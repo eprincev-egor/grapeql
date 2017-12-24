@@ -1,23 +1,9 @@
 (function(QUnit, GrapeQLCoach) {
     "use strict";
     
-    function equal(assert, test, result) {
-        for (let key in test.result) {
-            if ( test.result[ key ] !== result[ key ] ) {
-                assert.ok(false, 
-                    test.str + 
-                    "\n expected: " + JSON.stringify(test.result) +
-                    "\n result: " + JSON.stringify(result)
-                );
-                return;
-            }
-        }
-        
-        assert.ok(true, test.str);
-    }
-    
     function testClass(className, SyntaxClass) {
         QUnit.test(className, (assert) => {
+            window.assert = assert;
             SyntaxClass.tests.forEach(test => {
                 
                 let str = test.str,
@@ -28,7 +14,12 @@
                     let result = coach[ parseFuncName ]();
                     
                     if ( test.result ) {
-                        equal(assert, test, result);
+                        assert.pushResult({
+                            result: !!window.weakDeepEqual(test.result, result),
+                            actual: result,
+                            expected: test.result,
+                            message: test.str
+                        });
                     }
                 } catch(err) {
                     if ( test.error ) {

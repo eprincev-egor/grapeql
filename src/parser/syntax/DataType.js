@@ -1,0 +1,191 @@
+"use strict";
+
+const Syntax = require("../syntax/Syntax");
+// TODO: load types from db
+const types = [
+    "smallint",
+    "integer",
+    "bigint",
+    "decimal",
+    "numeric(n)",
+    "numeric(n,n)",
+    "real",
+    "double precision",
+    "smallserial",
+    "serial",
+    "bigserial",
+    "money",
+    "character varying(n)",
+    "varchar(n)",
+    "character(n)",
+    "char(n)",
+    "text",
+    "\"char\"",
+    "name",
+    "bytea",
+    "timestamp",
+    "timestamp without time zone",
+    "timestamp with time zone",
+    "time without time zone",
+    "time with time zone",
+    // ...
+    "boolean",
+    "point",
+    "line",
+    "lseg",
+    "box",
+    "path",
+    "polygon",
+    "path",
+    "circle",
+    "cidr",
+    "inet",
+    "macaddr",
+    "macaddr8",
+    "bit(n)",
+    "bit varying(n)",
+    "tsvector",
+    "tsquery",
+    "uuid",
+    "xml",
+    "json",
+    "jsonb",
+    "int",
+    "int4range",
+    "int8range",
+    "numrange",
+    "tsrange",
+    "tstzrange",
+    "daterange",
+    "regclass",
+    "regproc",
+    "regprocedure",
+    "regoper",
+    "regoperator",
+    "regclass",
+    "regtype",
+    "regrole",
+    "regnamespace",
+    "regconfig",
+    "regdictionary"
+];
+
+let firstWords = {};
+types.forEach(type => {
+    let firstWord = type.split(" ")[0];
+    firstWord = firstWord.split("(")[0];
+    
+    if ( !firstWords[firstWord] ) {
+        firstWords[firstWord] = [];
+    }
+    firstWords[ firstWord ].push( type );
+});
+
+let regExps = {};
+types.forEach(type => {
+    let regExp = type.replace(/ /g, "\\s+");
+    regExp = regExp.replace("(n)", "\\s*\\(\\s*\\d+\\s*\\)");
+    regExp = regExp.replace("(n,n)", "\\s*\\(\\s*\\d+\\s*,\\s*\\d+\\s*\\)");
+    
+    regExps[ type ] = new RegExp(regExp, "i");
+});
+
+class DataType extends Syntax {
+    parse(coach) {
+        if ( coach.is("\"") ) {
+            coach.i++;
+            coach.expectWord("char");
+            coach.expectRead("\"");
+            this.type = "\"char\"";
+            this.value = "\"char\"";
+            return;
+        }
+        
+        let index = coach.i;
+        let word = coach.readCurrentWord().toLowerCase();
+        let posibleTypes = firstWords[ word ];
+        
+        if ( !posibleTypes ) {
+            coach.throwError("expected data type");
+        }
+        
+        coach.i = index;
+        for (let i = 0, n = posibleTypes.length; i < n; i++) {
+            let posibleType = posibleTypes[ i ],
+                regExp = regExps[ posibleType ];
+            
+            if ( coach.is(regExp) ) {
+                this.type = posibleType;
+                this.value = regExp.exec( coach.str.slice(coach.i) )[0];
+                this.value = this.value.replace(/\s+/g, " ");
+                this.value = this.value.replace(/\s*\(\s*/g, "(");
+                this.value = this.value.replace(/\s*\)\s*/g, ")");
+                this.value = this.value.replace(/\s*,\s*/g, ",");
+                
+                coach.i += this.value.length;
+                break;
+            }
+        }
+        
+        this.parseArrayType(coach);
+    }
+    
+    parseArrayType(coach) {
+        if ( coach.is(/\s*\[/) ) {
+            coach.skipSpace();
+            coach.i++;
+            coach.skipSpace();
+            
+            if ( coach.is("]") ) {
+                coach.i++;
+                this.type += "[]";
+                this.value += "[]";
+            } else {
+                let pgNumb = coach.parsePgNumber();
+                coach.skipSpace();
+                coach.expectRead("]");
+                
+                this.type += "[n]";
+                this.value += "[" + pgNumb.numb + "]";
+            }
+        }
+        
+        if ( coach.is(/\s*\[/) ) {
+            this.parseArrayType(coach);
+        }
+    }
+    
+    is(coach) {
+        let i = coach.i;
+        let word = coach.readCurrentWord().toLowerCase();
+        coach.i = i;
+        return word in firstWords;
+    }
+}
+
+DataType.tests = [
+    {
+        str: "numeric  ( 10 )",
+        result: {type: "numeric(n)", value: "numeric(10)"}
+    },
+    {
+        str: "numeric ( 10, 3 )",
+        result: {type: "numeric(n,n)", value: "numeric(10,3)"}
+    },
+    {
+        str: "bigint[ ]",
+        result: {
+            type: "bigint[]",
+            value: "bigint[]"
+        }
+    },
+    {
+        str: "bigint [ 1 ]",
+        result: {
+            type: "bigint[n]",
+            value: "bigint[1]"
+        }
+    }
+];
+
+module.exports = DataType;
