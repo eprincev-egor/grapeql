@@ -95,9 +95,8 @@ class DataType extends Syntax {
         if ( coach.is("\"") ) {
             coach.i++;
             coach.expectWord("char");
-            coach.expectRead("\"");
+            coach.expect("\"");
             this.type = "\"char\"";
-            this.value = "\"char\"";
             return;
         }
         
@@ -115,14 +114,13 @@ class DataType extends Syntax {
                 regExp = regExps[ posibleType ];
             
             if ( coach.is(regExp) ) {
-                this.type = posibleType;
-                this.value = regExp.exec( coach.str.slice(coach.i) )[0];
-                this.value = this.value.replace(/\s+/g, " ");
-                this.value = this.value.replace(/\s*\(\s*/g, "(");
-                this.value = this.value.replace(/\s*\)\s*/g, ")");
-                this.value = this.value.replace(/\s*,\s*/g, ",");
+                this.type = regExp.exec( coach.str.slice(coach.i) )[0];
+                coach.i += this.type.length;
                 
-                coach.i += this.value.length;
+                this.type = this.type.replace(/\s+/g, " ");
+                this.type = this.type.replace(/\s*\(\s*/g, "(");
+                this.type = this.type.replace(/\s*\)\s*/g, ")");
+                this.type = this.type.replace(/\s*,\s*/g, ",");
                 break;
             }
         }
@@ -139,14 +137,12 @@ class DataType extends Syntax {
             if ( coach.is("]") ) {
                 coach.i++;
                 this.type += "[]";
-                this.value += "[]";
             } else {
                 let pgNumb = coach.parsePgNumber();
                 coach.skipSpace();
-                coach.expectRead("]");
+                coach.expect("]");
                 
-                this.type += "[n]";
-                this.value += "[" + pgNumb.numb + "]";
+                this.type += "[" + pgNumb.number + "]";
             }
         }
         
@@ -166,24 +162,22 @@ class DataType extends Syntax {
 DataType.tests = [
     {
         str: "numeric  ( 10 )",
-        result: {type: "numeric(n)", value: "numeric(10)"}
+        result: {type: "numeric(10)"}
     },
     {
         str: "numeric ( 10, 3 )",
-        result: {type: "numeric(n,n)", value: "numeric(10,3)"}
+        result: {type: "numeric(10,3)"}
     },
     {
         str: "bigint[ ]",
         result: {
-            type: "bigint[]",
-            value: "bigint[]"
+            type: "bigint[]"
         }
     },
     {
         str: "bigint [ 1 ]",
         result: {
-            type: "bigint[n]",
-            value: "bigint[1]"
+            type: "bigint[1]"
         }
     }
 ];

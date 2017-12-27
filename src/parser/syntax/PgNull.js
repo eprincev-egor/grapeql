@@ -5,10 +5,11 @@ const Syntax = require("../syntax/Syntax");
 class PgNull extends Syntax {
     parse(coach) {
         coach.expectWord("null");
+        this.null = true;
     }
     
     is(coach) {
-        return coach.is(/null[^\w]/i);
+        return coach.isWord("null");
     }
 }
 

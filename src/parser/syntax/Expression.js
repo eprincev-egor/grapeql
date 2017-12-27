@@ -8,17 +8,36 @@ class Expression extends Syntax {
         this.elements = [];
     }
     
-    parse(coach, expression) {
-        expression = expression instanceof Expression ? expression : this;
-        let elem;
+    parse(coach) {
+        this.parseElements( coach );
+        this.elements = this.extrude(this.elements);
+    }
+    
+    parseElements(coach) {
+        let operator;
         
-        coach.skipSpace();
-        
-        // operator
         if ( coach.isOperator() ) {
-            expression.elements.push( coach.parseOperator() );
+            operator = coach.parseOperator();
+            this.elements.push( operator );
             coach.skipSpace();
         }
+        
+        let elem = this.parseElement( coach );
+        this.elements.push(elem);
+        
+        // ::text::text::text
+        coach.skipSpace();
+        this.parseToTypes(coach);
+        
+        // operator
+        coach.skipSpace();
+        if ( coach.isOperator() ) {
+            this.parseElements(coach);
+        }
+    }
+    
+    parseElement(coach) {
+        let elem;
         
         // sub expression
         if ( coach.is("(") ) {
@@ -28,10 +47,21 @@ class Expression extends Syntax {
             elem = coach.parseExpression();
             
             coach.skipSpace();
-            coach.expectRead(")");
+            coach.expect(")");
         }
         
-        // number 
+        else if ( coach.isCast() ) {
+            elem = coach.parseCast();
+        }
+        
+        else if ( coach.isPgNull() ) {
+            elem = coach.parsePgNull();
+        }
+        
+        else if ( coach.isBoolean() ) {
+            elem = coach.parseBoolean();
+        }
+        
         else if ( coach.isPgNumber() ) {
             elem = coach.parsePgNumber();
         }
@@ -42,63 +72,33 @@ class Expression extends Syntax {
         }
         
         // case when then else end
-        else if ( coach.isCaseWhen() ) {
-            elem = coach.parseCaseWhen();
-        }
-        
-        // case when then else end
-        else if ( coach.is(/select\s/i) ) {
-            elem = coach.parseSelect();
-        }
-        
-        else if ( coach.isPgNull() ) {
-            elem = coach.parsePgNull();
-        }
+        // else if ( coach.isCaseWhen() ) {
+        //     elem = coach.parseCaseWhen();
+        // }
         
         else if ( coach.isSystemVariable() ) {
             elem = coach.parseSystemVariable();
         }
         
-        else if ( coach.isFunctionCall() ) {
-            elem = coach.parseFunctionCall();
-        }
-        
-        /*
-        // [ scheme . ] table . column
-        else if ( coach.isObjectName() ) {
-            elem = coach.parseColumnName();
-        }
-        */
-       
-        // expression.addChild(elem);
-        expression.elements.push(elem);
-        coach.skipSpace();
-        
-        // 'something'::int
-        if ( coach.is(/::/) ) {
-            coach.skipSpace();
-            coach.i += 2; // ::
+        return elem;
+    }
+    
+    parseToTypes(coach) {
+        if ( coach.isToType() ) {
+            let elem = coach.parseToType();
+            this.elements.push( elem );
             
-            expression.dataType = coach.readDataType();
             coach.skipSpace();
+            this.parseToTypes(coach);
         }
-        
-        coach.skipSpace();
-        
-        // operator
-        if ( coach.isOperator() ) {
-            coach.parseExpression( expression );
-        }
-        
-        this.elements = this.extrude().elements;
     }
     
     // ((( expression )))  достаем выражение из лишних скобок
-    extrude() {
-        if ( this.elements.length === 1 && this.elements[0] instanceof Expression ) {
-            return this.elements[0].extrude();
+    extrude(elements) {
+        if ( elements.length === 1 && elements[0] instanceof Expression ) {
+            return this.extrude( elements[0].elements );
         }
-        return this;
+        return elements;
     }
 }
 
@@ -107,9 +107,58 @@ Expression.tests = [
         str: "1 + 1",
         result: {
             elements: [
-                {value: "1"},
-                {value: "+"},
-                {value: "1"}
+                {number: "1"},
+                {operator: "+"},
+                {number: "1"}
+            ]
+        }
+    },
+    {
+        str: "1::text::bigint-2 ",
+        result: {
+            elements: [
+                {number: "1"},
+                {dataType: {type: "text"}},
+                {dataType: {type: "bigint"}},
+                {operator: "-"},
+                {number: "2"}
+            ]
+        }
+    },
+    {
+        str: "{user}::bigint % 4",
+        result: {
+            elements: [
+                {name: "user"},
+                {dataType: {type: "bigint"}},
+                {operator: "%"},
+                {number: "4"}
+            ]
+        }
+    },
+    {
+        str: "$$test$$ || E'str'",
+        result: {
+            elements: [
+                {content: "test"},
+                {operator: "||"},
+                {content: "str"}
+            ]
+        }
+    },
+    {
+        str: "true-false*null+1/'test'",
+        result: {
+            elements: [
+                {boolean: true},
+                {operator: "-"},
+                {boolean: false},
+                {operator: "*"},
+                {null: true},
+                {operator: "+"},
+                {number: "1"},
+                {operator: "/"},
+                {content: "test"}
             ]
         }
     }

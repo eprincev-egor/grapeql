@@ -4,14 +4,14 @@ const Syntax = require("../syntax/Syntax");
 
 class DoubleQuotes extends Syntax {
     parse(coach) {
-        let value = "",
+        let content = "",
             withUEsacape = false;
         
         if ( coach.is("\"") ) {
             coach.i++;
         } else {
             coach.expectWord("u");
-            coach.expectRead("&\"");
+            coach.expect("&\"");
             withUEsacape = true;
         }
         
@@ -21,14 +21,14 @@ class DoubleQuotes extends Syntax {
             if ( symb == "\"" ) {
                 if ( coach.str[coach.i + 1] == "\"" ) {
                     coach.i++;
-                    value += "\"";
+                    content += "\"";
                     continue;
                 }
                 coach.i++;
                 break;
             }
             
-            value += symb;
+            content += symb;
         }
         
         let escape = "\\";
@@ -41,39 +41,39 @@ class DoubleQuotes extends Syntax {
             coach.expectWord("uescape");
             coach.skipSpace();
             
-            coach.expectRead("'");
+            coach.expect("'");
             escape = coach.str[ coach.i ];
             
             if ( /[+-\s\dabcdef"']/.test(escape) ) {
                 coach.throwError("The escape character can be any single character other than a hexadecimal digit, the plus sign, a single quote, a double quote, or a whitespace character");
             }
             coach.i++;
-            coach.expectRead("'");
+            coach.expect("'");
         }
         
         if ( withUEsacape ) {
-            for (let i = 0, n = value.length; i < n; i++) {
-                let symb = value[i],
+            for (let i = 0, n = content.length; i < n; i++) {
+                let symb = content[i],
                     length;
                 
                 if ( symb == escape ) {
                     let expr;
-                    if ( value[i + 1] == "+" ) {
+                    if ( content[i + 1] == "+" ) {
                         length = 8;
-                        expr = value.slice(i + 2, i + length);
+                        expr = content.slice(i + 2, i + length);
                     } else {
                         length = 5;
-                        expr = value.slice(i + 1, i + length);
+                        expr = content.slice(i + 1, i + length);
                     }
                     
                     expr = coach.parseUnicode(expr);
                     n -= (length - 1);
-                    value = value.slice(0, i) + expr + value.slice(i + length);
+                    content = content.slice(0, i) + expr + content.slice(i + length);
                 }
             }
         }
         
-        this.value = value;
+        this.content = content;
     }
     
     is(coach, str) {
@@ -91,23 +91,23 @@ class DoubleQuotes extends Syntax {
 DoubleQuotes.tests = [
     {
         str: "\"test\"",
-        result: {value: "test"}
+        result: {content: "test"}
     },
     {
         str: "\"test\"\"\"",
-        result: {value: "test\""}
+        result: {content: "test\""}
     },
     {
         str: "U&\"d\\0061t\\+000061 test\"",
-        result: {value: "data test"}
+        result: {content: "data test"}
     },
     {
         str: "u&\"d\\0061t\\+000061 test\"",
-        result: {value: "data test"}
+        result: {content: "data test"}
     },
     {
         str: "U&\"d!0061t!+000061\" UESCAPE '!'",
-        result: {value: "data"}
+        result: {content: "data"}
     },
     {
         str: "U&\"\\006\"",

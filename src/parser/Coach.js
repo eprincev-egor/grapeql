@@ -38,7 +38,7 @@ class Coach {
         this.throwError("expected word: " + word);
     }
     
-    expectRead(str) {
+    expect(str) {
         if ( this.str.slice(this.i).indexOf(str) === 0 ) {
             this.i += str.length;
         } else {
@@ -75,6 +75,14 @@ class Coach {
         }
         
         return unicode;
+    }
+    
+    isWord(word) {
+        let i = this.i;
+        let currentWord = this.readCurrentWord();
+        this.i = i;
+        
+        return currentWord.toLowerCase() == word;
     }
     
     // проверяем строку (от текущего места) на регулярное выражение

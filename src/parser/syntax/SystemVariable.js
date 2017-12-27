@@ -4,13 +4,13 @@ const Syntax = require("../syntax/Syntax");
 
 class SystemVariable extends Syntax {
     parse(coach) {
-        coach.expectRead("@");
+        coach.expect("{");
         
         this.name = "";
         for (; coach.i < coach.n; coach.i++) {
             let symb = coach.str[ coach.i ];
             
-            if ( /[^\w$]/.test(symb) ) {
+            if ( symb == "}" ) {
                 break;
             }
             
@@ -20,28 +20,34 @@ class SystemVariable extends Syntax {
         if ( !this.name ) {
             coach.throwError("expect variable name");
         }
+        
+        coach.expect("}");
     }
     
     is(coach, str) {
-        return str.test(/^@\w/);
+        return /^\{\w+\}/.test(str);
     }
 }
 
 SystemVariable.tests = [
     {
-        str: "@x",
+        str: "{x}",
         result: {name: "x"}
     },
     {
-        str: "@X",
+        str: "{X}",
         result: {name: "X"}
     },
     {
-        str: "@$Any_Variable",
+        str: "{$Any_Variable}",
         result: {name: "$Any_Variable"}
     },
     {
-        str: "@",
+        str: "{Привет}",
+        result: {name: "Привет"}
+    },
+    {
+        str: "{}",
         error: Error
     }
 ];

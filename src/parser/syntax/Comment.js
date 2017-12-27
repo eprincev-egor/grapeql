@@ -7,7 +7,7 @@ class Comment extends Syntax {
         let content = "";
         
         if ( coach.is("-") ) {
-            coach.expectRead("--");
+            coach.expect("--");
             
             for (; coach.i < coach.n; coach.i++) {
                 let symb = coach.str[ coach.i ];
@@ -19,7 +19,7 @@ class Comment extends Syntax {
                 content += symb;
             }
         } else {
-            coach.expectRead("/*");
+            coach.expect("/*");
             
             for (; coach.i < coach.n; coach.i++) {
                 let symb = coach.str[ coach.i ];

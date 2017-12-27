@@ -4,13 +4,13 @@ const Syntax = require("../syntax/Syntax");
 
 class Operator extends Syntax {
     parse(coach) {
-        let value = "";
+        let operator = "";
         
-        if ( coach.is(/operator/) ) {
+        if ( coach.isWord("operator") ) {
             coach.readCurrentWord();
             coach.skipSpace();
-            coach.expectRead("(");
-            coach.expectRead(")");
+            coach.expect("(");
+            coach.expect(")");
         }
         
         for (; coach.i < coach.n; coach.i++) {
@@ -20,17 +20,17 @@ class Operator extends Syntax {
                 break;
             }
             
-            value += symb;
+            operator += symb;
         }
         
-        this.value = value;
+        this.operator = operator;
     }
     
     is(coach, str) {
         return (
             (
                 "+-*/%~=<>!&|^".indexOf(str[0]) != -1 ||
-                coach.is(/operator/i)
+                coach.isWord("operator")
             ) && 
             !(str[0] == "-" && str[1] == "-") && // -- comment
             !(str[0] == "/" && str[1] == "*") // /* comment
@@ -41,7 +41,15 @@ class Operator extends Syntax {
 Operator.tests = [
     {
         str: "+",
-        result: {value: "+"}
+        result: {operator: "+"}
+    },
+    {
+        str: ">= ",
+        result: {operator: ">="}
+    },
+    {
+        str: "<> ",
+        result: {operator: "<>"}
     }
 ];
 

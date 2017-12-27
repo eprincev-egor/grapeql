@@ -26,7 +26,7 @@ class PgString extends Syntax {
             coach.i += 2;
         }
         
-        let value = this.readSingleQuotes( coach, withEscape );
+        let content = this.readSingleQuotes( coach, withEscape );
         
         let escape = "\\";
         if ( coach.is(/\s*uescape/i) ) {
@@ -38,51 +38,51 @@ class PgString extends Syntax {
             coach.expectWord("uescape");
             coach.skipSpace();
             
-            coach.expectRead("'");
+            coach.expect("'");
             escape = coach.str[ coach.i ];
             
             if ( /[+-\s\dabcdef"']/.test(escape) ) {
                 coach.throwError("The escape character can be any single character other than a hexadecimal digit, the plus sign, a single quote, a double quote, or a whitespace character");
             }
             coach.i++;
-            coach.expectRead("'");
+            coach.expect("'");
         }
         
         if ( withUEsacape ) {
-            for (let i = 0, n = value.length; i < n; i++) {
-                let symb = value[i],
+            for (let i = 0, n = content.length; i < n; i++) {
+                let symb = content[i],
                     length;
                 
                 if ( symb == escape ) {
                     let expr;
-                    if ( value[i + 1] == "+" ) {
+                    if ( content[i + 1] == "+" ) {
                         length = 8;
-                        expr = value.slice(i + 2, i + length);
+                        expr = content.slice(i + 2, i + length);
                     } else {
                         length = 5;
-                        expr = value.slice(i + 1, i + length);
+                        expr = content.slice(i + 1, i + length);
                     }
                     
                     expr = coach.parseUnicode(expr);
                     n -= (length - 1);
-                    value = value.slice(0, i) + expr + value.slice(i + length);
+                    content = content.slice(0, i) + expr + content.slice(i + length);
                 }
             }
         }
         
-        this.value = value;
+        this.content = content;
     }
     
     parseDollarString(coach) {
         let tag = "";
         
-        coach.expectRead("$");
+        coach.expect("$");
         if ( coach.is(/\w/) ) {
             tag = coach.readCurrentWord();
         }
-        coach.expectRead("$");
+        coach.expect("$");
         
-        let value = "";
+        let content = "";
         for (; coach.i < coach.n; coach.i++) {
             let symb = coach.str[ coach.i ];
             
@@ -95,52 +95,52 @@ class PgString extends Syntax {
                 }
             }
             
-            value += symb;
+            content += symb;
         }
         
-        this.value = value;
+        this.content = content;
     }
     
     parseByteString(coach) {
         if ( coach.is(/b/i) ) {
             coach.i++;
-            let value = this.readSingleQuotes(coach, false);
+            let content = this.readSingleQuotes(coach, false);
             
-            if ( !/^[01]*$/.test(value) ) {
+            if ( !/^[01]*$/.test(content) ) {
                 coach.throwError("byte string b'' must contain only 0 or 1");
             }
             
-            this.value = value;
+            this.content = content;
         }
         
         else if ( coach.is(/x/i) ) {
             coach.i++;
-            let value = this.readSingleQuotes(coach, false);
+            let content = this.readSingleQuotes(coach, false);
             
-            if ( !/^[\dabcdef]*$/.test(value) ) {
+            if ( !/^[\dabcdef]*$/.test(content) ) {
                 coach.throwError("byte string x'' must contain only digits or abcdef");
             }
             
-            this.value = value.split("").map(x => parseInt(x, 16).toString(2)).join("");
+            this.content = content.split("").map(x => parseInt(x, 16).toString(2)).join("");
         }
     }
     
     readSingleQuotes(coach, withEscape) {
-        coach.expectRead("'");
-        let value = "";
+        coach.expect("'");
+        let content = "";
         
         for (; coach.i < coach.n; coach.i++) {
             let symb = coach.str[ coach.i ];
             
             if ( symb == "\\" && withEscape ) {
-                value += this.readEscape(coach);
+                content += this.readEscape(coach);
                 coach.i--;
                 continue;
             }
             
             if ( symb == "'" ) {
                 if ( coach.str[ coach.i + 1 ] == "'" ) {
-                    value += "'";
+                    content += "'";
                     coach.i++;
                     continue;
                 }
@@ -149,15 +149,15 @@ class PgString extends Syntax {
                 break;
             }
             
-            value += symb;
+            content += symb;
         }
         
         if ( coach.is(/\s*[\n\r]/) ) {
             coach.skipSpace();
-            value += this.readSingleQuotes( coach );
+            content += this.readSingleQuotes( coach );
         }
         
-        return value;
+        return content;
     }
     
     readEscape(coach) {
@@ -253,79 +253,79 @@ class PgString extends Syntax {
 PgString.tests = [
     {
         str: "'hello ''world'''",
-        result: {value: "hello 'world'"}
+        result: {content: "hello 'world'"}
     },
     {
         str: "'hello'\n'world'",
-        result: {value: "helloworld"}
+        result: {content: "helloworld"}
     },
     {
         str: "'hello'\r'world'",
-        result: {value: "helloworld"}
+        result: {content: "helloworld"}
     },
     {
         str: "'hello'\n\r'world'",
-        result: {value: "helloworld"}
+        result: {content: "helloworld"}
     },
     {
         str: "'hello' \n\r 'world' \n\r 'world'",
-        result: {value: "helloworldworld"}
+        result: {content: "helloworldworld"}
     },
     {
         str: "E'\\\\'",
-        result: {value: "\\"}
+        result: {content: "\\"}
     },
     {
         str: "E'\\n'",
-        result: {value: "\n"}
+        result: {content: "\n"}
     },
     {
         str: "E'\\r'",
-        result: {value: "\r"}
+        result: {content: "\r"}
     },
     {
         str: "E'\\b'",
-        result: {value: "\b"}
+        result: {content: "\b"}
     },
     {
         str: "E'\\f'",
-        result: {value: "\f"}
+        result: {content: "\f"}
     },
     {
         str: "E'\\t'",
-        result: {value: "\t"}
+        result: {content: "\t"}
     },
     {
         str: "E'\\U000061b'",
-        result: {value: "ab"}
+        result: {content: "ab"}
     },
     {
         str: "E'\\U00006aa'",
-        result: {value: "ja"}
+        result: {content: "ja"}
     },
     {
         str: "E'\\U00006A'",
-        result: {value: "j"}
+        result: {content: "j"}
     },
     {
         str: "E'\\u0061'",
-        result: {value: "a"}
+        result: {content: "a"}
     },
     {
         str: "E'\\061a'",
-        result: {value: "1a"}
+        result: {content: "1a"}
     },
     {
         str: "U&'d\\0061t\\+000061 test'",
-        result: {value: "data test"}
+        result: {content: "data test"}
     },
     {
         str: "u&'d\\0061t\\+000061 test'",
-        result: {value: "data test"}
+        result: {content: "data test"}
     },
     {
         str: "U&'d!0061t!+000061' UESCAPE '!'",
-        result: {value: "data"}
+        result: {content: "data"}
     },
     {
         str: "U&'\\006'",
@@ -333,11 +333,11 @@ PgString.tests = [
     },
     {
         str: "b'01'",
-        result: {value: "01"}
+        result: {content: "01"}
     },
     {
         str: "b''",
-        result: {value: ""}
+        result: {content: ""}
     },
     {
         str: "b'01a'",
@@ -345,15 +345,15 @@ PgString.tests = [
     },
     {
         str: "x'af'",
-        result: {value: "10101111"}
+        result: {content: "10101111"}
     },
     {
         str: "x'a'\n'f'",
-        result: {value: "10101111"}
+        result: {content: "10101111"}
     },
     {
         str: "x''",
-        result: {value: ""}
+        result: {content: ""}
     },
     {
         str: "x'01x'",
@@ -361,23 +361,23 @@ PgString.tests = [
     },
     {
         str: "$$hello'world$$",
-        result: {value: "hello'world"}
+        result: {content: "hello'world"}
     },
     {
         str: "$Tag_1$hello'world$Tag_1$",
-        result: {value: "hello'world"}
+        result: {content: "hello'world"}
     },
     {
         str: "$Tag_1$$tag_1$$Tag_1$",
-        result: {value: "$tag_1$"}
+        result: {content: "$tag_1$"}
     },
     {
         str: "$$\n\r$$",
-        result: {value: "\n\r"}
+        result: {content: "\n\r"}
     },
     {
         str: "$q$[\\t\\r\\n\\v\\\\]$q$",
-        result: {value: "[\\t\\r\\n\\v\\\\]"}
+        result: {content: "[\\t\\r\\n\\v\\\\]"}
     }
 ];
 

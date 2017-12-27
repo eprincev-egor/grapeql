@@ -33,16 +33,14 @@ class PgNumber extends Syntax {
         
         
         if ( floatPart ) {
-            this.value = intPart + "." + floatPart;
+            this.number = intPart + "." + floatPart;
         } else {
-            this.value = intPart;
+            this.number = intPart;
         }
         
         if ( ePart ) {
-            this.value += "e" + ePart;
+            this.number += "e" + ePart;
         }
-        
-        this.numb = +this.value;
     }
     
     readDigits(coach) {
@@ -67,31 +65,31 @@ class PgNumber extends Syntax {
 PgNumber.tests = [
     {
         str: "1",
-        result: {value: "1", numb: 1}
+        result: {number: "1"}
     },
     {
         str: "1234567890",
-        result: {value: "1234567890", numb: 1234567890}
+        result: {number: "1234567890"}
     },
     {
         str: "3.2",
-        result: {value: "3.2", numb: 3.2}
+        result: {number: "3.2"}
     },
     {
         str: "5e2",
-        result: {value: "5e2", numb: 5e2}
+        result: {number: "5e2"}
     },
     {
         str: ".001",
-        result: {value: ".001", numb: .001}
+        result: {number: ".001"}
     },
     {
         str: "1.925e-3",
-        result: {value: "1.925e-3", numb: 1.925e-3}
+        result: {number: "1.925e-3"}
     },
     {
         str: "1.925e+3",
-        result: {value: "1.925e+3", numb: 1.925e+3}
+        result: {number: "1.925e+3"}
     }
 ];
 
