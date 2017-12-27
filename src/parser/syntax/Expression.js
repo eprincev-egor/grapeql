@@ -66,15 +66,13 @@ class Expression extends Syntax {
             elem = coach.parsePgNumber();
         }
         
-        // string
         else if ( coach.isPgString() ) {
             elem = coach.parsePgString();
         }
         
-        // case when then else end
-        // else if ( coach.isCaseWhen() ) {
-        //     elem = coach.parseCaseWhen();
-        // }
+        else if ( coach.isCaseWhen() ) {
+            elem = coach.parseCaseWhen();
+        }
         
         else if ( coach.isSystemVariable() ) {
             elem = coach.parseSystemVariable();
@@ -161,6 +159,35 @@ Expression.tests = [
                 {content: "test"}
             ]
         }
+    },
+    {
+        str: "((('extrude')))",
+        elements: [
+            {content: "extrude"}
+        ]
+    },
+    {
+        str: "(-1+2.1)*''-(('test')+8)",
+        elements: [
+            {
+                elements: [
+                    {operator: "-"},
+                    {number: "1"},
+                    {operator: "+"},
+                    {number: "2.1"}
+                ]
+            },
+            {operator: "*"},
+            {content: ""},
+            {operator: "-"},
+            {
+                elements: [
+                    {content: "test"},
+                    {operator: "+"},
+                    {number: "8"}
+                ]
+            }
+        ]
     }
 ];
 

@@ -38,6 +38,8 @@ GrapeQLCoach.addSyntax("PgString", require("./syntax/PgString"));
 GrapeQLCoach.addSyntax("DataType", require("./syntax/DataType"));
 GrapeQLCoach.addSyntax("Cast", require("./syntax/Cast"));
 GrapeQLCoach.addSyntax("ToType", require("./syntax/ToType"));
+GrapeQLCoach.addSyntax("CaseWhenElement", require("./syntax/CaseWhenElement"));
+GrapeQLCoach.addSyntax("CaseWhen", require("./syntax/CaseWhen"));
 GrapeQLCoach.addSyntax("Expression", require("./syntax/Expression"));
 
 // need for tests

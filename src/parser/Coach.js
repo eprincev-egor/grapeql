@@ -62,6 +62,18 @@ class Coach {
         return word;
     }
     
+    read(regExp) {
+        var str = this.str.slice(this.i),
+            execResult = regExp.exec(str);
+        
+        if ( !execResult || execResult.index !== 0 ) {
+            return "";
+        }
+        
+        this.i += execResult[0].length;
+        return execResult[0];
+    }
+    
     parseUnicode(unicode) {
         try {
             // unicode can be valid js code
