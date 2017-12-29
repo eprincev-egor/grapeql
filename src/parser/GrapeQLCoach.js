@@ -41,6 +41,7 @@ GrapeQLCoach.addSyntax("ToType", require("./syntax/ToType"));
 GrapeQLCoach.addSyntax("CaseWhenElement", require("./syntax/CaseWhenElement"));
 GrapeQLCoach.addSyntax("CaseWhen", require("./syntax/CaseWhen"));
 GrapeQLCoach.addSyntax("ObjectLink", require("./syntax/ObjectLink"));
+GrapeQLCoach.addSyntax("FunctionCall", require("./syntax/FunctionCall"));
 GrapeQLCoach.addSyntax("Expression", require("./syntax/Expression"));
 
 // need for tests

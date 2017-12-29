@@ -13,6 +13,10 @@ class Expression extends Syntax {
         this.elements = this.extrude(this.elements);
     }
     
+    is(coach) {
+        return !coach.is(/[\s)]/);
+    }
+    
     parseElements(coach) {
         let operator;
         
@@ -22,7 +26,12 @@ class Expression extends Syntax {
             coach.skipSpace();
         }
         
+        let i = coach.i;
         let elem = this.parseElement( coach );
+        if ( !elem ) {
+            coach.i = i;
+            coach.throwError("expected expression element");
+        }
         this.elements.push(elem);
         
         // ::text::text::text
@@ -76,6 +85,10 @@ class Expression extends Syntax {
         
         else if ( coach.isSystemVariable() ) {
             elem = coach.parseSystemVariable();
+        }
+        
+        else if ( coach.isFunctionCall() ) {
+            elem = coach.parseFunctionCall();
         }
         
         else if ( coach.isObjectLink() ) {
@@ -206,6 +219,26 @@ Expression.tests = [
                     {word: "company"},
                     {word: "total"}
                 ]}
+            ]
+        }
+    },
+    {
+        str: "now()::date + 3",
+        result: {
+            elements: [
+                {
+                    "function": {link: [{ word: "now" }]},
+                    "arguments": []
+                },
+                {
+                    dataType: {type: "date"}
+                },
+                {
+                    operator: "+"
+                },
+                {
+                    number: "3"
+                }
             ]
         }
     }

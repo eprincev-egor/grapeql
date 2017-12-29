@@ -127,6 +127,37 @@ class Coach {
             return str.search(regExp) === 0;
         }
     }
+    
+    // Expression or ObjectLink or any SyntaxName,
+    // first symbol must be in upper case
+    parseComma(SyntaxName) {
+        let parseSyntax = this[ "parse" + SyntaxName ].bind(this),
+            isSyntax = this[ "is" + SyntaxName ].bind(this),
+            elements = [];
+        
+        this._parseComma(isSyntax, parseSyntax, elements);
+        
+        return elements;
+    }
+    
+    _parseComma(isSyntax, parseSyntax, elements) {
+        let elem;
+        
+        if ( isSyntax() ) {
+            elem = parseSyntax();
+            elements.push( elem );
+            
+            if ( this.is(/\s*,/) ) {
+                this.skipSpace();
+                this.i++; // ,
+                this.skipSpace();
+                
+                this._parseComma(isSyntax, parseSyntax, elements);
+            }
+        }
+        
+        return elements;
+    }
         
     getPosition(index) {
         let position = +index === +index ? +index : this.i, // index type maybe string or number, but not NaN
@@ -136,7 +167,7 @@ class Coach {
             column = position - lines.join("\n").length - (currentLine.length - currentLine.replace(/^[\n\r]+/, "").length); // POP!
             
         return {
-            index,
+            index: position,
             line: lineNumber - 1,
             column: column - 1
         };

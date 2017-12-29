@@ -67,7 +67,8 @@ const types = [
     "regrole",
     "regnamespace",
     "regconfig",
-    "regdictionary"
+    "regdictionary",
+    "date"
 ];
 
 let firstWords = {};
@@ -105,7 +106,8 @@ class DataType extends Syntax {
         let posibleTypes = firstWords[ word ];
         
         if ( !posibleTypes ) {
-            coach.throwError("expected data type");
+            coach.i = index;
+            coach.throwError("unknown data type: " + word);
         }
         
         coach.i = index;
