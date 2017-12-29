@@ -179,32 +179,38 @@ Expression.tests = [
     },
     {
         str: "((('extrude')))",
-        elements: [
-            {content: "extrude"}
-        ]
+        result: {
+            elements: [
+                {content: "extrude"}
+            ]
+        }
     },
     {
         str: "(-1+2.1)*''-(('test')+8)",
-        elements: [
-            {
-                elements: [
-                    {operator: "-"},
-                    {number: "1"},
-                    {operator: "+"},
-                    {number: "2.1"}
-                ]
-            },
-            {operator: "*"},
-            {content: ""},
-            {operator: "-"},
-            {
-                elements: [
-                    {content: "test"},
-                    {operator: "+"},
-                    {number: "8"}
-                ]
-            }
-        ]
+        result: {
+            elements: [
+                {
+                    elements: [
+                        {operator: "-"},
+                        {number: "1"},
+                        {operator: "+"},
+                        {number: "2.1"}
+                    ]
+                },
+                {operator: "*"},
+                {content: ""},
+                {operator: "-"},
+                {
+                    elements: [
+                        {elements: [
+                            {content: "test"}
+                        ]},
+                        {operator: "+"},
+                        {number: "8"}
+                    ]
+                }
+            ]
+        }
     },
     {
         str: "order.sum + Company.total",
