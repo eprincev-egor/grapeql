@@ -78,6 +78,10 @@ class Expression extends Syntax {
             elem = coach.parseSystemVariable();
         }
         
+        else if ( coach.isObjectLink() ) {
+            elem = coach.parseObjectLink();
+        }
+        
         return elem;
     }
     
@@ -188,6 +192,22 @@ Expression.tests = [
                 ]
             }
         ]
+    },
+    {
+        str: "order.sum + Company.total",
+        result: {
+            elements: [
+                {link: [
+                    {word: "order"},
+                    {word: "sum"}
+                ]},
+                {operator: "+"},
+                {link: [
+                    {word: "company"},
+                    {word: "total"}
+                ]}
+            ]
+        }
     }
 ];
 

@@ -31,6 +31,13 @@ class Coach {
     expectWord(word) {
         let currentWord = this.readCurrentWord().toLowerCase();
         
+        if ( word == null ) {
+            if ( !currentWord ) {
+                this.throwError("expected any word");
+            }
+            return currentWord;
+        }
+        
         if ( currentWord == word ) {
             return currentWord;
         }
@@ -90,6 +97,10 @@ class Coach {
     }
     
     isWord(word) {
+        if ( word == null ) {
+            return this.is(/\w/);
+        }
+        
         let i = this.i;
         let currentWord = this.readCurrentWord();
         this.i = i;
