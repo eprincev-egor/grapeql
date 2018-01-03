@@ -1,13 +1,13 @@
 "use strict";
 
-const Syntax = require("../syntax/Syntax");
+const Syntax = require("./Syntax");
 
 class Operator extends Syntax {
     parse(coach) {
         let operator = "";
         
         if ( coach.isWord("operator") ) {
-            coach.readCurrentWord();
+            coach.readWord();
             coach.skipSpace();
             coach.expect("(");
             coach.skipSpace();
@@ -25,7 +25,7 @@ class Operator extends Syntax {
         
         // check condition operators
         let index = coach.i;
-        let word = coach.readCurrentWord().toLowerCase();
+        let word = coach.readWord().toLowerCase();
         if ( word == "and" ) {
             this.operator = "and";
         }

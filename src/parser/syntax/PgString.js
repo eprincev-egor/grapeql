@@ -1,6 +1,6 @@
 "use strict";
 
-const Syntax = require("../syntax/Syntax");
+const Syntax = require("./Syntax");
 
 class PgString extends Syntax {
     parse(coach) {
@@ -78,7 +78,7 @@ class PgString extends Syntax {
         
         coach.expect("$");
         if ( coach.is(/\w/) ) {
-            tag = coach.readCurrentWord();
+            tag = coach.readWord();
         }
         coach.expect("$");
         

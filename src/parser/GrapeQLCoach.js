@@ -40,9 +40,14 @@ GrapeQLCoach.addSyntax("Cast", require("./syntax/Cast"));
 GrapeQLCoach.addSyntax("ToType", require("./syntax/ToType"));
 GrapeQLCoach.addSyntax("CaseWhenElement", require("./syntax/CaseWhenElement"));
 GrapeQLCoach.addSyntax("CaseWhen", require("./syntax/CaseWhen"));
+GrapeQLCoach.addSyntax("ObjectName", require("./syntax/ObjectName"));
 GrapeQLCoach.addSyntax("ObjectLink", require("./syntax/ObjectLink"));
 GrapeQLCoach.addSyntax("FunctionCall", require("./syntax/FunctionCall"));
 GrapeQLCoach.addSyntax("Expression", require("./syntax/Expression"));
+GrapeQLCoach.addSyntax("As", require("./syntax/As"));
+GrapeQLCoach.addSyntax("Column", require("./syntax/Column"));
+GrapeQLCoach.addSyntax("Select", require("./syntax/Select"));
+GrapeQLCoach.addSyntax("WithQuery", require("./syntax/WithQuery"));
 
 // need for tests
 if ( typeof window !== "undefined" ) {

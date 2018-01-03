@@ -1,6 +1,6 @@
 "use strict";
 
-const Syntax = require("../syntax/Syntax");
+const Syntax = require("./Syntax");
 // TODO: load types from db
 const types = [
     "smallint",
@@ -102,7 +102,7 @@ class DataType extends Syntax {
         }
         
         let index = coach.i;
-        let word = coach.readCurrentWord().toLowerCase();
+        let word = coach.readWord().toLowerCase();
         let posibleTypes = firstWords[ word ];
         
         if ( !posibleTypes ) {
@@ -155,7 +155,7 @@ class DataType extends Syntax {
     
     is(coach) {
         let i = coach.i;
-        let word = coach.readCurrentWord().toLowerCase();
+        let word = coach.readWord().toLowerCase();
         coach.i = i;
         return word in firstWords;
     }

@@ -1,6 +1,6 @@
 "use strict";
 
-const Syntax = require("../syntax/Syntax");
+const Syntax = require("./Syntax");
 
 class PgNull extends Syntax {
     parse(coach) {
@@ -16,11 +16,11 @@ class PgNull extends Syntax {
 PgNull.tests = [
     {
         str: "null",
-        result: {}
+        result: {null: true}
     },
     {
         str: "null ",
-        result: {}
+        result: {null: true}
     },
     {
         str: "null1",

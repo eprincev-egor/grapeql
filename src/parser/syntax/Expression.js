@@ -1,6 +1,6 @@
 "use strict";
 
-const Syntax = require("../syntax/Syntax");
+const Syntax = require("./Syntax");
 
 class Expression extends Syntax {
     constructor() {
@@ -8,17 +8,26 @@ class Expression extends Syntax {
         this.elements = [];
     }
     
-    parse(coach) {
-        this.parseElements( coach );
+    parse(coach, options) {
+        options = options || {posibleStar: false};
+        
+        this.parseElements( coach, options );
         this.elements = this.extrude(this.elements);
     }
     
     is(coach) {
-        return !coach.is(/[\s)]/);
+        // for stopping parseComma
+        return !coach.is(/[\s),]/);
     }
     
-    parseElements(coach) {
-        let operator;
+    parseElements(coach, options) {
+        let operator, elem, i;
+        
+        if ( options.posibleStar && coach.is("*") ) {
+            elem = coach.parseObjectLink({ posibleStar: options.posibleStar });
+            this.elements.push(elem);
+            return;
+        }
         
         if ( coach.isOperator() ) {
             operator = coach.parseOperator();
@@ -26,8 +35,8 @@ class Expression extends Syntax {
             coach.skipSpace();
         }
         
-        let i = coach.i;
-        let elem = this.parseElement( coach );
+        i = coach.i;
+        elem = this.parseElement( coach, options );
         if ( !elem ) {
             coach.i = i;
             coach.throwError("expected expression element");
@@ -41,11 +50,11 @@ class Expression extends Syntax {
         // operator
         coach.skipSpace();
         if ( coach.isOperator() ) {
-            this.parseElements(coach);
+            this.parseElements(coach, options);
         }
     }
     
-    parseElement(coach) {
+    parseElement(coach, options) {
         let elem;
         
         // sub expression
@@ -92,7 +101,7 @@ class Expression extends Syntax {
         }
         
         else if ( coach.isObjectLink() ) {
-            elem = coach.parseObjectLink();
+            elem = coach.parseObjectLink({ posibleStar: options.posibleStar });
         }
         
         return elem;

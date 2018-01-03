@@ -1,6 +1,6 @@
 "use strict";
 
-const Syntax = require("../syntax/Syntax");
+const Syntax = require("./Syntax");
 
 class SystemVariable extends Syntax {
     parse(coach) {

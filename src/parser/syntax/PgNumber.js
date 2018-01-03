@@ -1,5 +1,5 @@
 "use strict";
-const Syntax = require("../syntax/Syntax");
+const Syntax = require("./Syntax");
 
 // 42
 // 3.5

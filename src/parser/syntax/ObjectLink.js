@@ -1,32 +1,30 @@
 "use strict";
 
-const Syntax = require("../syntax/Syntax");
+const Syntax = require("./Syntax");
 
 class ObjectLink extends Syntax {
-    parse(coach) {
+    parse(coach, options) {
+        options = options || {posibleStar: false};
         this.link = [];
         
-        this.parseLink(coach);
+        this.parseLink(coach, options);
     }
     
-    parseLink(coach) {
-        let elem;
-        
-        if ( coach.isDoubleQuotes() ) {
-            elem = coach.parseDoubleQuotes();
+    parseLink(coach, options) {
+        if ( options.posibleStar && coach.is("*") ) {
+            this.link.push( "*" );
+            coach.i++;
+        } else {
+            let elem = coach.parseObjectName();
+            this.link.push( elem.name );
         }
-        else {
-            elem = {word: coach.expectWord()};
-        }
-        
-        this.link.push(elem);
         
         if ( coach.is(/\s*\./) ) {
             coach.skipSpace();
             coach.i++; // .
             coach.skipSpace();
             
-            this.parseLink( coach );
+            this.parseLink( coach, options );
         }
     }
     

@@ -1,6 +1,7 @@
 (function(QUnit, GrapeQLCoach) {
     "use strict";
     
+    let index = 0; // for conditional break point
     function testClass(className, SyntaxClass) {
         QUnit.test(className, (assert) => {
             window.assert = assert;
@@ -9,13 +10,19 @@
                 let str = test.str,
                     parseFuncName = "parse" + className;
                 
+                index++;
                 try {
                     let coach = new GrapeQLCoach(str);
                     let result = coach[ parseFuncName ]();
                     
                     if ( test.result ) {
+                        let isEqual = !!window.weakDeepEqual(test.result, result);
+                        if ( !isEqual ) {
+                            console.log("break here");
+                        }
+                        
                         assert.pushResult({
-                            result: !!window.weakDeepEqual(test.result, result),
+                            result: isEqual,
                             actual: result,
                             expected: test.result,
                             message: test.str
@@ -25,7 +32,7 @@
                     if ( test.error ) {
                         assert.ok(true, str);
                     } else {
-                        console.log(err);
+                        console.log(index, err);
                         assert.ok(false, str + "\n " + err);
                     }
                 }

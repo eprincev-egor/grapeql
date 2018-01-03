@@ -1,6 +1,6 @@
 "use strict";
 
-const Syntax = require("../syntax/Syntax");
+const Syntax = require("./Syntax");
 
 class CaseWhen extends Syntax {
     parse(coach) {
@@ -13,7 +13,7 @@ class CaseWhen extends Syntax {
         
         coach.skipSpace();
         if ( coach.isWord("else") ) {
-            coach.readCurrentWord();
+            coach.readWord();
             coach.skipSpace();
             this.else = coach.parseExpression();
             coach.skipSpace();

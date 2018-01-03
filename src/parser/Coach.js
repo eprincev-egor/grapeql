@@ -29,7 +29,7 @@ class Coach {
     }
 
     expectWord(word) {
-        let currentWord = this.readCurrentWord().toLowerCase();
+        let currentWord = this.readWord().toLowerCase();
         
         if ( word == null ) {
             if ( !currentWord ) {
@@ -45,15 +45,32 @@ class Coach {
         this.throwError("expected word: " + word);
     }
     
-    expect(str) {
-        if ( this.str.slice(this.i).indexOf(str) === 0 ) {
-            this.i += str.length;
+    expect(strOrRegExp) {
+        if ( typeof strOrRegExp == "string" ) {
+            let str = strOrRegExp;
+            
+            if ( this.str.slice(this.i).indexOf(str) === 0 ) {
+                this.i += str.length;
+            } else {
+                this.throwError("expected: " + str);
+            }
+            
+            return str;
         } else {
-            this.throwError("expected: " + str);
+            let regExp = strOrRegExp,
+                str = this.str.slice(this.i),
+                execResult = regExp.exec(str);
+            
+            if ( !execResult || execResult.index !== 0 ) {
+                this.throwError("expected: " + regExp);
+            }
+            
+            this.i += execResult[0].length;
+            return execResult[0];
         }
     }
     
-    readCurrentWord() {
+    readWord() {
         let word = "";
         
         for (; this.i < this.n; this.i++) {
@@ -98,11 +115,11 @@ class Coach {
     
     isWord(word) {
         if ( word == null ) {
-            return this.is(/\w/);
+            return this.is(/\w/i);
         }
         
         let i = this.i;
-        let currentWord = this.readCurrentWord();
+        let currentWord = this.readWord();
         this.i = i;
         
         return currentWord.toLowerCase() == word;
