@@ -38,7 +38,7 @@ Column.tests = [
                     ]}
                 ]
             },
-            as: { alias: "id" }
+            as: { alias: {word: "id"} }
         }
     },
     {
@@ -49,7 +49,7 @@ Column.tests = [
                     {null: true}
                 ]
             },
-            as: { alias: "null1" }
+            as: { alias: {word: "null1"} }
         }
     },
     {

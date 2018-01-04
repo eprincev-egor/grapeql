@@ -13,7 +13,7 @@ module.exports = [
     {
         str: "public.company as Company",
         result: {
-            as: {alias: "company"},
+            as: {alias: {word: "company"}},
             table: {link: [
                 {word: "public"},
                 {word: "company"}
@@ -23,7 +23,7 @@ module.exports = [
     {
         str: "public.company as Company ( id, inn )",
         result: {
-            as: {alias: "company"},
+            as: {alias: {word: "company"}},
             table: {link: [
                 {word: "public"},
                 {word: "company"}
@@ -56,7 +56,7 @@ module.exports = [
                     as: {alias: null}
                 }]
             },
-            as: {alias: "orders"}
+            as: {alias: {word: "orders"}}
         }
     },
     {
@@ -81,7 +81,7 @@ module.exports = [
                     as: {alias: null}
                 }]
             },
-            as: {alias: "company"},
+            as: {alias: {word: "company"}},
             columns: [
                 {word: "id"},
                 {word: "inn"}
@@ -110,7 +110,7 @@ module.exports = [
                 ]
             },
             as: {
-                alias: "some_rows"
+                alias: {word: "some_rows"}
             }
         }
     }

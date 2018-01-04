@@ -29,7 +29,7 @@ module.exports = [
         result: {
             columns: [
                 {
-                    as: {alias: "id"},
+                    as: {alias: {word: "id"}},
                     expression: {elements: [
                         {link: [
                             {word: "company"},
@@ -38,7 +38,7 @@ module.exports = [
                     ]}
                 },
                 {
-                    as: {alias: "n"},
+                    as: {alias: {word: "n"}},
                     expression: {elements: [
                         {null: true}
                     ]}
@@ -210,7 +210,7 @@ module.exports = [
                 table: {link: [
                     {word: "company"}
                 ]},
-                as: { alias: "company" },
+                as: { alias: {word: "company"} },
                 columns: [
                     {word: "id"},
                     {word: "inn"}
@@ -292,6 +292,69 @@ module.exports = [
                         ]}
                     ]},
                     vector: "desc"
+                }
+            ]
+        }
+    },
+    {
+        str: "SELECT brand, size, sum(sales) FROM items_sold GROUP BY GROUPING SETS ((brand), (size), ())",
+        result: {
+            columns: [
+                {
+                    expression: {elements: [
+                        {link: [
+                            {word: "brand"}
+                        ]}
+                    ]},
+                    as: null
+                },
+                {
+                    expression: {elements: [
+                        {link: [
+                            {word: "size"}
+                        ]}
+                    ]},
+                    as: null
+                },
+                {
+                    expression: {elements: [
+                        {
+                            "function": {link: [
+                                {word: "sum"}
+                            ]},
+                            "arguments": [
+                                {elements: [
+                                    {link: [
+                                        {word: "sales"}
+                                    ]}
+                                ]}
+                            ]
+                        }
+                    ]},
+                    as: null
+                }
+            ],
+            from: [
+                {
+                    table: {link: [{word: "items_sold"}]},
+                    as: {alias: null}
+                }
+            ],
+            groupBy: [
+                {
+                    groupingSets: [
+                        {expression: {elements: [
+                            {link: [
+                                {word: "brand"}
+                            ]}
+                        ]}},
+                        {expression: {elements: [
+                            {link: [
+                                {word: "size"}
+                            ]}
+                        ]}},
+                        {isEmpty: true}
+                    ]
                 }
             ]
         }

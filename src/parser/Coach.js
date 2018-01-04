@@ -148,9 +148,17 @@ class Coach {
     // Expression or ObjectLink or any SyntaxName,
     // first symbol must be in upper case
     parseComma(SyntaxName) {
-        let parseSyntax = this[ "parse" + SyntaxName ].bind(this),
-            isSyntax = this[ "is" + SyntaxName ].bind(this),
-            elements = [];
+        let elements = [],
+            parseSyntax,
+            isSyntax;
+        
+        if ( typeof SyntaxName == "string" ) {
+            parseSyntax = this[ "parse" + SyntaxName ].bind(this);
+            isSyntax = this[ "is" + SyntaxName ].bind(this);
+        } else {
+            parseSyntax = SyntaxName.parse;
+            isSyntax = SyntaxName.is;
+        }
         
         this._parseComma(isSyntax, parseSyntax, elements);
         

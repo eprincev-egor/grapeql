@@ -61,6 +61,7 @@ class Select extends Syntax {
         
         this.parseFrom(coach);
         this.parseWhere(coach);
+        this.parseGroupBy(coach);
         this.parseHaving(coach);
         this.parseOrderBy(coach);
         this.parseOffsets(coach);
@@ -104,6 +105,19 @@ class Select extends Syntax {
             
             coach.skipSpace();
         }
+    }
+    
+    parseGroupBy(coach) {
+        if ( !coach.isWord("group") ) {
+            return;
+        }
+        
+        coach.expectWord("group");
+        coach.skipSpace();
+        coach.expectWord("by");
+        coach.skipSpace();
+        
+        this.groupBy = coach.parseComma("GroupByElement");
     }
     
     parseHaving(coach) {
@@ -282,7 +296,8 @@ Select.keywords = [
     "union",
     "intersect",
     "except",
-    "order"
+    "order",
+    "group"
 ];
 
 Select.tests = tests;

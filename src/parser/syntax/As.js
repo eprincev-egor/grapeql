@@ -8,7 +8,7 @@ class As extends Syntax {
         this.alias = null;
         
         if ( coach.isWord("as") ) {
-            coach.readWord();
+            coach.expect("as");
             coach.skipSpace();
             needAlias = true;
         }
@@ -32,7 +32,7 @@ class As extends Syntax {
                     coach.throwError("unexpected keyword: " + word);
                 }
             } else {
-                this.alias = word;
+                this.alias = {word};
             }
         }
     }
@@ -58,7 +58,7 @@ As.tests = [
     {
         str: "nice",
         result: {
-            alias: "nice"
+            alias: {word: "nice"}
         }
     },
     {
@@ -72,7 +72,7 @@ As.tests = [
     {
         str: "as Some1",
         result: {
-            alias: "some1"
+            alias: {word: "some1"}
         }
     },
     {
