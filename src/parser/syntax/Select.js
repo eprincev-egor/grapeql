@@ -1,5 +1,6 @@
 "use strict";
 const Syntax = require("./Syntax");
+const tests = require("./Select.tests");
 
 // https://www.postgresql.org/docs/9.5/static/sql-select.html
 /*
@@ -62,6 +63,8 @@ class Select extends Syntax {
         this.parseWhere(coach);
         this.parseHaving(coach);
         this.parseOffsets(coach);
+        
+        this.parseUnion(coach);
     }
     
     parseWith(coach) {
@@ -85,34 +88,7 @@ class Select extends Syntax {
         coach.expectWord("from");
         coach.skipSpace();
         
-        if ( coach.is("(") ) {
-            coach.i++;
-            coach.skipSpace();
-            
-            this.from = {
-                select: coach.parseSelect()
-            };
-            
-            coach.skipSpace();
-            coach.expect(")");
-            coach.skipSpace();
-            
-            let i = coach.i;
-            let as = coach.parseAs();
-            if ( !as.alias ) {
-                coach.i = i;
-                
-                coach.throwError("expected alias");
-            }
-            this.from.as = as;
-            
-        } else {
-            this.from = {
-                // don't sort it
-                table: coach.parseObjectLink(),
-                as: coach.parseAs()
-            };
-        }
+        this.from = coach.parseComma("FromItem");
         
         coach.skipSpace();
     }
@@ -238,6 +214,40 @@ class Select extends Syntax {
         }
     }
     
+    // [ { UNION | INTERSECT | EXCEPT } [ ALL | DISTINCT ] select ]
+    parseUnion(coach) {
+        this.union = null;
+        
+        if ( !coach.is(/(union|intersect|except)\s+/i) ) {
+            return;
+        }
+        
+        this.union = {};
+        
+        // { UNION | INTERSECT | EXCEPT }
+        let word = coach.readWord().toLowerCase();
+        if ( word == "intersect" ) {
+            this.union.intersect = true;
+        }
+        else if ( word == "except" ) {
+            this.union.except = true;
+        }
+        coach.skipSpace();
+        
+        // [ ALL | DISTINCT ]
+        if ( coach.isWord("all") ) {
+            this.union.all = true;
+            coach.readWord();
+        }
+        else if ( coach.isWord("distinct") ) {
+            this.union.distinct = true;
+            coach.readWord();
+        }
+        coach.skipSpace();
+        
+        this.union.select = coach.parseSelect();
+    }
+    
     is(coach) {
         return coach.isWord("select") || coach.isWord("with");
     }
@@ -247,239 +257,18 @@ Select.keywords = [
     "from",
     "where",
     "select",
-    "with"
+    "with",
+    "having",
+    "offset",
+    "limit",
+    "fetch",
+    "lateral",
+    "only",
+    "union",
+    "intersect",
+    "except"
 ];
 
-Select.tests = [
-    {
-        str: "select * from company",
-        result: {
-            columns: [
-                {
-                    as: null,
-                    expression: {elements: [
-                        {link: [
-                            "*"
-                        ]}
-                    ]}
-                }
-            ],
-            from: {
-                table: {link: [
-                    {word: "company"}
-                ]},
-                as: {
-                    alias: null
-                }
-            }
-        }
-    },
-    {
-        str: "select company.id as id, null as n from public.company",
-        result: {
-            columns: [
-                {
-                    as: {alias: "id"},
-                    expression: {elements: [
-                        {link: [
-                            {word: "company"},
-                            {word: "id"}
-                        ]}
-                    ]}
-                },
-                {
-                    as: {alias: "n"},
-                    expression: {elements: [
-                        {null: true}
-                    ]}
-                }
-            ],
-            from: {
-                table: {link: [
-                    {word: "public"},
-                    {word: "company"}
-                ]},
-                as: {alias: null}
-            }
-        }
-    },
-    {
-        str: "select * from ( select * from public.order ) as Orders",
-        result: {
-            columns: [
-                {
-                    as: null,
-                    expression: {elements: [
-                        {link: [
-                            "*"
-                        ]}
-                    ]}
-                }
-            ],
-            from: {
-                select: {
-                    columns: [
-                        {
-                            as: null,
-                            expression: {elements: [
-                                {link: [
-                                    "*"
-                                ]}
-                            ]}
-                        }
-                    ],
-                    from: {
-                        table: {link: [
-                            {word: "public"},
-                            {word: "order"}
-                        ]},
-                        as: {alias: null}
-                    }
-                },
-                as: {alias: "orders"}
-            }
-        }
-    },
-    {
-        str: "select from company where id = 1",
-        result: {
-            columns: [],
-            from: {
-                table: {link: [
-                    {word: "company"}
-                ]},
-                as: {alias: null}
-            },
-            where: {elements: [
-                {link: [
-                    {word: "id"}
-                ]},
-                {operator: "="},
-                {number: "1"}
-            ]}
-        }
-    },
-    {
-        str: "select from company having id = 1",
-        result: {
-            columns: [],
-            from: {
-                table: {link: [
-                    {word: "company"}
-                ]},
-                as: {alias: null}
-            },
-            having: {elements: [
-                {link: [
-                    {word: "id"}
-                ]},
-                {operator: "="},
-                {number: "1"}
-            ]}
-        }
-    },
-    {
-        str: "select from company offset 1 limit 10",
-        result: {
-            columns: [],
-            from: {
-                table: {link: [
-                    {word: "company"}
-                ]},
-                as: {alias: null}
-            },
-            offset: 1,
-            limit: 10
-        }
-    },
-    {
-        str: "select from company limit all offset 100",
-        result: {
-            columns: [],
-            from: {
-                table: {link: [
-                    {word: "company"}
-                ]},
-                as: {alias: null}
-            },
-            offset: 100,
-            limit: "all"
-        }
-    },
-    {
-        str: "select from company fetch first 5 rows only",
-        result: {
-            columns: [],
-            from: {
-                table: {link: [
-                    {word: "company"}
-                ]},
-                as: {alias: null}
-            },
-            fetch: {first: 5}
-        }
-    },
-    {
-        str: "select from company fetch next 1 row only",
-        result: {
-            columns: [],
-            from: {
-                table: {link: [
-                    {word: "company"}
-                ]},
-                as: {alias: null}
-            },
-            fetch: {next: 1}
-        }
-    },
-    {
-        str: "with orders as (select * from company) select * from orders",
-        result: {
-            with: [
-                {
-                    name: {word: "orders"},
-                    select: {
-                        columns: [
-                            {
-                                as: null,
-                                expression: {elements: [
-                                    {link: [
-                                        "*"
-                                    ]}
-                                ]}
-                            }
-                        ],
-                        from: {
-                            table: {link: [
-                                {word: "company"}
-                            ]},
-                            as: {
-                                alias: null
-                            }
-                        }
-                    }
-                }
-            ],
-            columns: [
-                {
-                    as: null,
-                    expression: {elements: [
-                        {link: [
-                            "*"
-                        ]}
-                    ]}
-                }
-            ],
-            from: {
-                table: {link: [
-                    {word: "orders"}
-                ]},
-                as: {
-                    alias: null
-                }
-            }
-        }
-    }
-];
+Select.tests = tests;
 
 module.exports = Select;

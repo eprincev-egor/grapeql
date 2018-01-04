@@ -59,14 +59,14 @@ WithQuery.tests = [
                         ]}
                     }
                 ],
-                from: {
+                from: [{
                     table: {link: [
                         {word: "company"}
                     ]},
                     as: {
                         alias: null
                     }
-                }
+                }]
             }
         }
     },
@@ -90,14 +90,14 @@ WithQuery.tests = [
                         ]}
                     }
                 ],
-                from: {
+                from: [{
                     table: {link: [
                         {word: "company"}
                     ]},
                     as: {
                         alias: null
                     }
-                }
+                }]
             }
         }
     }
