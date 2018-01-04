@@ -62,6 +62,7 @@ class Select extends Syntax {
         this.parseFrom(coach);
         this.parseWhere(coach);
         this.parseHaving(coach);
+        this.parseOrderBy(coach);
         this.parseOffsets(coach);
         
         this.parseUnion(coach);
@@ -214,6 +215,20 @@ class Select extends Syntax {
         }
     }
     
+    // [ ORDER BY expression [ ASC | DESC | USING operator ] [ NULLS { FIRST | LAST } ] [, ...] ]
+    parseOrderBy(coach) {
+        if ( !coach.isWord("order") ) {
+            return;
+        }
+        
+        coach.expectWord("order");
+        coach.skipSpace();
+        coach.expectWord("by");
+        coach.skipSpace();
+        
+        this.orderBy = coach.parseComma("OrderByElement");
+    }
+    
     // [ { UNION | INTERSECT | EXCEPT } [ ALL | DISTINCT ] select ]
     parseUnion(coach) {
         this.union = null;
@@ -266,7 +281,8 @@ Select.keywords = [
     "only",
     "union",
     "intersect",
-    "except"
+    "except",
+    "order"
 ];
 
 Select.tests = tests;

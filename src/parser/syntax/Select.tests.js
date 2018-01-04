@@ -264,5 +264,36 @@ module.exports = [
             }
         }
     },
-    
+    {
+        str: "select from company order by inn asc, id desc",
+        result: {
+            columns: [],
+            from: [{
+                table: {link: [
+                    {word: "company"}
+                ]},
+                as: {
+                    alias: null
+                }
+            }],
+            orderBy: [
+                {
+                    expression: {elements: [
+                        {link: [
+                            {word: "inn"}
+                        ]}
+                    ]},
+                    vector: "asc"
+                },
+                {
+                    expression: {elements: [
+                        {link: [
+                            {word: "id"}
+                        ]}
+                    ]},
+                    vector: "desc"
+                }
+            ]
+        }
+    }
 ];

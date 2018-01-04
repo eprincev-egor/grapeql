@@ -47,6 +47,7 @@ GrapeQLCoach.addSyntax("Expression", require("./syntax/Expression"));
 GrapeQLCoach.addSyntax("As", require("./syntax/As"));
 GrapeQLCoach.addSyntax("Column", require("./syntax/Column"));
 GrapeQLCoach.addSyntax("FromItem", require("./syntax/FromItem"));
+GrapeQLCoach.addSyntax("OrderByElement", require("./syntax/OrderByElement"));
 GrapeQLCoach.addSyntax("Select", require("./syntax/Select"));
 GrapeQLCoach.addSyntax("WithQuery", require("./syntax/WithQuery"));
 
