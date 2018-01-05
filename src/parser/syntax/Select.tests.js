@@ -358,5 +358,183 @@ module.exports = [
                 }
             ]
         }
+    },
+    {
+        str: `select
+            company.*,
+            totals.*,
+            country.name,
+            partner_country.name
+        from company
+        
+        left join country on 
+            company.country_id = country.id
+        
+        left join company as partner on
+            partner.id = company.partner_id
+        
+        left join country as partner_country on 
+            partner.country_id = partner_country.id
+        
+        left join lateral (
+            select
+                sum(sale) as sum_sale
+            from orders
+            
+            where
+                orders.company_id = company.id or
+                orders.company_id = partner.id
+        ) as totals on true
+        `,
+        result: {
+            columns: [
+                {expression: {elements: [
+                    {link: [
+                        {word: "company"},
+                        "*"
+                    ]}
+                ]}},
+                {expression: {elements: [
+                    {link: [
+                        {word: "totals"},
+                        "*"
+                    ]}
+                ]}},
+                {expression: {elements: [
+                    {link: [
+                        {word: "country"},
+                        {word: "name"}
+                    ]}
+                ]}},
+                {expression: {elements: [
+                    {link: [
+                        {word: "partner_country"},
+                        {word: "name"}
+                    ]}
+                ]}}
+            ],
+            from: [{
+                table: {link: [{word: "company"}]}
+            }],
+            joins: [
+                {
+                    type: "left join",
+                    from: {
+                        table: {link: [
+                            {word: "country"}
+                        ]}
+                    },
+                    on: {elements: [
+                        {link: [
+                            {word: "company"},
+                            {word: "country_id"}
+                        ]},
+                        {operator: "="},
+                        {link: [
+                            {word: "country"},
+                            {word: "id"}
+                        ]}
+                    ]}
+                },
+                {
+                    type: "left join",
+                    from: {
+                        table: {link: [
+                            {word: "company"}
+                        ]},
+                        as: {alias: {word: "partner"}}
+                    },
+                    on: {elements: [
+                        {link: [
+                            {word: "partner"},
+                            {word: "id"}
+                        ]},
+                        {operator: "="},
+                        {link: [
+                            {word: "company"},
+                            {word: "partner_id"}
+                        ]}
+                    ]}
+                },
+                {
+                    type: "left join",
+                    from: {
+                        table: {link: [
+                            {word: "country"}
+                        ]},
+                        as: {alias: {word: "partner_country"}}
+                    },
+                    on: {elements: [
+                        {link: [
+                            {word: "partner"},
+                            {word: "country_id"}
+                        ]},
+                        {operator: "="},
+                        {link: [
+                            {word: "partner_country"},
+                            {word: "id"}
+                        ]}
+                    ]}
+                },
+                {
+                    type: "left join",
+                    from: {
+                        lateral: true,
+                        select: {
+                            columns: [
+                                {
+                                    expression: {elements: [
+                                        {
+                                            "function": {link: [
+                                                {word: "sum"}
+                                            ]},
+                                            "arguments": [
+                                                {elements: [
+                                                    {link: [
+                                                        {word: "sale"}
+                                                    ]}
+                                                ]}
+                                            ]
+                                        }
+                                    ]},
+                                    as: {alias: {word: "sum_sale"}}
+                                }
+                            ],
+                            from: [{
+                                table: {link: [
+                                    {word: "orders"}
+                                ]}
+                            }],
+                            where: {elements: [
+                                {link: [
+                                    {word: "orders"},
+                                    {word: "company_id"}
+                                ]},
+                                {operator: "="},
+                                {link: [
+                                    {word: "company"},
+                                    {word: "id"}
+                                ]},
+                                
+                                {operator: "or"},
+                                
+                                {link: [
+                                    {word: "orders"},
+                                    {word: "company_id"}
+                                ]},
+                                {operator: "="},
+                                {link: [
+                                    {word: "partner"},
+                                    {word: "id"}
+                                ]}
+                            ]}
+                        }
+                    },
+                    on: {elements: [
+                        {boolean: true}
+                    ]}
+                }
+            ]
+        }
     }
 ];

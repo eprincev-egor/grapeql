@@ -45,14 +45,17 @@ class Coach {
         this.throwError("expected word: " + word);
     }
     
-    expect(strOrRegExp) {
+    expect(strOrRegExp, message) {
         if ( typeof strOrRegExp == "string" ) {
             let str = strOrRegExp;
             
             if ( this.str.slice(this.i).indexOf(str) === 0 ) {
                 this.i += str.length;
             } else {
-                this.throwError("expected: " + str);
+                if ( message == null ) {
+                    message = "expected: " + str;
+                }
+                this.throwError(message);
             }
             
             return str;
@@ -62,7 +65,10 @@ class Coach {
                 execResult = regExp.exec(str);
             
             if ( !execResult || execResult.index !== 0 ) {
-                this.throwError("expected: " + regExp);
+                if ( message == null ) {
+                    message = "expected: " + regExp;
+                }
+                this.throwError(message);
             }
             
             this.i += execResult[0].length;
@@ -145,8 +151,14 @@ class Coach {
         }
     }
     
-    // Expression or ObjectLink or any SyntaxName,
+    // parsing over "," and returning array of syntax objects
+    // first argument SyntaxName is string: "Expression" or "ObjectLink" or any SyntaxName,
     // first symbol must be in upper case
+    // or object like are: 
+    // {
+    //    is: function,
+    //    parse: function
+    // }
     parseComma(SyntaxName) {
         let elements = [],
             parseSyntax,
@@ -179,6 +191,48 @@ class Coach {
                 
                 this._parseComma(isSyntax, parseSyntax, elements);
             }
+        }
+        
+        return elements;
+    }
+    
+    // parsing chain of syntax objects splitted by space symbols
+    // first argument SyntaxName is string: "Expression" or "ObjectLink" or any SyntaxName,
+    // first symbol must be in upper case
+    // or object like are: 
+    // {
+    //    is: function,
+    //    parse: function
+    // }
+    parseChain(SyntaxName) {
+        let elements = [],
+            parseSyntax,
+            isSyntax;
+        
+        if ( typeof SyntaxName == "string" ) {
+            parseSyntax = this[ "parse" + SyntaxName ].bind(this);
+            isSyntax = this[ "is" + SyntaxName ].bind(this);
+        } else {
+            parseSyntax = SyntaxName.parse;
+            isSyntax = SyntaxName.is;
+        }
+        
+        this._parseChain(isSyntax, parseSyntax, elements);
+        
+        return elements;
+    }
+    
+    _parseChain(isSyntax, parseSyntax, elements) {
+        let i = this.i;
+        this.skipSpace();
+        
+        if ( isSyntax() ) {
+            let elem = parseSyntax();
+            elements.push( elem );
+            
+            this._parseChain(isSyntax, parseSyntax, elements);
+        } else {
+            this.i = i;
         }
         
         return elements;

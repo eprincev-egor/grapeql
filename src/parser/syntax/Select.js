@@ -60,6 +60,7 @@ class Select extends Syntax {
         coach.skipSpace();
         
         this.parseFrom(coach);
+        this.parseJoins(coach);
         this.parseWhere(coach);
         this.parseGroupBy(coach);
         this.parseHaving(coach);
@@ -95,6 +96,10 @@ class Select extends Syntax {
         coach.skipSpace();
     }
     
+    parseJoins(coach) {
+        this.joins = coach.parseChain("Join");
+    }
+    
     parseWhere(coach) {
         this.where = null;
         
@@ -118,6 +123,8 @@ class Select extends Syntax {
         coach.skipSpace();
         
         this.groupBy = coach.parseComma("GroupByElement");
+        
+        coach.skipSpace();
     }
     
     parseHaving(coach) {
@@ -241,6 +248,8 @@ class Select extends Syntax {
         coach.skipSpace();
         
         this.orderBy = coach.parseComma("OrderByElement");
+        
+        coach.skipSpace();
     }
     
     // [ { UNION | INTERSECT | EXCEPT } [ ALL | DISTINCT ] select ]
@@ -282,6 +291,7 @@ class Select extends Syntax {
     }
 }
 
+// stop keywords for alias
 Select.keywords = [
     "from",
     "where",
@@ -297,7 +307,16 @@ Select.keywords = [
     "intersect",
     "except",
     "order",
-    "group"
+    "group",
+    // @see joins
+    "on",
+    "using",
+    "left",
+    "right",
+    "full",
+    "inner",
+    "cross",
+    "join"
 ];
 
 Select.tests = tests;
