@@ -5,8 +5,22 @@ const tests = require("./FromItem.tests");
 
 class FromItem extends Syntax {
     parse(coach) {
+        // file Order.sql
+        if ( coach.isFile() ) {
+            this.file = coach.parseFile();
+            coach.skipSpace();
+            
+            let i = coach.i;
+            let as = coach.parseAs();
+            if ( !as.alias ) {
+                coach.i = i;
+                
+                coach.throwError("expected alias");
+            }
+            this.as = as;
+        }
         // [ LATERAL ] ( select ) [ AS ] alias 
-        if ( coach.is("(") || coach.is(/lateral\s*\(/i) ) {
+        else if ( coach.is("(") || coach.is(/lateral\s*\(/i) ) {
             let isLateral = false;
             if ( coach.isWord("lateral") ) {
                 isLateral = true;

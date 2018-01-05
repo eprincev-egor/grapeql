@@ -113,5 +113,17 @@ module.exports = [
                 alias: {word: "some_rows"}
             }
         }
+    },
+    {
+        str: "file Order.sql as orders",
+        result: {
+            file: {
+                path: [
+                    {name: "."},
+                    {name: "Order.sql"}
+                ]
+            },
+            as: {alias: {word: "orders"}}
+        }
     }
 ];

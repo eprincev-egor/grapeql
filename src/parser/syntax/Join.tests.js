@@ -178,5 +178,23 @@ module.exports = [
                 {boolean: true}
             ]}
         }
+    },
+    {
+        str: "left join ./Company.sql as company on true",
+        result: {
+            type: "left join",
+            from: {
+                file: {
+                    path: [
+                        {name: "."},
+                        {name: "Company.sql"}
+                    ]
+                },
+                as: {alias: {word: "company"}}
+            },
+            on: {elements: [
+                {boolean: true}
+            ]}
+        }
     }
 ];
