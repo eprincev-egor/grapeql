@@ -2,7 +2,8 @@
 
 const _ = require("lodash");
 const pg = require("pg");
-const client = 
+const config = require("../../config");
+const client = new pg.Client(config.db);
 
 class GrapeQL {
     constructor(settings) {
