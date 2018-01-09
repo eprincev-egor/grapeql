@@ -18,6 +18,8 @@ const tests = require("./Join.tests");
 
 class Join extends Syntax {
     parse(coach) {
+        let lateralErrorIndex = coach.i;
+        
         let type = coach.expect(/(((left|right|full)\s+(outer\s+)?)|(inner\s+)?|cross\s+)join\s+/i, "expected join keyword");
         type = type.toLowerCase()
             // normolize spaces
@@ -29,6 +31,13 @@ class Join extends Syntax {
         
         this.from = coach.parseFromItem();
         coach.skipSpace();
+        
+        if ( this.from.lateral ) {
+            if ( type != "join" && type != "left join" && type != "inner join" )  {
+                coach.i = lateralErrorIndex;
+                coach.throwError("The combining JOIN type must be INNER or LEFT for a LATERAL reference.");
+            }
+        }
         
         if ( coach.isWord("on") ) {
             coach.expectWord("on");

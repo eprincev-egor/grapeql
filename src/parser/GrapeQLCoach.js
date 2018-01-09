@@ -5,6 +5,7 @@ const Coach = require("./Coach");
 class GrapeQLCoach extends Coach {
     replaceComments() {
         let coach = this,
+            startIndex = coach.i,
             newStr = coach.str.split("");
         
         for (; coach.i < coach.n; coach.i++) {
@@ -21,6 +22,7 @@ class GrapeQLCoach extends Coach {
             }
         }
         
+        coach.i = startIndex;
         coach.str = newStr.join("");
     }
 }
@@ -53,6 +55,12 @@ GrapeQLCoach.addSyntax("Join", require("./syntax/Join"));
 GrapeQLCoach.addSyntax("File", require("./syntax/File"));
 GrapeQLCoach.addSyntax("Select", require("./syntax/Select"));
 GrapeQLCoach.addSyntax("WithQuery", require("./syntax/WithQuery"));
+
+GrapeQLCoach.parseEntity = function(str) {
+    let coach = new GrapeQLCoach(str);
+    coach.replaceComments();
+    return coach.parseSelect();
+};
 
 // need for tests
 if ( typeof window !== "undefined" ) {

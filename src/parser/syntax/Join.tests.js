@@ -196,5 +196,65 @@ module.exports = [
                 {boolean: true}
             ]}
         }
+    },
+    {
+        str: "right join lateral unnest( company.orders_ids ) as order_id on true",
+        error: Error
+    },
+    {
+        str: "full join lateral unnest( company.orders_ids ) as order_id on true",
+        error: Error
+    },
+    {
+        str: "left join lateral unnest( company.orders_ids ) as order_id on true",
+        result: {
+            type: "left join",
+            from: {
+                lateral: true,
+                functionCall: {
+                    "function": {
+                        link: [
+                            {word: "unnest"}
+                        ]
+                    },
+                    "arguments": [{elements: [
+                        {link: [
+                            {word: "company"},
+                            {word: "orders_ids"}
+                        ]}
+                    ]}]
+                },
+                as: {alias: {word: "order_id"}}
+            },
+            on: {elements: [
+                {boolean: true}
+            ]}
+        }
+    },
+    {
+        str: "join lateral unnest( company.orders_ids ) as order_id on true",
+        result: {
+            type: "join",
+            from: {
+                lateral: true,
+                functionCall: {
+                    "function": {
+                        link: [
+                            {word: "unnest"}
+                        ]
+                    },
+                    "arguments": [{elements: [
+                        {link: [
+                            {word: "company"},
+                            {word: "orders_ids"}
+                        ]}
+                    ]}]
+                },
+                as: {alias: {word: "order_id"}}
+            },
+            on: {elements: [
+                {boolean: true}
+            ]}
+        }
     }
 ];

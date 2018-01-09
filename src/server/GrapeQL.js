@@ -2,6 +2,8 @@
 
 const _ = require("lodash");
 const pg = require("pg");
+const fs = require("fs");
+const Node = require("./Node");
 
 class GrapeQL {
     constructor(config) {
@@ -57,7 +59,33 @@ class GrapeQL {
     }
     
     async loadNodes() {
-        this.nodes = {};
+        if ( !this.config.nodes ) {
+            this.nodes = {};
+            return;
+        }
+        
+        let nodes = {};
+        if ( _.isString(this.config.nodes) ) {
+            let files = fs.readdirSync(this.config.nodes);
+            files.forEach(fileName => {
+                let nodeName = fileName.replace(/\.sql$/i, "");
+                nodes[ nodeName ] = this.config.nodes + "/" + fileName;
+            });
+        }
+        
+        for (let nodeName in nodes) {
+            let fileName = nodes[ nodeName ];
+            
+            if ( fileName instanceof Node ) {
+                nodes[ nodeName ] = fileName;
+                continue;
+            }
+            
+            let node = new Node(fileName);
+            nodes[ nodeName ] = node;
+        }
+        
+        this.nodes = nodes;
     }
 }
 
