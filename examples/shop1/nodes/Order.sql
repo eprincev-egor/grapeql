@@ -1,6 +1,6 @@
 select * from public.order
 
-import 'Company' as Client
+left join ./Company as Client
 using public.order.client_id
 
 left join lateral (

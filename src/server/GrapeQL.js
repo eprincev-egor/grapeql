@@ -67,6 +67,7 @@ class GrapeQL {
         let nodes = {};
         if ( _.isString(this.config.nodes) ) {
             let files = fs.readdirSync(this.config.nodes);
+
             files.forEach(fileName => {
                 let nodeName = fileName.replace(/\.sql$/i, "");
                 nodes[ nodeName ] = this.config.nodes + "/" + fileName;
@@ -81,10 +82,10 @@ class GrapeQL {
                 continue;
             }
             
-            let node = new Node(fileName);
+            let node = new Node(fileName, this);
             nodes[ nodeName ] = node;
         }
-        
+
         this.nodes = nodes;
     }
 }

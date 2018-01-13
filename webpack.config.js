@@ -5,6 +5,7 @@ const path = require("path");
 module.exports = {
     devtool: "source-map",
     entry: {
+        QueryBuilder: path.join(__dirname, "src/server/QueryBuilder.js"),
         GrapeQLCoach: path.join(__dirname, "src/parser/GrapeQLCoach.js")
     },
     output: {

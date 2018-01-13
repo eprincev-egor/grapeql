@@ -124,6 +124,14 @@ class Expression extends Syntax {
         }
         return elements;
     }
+    
+    isLink() {
+        return this.elements.length === 1 && !!this.elements[0].link;
+    }
+    
+    getLink() {
+        return this.elements[0];
+    }
 }
 
 Expression.tests = [

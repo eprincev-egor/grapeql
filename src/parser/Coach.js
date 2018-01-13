@@ -270,9 +270,14 @@ Coach.addSyntax = function(className, SyntaxClass) {
     
     funcName = "parse" + className;
     ChildCoach.prototype[funcName] = function parseSyntax() {
-        let syntax = new SyntaxClass();
         let args = [this].concat([].slice.call(arguments));
+        let syntax = new SyntaxClass();
+        
+        syntax.coach = this;
+        syntax.startIndex = this.i;
         syntax.parse.apply(syntax, args);
+        syntax.endIndex = this.i;
+        
         return syntax; 
     };
 };

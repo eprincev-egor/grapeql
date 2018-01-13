@@ -1,5 +1,5 @@
 select * 
 from public.nomenclature as Nomenclature
 
-import 'Nomenclature' as ParentNomenclature
+left join ./Nomenclature as ParentNomenclature
 using parent_id

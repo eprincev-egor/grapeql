@@ -68,4 +68,4 @@
         testReplaceComments(assert, "1 + /* \n\r */2", "1 +    \n\r   2");
     });
     
-})(window.QUnit, window.GrapeQLCoach);
+})(window.QUnit, window.tests.GrapeQLCoach);

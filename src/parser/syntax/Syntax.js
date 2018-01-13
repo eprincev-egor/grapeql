@@ -3,6 +3,9 @@
 class Syntax {
     constructor() {
         this.parent = null;
+        this.coach = null;
+        this.startIndex = null;
+        this.endIndex;
     }
     
     addChild(child) {
@@ -41,6 +44,10 @@ class Syntax {
             return false;
         }
         this.parent.findParent(callback, context);
+    }
+    
+    toString() {
+        return this.coach.str.slice(this.startIndex, this.endIndex);
     }
 }
 

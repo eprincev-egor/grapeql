@@ -59,12 +59,15 @@ GrapeQLCoach.addSyntax("WithQuery", require("./syntax/WithQuery"));
 GrapeQLCoach.parseEntity = function(str) {
     let coach = new GrapeQLCoach(str);
     coach.replaceComments();
+    coach.skipSpace();
     return coach.parseSelect();
 };
 
 // need for tests
 if ( typeof window !== "undefined" ) {
-    window.GrapeQLCoach = GrapeQLCoach;
+    if ( typeof window.tests !== "undefined" ) {
+        window.tests.GrapeQLCoach = GrapeQLCoach;
+    }
 }
 
 module.exports = GrapeQLCoach;

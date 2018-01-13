@@ -24,6 +24,13 @@ class Column extends Syntax {
         
         return coach.is("*") || coach.isExpression();
     }
+    
+    isStar() {
+        if ( this.expression.isLink() ) {
+            let link = this.expression.getLink();
+            return link.isStar();
+        }
+    }
 }
 
 Column.tests = [

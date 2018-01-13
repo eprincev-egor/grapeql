@@ -31,6 +31,14 @@ class ObjectLink extends Syntax {
     is(coach) {
         return coach.isDoubleQuotes() || coach.isWord();
     }
+    
+    isStar() {
+        return this.link.some(elem => elem == "*");
+    }
+    
+    getLast() {
+        return this.link[ this.link.length - 1 ];
+    }
 }
 
 ObjectLink.tests = [

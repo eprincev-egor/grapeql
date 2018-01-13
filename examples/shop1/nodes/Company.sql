@@ -16,13 +16,13 @@ select
 
 from public.company as Company
 
-import 'Order' as LastOrder
+left join ./Order as LastOrder
 using Company.last_order_id
 
-import 'Country'
+left join ./Country
 using Company.country_id
 
-import 'User' as Manager
+left join ./User as Manager
 using Company.manager_id
 
 left join lateral (
