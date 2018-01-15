@@ -6,6 +6,7 @@ module.exports = {
     devtool: "source-map",
     entry: {
         QueryBuilder: path.join(__dirname, "src/server/QueryBuilder.js"),
+        Filter: path.join(__dirname, "src/filter/Filter.js"),
         GrapeQLCoach: path.join(__dirname, "src/parser/GrapeQLCoach.js")
     },
     output: {
