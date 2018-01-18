@@ -21,7 +21,7 @@ class Expression extends Syntax {
     }
     
     parseElements(coach, options) {
-        let operator, elem, i;
+        let elem, i;
         
         if ( options.posibleStar && coach.is("*") ) {
             elem = coach.parseObjectLink({ posibleStar: options.posibleStar });
@@ -29,11 +29,7 @@ class Expression extends Syntax {
             return;
         }
         
-        if ( coach.isOperator() ) {
-            operator = coach.parseOperator();
-            this.elements.push( operator );
-            coach.skipSpace();
-        }
+        this.parseOperators(coach);
         
         i = coach.i;
         elem = this.parseElement( coach, options );
@@ -50,7 +46,19 @@ class Expression extends Syntax {
         // operator
         coach.skipSpace();
         if ( coach.isOperator() ) {
+            this.parseOperators(coach);
+            
             this.parseElements(coach, options);
+        }
+    }
+    
+    parseOperators(coach) {
+        if ( coach.isOperator() ) {
+            let operator = coach.parseOperator();
+            this.elements.push( operator );
+            coach.skipSpace();
+            
+            this.parseOperators(coach);
         }
     }
     
@@ -67,7 +75,7 @@ class Expression extends Syntax {
             coach.skipSpace();
             coach.expect(")");
         }
-        
+
         else if ( coach.isCast() ) {
             elem = coach.parseCast();
         }
@@ -262,6 +270,51 @@ Expression.tests = [
                 {
                     number: "3"
                 }
+            ]
+        }
+    },
+    {
+        str: "id = 2 or id = -3",
+        result: {
+            elements: [
+                {link: [
+                    {word: "id"}
+                ]},
+                {operator: "="},
+                {number: "2"},
+                
+                {operator: "or"},
+                
+                {link: [
+                    {word: "id"}
+                ]},
+                {operator: "="},
+                {operator: "-"},
+                {number: "3"}
+            ]
+        }
+    },
+    {
+        str: "id = 2 or - -+id = 3",
+        result: {
+            elements: [
+                {link: [
+                    {word: "id"}
+                ]},
+                {operator: "="},
+                {number: "2"},
+                
+                {operator: "or"},
+                
+                {operator: "-"},
+                {operator: "-"},
+                {operator: "+"},
+                
+                {link: [
+                    {word: "id"}
+                ]},
+                {operator: "="},
+                {number: "3"}
             ]
         }
     }

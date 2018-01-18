@@ -220,6 +220,39 @@ class Condition {
 
         return result;
     }
+    
+    compile2sql(model) {
+        let elements = this.elements,
+            element,
+            conditionOperator,
+            result = "",
+            i, n;
+
+        if ( !elements.length ) {
+            return "true";
+        }
+
+        for (i = 0, n = elements.length; i < n; i++) {
+            element = elements[ i ];
+
+            conditionOperator = false;
+            if ( _.isString(element) ) {
+                conditionOperator = element.toLowerCase().trim();
+            }
+
+            if ( isAnd(conditionOperator) ) {
+                result += " and ";
+            }
+            else if ( isOr(conditionOperator) ) {
+                result += " or ";
+            }
+            else {
+                result += " (" + element.compile2sql(model) + ") ";
+            }
+        }
+
+        return result;
+    }
 
     isEmpty() {
         let elements = this.elements,

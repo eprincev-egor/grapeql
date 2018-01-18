@@ -74,6 +74,23 @@ class ConditionElement {
 
         return [this.column, this.operator.literal, value];
     }
+    
+    compile2sql(model) {
+        if ( this.noRows ) {
+            return "false";
+        }
+
+        // left is variable in compiled function
+        let left = model[ this.column ],
+            right = this.value;
+
+        // undefined, null
+        if ( right == null ) {
+            right = null;
+        }
+
+        return this.operator.compile2sql(left, right);
+    }
 
     isEmpty() {
         return false;

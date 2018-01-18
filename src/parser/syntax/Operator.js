@@ -65,6 +65,13 @@ class Operator extends Syntax {
             for (; coach.i < coach.n; coach.i++) {
                 let symb = coach.str[ coach.i ];
                 
+                // -+ must be as two operators
+                if ( symb == "-" ) {
+                    operator = "-";
+                    coach.i++;
+                    break;
+                }
+                
                 if ( !/[+\-*/%~=<>!&|^]/.test(symb) ) {
                     break;
                 }

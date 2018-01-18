@@ -296,6 +296,10 @@ class Filter {
         }
         return _.cloneDeep( this._compiledJSON );
     }
+    
+    toSql(model) {
+        return this.condition.compile2sql(model);
+    }
 
     clone() {
         let clone = new Filter( this.toJSON() );

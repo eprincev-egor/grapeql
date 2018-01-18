@@ -6,6 +6,7 @@
             return;
         }
         
+        syntax.Coach = null;
         delete syntax.coach;
         delete syntax.parent;
         delete syntax.startIndex;
