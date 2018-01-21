@@ -15,6 +15,10 @@ class LesserOrEqual extends Operator {
         right = JSON.stringify( right );
         return left + " != null && " + right + " != null && +" + left + " <= +" + right;
     }
+    
+    compile2sql(column, value) {
+        return Operator.toSql(column, "<=", value);
+    }
 }
 
 Operator.addLiteral(["<="], LesserOrEqual);

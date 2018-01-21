@@ -1,6 +1,7 @@
 "use strict";
 
 const _ = require("lodash");
+const Filter = require("../filter/Filter");
 
 class QueryBuilder {
     constructor(server, node) {
@@ -45,10 +46,16 @@ class QueryBuilder {
             throw new Error("columns must be array of strings: " + request.columns);
         }
         
+        let where = false;
+        if ( request.where ) {
+            where = new Filter( request.where );
+        }
+        
         return {
             offset,
             limit,
-            columns
+            columns,
+            where
         };
     }
     
@@ -172,6 +179,12 @@ class QueryBuilder {
         query += "\n";
         query += "from " + parsed.from.toString(); // Arr => "from1, from2"
         query += "\n";
+        
+        if ( request.where ) {
+            query += "where \n";
+            let sqlModel = {};
+            query += request.where.toSql(sqlModel);
+        }
         
         if ( request.offset ) {
             query += `offset ${ request.offset}\n`;

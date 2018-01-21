@@ -18,6 +18,12 @@ class Contain extends Operator {
         // _lowercase @see RowModel.parse2filter
         return "( " + left + " && " + left + "._lowerCase || (" + left + " + '').toLowerCase() ).indexOf( " + right + " ) !== -1";
     }
+    
+    compile2sql(column, value) {
+        if ( column ) {
+            
+        }
+    }
 }
 
 Operator.addLiteral(["contain"], Contain);

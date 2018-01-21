@@ -226,7 +226,8 @@ class Condition {
             element,
             conditionOperator,
             result = "",
-            i, n;
+            i, n,
+            needBrackets = false;
 
         if ( !elements.length ) {
             return "true";
@@ -245,12 +246,16 @@ class Condition {
             }
             else if ( isOr(conditionOperator) ) {
                 result += " or ";
+                needBrackets = true;
             }
             else {
-                result += " (" + element.compile2sql(model) + ") ";
+                result += element.compile2sql(model);
             }
         }
-
+        
+        if ( needBrackets ) {
+            result = "(" + result + ")";
+        }
         return result;
     }
 

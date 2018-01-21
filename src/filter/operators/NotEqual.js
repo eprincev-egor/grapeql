@@ -11,6 +11,10 @@ class NotEqual extends Operator {
         right = JSON.stringify( right );
         return left + " != " + right;
     }
+    
+    compile2sql(column, value) {
+        return Operator.toSql(column, "<>", value);
+    }
 }
 
 Operator.addLiteral(["<>", "!="], NotEqual);

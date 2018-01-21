@@ -15,6 +15,10 @@ class Greater extends Operator {
         right = JSON.stringify( right );
         return left + " != null && " + left + " > +" + right;
     }
+    
+    compile2sql(column, value) {
+        return Operator.toSql(column, ">", value);
+    }
 }
 
 Operator.addLiteral([">"], Greater);
