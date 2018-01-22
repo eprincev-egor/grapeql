@@ -60,6 +60,16 @@ class PgNumber extends Syntax {
     is(coach, str) {
         return str.search(/[\d.]/) === 0;
     }
+    
+    clone() {
+        let clone = new PgNumber();
+        clone.number = this.number;
+        return clone;
+    }
+    
+    toString() {
+        return this.number;
+    }
 }
 
 module.exports = PgNumber;

@@ -12,7 +12,7 @@ class File extends Syntax {
             coach.expectWord("file");
             coach.skipSpace();
             
-            if ( !coach.is("/") ) {
+            if ( !coach.is("/") && !coach.is(".") ) {
                 this.path.push({name: "."});
             }
             
@@ -49,6 +49,30 @@ class File extends Syntax {
     
     is(coach) {
         return coach.is(/\.*\//) || coach.isWord("file");
+    }
+    
+    clone() {
+        let clone = new File();
+        
+        clone.path = this.path.map(elem => {
+            if ( elem.name ) {
+                return {name: elem.name};
+            }
+            
+            return elem.clone();
+        });
+        
+        return clone;
+    }
+    
+    toString() {
+        return this.path.map(elem => {
+            if ( elem.name ) {
+                return elem.name;
+            }
+            
+            return elem.toString();
+        }).join("/");
     }
 }
 

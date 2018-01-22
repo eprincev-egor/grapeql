@@ -49,9 +49,14 @@ class DoubleQuotes extends Syntax {
             }
             coach.i++;
             coach.expect("'");
+            
+            this.isCustomUescape = true;
         }
         
         if ( withUEsacape ) {
+            this.escape = escape;
+            this.contentBeforeEscape = content;
+            
             for (let i = 0, n = content.length; i < n; i++) {
                 let symb = content[i],
                     length;
@@ -85,6 +90,37 @@ class DoubleQuotes extends Syntax {
             str[1] == "&" &&
             str[1] == "\""
         );
+    }
+    
+    clone() {
+        let clone = new DoubleQuotes();
+        clone.content = this.content;
+        
+        if ( !this.escape ) {
+            return clone;
+        }
+        
+        clone.escape = this.escape;
+        if ( this.isCustomUescape ) {
+            clone.isCustomUescape = true;
+        }
+    }
+    
+    toString() {
+        if ( !this.escape ) {
+            let content = this.content.replace(/"/g, "\"\"");
+            return "\"" + content + "\"";
+        }
+        
+        let content = this.contentBeforeEscape;
+        content = content.replace(/"/g, "\"\"");
+        
+        content = "u&\"" + content + "\"";
+        if ( this.isCustomUescape ) {
+            content += " uescape '" + this.escape + "'";
+        }
+        
+        return content;
     }
 }
 

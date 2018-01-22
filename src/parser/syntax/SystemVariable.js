@@ -27,6 +27,16 @@ class SystemVariable extends Syntax {
     is(coach, str) {
         return /^\{\w+\}/.test(str);
     }
+    
+    clone() {
+        let clone = new SystemVariable();
+        clone.name = this.name;
+        return clone;
+    }
+    
+    toString() {
+        return "{" + this.name + "}";
+    }
 }
 
 module.exports = SystemVariable;

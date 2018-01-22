@@ -19,6 +19,18 @@ class CaseWhenElement extends Syntax {
     is(coach) {
         return coach.isWord("when");
     }
+    
+    clone() {
+        let clone = new CaseWhenElement();
+        clone.when = this.when.clone();
+        clone.then = this.then.clone();
+        return clone;
+    }
+    
+    toString() {
+        // !! .toString()
+        return `when ${ this.when } then ${ this.then }`;
+    }
 }
 
 module.exports = CaseWhenElement;

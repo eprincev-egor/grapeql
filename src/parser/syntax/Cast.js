@@ -24,6 +24,18 @@ class Cast extends Syntax {
     is(coach) {
         return coach.isWord("cast");
     }
+    
+    clone() {
+        let clone = new Cast();
+        clone.expression = this.expression.clone();
+        clone.dataType = this.dataType.clone();
+        return clone;
+    }
+    
+    toString() {
+        // !! .toString()
+        return `cast(${ this.expression } as ${ this.dataType })`;
+    }
 }
 
 module.exports = Cast;

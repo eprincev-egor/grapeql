@@ -31,6 +31,28 @@ class Column extends Syntax {
             return link.isStar();
         }
     }
+    
+    clone() {
+        let clone = new Column();
+        clone.expression = this.expression.clone();
+        clone.as = null;
+        
+        if ( this.as ) {
+            clone.as = this.as.clone();
+        }
+        
+        return clone;
+    }
+    
+    toString() {
+        let out = this.expression.toString();
+        
+        if ( this.as ) {
+            out += " " + this.as.toString();
+        }
+        
+        return out;
+    }
 }
 
 module.exports = Column;

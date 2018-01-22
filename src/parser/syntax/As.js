@@ -11,6 +11,7 @@ class As extends Syntax {
             coach.expect("as");
             coach.skipSpace();
             needAlias = true;
+            this.hasWordAs = true;
         }
         
         if ( coach.isDoubleQuotes() ) {
@@ -32,7 +33,7 @@ class As extends Syntax {
                     coach.throwError("unexpected keyword: " + word);
                 }
             } else {
-                this.alias = {word};
+                this.alias = new Syntax.Word(word);
             }
         }
     }
@@ -51,6 +52,33 @@ class As extends Syntax {
         }
         
         return false;
+    }
+    
+    clone() {
+        let clone = new As();
+        
+        if ( !this.alias ) {
+            clone.alias = null;
+            return clone;
+        }
+        
+        clone.alias = this.alias.clone();
+        
+        return clone;
+    }
+    
+    toString() {
+        if ( !this.alias ) {
+            return "";
+        }
+        
+        let out = this.alias.toString();
+        
+        if ( this.hasWordAs ) {
+            out = "as " + out;
+        }
+        
+        return out;
     }
 }
 

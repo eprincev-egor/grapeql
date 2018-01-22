@@ -18,6 +18,20 @@ class Boolean extends Syntax {
     is(coach) {
         return coach.isWord("true") || coach.isWord("false");
     }
+    
+    clone() {
+        let clone = new Boolean();
+        clone.boolean = this.boolean;
+        return clone;
+    }
+    
+    toString() {
+        if ( this.boolean ) {
+            return "true";
+        } else {
+            return "false";
+        }
+    }
 }
 
 module.exports = Boolean;

@@ -8,12 +8,23 @@ class ObjectName extends Syntax {
             this.name = coach.parseDoubleQuotes();
         }
         else {
-            this.name = {word: coach.expectWord()};
+            let word = coach.expectWord();
+            this.name = new Syntax.Word( word );
         }
     }
     
     is(coach) {
         return coach.isDoubleQuotes() || coach.isWord();
+    }
+    
+    clone() {
+        let clone = new ObjectName();
+        clone.name = this.name.clone();
+        return clone;
+    }
+    
+    toString() {
+        return this.name.toString();
     }
 }
 

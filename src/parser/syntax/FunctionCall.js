@@ -33,6 +33,18 @@ class FunctionCall extends Syntax {
         coach.i = i;
         return result;
     }
+    
+    clone() {
+        let clone = new FunctionCall();
+        clone.function = this.function.clone();
+        clone.arguments = this.arguments.map(arg => arg.clone());
+        return clone;
+    }
+    
+    toString() {
+        let args = this.arguments.map(arg => arg.toString()).join(", ");
+        return this.function.toString() + "(" + args + ")";
+    }
 }
 
 module.exports = FunctionCall;

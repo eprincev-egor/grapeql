@@ -159,6 +159,16 @@ class DataType extends Syntax {
         coach.i = i;
         return word in firstWords;
     }
+    
+    clone() {
+        let clone = new DataType();
+        clone.type = this.type;
+        return clone;
+    }
+    
+    toString() {
+        return this.type;
+    }
 }
 
 module.exports = DataType;

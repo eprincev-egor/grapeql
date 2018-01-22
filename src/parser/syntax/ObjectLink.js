@@ -39,6 +39,38 @@ class ObjectLink extends Syntax {
     getLast() {
         return this.link[ this.link.length - 1 ];
     }
+    
+    clone() {
+        let clone = new ObjectLink();
+        
+        clone.link = this.link.map(elem => {
+            if ( elem == "*" ) {
+                return "*";
+            }
+            
+            if ( elem.word ) {
+                return {word: elem.word};
+            }
+            
+            return elem.clone();
+        });
+        
+        return clone;
+    }
+    
+    toString() {
+        return this.link.map(elem => {
+            if ( elem == "*" ) {
+                return "*";
+            }
+            
+            if ( elem.word ) {
+                elem.word;
+            }
+            
+            return elem.toString();
+        }).join(".");
+    }
 }
 
 module.exports = ObjectLink;

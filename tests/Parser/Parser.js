@@ -648,6 +648,15 @@
                     {name: "root.sql"}
                 ]
             }
+        },
+        {
+            str: "file ./company",
+            result: {
+                path: [
+                    {name: "."},
+                    {name: "company"}
+                ]
+            }
         }
     ];
     

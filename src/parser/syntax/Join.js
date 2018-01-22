@@ -58,6 +58,21 @@ class Join extends Syntax {
     is(coach) {
         return coach.is(/(left|right|inner|join|full|cross)\s/i);
     }
+    
+    toString() {
+        let out = this.type;
+        
+        out += " ";
+        out += this.from.toString();
+        
+        if ( this.on ) {
+            out += " on " + this.on.toString();
+        } else {
+            out += " using " + this.using.map(elem => elem.toString()).join(", ");
+        }
+        
+        return out;
+    }
 }
 
 module.exports = Join;

@@ -51,4 +51,18 @@ class Syntax {
     }
 }
 
+Syntax.Word = class Word {
+    constructor(word) {
+        this.word = word;
+    }
+    
+    clone() {
+        return new Syntax.Word( this.word );
+    }
+    
+    toString() {
+        return this.word;
+    }
+};
+
 module.exports = Syntax;

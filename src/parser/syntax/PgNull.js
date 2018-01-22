@@ -11,6 +11,14 @@ class PgNull extends Syntax {
     is(coach) {
         return coach.isWord("null");
     }
+    
+    clone() {
+        return new PgNull();
+    }
+    
+    toString() {
+        return "null";
+    }
 }
 
 module.exports = PgNull;

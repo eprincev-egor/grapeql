@@ -40,6 +40,47 @@ class WithQuery extends Syntax {
     is(coach) {
         return !coach.isWord("select") && coach.isObjectName();
     }
+    
+    clone() {
+        let clone = new WithQuery();
+        
+        if ( this.recursive ) {
+            clone.recursive = true;
+        }
+        
+        clone.name = this.name.clone();
+        
+        clone.columns = null;
+        if ( this.columns ) {
+            clone.columns = this.columns.map(column => column.clone());
+        }
+        
+        clone.select = this.select.clone();
+        
+        return clone;
+    }
+    
+    toString() {
+        let out = "";
+        
+        if ( this.recursive ) {
+            out += "recursive ";
+        }
+        
+        out += this.name.toString() + " ";
+        
+        if ( this.columns ) {
+            out += "(";
+            out += this.columns.map(column => column.toString()).join(", ");
+            out += ") ";
+        }
+        
+        out += "as (";
+        out += this.select.toString();
+        out += ")";
+        
+        return out;
+    }
 }
 
 module.exports = WithQuery;

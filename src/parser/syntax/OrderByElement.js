@@ -30,6 +30,41 @@ class OrderByElement extends Syntax {
     is(coach) {
         return coach.isExpression();
     }
+    
+    clone() {
+        let clone = new OrderByElement();
+        clone.expression = this.expression.clone();
+        
+        if ( this.vector ) {
+            clone.vector = this.vector;
+        } 
+        else if ( this.using ) {
+            clone.using = this.using;
+        }
+        
+        if ( this.nulls ) {
+            clone.nulls = this.nulls;
+        }
+        
+        return clone;
+    }
+    
+    toString() {
+        let out = this.expression.toString();
+        
+        if ( this.vector ) {
+            out += " " + this.vector;
+        } 
+        else if ( this.using ) {
+            out += " using " + this.using.toString();
+        }
+        
+        if ( this.nulls ) {
+            out += " nulls " + this.nulls;
+        }
+        
+        return out;
+    }
 }
 
 module.exports = OrderByElement;

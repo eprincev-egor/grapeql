@@ -37,6 +37,35 @@ class CaseWhen extends Syntax {
     is(coach) {
         return coach.isWord("case");
     }
+    
+    clone() {
+        let clone = new CaseWhen();
+        
+        clone.case = this.case.map(elem => elem.clone());
+        clone.else = null;
+        
+        if ( this.else ) {
+            clone.else = this.else.clone();
+        }
+        
+        return clone;
+    }
+    
+    toString() {
+        let out = "case";
+        
+        let cases = this.cases.map(elem => elem.toString());
+        out += cases;
+        
+        if ( this.else ) {
+            out += " else ";
+            out += this.else.toString();
+            out += " ";
+        }
+        
+        out += "end";
+        return out;
+    }
 }
 
 module.exports = CaseWhen;

@@ -14,6 +14,16 @@ class ToType extends Syntax {
     is(coach, str) {
         return str[0] == ":" && str[1] == ":";
     }
+    
+    clone() {
+        let clone = new ToType();
+        clone.dataType = this.dataType.clone();
+        return clone;
+    }
+    
+    toString() {
+        return "::" + this.dataType.toString();
+    }
 }
 
 module.exports = ToType;

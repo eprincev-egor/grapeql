@@ -97,6 +97,16 @@ class Operator extends Syntax {
             !(str[0] == "/" && str[1] == "*") // /* comment
         ); 
     }
+    
+    clone() {
+        let clone = new Operator();
+        clone.operator = this.operator;
+        return clone;
+    }
+    
+    toString() {
+        return this.operator;
+    }
 }
 
 module.exports = Operator;

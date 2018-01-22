@@ -140,6 +140,32 @@ class Expression extends Syntax {
     getLink() {
         return this.elements[0];
     }
+    
+    clone() {
+        let clone = new Expression();
+        clone.elements = this.elements.map(elem => elem.clone());
+        return clone;
+    }
+    
+    toString() {
+        let out = "";
+        
+        this.elements.forEach((elem, i) => {
+            if ( i > 0 ) {
+                out += " ";
+            }
+            
+            if ( elem instanceof Expression ) {
+                out += "( ";
+                out += elem.toString();
+                out += " )";
+            } else {
+                out += elem.toString();
+            }
+        });
+        
+        return out;
+    }
 }
 
 module.exports = Expression;

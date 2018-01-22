@@ -248,6 +248,14 @@ class PgString extends Syntax {
             coach.is(/\$\w*\$/)
         );
     }
+    
+    clone() {
+        
+    }
+    
+    toString() {
+        
+    }
 }
 
 module.exports = PgString;
