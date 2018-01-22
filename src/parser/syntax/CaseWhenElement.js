@@ -21,14 +21,4 @@ class CaseWhenElement extends Syntax {
     }
 }
 
-CaseWhenElement.tests = [
-    {
-        str: "when true then 1",
-        result: {
-            when: {elements: [{boolean: true}]},
-            then: {elements: [{number: "1"}]}
-        }
-    }
-];
-
 module.exports = CaseWhenElement;

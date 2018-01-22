@@ -1,6 +1,5 @@
 "use strict";
 const Syntax = require("./Syntax");
-const tests = require("./Select.tests");
 
 // https://www.postgresql.org/docs/9.5/static/sql-select.html
 /*
@@ -318,7 +317,5 @@ Select.keywords = [
     "cross",
     "join"
 ];
-
-Select.tests = tests;
 
 module.exports = Select;

@@ -1,7 +1,6 @@
 "use strict";
 
 const Syntax = require("./Syntax");
-const tests = require("./FromItem.tests");
 
 class FromItem extends Syntax {
     parse(coach) {
@@ -124,7 +123,5 @@ class FromItem extends Syntax {
         return coach.is(/only|lateral|\(/) || coach.isWord();
     }
 }
-
-FromItem.tests = tests;
 
 module.exports = FromItem;

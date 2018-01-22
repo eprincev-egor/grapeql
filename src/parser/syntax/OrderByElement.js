@@ -32,18 +32,4 @@ class OrderByElement extends Syntax {
     }
 }
 
-OrderByElement.tests = [
-    {
-        str: "id Desc",
-        result: {
-            expression: {elements: [
-                {link: [
-                    {word: "id"}
-                ]}
-            ]},
-            vector: "desc"
-        }
-    }
-];
-
 module.exports = OrderByElement;

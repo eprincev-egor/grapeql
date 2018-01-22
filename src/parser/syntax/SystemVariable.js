@@ -29,27 +29,4 @@ class SystemVariable extends Syntax {
     }
 }
 
-SystemVariable.tests = [
-    {
-        str: "{x}",
-        result: {name: "x"}
-    },
-    {
-        str: "{X}",
-        result: {name: "X"}
-    },
-    {
-        str: "{$Any_Variable}",
-        result: {name: "$Any_Variable"}
-    },
-    {
-        str: "{Привет}",
-        result: {name: "Привет"}
-    },
-    {
-        str: "{}",
-        error: Error
-    }
-];
-
 module.exports = SystemVariable;

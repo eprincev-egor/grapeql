@@ -17,21 +17,4 @@ class ObjectName extends Syntax {
     }
 }
 
-ObjectName.tests = [
-    {
-        str: "a",
-        result: {
-            name: {word: "a"}
-        }
-    },
-    {
-        str: "\"Nice\"",
-        result: {
-            name: {
-                content: "Nice"
-            }
-        }
-    }
-];
-
 module.exports = ObjectName;

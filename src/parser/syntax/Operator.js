@@ -99,47 +99,4 @@ class Operator extends Syntax {
     }
 }
 
-Operator.tests = [
-    {
-        str: "+",
-        result: {operator: "+"}
-    },
-    {
-        str: ">= ",
-        result: {operator: ">="}
-    },
-    {
-        str: "<> ",
-        result: {operator: "<>"}
-    },
-    {
-        str: "and",
-        result: {operator: "and"}
-    },
-    {
-        str: "or",
-        result: {operator: "or"}
-    },
-    {
-        str: "not",
-        result: {operator: "not"}
-    },
-    {
-        str: "is",
-        result: {operator: "is"}
-    },
-    {
-        str: "is  Not null",
-        result: {operator: "is not"}
-    },
-    {
-        str: "is Distinct from",
-        result: {operator: "is distinct from"}
-    },
-    {
-        str: "operator( pg_catalog.+  )",
-        result: {operator: "operator(pg_catalog.+)"}
-    }
-];
-
 module.exports = Operator;

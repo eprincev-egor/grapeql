@@ -20,19 +20,4 @@ class Boolean extends Syntax {
     }
 }
 
-Boolean.tests = [
-    {
-        str: "true",
-        result: {
-            boolean: true
-        }
-    },
-    {
-        str: "false",
-        result: {
-            boolean: false
-        }
-    }
-];
-
 module.exports = Boolean;

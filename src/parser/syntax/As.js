@@ -54,39 +54,4 @@ class As extends Syntax {
     }
 }
 
-As.tests = [
-    {
-        str: "nice",
-        result: {
-            alias: {word: "nice"}
-        }
-    },
-    {
-        str: "\" Yep\"",
-        result: {
-            alias: {
-                content: " Yep"
-            }
-        }
-    },
-    {
-        str: "as Some1",
-        result: {
-            alias: {word: "some1"}
-        }
-    },
-    {
-        str: "as \"order\"",
-        result: {
-            alias: {
-                content: "order"
-            }
-        }
-    },
-    {
-        str: "as from",
-        error: Error
-    }
-];
-
 module.exports = As;

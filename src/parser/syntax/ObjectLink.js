@@ -41,32 +41,4 @@ class ObjectLink extends Syntax {
     }
 }
 
-ObjectLink.tests = [
-    {
-        str: "a.B.c",
-        result: {
-            link: [
-                {word: "a"},
-                {word: "b"},
-                {word: "c"}
-            ]
-        }
-    },
-    {
-        str: `"Nice"
-        .
-        "test"   . X.y."some"
-        `,
-        result: {
-            link: [
-                {content: "Nice"},
-                {content: "test"},
-                {word: "x"},
-                {word: "y"},
-                {content: "some"}
-            ]
-        }
-    }
-];
-
 module.exports = ObjectLink;

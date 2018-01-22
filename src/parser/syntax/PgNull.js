@@ -13,19 +13,4 @@ class PgNull extends Syntax {
     }
 }
 
-PgNull.tests = [
-    {
-        str: "null",
-        result: {null: true}
-    },
-    {
-        str: "null ",
-        result: {null: true}
-    },
-    {
-        str: "null1",
-        error: Error
-    }
-];
-
 module.exports = PgNull;

@@ -14,7 +14,6 @@ where
  */
  
 const Syntax = require("./Syntax");
-const tests = require("./Join.tests");
 
 class Join extends Syntax {
     parse(coach) {
@@ -60,7 +59,5 @@ class Join extends Syntax {
         return coach.is(/(left|right|inner|join|full|cross)\s/i);
     }
 }
-
-Join.tests = tests;
 
 module.exports = Join;

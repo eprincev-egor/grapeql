@@ -33,44 +33,4 @@ class Column extends Syntax {
     }
 }
 
-Column.tests = [
-    {
-        str: "company.id as id",
-        result: {
-            expression: {
-                elements: [
-                    {link: [
-                        {word: "company"},
-                        {word: "id"}
-                    ]}
-                ]
-            },
-            as: { alias: {word: "id"} }
-        }
-    },
-    {
-        str: "null nulL1",
-        result: {
-            expression: {
-                elements: [
-                    {null: true}
-                ]
-            },
-            as: { alias: {word: "null1"} }
-        }
-    },
-    {
-        str: "*",
-        result: {
-            expression: {
-                elements: [
-                    {link: [
-                        "*"
-                    ]}
-                ]
-            }
-        }
-    }
-];
-
 module.exports = Column;
