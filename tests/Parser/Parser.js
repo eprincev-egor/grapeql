@@ -13,35 +13,58 @@
                     parseFuncName = "parse" + className;
                 
                 index++;
-                try {
+                console.log(index);
+                
+                if ( test.err ) {
+                    try {
+                        let coach = new GrapeQLCoach(str);
+                        coach[ parseFuncName ]();
+                        assert.ok(false, "expected error: " + str);
+                    } catch(err) {
+                        assert.ok(true, "expected error: " + str);
+                    }
+                } 
+                
+                else if ( test.result ) {
                     let coach = new GrapeQLCoach(str);
                     let result = coach[ parseFuncName ]();
                     
-                    if ( test.result ) {
-                        normolizeSyntaxBeforeEqual(test.result);
-                        normolizeSyntaxBeforeEqual(result);
-                        
-                        let isEqual = !!window.weakDeepEqual(test.result, result);
-                        if ( !isEqual ) {
-                            console.log("break here");
-                        }
-                        
-                        assert.pushResult({
-                            result: isEqual,
-                            actual: result,
-                            expected: test.result,
-                            message: test.str
-                        });
+                    normolizeSyntaxBeforeEqual(test.result);
+                    normolizeSyntaxBeforeEqual(result);
+                    
+                    let isEqual = !!window.weakDeepEqual(test.result, result);
+                    if ( !isEqual ) {
+                        console.log("break here");
                     }
-                } catch(err) {
-                    if ( test.error ) {
-                        assert.ok(true, str);
-                    } else {
-                        console.log(index, err);
-                        assert.ok(false, str + "\n " + err);
+                    
+                    assert.pushResult({
+                        result: isEqual,
+                        actual: result,
+                        expected: test.result,
+                        message: test.str
+                    });
+                    
+                    
+                    // auto test clone and toString
+                    let clone = result.clone();
+                    let cloneString = clone.toString();
+                    let cloneCoach = new GrapeQLCoach( cloneString );
+                    let cloneResult = cloneCoach[ parseFuncName ]();
+                    
+                    normolizeSyntaxBeforeEqual(cloneResult);
+                    
+                    isEqual = !!window.weakDeepEqual(test.result, result);
+                    if ( !isEqual ) {
+                        console.log("break here");
                     }
+                    
+                    assert.pushResult({
+                        result: isEqual,
+                        actual: cloneResult,
+                        expected: test.result,
+                        message: "clone: " + test.str
+                    });
                 }
-                
             });
         });
     }
@@ -1559,7 +1582,7 @@
                     ]},
                     as: {alias: null}
                 }],
-                fetch: {first: 5}
+                fetch: {first: true, count: 5, rows: true}
             }
         },
         {
@@ -1572,7 +1595,7 @@
                     ]},
                     as: {alias: null}
                 }],
-                fetch: {next: 1}
+                fetch: {next: true, count: 1, row: true}
             }
         },
         {

@@ -59,6 +59,20 @@ class Join extends Syntax {
         return coach.is(/(left|right|inner|join|full|cross)\s/i);
     }
     
+    clone() {
+        let clone = new Join();
+        clone.type = this.type;
+        clone.from = this.from.clone();
+        
+        if ( this.on ) {
+            clone.on = this.on.clone();
+        } else {
+            clone.using = this.using.map(elem => elem.clone());
+        }
+        
+        return clone;
+    }
+    
     toString() {
         let out = this.type;
         

@@ -122,6 +122,95 @@ class FromItem extends Syntax {
     is(coach) {
         return coach.is(/only|lateral|\(/) || coach.isWord();
     }
+    
+    clone() {
+        let clone = new FromItem();
+        
+        if ( this.file ) {
+            clone.file = this.file.clone();
+        }
+        else if ( this.select ) {
+            if ( this.lateral ) {
+                clone.lateral = true;
+            }
+            clone.select = this.select.clone();
+        }
+        else if ( this.functionCall ) {
+            if ( this.lateral ) {
+                clone.lateral = true;
+            }
+            
+            clone.functionCall = this.functionCall.clone();
+            
+            if ( this.withOrdinality ) {
+                clone.withOrdinality = true;
+            }
+        }
+        else if ( this.table ) {
+            if ( this.only ) {
+                clone.only = true;
+            }
+            
+            clone.table = this.table.clone();
+        }
+        
+        if ( this.as ) {
+            clone.as = this.as.clone();
+        }
+        
+        if ( this.columns ) {
+            clone.columns = this.columns.map(name => name.clone());
+        }
+        
+        return clone;
+    }
+    
+    toString() {
+        let out = "";
+        
+        if ( this.file ) {
+            this.file.toString();
+        }
+        else if ( this.select ) {
+            if ( this.lateral ) {
+                out += "lateral ";
+            }
+            out += "(";
+            out += this.select.toString();
+            out += ")";
+        }
+        else if ( this.functionCall ) {
+            if ( this.lateral ) {
+                out += "lateral ";
+            }
+            
+            out += this.functionCall.toString();
+            
+            if ( this.withOrdinality ) {
+                out += " with ordinality";
+            }
+        }
+        else if ( this.table ) {
+            if ( this.only ) {
+                out += "only ";
+            }
+            
+            out += this.table.toString();
+        }
+        
+        if ( this.as ) {
+            out += " ";
+            out += this.as.toString();
+        }
+        
+        if ( this.columns ) {
+            out += " (";
+            out += this.columns.map(name => name.toString()).join(", ");
+            out += ")";
+        }
+        
+        return out;
+    }
 }
 
 module.exports = FromItem;

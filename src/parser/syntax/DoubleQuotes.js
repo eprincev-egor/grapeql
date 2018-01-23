@@ -76,6 +76,8 @@ class DoubleQuotes extends Syntax {
                     content = content.slice(0, i) + expr + content.slice(i + length);
                 }
             }
+        } else {
+            this.contentBeforeEscape = content;
         }
         
         this.content = content;
@@ -95,15 +97,14 @@ class DoubleQuotes extends Syntax {
     clone() {
         let clone = new DoubleQuotes();
         clone.content = this.content;
-        
-        if ( !this.escape ) {
-            return clone;
-        }
+        clone.contentBeforeEscape = this.contentBeforeEscape;
         
         clone.escape = this.escape;
         if ( this.isCustomUescape ) {
             clone.isCustomUescape = true;
         }
+        
+        return clone;
     }
     
     toString() {

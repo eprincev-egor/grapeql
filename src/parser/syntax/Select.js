@@ -175,9 +175,15 @@ class Select extends Syntax {
             let start = coach.expect(/\d+/);
             this.offset = +start;
                 
-            if ( coach.isWord("row") || coach.isWord("rows") ) {
+            if ( coach.isWord("rows") ) {
                 coach.skipSpace();
-                coach.readWord(); // row || rows
+                coach.readWord(); // rows
+                this.offsetRows = true;
+            }
+            else if ( coach.isWord("row") ) {
+                coach.skipSpace();
+                coach.readWord(); // row
+                this.offsetRow = true;
             }
             
             coach.skipSpace();
@@ -187,6 +193,8 @@ class Select extends Syntax {
     
     // [ LIMIT { count | ALL } ]
     parseLimit(coach) {
+        this.limit = null;
+        
         if ( coach.isWord("limit") ) {
             coach.readWord(); // limit
             coach.skipSpace();
@@ -211,10 +219,10 @@ class Select extends Syntax {
             coach.readWord(); // fetch
             coach.skipSpace();
             
-            let firstOrNext = coach.expect(/first|next/i);
+            let firstOrNext = coach.expect(/first|next/i).toLowerCase();
             coach.skipSpace();
             
-            let count = 1;
+            let count = null;
             // count ?
             if ( coach.is(/\d/) ); {
                 count = +coach.expect(/\d+/);
@@ -225,10 +233,21 @@ class Select extends Syntax {
             }
             
             // { ROW | ROWS } ONLY
+            let isRows = false;
+            if ( coach.isWord("rows") ) {
+                isRows = true;
+            }
             coach.expect(/rows?\s+only/i);
             
             this.fetch = {};
-            this.fetch[ firstOrNext ] = count;
+            this.fetch[ firstOrNext ] = true;
+            this.fetch.count = count;
+            
+            if ( isRows ) {
+                this.fetch.rows = true;
+            } else {
+                this.fetch.row = true;
+            }
             
             coach.skipSpace();
             return true;
@@ -287,6 +306,198 @@ class Select extends Syntax {
     
     is(coach) {
         return coach.isWord("select") || coach.isWord("with");
+    }
+    
+    clone() {
+        let clone = new Select();
+        
+        if ( this.with ) {
+            clone.with = this.with.map(item => item.clone());
+        }
+        
+        clone.columns = this.columns.map(item => item.clone());
+        
+        clone.from = this.from.map(item => item.clone());
+        
+        clone.joins = this.joins.map(item => item.clone());
+        
+        if ( this.where ) {
+            clone.where = this.where.clone();
+        }
+        
+        if ( this.groupBy ) {
+            clone.groupBy = this.groupBy.map(item => item.clone());
+        }
+        
+        if ( this.having ) {
+            clone.having = this.having.clone();
+        }
+        
+        if ( this.orderBy ) {
+            clone.orderBy = this.orderBy.map(item => item.clone());
+        }
+        
+        clone.offset = this.offset;
+        if ( this.offsetRows ) {
+            clone.offsetRows = true;
+        }
+        else if ( this.offsetRow ) {
+            clone.offsetRow = true;
+        }
+        
+        clone.limit = this.limit;
+        
+        if ( this.fetch ) {
+            clone.fetch = {};
+            
+            if ( this.fetch.first ) {
+                clone.fetch.first = true;
+            }
+            else if ( this.fetch.next ) {
+                clone.fetch.next = true;
+            }
+            
+            clone.fetch.count = this.fetch.count;
+            
+            if ( this.fetch.rows ) {
+                clone.fetch.rows = true;
+            }
+            else if ( this.fetch.row ) {
+                clone.fetch.row = true;
+            }
+        }
+        
+        if ( this.union ) {
+            clone.union = {};
+            
+            if ( this.union.intersect ) {
+                clone.union.intersect = true;
+            }
+            else if ( this.union.expect ) {
+                clone.union.expect = true;
+            }
+            
+            if ( this.union.all ) {
+                clone.union.all = true;
+            }
+            else if ( this.union.distinct ) {
+                clone.union.distinct = true;
+            }
+            
+            clone.union.select = this.union.select.clone();
+        }
+        
+        return clone;
+    }
+    
+    toString() {
+        let out = "";
+        
+        if ( this.with ) {
+            out += "with ";
+            out += this.with.map(item => item.toString()).join(", ");
+            out += " ";
+        }
+        
+        out += "select ";
+        out += this.columns.map(item => item.toString()).join(", ");
+        out += " ";
+        
+        out += "from ";
+        out += this.from.map(item => item.toString()).join(", ");
+        out += " ";
+        
+        if ( this.joins.length ) {
+            out += this.joins.map(item => item.toString()).join(", ");
+            out += " ";
+        }
+        
+        if ( this.where ) {
+            out += "where ";
+            out += this.where.toString();
+            out += " ";
+        }
+        
+        if ( this.groupBy ) {
+            out += "group by ";
+            out += this.groupBy.map(item => item.toString()).join(", ");
+            out += " ";
+        }
+        
+        if ( this.having ) {
+            out += "having ";
+            out += this.having.toString();
+            out += " ";
+        }
+        
+        if ( this.orderBy ) {
+            out += "order by ";
+            out += this.orderBy.map(item => item.toString()).join(", ");
+            out += " ";
+        }
+        
+        if ( this.offset !== null ) {
+            out += "offset " + this.offset;
+            
+            if ( this.offsetRows ) {
+                out += " rows";
+            }
+            else if ( this.offsetRow ) {
+                out += " row";
+            }
+            
+            out += " ";
+        }
+        
+        if ( this.limit !== null ) {
+            out += "limit " + this.limit;
+            out += " ";
+        }
+        
+        if ( this.fetch ) {
+            if ( this.fetch.first ) {
+                out += "first ";
+            }
+            else if ( this.fetch.next ) {
+                out += "next ";
+            }
+            
+            if ( this.fetch.count !== null ) {
+                out += this.fetch.count + " ";
+            }
+            
+            if ( this.fetch.rows ) {
+                out += "rows ";
+            }
+            else if ( this.fetch.row ) {
+                out += "row ";
+            }
+            
+            out += "only ";
+        }
+        
+        if ( this.union ) {
+            if ( this.union.intersect ) {
+                out += "intersect ";
+            }
+            else if ( this.union.expect ) {
+                out += "expect ";
+            }
+            else {
+                out += "union ";
+            }
+            
+            if ( this.union.all ) {
+                out += "all ";
+            }
+            else if ( this.union.distinct ) {
+                out += "distinct ";
+            }
+            
+            out += this.union.select.toString();
+        }
+        
+        return out;
     }
 }
 

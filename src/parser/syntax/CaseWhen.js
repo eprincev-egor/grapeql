@@ -52,18 +52,17 @@ class CaseWhen extends Syntax {
     }
     
     toString() {
-        let out = "case";
+        let out = "case ";
         
-        let cases = this.cases.map(elem => elem.toString());
+        let cases = this.case.map(elem => elem.toString()).join(" ");
         out += cases;
         
         if ( this.else ) {
             out += " else ";
             out += this.else.toString();
-            out += " ";
         }
         
-        out += "end";
+        out += " end";
         return out;
     }
 }

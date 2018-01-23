@@ -55,24 +55,31 @@ class File extends Syntax {
         let clone = new File();
         
         clone.path = this.path.map(elem => {
-            if ( elem.name ) {
+            if ( elem.clone ) {
+                return elem.clone();
+            } else {
                 return {name: elem.name};
             }
-            
-            return elem.clone();
         });
         
         return clone;
     }
     
     toString() {
-        return this.path.map(elem => {
-            if ( elem.name ) {
+        let out = this.path.map(elem => {
+            if ( elem.content ) {
+                return elem.toString();
+            }
+            else {
                 return elem.name;
             }
-            
-            return elem.toString();
         }).join("/");
+        
+        if ( !/^\.+$/.test(this.path[0].name) ) {
+            out = "/" + out;
+        }
+        
+        return out;
     }
 }
 

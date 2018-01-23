@@ -95,6 +95,89 @@ class GroupByElement extends Syntax {
             coach.isExpression()
         );
     }
+    
+    clone() {
+        let clone = new GroupByElement();
+        
+        if ( this.isEmpty ) {
+            clone.isEmpty = true;
+        }
+        
+        if ( this.rollup ) {
+            clone.rollup = this.cloneItems( this.rollup );
+        }
+        else if ( this.cube ) {
+            clone.cube = this.cloneItems( this.cube );
+        }
+        else if ( this.groupingSets ) {
+            clone.groupingSets = this.groupingSets.map(set => set.clone());
+        }
+        else if ( this.expression ) {
+            clone.expression = this.expression.clone();
+        }
+        
+        return clone;
+    }
+    
+    cloneItems(items) {
+        let out = [];
+        
+        items.forEach(item => {
+            if ( item.elements ) {// is expression
+                out.push( item );
+            } else {
+                out.push(
+                    item.map(subItem => subItem.clone())
+                );
+            }
+        });
+        
+        return out;
+    }
+    
+    toString() {
+        if ( this.isEmpty ) {
+            return "()";
+        }
+        
+        let out = "";
+        if ( this.rollup ) {
+            out += "rollup (" + this.items2string( this.rollup ) + ")";
+        }
+        else if ( this.cube ) {
+            out += "cube (" + this.items2string( this.cube ) + ")";
+        }
+        else if ( this.groupingSets ) {
+            out += "grouping sets (";
+            out += this.groupingSets.map(set => set.toString()).join(", ");
+            out += ")";
+        }
+        else {
+            out += this.expression.toString();
+        }
+        
+        return out;
+    }
+    
+    items2string(items) {
+        let out = "";
+        
+        items.forEach((item, i) => {
+            if ( i > 0 ) {
+                out += ", ";
+            }
+            
+            if ( item.elements ) {// is expression
+                out += item.toString();
+            } else {
+                out += "(";
+                out += item.map(subItem => subItem.toString()).join(", ");
+                out += ")";
+            }
+        });
+        
+        return out;
+    }
 }
 
 module.exports = GroupByElement;

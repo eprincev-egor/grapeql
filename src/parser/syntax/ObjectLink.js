@@ -65,7 +65,7 @@ class ObjectLink extends Syntax {
             }
             
             if ( elem.word ) {
-                elem.word;
+                return elem.word;
             }
             
             return elem.toString();

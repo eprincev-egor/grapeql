@@ -4,13 +4,19 @@ const Syntax = require("./Syntax");
 
 class PgString extends Syntax {
     parse(coach) {
+        let startIndex = coach.i;
+        
         if ( coach.is(/[xb]/i) ) {
             this.parseByteString(coach);
+            // easy way for .toString()
+            this._source = coach.str.slice(startIndex, coach.i);
             return;
         }
         
         if ( coach.is("$") ) {
             this.parseDollarString(coach);
+            // easy way for .toString()
+            this._source = coach.str.slice(startIndex, coach.i);
             return;
         }
         
@@ -71,6 +77,8 @@ class PgString extends Syntax {
         }
         
         this.content = content;
+        // easy way for .toString()
+        this._source = coach.str.slice(startIndex, coach.i);
     }
     
     parseDollarString(coach) {
@@ -250,11 +258,14 @@ class PgString extends Syntax {
     }
     
     clone() {
-        
+        let clone = new PgString();
+        clone.content = this.content;
+        clone._source = this._source;
+        return clone;
     }
     
     toString() {
-        
+        return this._source;
     }
 }
 
