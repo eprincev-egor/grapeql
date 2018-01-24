@@ -19,6 +19,10 @@ class PgNull extends Syntax {
     toString() {
         return "null";
     }
+    
+    getType() {
+        return "unknown";
+    }
 }
 
 module.exports = PgNull;
