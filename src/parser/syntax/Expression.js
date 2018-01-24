@@ -166,6 +166,15 @@ class Expression extends Syntax {
         
         return out;
     }
+    
+    getType() {
+        let firstElem = this.elements[0];
+        if ( !firstElem ) {
+            throw new Error("empty expression");
+        }
+        
+        firstElem.getType();
+    }
 }
 
 module.exports = Expression;

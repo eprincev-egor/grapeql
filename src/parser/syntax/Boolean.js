@@ -32,6 +32,10 @@ class Boolean extends Syntax {
             return "false";
         }
     }
+    
+    getType() {
+        return "boolean";
+    }
 }
 
 module.exports = Boolean;

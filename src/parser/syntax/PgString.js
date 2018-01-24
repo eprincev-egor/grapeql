@@ -267,6 +267,10 @@ class PgString extends Syntax {
     toString() {
         return this._source;
     }
+    
+    getType() {
+        return "text";
+    }
 }
 
 module.exports = PgString;

@@ -8,6 +8,10 @@ const Syntax = require("./Syntax");
 // 5e2
 // 1.925e-3
 
+// https://www.postgresql.org/docs/9.1/static/datatype-numeric.html
+const MAX_INTEGER_SIZE = 2147483647;
+const MIN_INTEGER_SIZE = -2147483647;
+
 class PgNumber extends Syntax {
     parse(coach) {
         let intPart = "",
@@ -69,6 +73,25 @@ class PgNumber extends Syntax {
     
     toString() {
         return this.number;
+    }
+    
+    // 1.1 => numeric
+    // 1 => integer
+    getType() {
+        if ( /\./.test(this.number) ) {
+            return "numeric";
+        }
+        
+        let numb = +this.number;
+        if ( 
+            this.number === this.number && // not NaN
+            this.number < MAX_INTEGER_SIZE && 
+            this.number > MIN_INTEGER_SIZE 
+        ) {
+            return "integer";
+        }
+        
+        return "bigint";
     }
 }
 
