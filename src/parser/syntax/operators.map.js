@@ -1,9 +1,9 @@
 "use strict";
 
 let operators = [
-    ["oprname","typname","typname","typname"],
     ["=","int4","int8","bool"],
     ["<>","int4","int8","bool"],
+    ["!=","int4","int8","bool"],
     ["<","int4","int8","bool"],
     [">","int4","int8","bool"],
     ["<=","int4","int8","bool"],
@@ -11,6 +11,7 @@ let operators = [
     ["<","bool","bool","bool"],
     [">","bool","bool","bool"],
     ["<>","bool","bool","bool"],
+    ["!=","bool","bool","bool"],
     ["=","bool","bool","bool"],
     ["<=","bool","bool","bool"],
     [">=","bool","bool","bool"],
@@ -27,25 +28,30 @@ let operators = [
     ["=","xid","xid","bool"],
     ["=","xid","int4","bool"],
     ["<>","xid","xid","bool"],
+    ["!=","xid","xid","bool"],
     ["<>","xid","int4","bool"],
+    ["!=","xid","int4","bool"],
     ["!","int8","","numeric"],
     ["!!","","int8","numeric"],
     ["=","cid","cid","bool"],
     ["=","int2vector","int2vector","bool"],
     ["=","tid","tid","bool"],
     ["<>","tid","tid","bool"],
+    ["!=","tid","tid","bool"],
     ["<","tid","tid","bool"],
     [">","tid","tid","bool"],
     ["<=","tid","tid","bool"],
     [">=","tid","tid","bool"],
     ["=","int8","int8","bool"],
     ["<>","int8","int8","bool"],
+    ["!=","int8","int8","bool"],
     ["<","int8","int8","bool"],
     [">","int8","int8","bool"],
     ["<=","int8","int8","bool"],
     [">=","int8","int8","bool"],
     ["=","int8","int4","bool"],
     ["<>","int8","int4","bool"],
+    ["!=","int8","int4","bool"],
     ["<","int8","int4","bool"],
     [">","int8","int4","bool"],
     ["<=","int8","int4","bool"],
@@ -86,7 +92,9 @@ let operators = [
     ["*","int4","int4","int4"],
     ["<->","point","point","float8"],
     ["<>","int4","int4","bool"],
+    ["!=","int4","int4","bool"],
     ["<>","int2","int2","bool"],
+    ["!=","int2","int2","bool"],
     [">","int2","int2","bool"],
     [">","int4","int4","bool"],
     ["<=","int2","int2","bool"],
@@ -99,6 +107,7 @@ let operators = [
     ["%","int2","int2","int2"],
     ["%","int4","int4","int4"],
     ["<>","text","text","bool"],
+    ["!=","text","text","bool"],
     ["=","int2","int4","bool"],
     ["=","int4","int2","bool"],
     ["<","int2","int4","bool"],
@@ -106,7 +115,9 @@ let operators = [
     [">","int2","int4","bool"],
     [">","int4","int2","bool"],
     ["<>","int2","int4","bool"],
+    ["!=","int2","int4","bool"],
     ["<>","int4","int2","bool"],
+    ["!=","int4","int2","bool"],
     ["<=","int2","int4","bool"],
     ["<=","int4","int2","bool"],
     [">=","int2","int4","bool"],
@@ -127,12 +138,14 @@ let operators = [
     ["-","","int2","int2"],
     ["=","abstime","abstime","bool"],
     ["<>","abstime","abstime","bool"],
+    ["!=","abstime","abstime","bool"],
     ["<","abstime","abstime","bool"],
     [">","abstime","abstime","bool"],
     ["<=","abstime","abstime","bool"],
     [">=","abstime","abstime","bool"],
     ["=","reltime","reltime","bool"],
     ["<>","reltime","reltime","bool"],
+    ["!=","reltime","reltime","bool"],
     ["<","reltime","reltime","bool"],
     [">","reltime","reltime","bool"],
     ["<=","reltime","reltime","bool"],
@@ -167,11 +180,13 @@ let operators = [
     ["<#>","abstime","abstime","tinterval"],
     ["=","oid","oid","bool"],
     ["<>","oid","oid","bool"],
+    ["!=","oid","oid","bool"],
     ["<","oid","oid","bool"],
     [">","oid","oid","bool"],
     ["<=","oid","oid","bool"],
     [">=","oid","oid","bool"],
     ["<>","oidvector","oidvector","bool"],
+    ["!=","oidvector","oidvector","bool"],
     ["<","oidvector","oidvector","bool"],
     [">","oidvector","oidvector","bool"],
     ["<=","oidvector","oidvector","bool"],
@@ -185,11 +200,13 @@ let operators = [
     ["<->","point","path","float8"],
     ["=","float4","float4","bool"],
     ["<>","float4","float4","bool"],
+    ["!=","float4","float4","bool"],
     ["<","float4","float4","bool"],
     [">","float4","float4","bool"],
     ["<=","float4","float4","bool"],
     [">=","float4","float4","bool"],
     ["<>","char","char","bool"],
+    ["!=","char","char","bool"],
     ["<","char","char","bool"],
     ["<=","char","char","bool"],
     [">","char","char","bool"],
@@ -199,6 +216,7 @@ let operators = [
     ["~","text","text","bool"],
     ["!~","text","text","bool"],
     ["<>","name","name","bool"],
+    ["!=","name","name","bool"],
     ["||","text","text","text"],
     ["<","name","name","bool"],
     ["<=","name","name","bool"],
@@ -210,6 +228,7 @@ let operators = [
     [">=","text","text","bool"],
     ["=","float8","float8","bool"],
     ["<>","float8","float8","bool"],
+    ["!=","float8","float8","bool"],
     ["<","float8","float8","bool"],
     ["<=","float8","float8","bool"],
     [">","float8","float8","bool"],
@@ -241,6 +260,7 @@ let operators = [
     ["<->","lseg","lseg","float8"],
     ["<->","polygon","polygon","float8"],
     ["<>","point","point","bool"],
+    ["!=","point","point","bool"],
     ["+","point","point","point"],
     ["-","point","point","point"],
     ["*","point","point","point"],
@@ -276,6 +296,7 @@ let operators = [
     ["?|","point","point","bool"],
     ["=","tinterval","tinterval","bool"],
     ["<>","tinterval","tinterval","bool"],
+    ["!=","tinterval","tinterval","bool"],
     ["<","tinterval","tinterval","bool"],
     [">","tinterval","tinterval","bool"],
     ["<=","tinterval","tinterval","bool"],
@@ -285,6 +306,7 @@ let operators = [
     ["*","float4","money","money"],
     ["=","money","money","bool"],
     ["<>","money","money","bool"],
+    ["!=","money","money","bool"],
     ["<","money","money","bool"],
     [">","money","money","bool"],
     ["<=","money","money","bool"],
@@ -313,12 +335,14 @@ let operators = [
     ["~","bpchar","text","bool"],
     ["!~","bpchar","text","bool"],
     ["<>","bpchar","bpchar","bool"],
+    ["!=","bpchar","bpchar","bool"],
     ["<","bpchar","bpchar","bool"],
     ["<=","bpchar","bpchar","bool"],
     [">","bpchar","bpchar","bool"],
     [">=","bpchar","bpchar","bool"],
     ["=","anyarray","anyarray","bool"],
     ["<>","anyarray","anyarray","bool"],
+    ["!=","anyarray","anyarray","bool"],
     ["<","anyarray","anyarray","bool"],
     [">","anyarray","anyarray","bool"],
     ["<=","anyarray","anyarray","bool"],
@@ -327,6 +351,7 @@ let operators = [
     ["-","date","interval","timestamp"],
     ["=","date","date","bool"],
     ["<>","date","date","bool"],
+    ["!=","date","date","bool"],
     ["<","date","date","bool"],
     ["<=","date","date","bool"],
     [">","date","date","bool"],
@@ -336,12 +361,14 @@ let operators = [
     ["-","date","int4","date"],
     ["=","time","time","bool"],
     ["<>","time","time","bool"],
+    ["!=","time","time","bool"],
     ["<","time","time","bool"],
     ["<=","time","time","bool"],
     [">","time","time","bool"],
     [">=","time","time","bool"],
     ["=","timetz","timetz","bool"],
     ["<>","timetz","timetz","bool"],
+    ["!=","timetz","timetz","bool"],
     ["<","timetz","timetz","bool"],
     ["<=","timetz","timetz","bool"],
     [">","timetz","timetz","bool"],
@@ -352,6 +379,7 @@ let operators = [
     ["*","float4","float8","float8"],
     ["=","float4","float8","bool"],
     ["<>","float4","float8","bool"],
+    ["!=","float4","float8","bool"],
     ["<","float4","float8","bool"],
     [">","float4","float8","bool"],
     ["<=","float4","float8","bool"],
@@ -362,6 +390,7 @@ let operators = [
     ["*","float8","float4","float8"],
     ["=","float8","float4","bool"],
     ["<>","float8","float4","bool"],
+    ["!=","float8","float4","bool"],
     ["<","float8","float4","bool"],
     [">","float8","float4","bool"],
     ["<=","float8","float4","bool"],
@@ -380,6 +409,7 @@ let operators = [
     ["!~*","bpchar","text","bool"],
     ["=","timestamptz","timestamptz","bool"],
     ["<>","timestamptz","timestamptz","bool"],
+    ["!=","timestamptz","timestamptz","bool"],
     ["<","timestamptz","timestamptz","bool"],
     ["<=","timestamptz","timestamptz","bool"],
     [">","timestamptz","timestamptz","bool"],
@@ -389,6 +419,7 @@ let operators = [
     ["-","timestamptz","interval","timestamptz"],
     ["=","interval","interval","bool"],
     ["<>","interval","interval","bool"],
+    ["!=","interval","interval","bool"],
     ["<","interval","interval","bool"],
     ["<=","interval","interval","bool"],
     [">","interval","interval","bool"],
@@ -404,6 +435,7 @@ let operators = [
     ["@@","","circle","point"],
     ["=","circle","circle","bool"],
     ["<>","circle","circle","bool"],
+    ["!=","circle","circle","bool"],
     ["<","circle","circle","bool"],
     [">","circle","circle","bool"],
     ["<=","circle","circle","bool"],
@@ -456,6 +488,7 @@ let operators = [
     ["*","float8","interval","interval"],
     ["/","interval","float8","interval"],
     ["<>","lseg","lseg","bool"],
+    ["!=","lseg","lseg","bool"],
     ["<","lseg","lseg","bool"],
     ["<=","lseg","lseg","bool"],
     [">","lseg","lseg","bool"],
@@ -470,6 +503,7 @@ let operators = [
     ["#","line","line","point"],
     ["=","macaddr","macaddr","bool"],
     ["<>","macaddr","macaddr","bool"],
+    ["!=","macaddr","macaddr","bool"],
     ["<","macaddr","macaddr","bool"],
     ["<=","macaddr","macaddr","bool"],
     [">","macaddr","macaddr","bool"],
@@ -479,6 +513,7 @@ let operators = [
     ["|","macaddr","macaddr","macaddr"],
     ["=","inet","inet","bool"],
     ["<>","inet","inet","bool"],
+    ["!=","inet","inet","bool"],
     ["<","inet","inet","bool"],
     ["<=","inet","inet","bool"],
     [">","inet","inet","bool"],
@@ -504,6 +539,7 @@ let operators = [
     ["-","","numeric","numeric"],
     ["=","numeric","numeric","bool"],
     ["<>","numeric","numeric","bool"],
+    ["!=","numeric","numeric","bool"],
     ["<","numeric","numeric","bool"],
     ["<=","numeric","numeric","bool"],
     [">","numeric","numeric","bool"],
@@ -517,6 +553,7 @@ let operators = [
     ["@","","numeric","numeric"],
     ["=","bit","bit","bool"],
     ["<>","bit","bit","bool"],
+    ["!=","bit","bit","bool"],
     ["<","bit","bit","bool"],
     [">","bit","bit","bool"],
     ["<=","bit","bit","bool"],
@@ -534,6 +571,7 @@ let operators = [
     ["-","timetz","interval","timetz"],
     ["=","varbit","varbit","bool"],
     ["<>","varbit","varbit","bool"],
+    ["!=","varbit","varbit","bool"],
     ["<","varbit","varbit","bool"],
     [">","varbit","varbit","bool"],
     ["<=","varbit","varbit","bool"],
@@ -541,12 +579,14 @@ let operators = [
     ["+","interval","time","time"],
     ["=","int2","int8","bool"],
     ["<>","int2","int8","bool"],
+    ["!=","int2","int8","bool"],
     ["<","int2","int8","bool"],
     [">","int2","int8","bool"],
     ["<=","int2","int8","bool"],
     [">=","int2","int8","bool"],
     ["=","int8","int2","bool"],
     ["<>","int8","int2","bool"],
+    ["!=","int8","int2","bool"],
     ["<","int8","int2","bool"],
     [">","int8","int2","bool"],
     ["<=","int8","int2","bool"],
@@ -577,6 +617,7 @@ let operators = [
     ["+","","numeric","numeric"],
     ["=","bytea","bytea","bool"],
     ["<>","bytea","bytea","bool"],
+    ["!=","bytea","bytea","bool"],
     ["<","bytea","bytea","bool"],
     ["<=","bytea","bytea","bool"],
     [">","bytea","bytea","bool"],
@@ -586,6 +627,7 @@ let operators = [
     ["||","bytea","bytea","bytea"],
     ["=","timestamp","timestamp","bool"],
     ["<>","timestamp","timestamp","bool"],
+    ["!=","timestamp","timestamp","bool"],
     ["<","timestamp","timestamp","bool"],
     ["<=","timestamp","timestamp","bool"],
     [">","timestamp","timestamp","bool"],
@@ -607,36 +649,42 @@ let operators = [
     [">=","date","timestamp","bool"],
     [">","date","timestamp","bool"],
     ["<>","date","timestamp","bool"],
+    ["!=","date","timestamp","bool"],
     ["<","date","timestamptz","bool"],
     ["<=","date","timestamptz","bool"],
     ["=","date","timestamptz","bool"],
     [">=","date","timestamptz","bool"],
     [">","date","timestamptz","bool"],
     ["<>","date","timestamptz","bool"],
+    ["!=","date","timestamptz","bool"],
     ["<","timestamp","date","bool"],
     ["<=","timestamp","date","bool"],
     ["=","timestamp","date","bool"],
     [">=","timestamp","date","bool"],
     [">","timestamp","date","bool"],
     ["<>","timestamp","date","bool"],
+    ["!=","timestamp","date","bool"],
     ["<","timestamptz","date","bool"],
     ["<=","timestamptz","date","bool"],
     ["=","timestamptz","date","bool"],
     [">=","timestamptz","date","bool"],
     [">","timestamptz","date","bool"],
     ["<>","timestamptz","date","bool"],
+    ["!=","timestamptz","date","bool"],
     ["<","timestamp","timestamptz","bool"],
     ["<=","timestamp","timestamptz","bool"],
     ["=","timestamp","timestamptz","bool"],
     [">=","timestamp","timestamptz","bool"],
     [">","timestamp","timestamptz","bool"],
     ["<>","timestamp","timestamptz","bool"],
+    ["!=","timestamp","timestamptz","bool"],
     ["<","timestamptz","timestamp","bool"],
     ["<=","timestamptz","timestamp","bool"],
     ["=","timestamptz","timestamp","bool"],
     [">=","timestamptz","timestamp","bool"],
     [">","timestamptz","timestamp","bool"],
     ["<>","timestamptz","timestamp","bool"],
+    ["!=","timestamptz","timestamp","bool"],
     ["+","interval","date","timestamp"],
     ["+","interval","timetz","timetz"],
     ["+","interval","timestamp","timestamp"],
@@ -677,12 +725,14 @@ let operators = [
     ["~","_aclitem","aclitem","bool"],
     ["=","uuid","uuid","bool"],
     ["<>","uuid","uuid","bool"],
+    ["!=","uuid","uuid","bool"],
     ["<","uuid","uuid","bool"],
     [">","uuid","uuid","bool"],
     ["<=","uuid","uuid","bool"],
     [">=","uuid","uuid","bool"],
     ["=","pg_lsn","pg_lsn","bool"],
     ["<>","pg_lsn","pg_lsn","bool"],
+    ["!=","pg_lsn","pg_lsn","bool"],
     ["<","pg_lsn","pg_lsn","bool"],
     [">","pg_lsn","pg_lsn","bool"],
     ["<=","pg_lsn","pg_lsn","bool"],
@@ -690,6 +740,7 @@ let operators = [
     ["-","pg_lsn","pg_lsn","numeric"],
     ["=","anyenum","anyenum","bool"],
     ["<>","anyenum","anyenum","bool"],
+    ["!=","anyenum","anyenum","bool"],
     ["<","anyenum","anyenum","bool"],
     [">","anyenum","anyenum","bool"],
     ["<=","anyenum","anyenum","bool"],
@@ -698,6 +749,7 @@ let operators = [
     ["<=","tsvector","tsvector","bool"],
     ["=","tsvector","tsvector","bool"],
     ["<>","tsvector","tsvector","bool"],
+    ["!=","tsvector","tsvector","bool"],
     [">=","tsvector","tsvector","bool"],
     [">","tsvector","tsvector","bool"],
     ["||","tsvector","tsvector","tsvector"],
@@ -709,6 +761,7 @@ let operators = [
     ["<=","tsquery","tsquery","bool"],
     ["=","tsquery","tsquery","bool"],
     ["<>","tsquery","tsquery","bool"],
+    ["!=","tsquery","tsquery","bool"],
     [">=","tsquery","tsquery","bool"],
     [">","tsquery","tsquery","bool"],
     ["&&","tsquery","tsquery","tsquery"],
@@ -721,6 +774,7 @@ let operators = [
     ["@@","text","tsquery","bool"],
     ["=","record","record","bool"],
     ["<>","record","record","bool"],
+    ["!=","record","record","bool"],
     ["<","record","record","bool"],
     [">","record","record","bool"],
     ["<=","record","record","bool"],
@@ -733,6 +787,7 @@ let operators = [
     ["*>=","record","record","bool"],
     ["=","anyrange","anyrange","bool"],
     ["<>","anyrange","anyrange","bool"],
+    ["!=","anyrange","anyrange","bool"],
     ["<","anyrange","anyrange","bool"],
     ["<=","anyrange","anyrange","bool"],
     [">=","anyrange","anyrange","bool"],
@@ -764,6 +819,7 @@ let operators = [
     ["#>>","jsonb","_text","text"],
     ["=","jsonb","jsonb","bool"],
     ["<>","jsonb","jsonb","bool"],
+    ["!=","jsonb","jsonb","bool"],
     ["<","jsonb","jsonb","bool"],
     [">","jsonb","jsonb","bool"],
     ["<=","jsonb","jsonb","bool"],
@@ -776,17 +832,97 @@ let operators = [
     ["||","jsonb","jsonb","jsonb"],
     ["-","jsonb","text","jsonb"],
     ["-","jsonb","int4","jsonb"],
-    ["#-","jsonb","_text","jsonb"]
+    ["#-","jsonb","_text","jsonb"],
+    ["and","bool","bool","bool"],
+    ["or","bool","bool","bool"],
+    ["not","","bool","bool"]
 ];
 
-let map = {};
+// https://www.postgresql.org/docs/current/static/sql-syntax-lexical.html#SQL-PRECEDENCE
+
+let precedence = {
+    unary: [
+        "+", 
+        "-",
+        
+        /*
+        select 
+	not false or false,  -- t
+	not false or true,  -- t
+	not true or false,  -- f
+	not true or true,  -- t
+
+	not (false or false),  -- t
+	not (false or true),  -- f
+	not (true or false),  -- f
+	not (true or true)  -- f
+         */
+        "not"
+    ],
+    binary: [
+        ["^"],
+        ["*", "/", "%"],
+        ["+", "-"],
+        
+        // (any other operator)
+        [],
+        
+        // BETWEEN IN LIKE ILIKE SIMILAR
+        
+        ["<", ">", "=", "<=", ">=", "<>", "!="],
+        
+        // IS TRUE, IS FALSE, IS NULL, IS DISTINCT FROM, etc
+        
+        ["and"],
+        ["or"]
+    ]
+};
+
+let othersPrecedenceIndex = precedence.binary
+    .findIndex(operators => !operators.length);
+
+let map = {
+    binary: {},
+    unary: {}
+};
 operators.forEach(row => {
     let operator = row[0];
-    map[ operator ] = {
-        left: row[1] || null,
-        right: row[2] || null,
-        result: row[3] || null
-    };
+    
+    let 
+        storeMap = map.binary,
+        
+        left = row[1] || null, 
+        right = row[2] || null, 
+        result = row[3] || null;
+    
+    if ( !left || !right ) {
+        storeMap = map.unary;
+    }
+    
+    let operatorMap = storeMap[ operator ];
+    if ( !operatorMap ) {
+        operatorMap = {
+            types: []
+        };
+        
+        if ( left && right ) {
+            operatorMap.precedence = othersPrecedenceIndex;
+        }
+        storeMap[ operator ] = operatorMap;
+    }
+    
+    operatorMap.types.push({
+        left,
+        right,
+        result
+    });
+});
+
+precedence.binary.forEach((operators, precedenceIndex) => {
+    operators.forEach(operator => {
+        let operatorMap = map.binary[ operator ];
+        operatorMap.precedence = precedenceIndex;
+    });
 });
 
 module.exports = map;
