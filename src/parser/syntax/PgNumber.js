@@ -84,9 +84,9 @@ class PgNumber extends Syntax {
         
         let numb = +this.number;
         if ( 
-            this.number === this.number && // not NaN
-            this.number < MAX_INTEGER_SIZE && 
-            this.number > MIN_INTEGER_SIZE 
+            numb === numb && // not NaN
+            numb < MAX_INTEGER_SIZE && 
+            numb > MIN_INTEGER_SIZE 
         ) {
             return "integer";
         }

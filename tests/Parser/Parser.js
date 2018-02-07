@@ -324,6 +324,10 @@
             result: {
                 type: "bigint[1]"
             }
+        },
+        {
+            str: "char",
+            err: Error
         }
     ];
     
@@ -595,6 +599,26 @@
                     ]},
                     {operator: "="},
                     {number: "3"}
+                ]
+            }
+        },
+        {
+            str: "2::date::text || '120'::char(2) - -8",
+            result: {
+                elements: [
+                    {number: "2"},
+                    {dataType: {type: "date"}},
+                    {dataType: {type: "text"}},
+                    
+                    {operator: "||"},
+                    
+                    {content: "120"},
+                    {dataType: {type: "char(2)"}},
+                    
+                    {operator: "-"},
+                    
+                    {operator: "-"},
+                    {number: "8"}
                 ]
             }
         }

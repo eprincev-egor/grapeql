@@ -36,6 +36,10 @@ class Cast extends Syntax {
         // !! .toString()
         return `cast(${ this.expression } as ${ this.dataType })`;
     }
+    
+    getType() {
+        return this.dataType.type;
+    }
 }
 
 module.exports = Cast;

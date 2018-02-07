@@ -218,6 +218,7 @@ let operators = [
     ["<>","name","name","bool"],
     ["!=","name","name","bool"],
     ["||","text","text","text"],
+    ["||","text","char","text"],
     ["<","name","name","bool"],
     ["<=","name","name","bool"],
     [">","name","name","bool"],

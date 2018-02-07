@@ -1,6 +1,7 @@
 "use strict";
 
 const Syntax = require("./Syntax");
+const operatorsMap = require("./operators.map.js");
 
 class Expression extends Syntax {
     constructor() {
@@ -168,12 +169,75 @@ class Expression extends Syntax {
     }
     
     getType() {
-        let firstElem = this.elements[0];
-        if ( !firstElem ) {
-            throw new Error("empty expression");
+        let map = [];
+        let allOperators = [];
+        
+        for (let i = 0, n = this.elements.length; i < n; i++) {
+            let elem = this.elements[i];
+            
+            if ( elem.operator ) {
+                if ( !allOperators.includes(elem.operator) ) {
+                    // push to allOperators, only if binary
+                    let binaryOperatorMap = operatorsMap.binary[ elem.operator ];
+                    
+                    if ( binaryOperatorMap ) {
+                        allOperators.push( elem.operator );
+                    }
+                }
+                
+                map.push( elem );
+            } else if ( elem.dataType ) {
+                map.pop();
+                map.push( elem.dataType.type );
+            } else {
+                map.push( elem.getType() );
+            }
         }
         
-        firstElem.getType();
+        // sort by operator precedence
+        allOperators = allOperators.sort((a, b) => {
+            a = operatorsMap.binary[a];
+            b = operatorsMap.binary[b];
+            
+            a = a ? a.precedence : 1 / 0;
+            b = b ? b.precedence : 1 / 0;
+            
+            return a > b ? 1 : -1;
+        });
+        
+        
+        // math binary
+        allOperators.forEach(operator => {
+            let binaryOperatorMap = operatorsMap.binary[ operator ];
+            
+            for (let i = 1, n = map.length; i < n; i++) {
+                let elem = map[i],
+                    prevElem = map[i - 1],
+                    nextElem = map[i + 1];
+            
+                if ( 
+                    typeof prevElem == "string" &&
+                    elem.operator == operator &&
+                    typeof nextElem == "string"
+                ) {
+                    prevElem = prevElem.split("(")[0];
+                    nextElem = nextElem.split("(")[0];
+                    
+                    let type = binaryOperatorMap.types.find(type => (
+                        type.left == prevElem && 
+                        type.right == nextElem
+                    ));
+                    
+                    if ( type ) {
+                        map.splice(i - 1, 3, type.result);
+                        n -= 2;
+                        i--;
+                    }
+                }
+            }
+        });
+        
+        return map;
     }
 }
 
