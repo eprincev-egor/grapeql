@@ -2146,4 +2146,22 @@
         testReplaceComments(assert, "1 + /* \n\r */2", "1 +    \n\r   2");
     });
     
+    function testGetType(assert, str, result) {
+        let coach = new GrapeQLCoach(str);
+        let expr = coach.parseExpression();
+        let type = expr.getType();
+        
+        assert.equal( type, result, `${ str }   => ${ result }` );
+    }
+    
+    QUnit.test("Expression.getType()", function(assert) {
+        
+        testGetType(assert, "0", "integer");
+        testGetType(assert, "1", "integer");
+        testGetType(assert, "-1", "integer");
+        testGetType(assert, "+'1'", "double precision");
+        testGetType(assert, "- + '2' - - 1", "double precision");
+        
+    });
+    
 })(window.QUnit, window.tests.GrapeQLCoach);
