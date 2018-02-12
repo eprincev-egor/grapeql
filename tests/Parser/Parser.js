@@ -621,6 +621,36 @@
                     {number: "8"}
                 ]
             }
+        },
+        {
+            str: "(-1 + 2.1) * '0'::numeric - ( ('-2')::bigint + 8)",
+            result: {
+                elements: [
+                    {elements: [
+                        {operator: "-"},
+                        {number: "1"},
+                        {operator: "+"},
+                        {number: "2.1"}
+                    ]},
+                    
+                    {operator: "*"},
+                    
+                    {content: "0"},
+                    {dataType: {type: "numeric"}},
+                    
+                    {operator: "-"},
+                    
+                    {elements: [
+                        {elements: [
+                            {content: "-2"}
+                        ]},
+                        
+                        {dataType: {type: "bigint"}},
+                        {operator: "+"},
+                        {number: "8"}
+                    ]}
+                ]
+            }
         }
     ];
     
@@ -2162,6 +2192,8 @@
         testGetType(assert, "+'1'", "double precision");
         testGetType(assert, "- + '2' - - 1", "double precision");
         
+        testGetType(assert, "'2018-01-21 22:02:21.993628'::date::text || '120'::char(2)::text::integer - -8", "text");
+        testGetType(assert, "(-1 + 2.1) * '0'::numeric - ( ('-2')::bigint + 8)", "numeric");
     });
     
 })(window.QUnit, window.tests.GrapeQLCoach);

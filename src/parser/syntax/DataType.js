@@ -128,7 +128,12 @@ class DataType extends Syntax {
         }
         
         if ( !this.type ) {
-            coach.throwError("unknown data type: " + word);
+            if ( word == "numeric" ) {
+                this.type = "numeric";
+                coach.i += this.type.length;
+            } else {
+                coach.throwError("unknown data type: " + word);
+            }
         }
         
         this.parseArrayType(coach);
