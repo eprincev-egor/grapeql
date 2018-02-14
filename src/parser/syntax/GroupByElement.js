@@ -54,6 +54,7 @@ class GroupByElement extends Syntax {
             coach.skipSpace();
             
             this.groupingSets = coach.parseComma("GroupByElement");
+            this.groupingSets.map(elem => this.addChild(elem));
             
             coach.skipSpace();
             coach.expect(")");
@@ -61,11 +62,12 @@ class GroupByElement extends Syntax {
         
         else {
             this.expression = coach.parseExpression();
+            this.addChild(this.expression);
         }
     }
     
     parseElements(coach) {
-        return coach.parseComma({
+        let elements = coach.parseComma({
             is: () => {
                 return coach.isExpression();
             },
@@ -85,6 +87,8 @@ class GroupByElement extends Syntax {
                 }
             }
         });
+        elements.map(elem => this.addChild(elem));
+        return elements;
     }
     
     is(coach) {
@@ -105,15 +109,19 @@ class GroupByElement extends Syntax {
         
         if ( this.rollup ) {
             clone.rollup = this.cloneItems( this.rollup );
+            clone.rollup.map(elem => clone.addChild(elem));
         }
         else if ( this.cube ) {
             clone.cube = this.cloneItems( this.cube );
+            clone.cube.map(elem => clone.addChild(elem));
         }
         else if ( this.groupingSets ) {
             clone.groupingSets = this.groupingSets.map(set => set.clone());
+            clone.groupingSets.map(elem => clone.addChild(elem));
         }
         else if ( this.expression ) {
             clone.expression = this.expression.clone();
+            clone.addChild(clone.expression);
         }
         
         return clone;

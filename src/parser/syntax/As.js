@@ -16,6 +16,7 @@ class As extends Syntax {
         
         if ( coach.isDoubleQuotes() ) {
             this.alias = coach.parseDoubleQuotes();
+            this.addChild(this.alias);
             return;
         }
         
@@ -34,6 +35,7 @@ class As extends Syntax {
                 }
             } else {
                 this.alias = new Syntax.Word(word);
+                this.addChild(this.alias);
             }
         }
     }
@@ -63,6 +65,7 @@ class As extends Syntax {
         }
         
         clone.alias = this.alias.clone();
+        clone.addChild(clone.alias);
         
         return clone;
     }

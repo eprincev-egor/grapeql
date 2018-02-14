@@ -5,6 +5,7 @@ const Syntax = require("./Syntax");
 class OrderByElement extends Syntax {
     parse(coach) {
         this.expression = coach.parseExpression();
+        this.addChild(this.expression);
         coach.skipSpace();
         
         if ( coach.is(/asc|desc/i) ) {
@@ -16,6 +17,7 @@ class OrderByElement extends Syntax {
             coach.skipSpace();
             
             this.using = coach.parseOperator();
+            this.addChild(this.using);
         }
         
         if ( coach.is(/nulls\s+(first|last)/i) ) {
@@ -34,6 +36,7 @@ class OrderByElement extends Syntax {
     clone() {
         let clone = new OrderByElement();
         clone.expression = this.expression.clone();
+        clone.addChild(clone.expression);
         
         if ( this.vector ) {
             clone.vector = this.vector;

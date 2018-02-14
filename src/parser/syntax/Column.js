@@ -5,11 +5,13 @@ const Syntax = require("./Syntax");
 class Column extends Syntax {
     parse(coach) {
         this.expression = coach.parseExpression({ posibleStar: true });
+        this.addChild(this.expression);
         this.as = null;
         
         coach.skipSpace();
         if ( coach.isAs() ) {
             this.as = coach.parseAs();
+            this.addChild(this.as);
         }
     }
     
@@ -35,10 +37,12 @@ class Column extends Syntax {
     clone() {
         let clone = new Column();
         clone.expression = this.expression.clone();
+        clone.addChild(clone.expression);
         clone.as = null;
         
         if ( this.as ) {
             clone.as = this.as.clone();
+            clone.addChild(clone.as);
         }
         
         return clone;

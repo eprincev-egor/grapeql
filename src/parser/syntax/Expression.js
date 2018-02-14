@@ -26,6 +26,7 @@ class Expression extends Syntax {
         
         if ( options.posibleStar && coach.is("*") ) {
             elem = coach.parseObjectLink({ posibleStar: options.posibleStar });
+            this.addChild(elem);
             this.elements.push(elem);
             return;
         }
@@ -38,6 +39,7 @@ class Expression extends Syntax {
             coach.i = i;
             coach.throwError("expected expression element");
         }
+        this.addChild(elem);
         this.elements.push(elem);
         
         // ::text::text::text
@@ -56,6 +58,7 @@ class Expression extends Syntax {
     parseOperators(coach) {
         if ( coach.isOperator() ) {
             let operator = coach.parseOperator();
+            this.addChild(operator);
             this.elements.push( operator );
             coach.skipSpace();
             
@@ -119,6 +122,7 @@ class Expression extends Syntax {
     parseToTypes(coach) {
         if ( coach.isToType() ) {
             let elem = coach.parseToType();
+            this.addChild(elem);
             this.elements.push( elem );
             
             coach.skipSpace();
@@ -145,6 +149,7 @@ class Expression extends Syntax {
     clone() {
         let clone = new Expression();
         clone.elements = this.elements.map(elem => elem.clone());
+        clone.elements.map(elem => clone.addChild(elem));
         return clone;
     }
     

@@ -10,12 +10,14 @@ class Cast extends Syntax {
         coach.skipSpace();
         
         this.expression = coach.parseExpression();
+        this.addChild(this.expression);
         
         coach.skipSpace();
         coach.expectWord("as");
         coach.skipSpace();
         
         this.dataType = coach.parseDataType();
+        this.addChild(this.dataType);
         
         coach.skipSpace();
         coach.expect(")");
@@ -29,6 +31,8 @@ class Cast extends Syntax {
         let clone = new Cast();
         clone.expression = this.expression.clone();
         clone.dataType = this.dataType.clone();
+        clone.addChild(clone.expression);
+        clone.addChild(clone.dataType);
         return clone;
     }
     

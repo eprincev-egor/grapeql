@@ -16,6 +16,7 @@ class ObjectLink extends Syntax {
             coach.i++;
         } else {
             let elem = coach.parseObjectName();
+            this.addChild(elem);
             this.link.push( elem.name );
         }
         
@@ -52,7 +53,9 @@ class ObjectLink extends Syntax {
                 return {word: elem.word};
             }
             
-            return elem.clone();
+            let elemClone = elem.clone();
+            clone.addChild(elemClone);
+            return elemClone;
         });
         
         return clone;

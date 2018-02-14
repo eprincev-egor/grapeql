@@ -9,6 +9,7 @@ class ToType extends Syntax {
         coach.expect("::");
         coach.skipSpace();
         this.dataType = coach.parseDataType();
+        this.addChild(this.dataType);
     }
     
     is(coach, str) {
@@ -18,6 +19,7 @@ class ToType extends Syntax {
     clone() {
         let clone = new ToType();
         clone.dataType = this.dataType.clone();
+        clone.addChild(clone.dataType);
         return clone;
     }
     

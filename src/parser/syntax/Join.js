@@ -29,6 +29,7 @@ class Join extends Syntax {
         this.type = type;
         
         this.from = coach.parseFromItem();
+        this.addChild(this.from);
         coach.skipSpace();
         
         if ( this.from.lateral ) {
@@ -43,12 +44,14 @@ class Join extends Syntax {
             coach.skipSpace();
             
             this.on = coach.parseExpression();
+            this.addChild(this.on);
         }
         else if ( coach.isWord("using") ) {
             coach.expectWord("using");
             coach.skipSpace();
             
             this.using = coach.parseComma("ObjectLink");
+            this.using.map(elem => this.addChild(elem));
         }
         else {
             coach.throwError("expected 'on' or 'using'");
@@ -63,11 +66,14 @@ class Join extends Syntax {
         let clone = new Join();
         clone.type = this.type;
         clone.from = this.from.clone();
+        clone.addChild(clone.from);
         
         if ( this.on ) {
             clone.on = this.on.clone();
+            clone.addChild(clone.on);
         } else {
             clone.using = this.using.map(elem => elem.clone());
+            clone.using.map(elem => clone.addChild(elem));
         }
         
         return clone;

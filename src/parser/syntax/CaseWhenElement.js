@@ -8,12 +8,14 @@ class CaseWhenElement extends Syntax {
         coach.skipSpace();
         
         this.when = coach.parseExpression();
+        this.addChild(this.when);
         coach.skipSpace();
         
         coach.expectWord("then");
         coach.skipSpace();
         
         this.then = coach.parseExpression();
+        this.addChild(this.then);
     }
     
     is(coach) {
@@ -24,6 +26,8 @@ class CaseWhenElement extends Syntax {
         let clone = new CaseWhenElement();
         clone.when = this.when.clone();
         clone.then = this.then.clone();
+        clone.addChild(clone.when);
+        clone.addChild(clone.then);
         return clone;
     }
     

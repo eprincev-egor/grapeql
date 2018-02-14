@@ -56,6 +56,7 @@ class Select extends Syntax {
         coach.skipSpace();
         
         this.columns = coach.parseComma("Column");
+        this.columns.map(column => this.addChild(column));
         coach.skipSpace();
         
         this.parseFrom(coach);
@@ -81,6 +82,7 @@ class Select extends Syntax {
         if ( !queries.length ) {
             coach.throwError("expected with_query");
         }
+        queries.map(query => this.addChild(query));
         
         this.with = queries;
         coach.skipSpace();
@@ -91,12 +93,14 @@ class Select extends Syntax {
         coach.skipSpace();
         
         this.from = coach.parseComma("FromItem");
+        this.from.map(item => this.addChild(item));
         
         coach.skipSpace();
     }
     
     parseJoins(coach) {
         this.joins = coach.parseChain("Join");
+        this.joins.map(join => this.addChild(join));
     }
     
     parseWhere(coach) {
@@ -105,7 +109,9 @@ class Select extends Syntax {
         if ( coach.isWord("where") ) {
             coach.readWord();
             coach.skipSpace();
+            
             this.where = coach.parseExpression();
+            this.addChild(this.where);
             
             coach.skipSpace();
         }
@@ -122,6 +128,7 @@ class Select extends Syntax {
         coach.skipSpace();
         
         this.groupBy = coach.parseComma("GroupByElement");
+        this.groupBy.map(elem => this.addChild(elem));
         
         coach.skipSpace();
     }
@@ -133,7 +140,9 @@ class Select extends Syntax {
         if ( coach.isWord("having") ) {
             coach.readWord();
             coach.skipSpace();
+            
             this.having = coach.parseExpression();
+            this.addChild(this.having);
             
             coach.skipSpace();
         }
@@ -266,6 +275,7 @@ class Select extends Syntax {
         coach.skipSpace();
         
         this.orderBy = coach.parseComma("OrderByElement");
+        this.orderBy.map(elem => this.addChild(elem));
         
         coach.skipSpace();
     }
@@ -302,6 +312,7 @@ class Select extends Syntax {
         coach.skipSpace();
         
         this.union.select = coach.parseSelect();
+        this.addChild(this.union.select);
     }
     
     is(coach) {
@@ -313,28 +324,36 @@ class Select extends Syntax {
         
         if ( this.with ) {
             clone.with = this.with.map(item => item.clone());
+            clone.with.map(item => clone.addChild(item));
         }
         
         clone.columns = this.columns.map(item => item.clone());
+        clone.columns.map(item => clone.addChild(item));
         
         clone.from = this.from.map(item => item.clone());
+        clone.from.map(item => clone.addChild(item));
         
         clone.joins = this.joins.map(item => item.clone());
+        clone.joins.map(item => clone.addChild(item));
         
         if ( this.where ) {
             clone.where = this.where.clone();
+            clone.addChild(clone.where);
         }
         
         if ( this.groupBy ) {
             clone.groupBy = this.groupBy.map(item => item.clone());
+            clone.groupBy.map(item => clone.addChild(item));
         }
         
         if ( this.having ) {
             clone.having = this.having.clone();
+            clone.addChild(clone.having);
         }
         
         if ( this.orderBy ) {
             clone.orderBy = this.orderBy.map(item => item.clone());
+            clone.orderBy.map(item => clone.addChild(item));
         }
         
         clone.offset = this.offset;
@@ -385,6 +404,7 @@ class Select extends Syntax {
             }
             
             clone.union.select = this.union.select.clone();
+            clone.addChild(clone.union.select);
         }
         
         return clone;

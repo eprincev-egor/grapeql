@@ -7,6 +7,7 @@ class FromItem extends Syntax {
         // file Order.sql
         if ( coach.isFile() ) {
             this.file = coach.parseFile();
+            this.addChild(this.file);
             coach.skipSpace();
             
             let i = coach.i;
@@ -17,6 +18,7 @@ class FromItem extends Syntax {
                 coach.throwError("expected alias");
             }
             this.as = as;
+            this.addChild(this.as);
         }
         // [ LATERAL ] ( select ) [ AS ] alias 
         else if ( coach.is("(") || coach.is(/lateral\s*\(/i) ) {
@@ -32,6 +34,7 @@ class FromItem extends Syntax {
             
             this.lateral = isLateral;
             this.select = coach.parseSelect();
+            this.addChild(this.select);
             
             coach.skipSpace();
             coach.expect(")");
@@ -45,7 +48,7 @@ class FromItem extends Syntax {
                 coach.throwError("expected alias");
             }
             this.as = as;
-            
+            this.addChild(this.as);
         } 
         // [ LATERAL ] function_name ( [ argument [, ...] ] )
         //            [ WITH ORDINALITY ] [ [ AS ] alias ]
@@ -60,6 +63,7 @@ class FromItem extends Syntax {
             this.lateral = isLateral;
             this.withOrdinality = false;
             this.functionCall = coach.parseFunctionCall();
+            this.addChild(this.functionCall);
             
             coach.skipSpace();
             
@@ -69,6 +73,7 @@ class FromItem extends Syntax {
             }
             
             this.as = coach.parseAs();
+            this.addChild(this.as);
         }
         // [ ONLY ] table_name [ * ] [ [ AS ] alias 
         else {
@@ -81,6 +86,7 @@ class FromItem extends Syntax {
             
             this.only = isOnly;
             this.table =  coach.parseObjectLink();
+            this.addChild(this.table);
             
             coach.skipSpace();
             
@@ -90,6 +96,7 @@ class FromItem extends Syntax {
             }
             
             this.as = coach.parseAs();
+            this.addChild(this.as);
         }
         
         // [ ( column_alias [, ...] ) ]
@@ -128,12 +135,14 @@ class FromItem extends Syntax {
         
         if ( this.file ) {
             clone.file = this.file.clone();
+            clone.addChild(clone.file);
         }
         else if ( this.select ) {
             if ( this.lateral ) {
                 clone.lateral = true;
             }
             clone.select = this.select.clone();
+            clone.addChild(clone.select);
         }
         else if ( this.functionCall ) {
             if ( this.lateral ) {
@@ -141,6 +150,7 @@ class FromItem extends Syntax {
             }
             
             clone.functionCall = this.functionCall.clone();
+            clone.addChild(clone.functionCall);
             
             if ( this.withOrdinality ) {
                 clone.withOrdinality = true;
@@ -152,10 +162,12 @@ class FromItem extends Syntax {
             }
             
             clone.table = this.table.clone();
+            clone.addChild(clone.table);
         }
         
         if ( this.as ) {
             clone.as = this.as.clone();
+            clone.addChild(clone.as);
         }
         
         if ( this.columns ) {

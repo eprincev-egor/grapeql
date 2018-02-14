@@ -7,12 +7,14 @@ const Syntax = require("./Syntax");
 class FunctionCall extends Syntax {
     parse(coach) {
         this.function = coach.parseObjectLink();
+        this.addChild(this.function);
         
         coach.skipSpace();
         coach.expect("(");
         coach.skipSpace();
         
         this.arguments = coach.parseComma("Expression");
+        this.arguments.map(arg => this.addChild(arg));
         
         coach.skipSpace();
         coach.expect(")");
@@ -37,7 +39,9 @@ class FunctionCall extends Syntax {
     clone() {
         let clone = new FunctionCall();
         clone.function = this.function.clone();
+        clone.addChild(this.function);
         clone.arguments = this.arguments.map(arg => arg.clone());
+        clone.arguments.map(arg => clone.addChild(arg));
         return clone;
     }
     

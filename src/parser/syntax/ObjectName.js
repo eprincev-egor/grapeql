@@ -11,6 +11,7 @@ class ObjectName extends Syntax {
             let word = coach.expectWord();
             this.name = new Syntax.Word( word );
         }
+        this.addChild(this.name);
     }
     
     is(coach) {
@@ -20,6 +21,7 @@ class ObjectName extends Syntax {
     clone() {
         let clone = new ObjectName();
         clone.name = this.name.clone();
+        clone.addChild(this.name);
         return clone;
     }
     

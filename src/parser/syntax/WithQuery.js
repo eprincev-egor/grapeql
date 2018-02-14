@@ -11,6 +11,7 @@ class WithQuery extends Syntax {
         }
         
         this.name = coach.parseObjectName().name;
+        this.addChild(this.name);
         coach.skipSpace();
         
         // [ ( column_name [, ...] ) ]
@@ -21,6 +22,7 @@ class WithQuery extends Syntax {
             
             this.columns = coach.parseComma("ObjectName");
             this.columns = this.columns.map(objectName => objectName.name);
+            this.columns.map(objectName => this.addChild(objectName));
             
             coach.expect(")");
             coach.skipSpace();
@@ -33,6 +35,7 @@ class WithQuery extends Syntax {
         coach.skipSpace();
         
         this.select = coach.parseSelect();
+        this.addChild(this.select);
         
         coach.expect(")");
     }
@@ -49,13 +52,16 @@ class WithQuery extends Syntax {
         }
         
         clone.name = this.name.clone();
+        clone.addChild(clone.name);
         
         clone.columns = null;
         if ( this.columns ) {
             clone.columns = this.columns.map(column => column.clone());
+            clone.columns.map(column => clone.addChild(column));
         }
         
         clone.select = this.select.clone();
+        clone.addChild(clone.select);
         
         return clone;
     }
