@@ -548,6 +548,18 @@ class Filter {
 
         this.condition.each(iterator, context);
     }
+    
+    getColumns() {
+        let columns = {};
+        this.each(element => {
+            let key = element && element[0];
+            if ( key ) {
+                columns[ key ] = true;
+            }
+        });
+        
+        return Object.keys(columns);
+    }
 }
 
 // need for tests

@@ -56,13 +56,16 @@
                 scheme: null,
                 columns: {
                     id: {
-                        name: "id"
+                        name: "id",
+                        type: "integer"
                     },
                     name: {
-                        name: "name"
+                        name: "name",
+                        type: "text"
                     },
                     inn: {
-                        name: "inn"
+                        name: "inn",
+                        type: "text"
                     }
                 }
             }

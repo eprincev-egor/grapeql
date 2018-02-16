@@ -1636,4 +1636,29 @@
 
     });
     
+    function checkGetColumns(assert, arr, columns) {
+        var filter;
+
+        var testName = "filter: " + JSON.stringify( arr ) + "<br/> columns: " + JSON.stringify(columns) + "<br/> filter.getColumns()";
+        try {
+            if ( arr instanceof Filter ) {
+                filter = arr;
+            } else {
+                filter = new Filter(arr);
+            }
+            assert.deepEqual( filter.getColumns(), columns, testName );
+        } catch(err) {
+            assert.ok( false,  testName + "<br/>" + err);
+        }
+    }
+    
+    QUnit.test("filter.getColumns()", function(assert) {
+
+        checkGetColumns(assert, ["ID", "=", 1], ["ID"]);
+        checkGetColumns(assert, [["ID", "=", 1], "or", ["ID", "=", 2]], ["ID"]);
+        checkGetColumns(assert, [["ID", "=", 1], "or", ["nAme", "=", 2], ["nAme", "=", 2]], ["ID", "nAme"]);
+        checkGetColumns(assert, [["ID", "=", 1], "or", ["nAme", "=", 2], ["Name", "=", 2]], ["ID", "nAme", "Name"]);
+
+    });
+    
 })(window.QUnit, window.tests.Filter);

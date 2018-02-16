@@ -519,6 +519,34 @@ class Select extends Syntax {
         
         return out;
     }
+    
+    clearColumns() {
+        this.columns.forEach(column => {
+            this.removeChild(column);
+        });
+        this.columns = [];
+    }
+    
+    addColumn(sql) {
+        let coach = new this.Coach(sql);
+        let column = coach.parseColumn(sql);
+        this.addChild(column);
+        this.columns.push(column);
+    }
+    
+    clearOffsets() {
+        this.offset = null;
+        this.limit = null;
+        this.fetch = null;
+    }
+    
+    setLimit(limit) {
+        this.limit = limit;
+    }
+    
+    setOffset(offset) {
+        this.offset = offset;
+    }
 }
 
 // stop keywords for alias

@@ -62,14 +62,25 @@ class QueryBuilder {
     get(request) {
         request = this.preapareGetRequest(request);
         
-        let parsed = this.node.parsed;
-        let query = "select\n";
+        let originalQuery = this.node.parsed,
+            outQuery = originalQuery.clone(),
+            usedColumns = request.columns.slice(),
+            // select * in scheme
+            hasStarColumn = originalQuery.columns.find(column => column.isStar());
         
-        let columns = [];
-        let starColumn = parsed.columns.find(column => column.isStar());
+        if ( request.where ) {
+            let filterColumns = request.where.getColumns();
+            filterColumns.forEach(key => {
+                if ( !usedColumns.includes(key) ) {
+                    usedColumns.push(key);
+                }
+            });
+        }
+        
+        outQuery.clearColumns();
         
         request.columns.forEach(key => {
-            let findedColumn = parsed.columns.find(column => {
+            let findedColumn = originalQuery.columns.find(column => {
                 let as = column.as;
                 
                 if ( !as ) {
@@ -95,13 +106,13 @@ class QueryBuilder {
             });
             
             if ( findedColumn ) {
-                columns.push(`${ findedColumn.expression } as "${ key }"`);
+                outQuery.addColumn(`${ findedColumn.expression } as "${ key }"`);
             } else {
-                if ( !starColumn ) {
+                if ( !hasStarColumn ) {
                     throw new Error(`column ${key} not defined`);
                 } else {
                     let findedTableSchemeColumn, findedScheme, findedTable;
-                    parsed.from.some(from => {
+                    originalQuery.from.some(from => {
                         if ( from.table ) {
                             let scheme, table;
                             
@@ -170,31 +181,23 @@ class QueryBuilder {
                     sql += ".";
                     sql += `${ findedTableSchemeColumn.name } as "${ key }"`;
                     
-                    columns.push(sql);
+                    outQuery.addColumn(sql);
                 }
             }
         });
-
-        query += columns.join(",\n");
-        query += "\n";
-        query += "from " + parsed.from.toString(); // Arr => "from1, from2"
-        query += "\n";
         
-        if ( request.where ) {
-            query += "where \n";
-            let sqlModel = {};
-            query += request.where.toSql(sqlModel);
+        // offset 100, limit 10
+        outQuery.clearOffsets();
+        
+        if ( "limit" in request && request.limit != "all" ) {
+            outQuery.setLimit(request.limit);
+        }
+        if ( "offset" in request && request.offset > 0 ) {
+            outQuery.setOffset(request.offset);
         }
         
-        if ( request.offset ) {
-            query += `offset ${ request.offset}\n`;
-        }
         
-        if ( request.limit && request.limit != "all" ) {
-            query += `limit ${ request.limit }\n`;
-        }
-        
-        return query;
+        return outQuery;
     }
 }
 

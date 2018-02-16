@@ -17,6 +17,17 @@ class Syntax {
         this.children.push(child);
     }
     
+    removeChild(child) {
+        if ( child.parent == this ) {
+            child.parent = null;
+        }
+        
+        let index = this.children.indexOf(child);
+        if ( index != -1 ) {
+            this.children.splice(index, 1);
+        }
+    }
+    
     findChild(callback, context) {
         if ( !this.children ) {
             return;
