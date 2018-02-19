@@ -3,13 +3,18 @@
 const _ = require("lodash");
 const Filter = require("../filter/Filter");
 
-class QueryBuilder {
-    constructor(server, node) {
-        this.server = server;
-        this.node = node;
+class Query {
+    constructor(params) {
+        this.request = params.request;
+        this.server = params.server;
+        this.node = params.node;
+        
+        this.preapareRequest();
+        this.build();
     }
     
-    preapareGetRequest(request) {
+    preapareRequest() {
+        let request = this.request;
         let offset = 0;
         let limit = "all";
         
@@ -51,7 +56,7 @@ class QueryBuilder {
             where = new Filter( request.where );
         }
         
-        return {
+        this.request = {
             offset,
             limit,
             columns,
@@ -59,8 +64,8 @@ class QueryBuilder {
         };
     }
     
-    get(request) {
-        request = this.preapareGetRequest(request);
+    build() {
+        let request = this.request;
         
         let originalQuery = this.node.parsed,
             outQuery = originalQuery.clone(),
@@ -196,16 +201,19 @@ class QueryBuilder {
             outQuery.setOffset(request.offset);
         }
         
-        
-        return outQuery;
+        this.select = outQuery;
+    }
+    
+    toString() {
+        return this.select.toString();
     }
 }
 
 // need for tests
 if ( typeof window !== "undefined" ) {
     if ( typeof window.tests !== "undefined" ) {
-        window.tests.QueryBuilder = QueryBuilder;
+        window.tests.Query = Query;
     }
 }
 
-module.exports = QueryBuilder;
+module.exports = Query;

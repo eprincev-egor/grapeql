@@ -1,4 +1,4 @@
-(function(QUnit, QueryBuilder, GrapeQLCoach) {
+(function(QUnit, Query, GrapeQLCoach) {
     "use strict";
     
     let normolizeSyntaxBeforeEqual = window.normolizeSyntaxBeforeEqual;
@@ -21,8 +21,11 @@
             test.tests.forEach(requestTest => {
                 
                 
-                let builder = new QueryBuilder(server, server.nodes[ requestTest.reqeustNode ]);
-                let query = builder.get( requestTest.reqeust );
+                let query = new Query({
+                    server, 
+                    node: server.nodes[ requestTest.reqeustNode ],
+                    request: requestTest.reqeust
+                });
                 
                 let result = GrapeQLCoach.parseEntity( query.toString() );
                 let testResult = GrapeQLCoach.parseEntity( requestTest.result );
@@ -45,4 +48,4 @@
         });
     });
     
-})(window.QUnit, window.tests.QueryBuilder, window.tests.GrapeQLCoach);
+})(window.QUnit, window.tests.Query, window.tests.GrapeQLCoach);
