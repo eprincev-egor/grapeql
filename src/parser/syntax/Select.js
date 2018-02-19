@@ -89,6 +89,11 @@ class Select extends Syntax {
     }
     
     parseFrom(coach) {
+        if ( !coach.isWord("from") ) {
+            this.from = [];
+            return;
+        }
+        
         coach.expectWord("from");
         coach.skipSpace();
         
@@ -529,9 +534,13 @@ class Select extends Syntax {
     
     addColumn(sql) {
         let coach = new this.Coach(sql);
+        coach.skipSpace();
+        
         let column = coach.parseColumn(sql);
         this.addChild(column);
         this.columns.push(column);
+        
+        return column;
     }
     
     clearOffsets() {
@@ -546,6 +555,27 @@ class Select extends Syntax {
     
     setOffset(offset) {
         this.offset = offset;
+    }
+    
+    addJoin(sql) {
+        let coach = new this.Coach(sql);
+        coach.skipSpace();
+        let join = coach.parseJoin(sql);
+        this.addChild(join);
+        this.joins.push(join);
+    }
+    
+    addWhere(sql) {
+        if ( this.where ) {
+            sql = `( ${ this.where } ) and ${ sql }`;
+            this.removeChild( this.where );
+        }
+        
+        let coach = new this.Coach(sql);
+        coach.skipSpace();
+        
+        this.where = coach.parseExpression();
+        this.addChild(this.where);
     }
 }
 

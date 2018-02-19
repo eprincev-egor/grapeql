@@ -15,10 +15,15 @@
                 
                 result: `
                     select
+                        _grape_query_columns.*
+                    from company
+                    
+                    left join lateral (select 
                         id as "id",
                         public.company.inn as "inn",
                         coalesce( company.name, '(Не определено)' )  as "name"
-                    from company
+                    ) as _grape_query_columns on true
+                    
                     limit 2
                 `
             },
@@ -32,11 +37,25 @@
                 
                 result: `
                     select
+                        _grape_query_columns.*
+                    from company
+                    
+                    left join lateral(select
                         id as "id",
                         public.company.inn as "INN"
-                    from company
+                    ) as _grape_query_columns on true
+                    
                     offset 1
                 `
+            },
+            
+            {
+                reqeustNode: "Company",
+                reqeust: {
+                    columns: ["id"],
+                    offset: 1,
+                    where: ["ID", "=", 1]
+                }
             }
         ],
         
