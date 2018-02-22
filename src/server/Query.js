@@ -206,11 +206,20 @@ class Query {
             
             sqlModel[ key ] = {
                 sql: columnSql,
-                type: column.expression.getType()
+                column
             };
         }
         
         this.select.addJoin(`left join lateral ( select\n\n${ columnsSql.join(",\n") }\n\n) as ${ _grape_query_columns } on true`);
+        
+        for (let key in sqlModel) {
+            let column = sqlModel[ key ].column;
+            
+            sqlModel[ key ].type = column.expression.getType({
+                server: this.server,
+                node: this.node
+            });
+        }
         
         if ( "limit" in request && request.limit != "all" ) {
             this.select.setLimit(request.limit);

@@ -173,7 +173,9 @@ class Expression extends Syntax {
         return out;
     }
     
-    getType() {
+    // params.server
+    // params.node
+    getType( params ) {
         let map = [];
         
         for (let i = 0, n = this.elements.length; i < n; i++) {
@@ -185,7 +187,7 @@ class Expression extends Syntax {
                 map.pop();
                 map.push( elem.dataType.type );
             } else {
-                map.push( elem.getType() );
+                map.push( elem.getType(params) );
             }
         }
         

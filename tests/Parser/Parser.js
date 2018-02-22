@@ -2196,4 +2196,19 @@
         testGetType(assert, "(-1 + 2.1) * '0'::numeric - ( ('-2')::bigint + 8)", "numeric");
     });
     
+    QUnit.test("Syntax.findParent", function(assert) {
+        
+        let coach = new GrapeQLCoach("select id + 1 from table");
+        let select = coach.parseSelect();
+        let column = select.columns[0];
+        
+        let parent;
+        
+        parent = column.findParent(parent => parent instanceof GrapeQLCoach.Select);
+        assert.ok(parent === select, "findParent good");
+        
+        parent = column.expression.elements[0].findParent(parent => parent instanceof GrapeQLCoach.Select);
+        assert.ok(parent === select, "findParent good");
+    });
+    
 })(window.QUnit, window.tests.GrapeQLCoach);

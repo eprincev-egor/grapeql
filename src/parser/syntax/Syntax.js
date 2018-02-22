@@ -33,8 +33,8 @@ class Syntax {
             return;
         }
         
-        for (var i = 0, n = this.children.length; i < n; i++) {
-            var child = this.children[i],
+        for (let i = 0, n = this.children.length; i < n; i++) {
+            let child = this.children[i],
                 result = callback.call(context || this, child);
             
             if ( result === false ) {
@@ -50,11 +50,11 @@ class Syntax {
             return;
         }
         
-        var result = callback.call(context || this, this.parent);
-        if ( result === false ) {
-            return false;
+        let result = callback.call(context || this, this.parent);
+        if ( result === true ) {
+            return this.parent;
         }
-        this.parent.findParent(callback, context);
+        return this.parent.findParent(callback, context);
     }
     
     toString() {
