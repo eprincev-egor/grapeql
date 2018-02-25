@@ -127,7 +127,7 @@ class FromItem extends Syntax {
     }
     
     is(coach) {
-        return coach.is(/only|lateral|\(/) || coach.isWord();
+        return coach.is(/only|lateral|\(/) || coach.isWord() || coach.isDoubleQuotes();
     }
     
     clone() {
