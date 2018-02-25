@@ -67,6 +67,8 @@ class Select extends Syntax {
         this.parseOrderBy(coach);
         this.parseOffsets(coach);
         
+        this._createFromMap();
+        
         this.parseUnion(coach);
     }
     
@@ -324,6 +326,71 @@ class Select extends Syntax {
         return coach.isWord("select") || coach.isWord("with");
     }
     
+    _createFromMap() {
+        this._fromMap = {};
+        
+        this.from.forEach(fromItem => {
+            this._addFromItemToMap( fromItem );
+        });
+        
+        this.joins.forEach(join => {
+            this._addFromItemToMap( join.from );
+        });
+    }
+    
+    _addFromItemToMap(fromItem) {
+        let name;
+        
+        if ( fromItem.as && fromItem.as.alias ) {
+            name = fromItem.as.alias;
+            name = name.word || name.content;
+            
+            if ( name in this._fromMap ) {
+                this._throwFromUniqError(name);
+            }
+            
+            this._fromMap[ name ] = fromItem;
+        } else {
+            // from scheme1.company, scheme2.company
+            
+            name = fromItem.table.link.slice(-1)[0]; // last
+            name = name.word || name.content;
+            
+            if ( !(name in this._fromMap) ) {
+                this._fromMap[ name ] = [fromItem];
+            } else {
+                let items = this._fromMap[ name ];
+                if ( !Array.isArray(items) ) {
+                    this._throwFromUniqError(name);
+                }
+                
+                let scheme = "public";
+                if ( fromItem.table.link.length > 1 ) {
+                    scheme = fromItem.table.link[ 0 ];
+                    scheme = scheme.word || scheme.content;
+                }
+                
+                items.forEach(item => {
+                    let itemScheme = "public";
+                    if ( item.table.link.length > 1 ) {
+                        itemScheme = item.table.link[ 0 ];
+                        itemScheme = itemScheme.word || itemScheme.content;
+                    }
+                    
+                    if ( itemScheme == scheme ) {
+                        this._throwFromUniqError(name);
+                    }
+                });
+                
+                items.push( fromItem );
+            }
+        }
+    }
+    
+    _throwFromUniqError(name) {
+        throw new Error(`table name "${ name }" specified more than once`);
+    }
+    
     clone() {
         let clone = new Select();
         
@@ -411,6 +478,8 @@ class Select extends Syntax {
             clone.union.select = this.union.select.clone();
             clone.addChild(clone.union.select);
         }
+        
+        clone._createFromMap();
         
         return clone;
     }
@@ -577,6 +646,102 @@ class Select extends Syntax {
         this.where = coach.parseExpression();
         this.addChild(this.where);
     }
+    
+    // params.server
+    // params.node
+    getDbColumn(params, objectLink) {
+        let server = params.server;
+        let linkScheme = objectLink.link[0];
+        let linkTable = objectLink.link[1];
+        let linkColumn = objectLink.link[2];
+        
+        if ( !linkColumn ) {
+            linkColumn = linkTable;
+            linkTable = linkScheme;
+            linkScheme = null;
+        }
+        
+        if ( !linkColumn ) {
+            linkColumn = linkTable;
+            linkTable = null;
+            linkScheme = null;
+        }
+        
+        let linkTableName = null;
+        if ( linkTable ) {
+            linkTableName = linkTable.word || linkTable.content;
+        }
+        
+        let outFromItem;
+        let fromItems = this._fromMap[ linkTableName ];
+        
+        // only tables links without aliases 
+        if ( Array.isArray(fromItems) ) {
+            let n = fromItems.length;
+            if ( !linkScheme ) {
+                if ( n > 1 ) {
+                    throw new Error(`table reference "${ linkTableName }" is ambiguous`);
+                } else {
+                    outFromItem = fromItems[0];
+                }
+            } else {
+                for (let i = 0; i < n; i++) {
+                    let fromItem = fromItems[i];
+                    
+                    let fromScheme = fromItem.table.link[0],
+                        fromTable = fromItem.table.link[1];
+                    
+                    if ( !fromTable ) {
+                        fromTable = fromScheme;
+                        fromScheme = {word: "public"};
+                    }
+                    
+                    if ( equalObjectName(fromScheme, linkScheme) ) {
+                        outFromItem = fromItem;
+                    }
+                }
+            }
+        } else if ( fromItems ) {
+            // any fromItem by alias
+            outFromItem = fromItems;
+            
+            if ( linkScheme ) {
+                throw new Error(`invalid reference ${ objectLink } to FROM-clause entry for table ${ outFromItem.as.alias }`);
+            }
+        }
+        
+        let schemeName = outFromItem.table.link[0];
+        let tableName = outFromItem.table.link[1];
+        if ( !tableName ) {
+            tableName = schemeName;
+            schemeName = {word: "public"};
+        }
+        tableName = tableName.word || tableName.content;
+        schemeName = schemeName.word || schemeName.content;
+        
+        let dbTable = server.schemes[schemeName].tables[ tableName ];
+        let dbColumn = dbTable.columns[ linkColumn.word || linkColumn.content ];
+        
+        return dbColumn;
+    }
+}
+
+function equalObjectName(name1, name2) {
+    let str1, str2;
+    
+    if ( "content" in name1 ) {
+        str1 = name1.content;
+    } else {
+        str1 = name1.word;
+    }
+    
+    if ( "content" in name2 ) {
+        str2 = name2.content;
+    } else {
+        str2 = name2.word;
+    }
+    
+    return str1 == str2;
 }
 
 // stop keywords for alias

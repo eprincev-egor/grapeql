@@ -69,24 +69,28 @@
             `
         },
         
-        tables: {
-            company: {
-                name: "company",
-                scheme: null,
-                columns: {
-                    id: {
-                        name: "id",
-                        type: "integer"
-                    },
-                    name: {
-                        name: "name",
-                        type: "text"
-                    },
-                    inn: {
-                        name: "inn",
-                        type: "text"
+        schemes: {
+            public: {
+                tables: {
+                    company: {
+                        name: "company",
+                        scheme: null,
+                        columns: {
+                            id: {
+                                name: "id",
+                                type: "integer"
+                            },
+                            name: {
+                                name: "name",
+                                type: "text"
+                            },
+                            inn: {
+                                name: "inn",
+                                type: "text"
+                            }
+                        }
                     }
-                }
+                }        
             }
         }
     };

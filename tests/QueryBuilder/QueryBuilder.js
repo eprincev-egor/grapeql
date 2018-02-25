@@ -15,7 +15,7 @@
             server.nodes[ nodeName ] = node;
         }
         
-        server.tables = test.tables;
+        server.schemes = test.schemes;
         
         QUnit.test(test.testName, (assert) => {
             test.tests.forEach(requestTest => {

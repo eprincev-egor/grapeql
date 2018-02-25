@@ -131,36 +131,26 @@ class Query {
                                 table = from.table.link[1];
                             }
                             
-                            for (let tableName in this.server.tables) {
-                                if ( table.word ) {
-                                    if ( table.word.toLowerCase() != tableName ) {
-                                        continue;
-                                    }
-                                }
-                                if ( table.content ) {
-                                    if ( table.content != tableName ) {
-                                        continue;
-                                    }
-                                }
-                                
-                                let tableScheme = this.server.tables[ tableName ];
-                                
-                                if ( scheme.word ) {
-                                    if ( scheme.word.toLowerCase() != (tableScheme.scheme || "public") ) {
-                                        continue;
-                                    }
-                                }
-                                if ( scheme.content ) {
-                                    if ( scheme.content != (tableScheme.scheme || "public") ) {
-                                        continue;
-                                    }
-                                }
-                                
-                                findedScheme = scheme;
-                                findedTable = table;
-                                findedTableSchemeColumn = tableScheme.columns[ key.toLowerCase() ];
-                                return true;
+                            let schemeName;
+                            if ( scheme.word ) {
+                                schemeName = scheme.word.toLowerCase();
+                            } else {
+                                schemeName = scheme.content;
                             }
+                            
+                            let dbScheme = this.server.schemes[ schemeName ];
+                            
+                            let tableName;
+                            if ( table.word ) {
+                                tableName = table.word.toLowerCase();
+                            } else {
+                                tableName = table.content;
+                            }
+                            
+                            let dbTable = dbScheme && dbScheme.tables[ tableName ];
+                            findedScheme = scheme;
+                            findedTable = table;
+                            findedTableSchemeColumn = dbTable && dbTable.columns[ key.toLowerCase() ];
                         }
                     });
                     

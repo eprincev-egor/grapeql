@@ -35,23 +35,39 @@ class GrapeQL {
                 pg_columns.table_name != 'information_schema'
         `);
         
-        this.tables = {};
+        this.schemes = {};
         _.each(res.rows, (row) => {
+            let schemeName = row.schme_name,
+                scheme = this.schemes[ schemeName ];
+            
+            if ( !scheme ) {
+                scheme = {
+                    name: schemeName,
+                    tables: {}
+                };
+                this.schemes[ schemeName ] = scheme;
+            }
+            
             let tableName = row.table_name,
-                table = this.tables[ tableName ];
+                table = scheme.tables[ tableName ];
             
             if ( !table ) {
-                table = this.tables[ tableName ] = {};
-                table.name = tableName;
-                table.schema = row.schme_name;
-                table.columns = {};
+                table = {
+                    name: tableName,
+                    scheme: schemeName,
+                    columns: {}
+                };
+                scheme.tables[ tableName ] = table;
             }
             
             let column = {
                 name: row.column_name,
                 default: row.column_default,
                 type: row.data_type,
-                nulls: row.is_nullable == "YES"
+                nulls: row.is_nullable == "YES",
+                // for tests
+                table: tableName,
+                scheme: schemeName
             };
             
             table.columns[ column.name ] = column;
