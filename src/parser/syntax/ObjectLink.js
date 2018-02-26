@@ -16,7 +16,7 @@ class ObjectLink extends Syntax {
             coach.i++;
         } else {
             let elem = coach.parseObjectName();
-            this.addChild(elem);
+            this.addChild( elem.name );
             this.link.push( elem.name );
         }
         
@@ -90,6 +90,15 @@ class ObjectLink extends Syntax {
             let dbColumn = source.dbColumn;
             return dbColumn.type;
         }
+    }
+    
+    add(name) {
+        if ( !this.link ) {
+            this.link = [];
+        }
+        
+        this.addChild(name);
+        this.link.push(name);
     }
 }
 

@@ -650,137 +650,127 @@ class Select extends Syntax {
     // params.server
     // params.node
     getColumnSource(params, objectLink) {
+        let link = objectLink2schmeTableColumn( objectLink );
         let server = params.server;
-        let linkScheme = objectLink.link[0];
-        let linkTable = objectLink.link[1];
-        let linkColumn = objectLink.link[2];
+        let fromItems;
         
-        if ( !linkColumn ) {
-            linkColumn = linkTable;
-            linkTable = linkScheme;
-            linkScheme = null;
-        }
-        
-        if ( !linkColumn ) {
-            linkColumn = linkTable;
-            linkTable = null;
-            linkScheme = null;
-        }
-        
-        let linkTableName = null;
-        if ( linkTable ) {
-            linkTableName = linkTable.word || linkTable.content;
-        }
-        
-        let linkColumnName = linkColumn.word || linkColumn.content;
-        
-        let outFromItem;
-        
-        // select id from company
-        if ( !linkTableName ) {
-            let fromItems = this.from.concat( this.joins.map(join => join.from) );
+        if ( !link.table ) {
+            fromItems = this.from.concat( this.joins.map(join => join.from) );
+        } else {
+            // @see _createFromMap
+            fromItems = this._fromMap[ link.table ];
             
-            for (let i = 0, n = fromItems.length; i < n; i++) {
-                let fromItem = fromItems[ i ];
-                
-                let fromScheme = fromItem.table.link[0],
-                    fromTable = fromItem.table.link[1];
-                    
-                if ( !fromTable ) {
-                    fromTable = fromScheme;
-                    fromScheme = {word: "public"};
-                }
-                
-                let fromSchemeName = fromScheme.word || fromScheme.content,
-                    fromTableName = fromTable.word || fromTable.content;
-                
-                let dbTable = server.schemes[ fromSchemeName ].tables[ fromTableName ];
-                
-                if ( linkColumnName in dbTable.columns ) {
-                    if ( outFromItem ) {
-                        throw new Error(`column reference "${ linkColumnName }" is ambiguous`);
-                    }
-                    outFromItem = fromItem;
-                }
-            }
-            
-            if ( !outFromItem ) {
-                throw new Error(`column "${ linkColumnName }" does not exist`);
-            }
-        }
-        // select public.company.id from public.company
-        else {
-            let fromItems = this._fromMap[ linkTableName ];
             
             // only tables links without aliases 
             if ( Array.isArray(fromItems) ) {
-                let n = fromItems.length;
-                if ( !linkScheme ) {
-                    if ( n > 1 ) {
-                        throw new Error(`table reference "${ linkTableName }" is ambiguous`);
-                    } else {
-                        outFromItem = fromItems[0];
-                    }
-                } else {
-                    for (let i = 0; i < n; i++) {
-                        let fromItem = fromItems[i];
-                        
-                        let fromScheme = fromItem.table.link[0],
-                            fromTable = fromItem.table.link[1];
-                        
-                        if ( !fromTable ) {
-                            fromTable = fromScheme;
-                            fromScheme = {word: "public"};
-                        }
-                        
-                        if ( equalObjectName(fromScheme, linkScheme) ) {
-                            outFromItem = fromItem;
-                        }
-                    }
+                if ( !link.scheme && fromItems.length > 1 ) {
+                    throw new Error(`table reference "${ link.table }" is ambiguous`);
                 }
-            } else if ( fromItems ) {
-                // any fromItem by alias
-                outFromItem = fromItems;
-                
-                if ( linkScheme ) {
-                    throw new Error(`invalid reference ${ objectLink } to FROM-clause entry for table ${ outFromItem.as.alias }`);
+            }
+            
+            // any fromItem by alias
+            else if ( fromItems ) {    
+                if ( link.scheme ) {
+                    throw new Error(`invalid reference ${ objectLink } to FROM-clause entry for table ${ fromItems.as.alias }`);
                 }
+                fromItems = [fromItems];
             }
         }
         
-        
-        let schemeName = outFromItem.table.link[0];
-        let tableName = outFromItem.table.link[1];
-        if ( !tableName ) {
-            tableName = schemeName;
-            schemeName = {word: "public"};
+        if ( link.scheme ) {
+            fromItems = fromItems.filter(fromItem => {
+                if ( fromItem.table ) {
+                    let from = objectLink2schmeTable(fromItem.table);
+                    return from.scheme == link.scheme;
+                }
+                
+                return false;
+            });
         }
-        tableName = tableName.word || tableName.content;
-        schemeName = schemeName.word || schemeName.content;
         
-        let dbTable = server.schemes[ schemeName ].tables[ tableName ];
-        let dbColumn = dbTable.columns[ linkColumnName ];
+        let subLink = new this.Coach.ObjectLink();
+        subLink.add( link.columnObject.clone() );
+        
+        let outSource;
+        fromItems = fromItems.filter(fromItem => {
+            if ( fromItem.table ) {
+                let from = objectLink2schmeTable(fromItem.table);
+                let dbTable = server.schemes[ from.scheme ].tables[ from.table ];
+                
+                return dbTable && link.column in dbTable.columns;
+            }
+            else if ( fromItem.select ) {
+                let subSource = fromItem.select.getColumnSource(params, subLink);
+                if ( subSource ) {
+                    outSource = subSource;
+                    return true;
+                }
+            }
+            
+            return false;
+        });
+        
+        if ( fromItems.length === 0 ) {
+            throw new Error(`column "${ link.column }" does not exist`);
+        }
+        if ( fromItems.length > 1 ) {
+            throw new Error(`column reference "${ link.column }" is ambiguous`);
+        }
+        
+        if ( outSource ) {
+            return outSource;
+        }
+        
+        let fromItem = fromItems[0];
+        let from = objectLink2schmeTable(fromItem.table);
+        let dbTable = server.schemes[ from.scheme ].tables[ from.table ];
+        let dbColumn = dbTable.columns[ link.column ];
         
         return {dbColumn};
     }
 }
 
-function equalObjectName(name1, name2) {
-    let str1, str2;
+function objectLink2schmeTable(objectLink) {
+    let link = objectLink2schmeTableColumn( objectLink ),
+        table = link.column,
+        scheme = link.table;
     
-    if ( "content" in name1 ) {
-        str1 = name1.content;
-    } else {
-        str1 = name1.word;
+    if ( scheme == null ) {
+        scheme = "public";
     }
     
-    if ( "content" in name2 ) {
-        str2 = name2.content;
-    } else {
-        str2 = name2.word;
+    return {table, scheme};
+}
+
+function objectLink2schmeTableColumn(objectLink) {
+    let scheme = objectLink.link[0];
+    let table = objectLink.link[1];
+    let column = objectLink.link[2];
+    
+    if ( !column ) {
+        column = table;
+        table = scheme;
+        scheme = null;
     }
     
-    return str1 == str2;
+    if ( !column ) {
+        column = table;
+        table = null;
+        scheme = null;
+    }
+    
+    if ( scheme ) {
+        scheme = scheme.word || scheme.content;
+    }
+    
+    if ( table ) {
+        table = table.word || table.content;
+    }
+    
+    let columnObject = column;
+    column = column.word || column.content;
+    
+    return {scheme, table, column, columnObject};
 }
 
 // stop keywords for alias
