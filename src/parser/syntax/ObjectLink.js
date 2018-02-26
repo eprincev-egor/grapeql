@@ -83,8 +83,13 @@ class ObjectLink extends Syntax {
             throw new Error("ObjectLink must be inside Select");
         }
         
-        let dbColumn = select.getDbColumn(params, this);
-        return dbColumn.type;
+        let source = select.getColumnSource(params, this);
+        if ( source.expression ) {
+            return source.expression.getType(params);
+        } else {
+            let dbColumn = source.dbColumn;
+            return dbColumn.type;
+        }
     }
 }
 

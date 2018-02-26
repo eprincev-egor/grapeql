@@ -649,7 +649,7 @@ class Select extends Syntax {
     
     // params.server
     // params.node
-    getDbColumn(params, objectLink) {
+    getColumnSource(params, objectLink) {
         let server = params.server;
         let linkScheme = objectLink.link[0];
         let linkTable = objectLink.link[1];
@@ -672,43 +672,82 @@ class Select extends Syntax {
             linkTableName = linkTable.word || linkTable.content;
         }
         
-        let outFromItem;
-        let fromItems = this._fromMap[ linkTableName ];
+        let linkColumnName = linkColumn.word || linkColumn.content;
         
-        // only tables links without aliases 
-        if ( Array.isArray(fromItems) ) {
-            let n = fromItems.length;
-            if ( !linkScheme ) {
-                if ( n > 1 ) {
-                    throw new Error(`table reference "${ linkTableName }" is ambiguous`);
-                } else {
-                    outFromItem = fromItems[0];
+        let outFromItem;
+        
+        // select id from company
+        if ( !linkTableName ) {
+            let fromItems = this.from.concat( this.joins.map(join => join.from) );
+            
+            for (let i = 0, n = fromItems.length; i < n; i++) {
+                let fromItem = fromItems[ i ];
+                
+                let fromScheme = fromItem.table.link[0],
+                    fromTable = fromItem.table.link[1];
+                    
+                if ( !fromTable ) {
+                    fromTable = fromScheme;
+                    fromScheme = {word: "public"};
                 }
-            } else {
-                for (let i = 0; i < n; i++) {
-                    let fromItem = fromItems[i];
-                    
-                    let fromScheme = fromItem.table.link[0],
-                        fromTable = fromItem.table.link[1];
-                    
-                    if ( !fromTable ) {
-                        fromTable = fromScheme;
-                        fromScheme = {word: "public"};
+                
+                let fromSchemeName = fromScheme.word || fromScheme.content,
+                    fromTableName = fromTable.word || fromTable.content;
+                
+                let dbTable = server.schemes[ fromSchemeName ].tables[ fromTableName ];
+                
+                if ( linkColumnName in dbTable.columns ) {
+                    if ( outFromItem ) {
+                        throw new Error(`column reference "${ linkColumnName }" is ambiguous`);
                     }
-                    
-                    if ( equalObjectName(fromScheme, linkScheme) ) {
-                        outFromItem = fromItem;
-                    }
+                    outFromItem = fromItem;
                 }
             }
-        } else if ( fromItems ) {
-            // any fromItem by alias
-            outFromItem = fromItems;
             
-            if ( linkScheme ) {
-                throw new Error(`invalid reference ${ objectLink } to FROM-clause entry for table ${ outFromItem.as.alias }`);
+            if ( !outFromItem ) {
+                throw new Error(`column "${ linkColumnName }" does not exist`);
             }
         }
+        // select public.company.id from public.company
+        else {
+            let fromItems = this._fromMap[ linkTableName ];
+            
+            // only tables links without aliases 
+            if ( Array.isArray(fromItems) ) {
+                let n = fromItems.length;
+                if ( !linkScheme ) {
+                    if ( n > 1 ) {
+                        throw new Error(`table reference "${ linkTableName }" is ambiguous`);
+                    } else {
+                        outFromItem = fromItems[0];
+                    }
+                } else {
+                    for (let i = 0; i < n; i++) {
+                        let fromItem = fromItems[i];
+                        
+                        let fromScheme = fromItem.table.link[0],
+                            fromTable = fromItem.table.link[1];
+                        
+                        if ( !fromTable ) {
+                            fromTable = fromScheme;
+                            fromScheme = {word: "public"};
+                        }
+                        
+                        if ( equalObjectName(fromScheme, linkScheme) ) {
+                            outFromItem = fromItem;
+                        }
+                    }
+                }
+            } else if ( fromItems ) {
+                // any fromItem by alias
+                outFromItem = fromItems;
+                
+                if ( linkScheme ) {
+                    throw new Error(`invalid reference ${ objectLink } to FROM-clause entry for table ${ outFromItem.as.alias }`);
+                }
+            }
+        }
+        
         
         let schemeName = outFromItem.table.link[0];
         let tableName = outFromItem.table.link[1];
@@ -719,10 +758,10 @@ class Select extends Syntax {
         tableName = tableName.word || tableName.content;
         schemeName = schemeName.word || schemeName.content;
         
-        let dbTable = server.schemes[schemeName].tables[ tableName ];
-        let dbColumn = dbTable.columns[ linkColumn.word || linkColumn.content ];
+        let dbTable = server.schemes[ schemeName ].tables[ tableName ];
+        let dbColumn = dbTable.columns[ linkColumnName ];
         
-        return dbColumn;
+        return {dbColumn};
     }
 }
 
