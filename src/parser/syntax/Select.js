@@ -671,7 +671,7 @@ class Select extends Syntax {
     
     // params.server
     // params.node
-    getColumnSource(params, objectLink) {
+    getColumnSource(params, objectLink, _childFromItem) {
         let link = objectLink2schmeTableColumn( objectLink );
         
         if ( !link.table ) {
@@ -697,7 +697,13 @@ class Select extends Syntax {
         let sources = [];
         
         let fromItems = this.from.concat( this.joins.map(join => join.from) );
-        fromItems.forEach(fromItem => {
+        for (let i = 0, n = fromItems.length; i < n; i++) {
+            let fromItem = fromItems[ i ];
+            
+            if ( fromItem == _childFromItem ) {
+                break;
+            }
+            
             let source;
             if ( fromItem.table ) {
                 source = this._getColumnSourceByFromItem(params, fromItem, link);
@@ -712,9 +718,14 @@ class Select extends Syntax {
             if ( source ) {
                 sources.push(source);
             }
-        });
+        }
         
         if ( sources.length === 0 ) {
+            let source = this._findSourceByLateal(params, objectLink);
+            if ( source ) {
+                return source;
+            }
+            
             throw new Error(`column "${ link.column }" does not exist`);
         }
         if ( sources.length > 1 ) {
@@ -748,29 +759,64 @@ class Select extends Syntax {
             }
         }
         
-        if ( from.table in this._withMap ) {
-            let subLink = new this.Coach.ObjectLink();
-            subLink.add( link.columnObject.clone() );
-            
-            let withQuery = this._withMap[ from.table ];
-            return withQuery.select.getColumnSource(params, subLink);
+        if ( !from.scheme ) {
+            let source = this._findByWithQuery(params, from, link);
+            if ( source ) {
+                return source;
+            }
         }
-        // else {
-        //     let parentSelect = this.findParentInstance(Select);
-        // 
-        //     if ( parentSelect ) {
-        //         let source = parentSelect._getColumnSourceBy(params, from, link);
-        // 
-        //         if ( source ) {
-        //             return source;
-        //         }
-        //     }
-        // }
+        
         
         let dbTable = params.server.schemes[ from.scheme || PUBLIC_SCHEME_NAME ].tables[ from.table ];
         let dbColumn = dbTable.columns[ link.column ];
         
-        return {dbColumn};
+        if ( dbColumn ) {
+            return {dbColumn};
+        }
+    }
+    
+    _findByWithQuery(params, from, link, _childWithQuery) {
+        if ( this.with ) {
+            for (let i = 0, n = this.with.length; i < n; i++) {
+                let withQuery = this.with[ i ];
+                
+                if ( withQuery == _childWithQuery ) {
+                    break;
+                }
+                
+                let name = withQuery.name;
+                name = name.word || name.content;
+                
+                if ( name == from.table ) {
+                    let subLink = new this.Coach.ObjectLink();
+                    subLink.add( link.columnObject.clone() );
+                    
+                    return withQuery.select.getColumnSource(params, subLink);
+                }
+            }
+        }
+        
+        let WithQuery = this.Coach.WithQuery;
+        let parentWithQuery = this.findParentInstance(WithQuery);
+        
+        if ( parentWithQuery ) {
+            let parentSelect = parentWithQuery.findParentInstance(Select);
+            return parentSelect._findByWithQuery(params, from, link, parentWithQuery);
+        }
+    }
+    
+    _findSourceByLateal(params, objectLink) {
+        let FromItem = this.Coach.FromItem;
+        let parentFromItem = this.findParentInstance(FromItem);
+        
+        if ( !parentFromItem || !parentFromItem.lateral ) {
+            return;
+        }
+        
+        let parentSelect = parentFromItem.findParentInstance(Select);
+        if ( parentSelect ) {
+            return parentSelect.getColumnSource(params, objectLink, parentFromItem);
+        }
     }
 }
 
