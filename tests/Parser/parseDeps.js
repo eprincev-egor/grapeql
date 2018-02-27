@@ -1,6 +1,9 @@
 (function(QUnit, GrapeQLCoach) {
     "use strict";
     
+    QUnit.dump.maxDepth = 100;
+    let normolizeSyntaxBeforeEqual = window.normolizeSyntaxBeforeEqual;
+    
     function testGetDbColumn(assert, test) {
         let coach;
         
@@ -30,8 +33,21 @@
                 server: test.server
             }, link);
             
-            assert.deepEqual(source, test.source, `find ${ test.link } in
-                 ${ test.node }`);
+            normolizeSyntaxBeforeEqual(source);
+            normolizeSyntaxBeforeEqual(test.source);
+            
+            let isEqual = !!window.weakDeepEqual(test.source, source);
+            if ( !isEqual ) {
+                console.log("break here");
+            }
+            
+            assert.pushResult({
+                result: isEqual,
+                actual: source,
+                expected: test.source,
+                message: `find ${ test.link } in
+                     ${ test.node }`
+            });
         }
         
     }
@@ -229,6 +245,36 @@
             node: "select * from test.company left join (select * from (select * from public.company) as comp2) as comp1 on true", 
             link: "comp1.id",
             source: {dbColumn: SERVER_1.schemes.public.tables.company.columns.id}
+        });
+        
+        testGetDbColumn(assert, {
+            server: SERVER_1,
+            node: "select *, company.id as id_clone from public.company", 
+            link: "id_clone",
+            source: {dbColumn: SERVER_1.schemes.public.tables.company.columns.id}
+        });
+        
+        testGetDbColumn(assert, {
+            server: SERVER_1,
+            node: "select *, company.id + 1 as id1 from public.company", 
+            link: "id1",
+            source: {expression: {elements: [
+                {link: [
+                    {word: "company"},
+                    {word: "id"}
+                ]},
+                {operator: "+"},
+                {number: "1"}
+            ]}}
+        });
+        
+        testGetDbColumn(assert, {
+            server: SERVER_1,
+            node: "select * from (select 1 as id) as user_admin",
+            link: "user_admin.id",
+            source: {expression: {elements: [
+                {number: "1"}
+            ]}}
         });
     });
     

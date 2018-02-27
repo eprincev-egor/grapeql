@@ -655,7 +655,25 @@ class Select extends Syntax {
         let fromItems;
         
         if ( !link.table ) {
-            fromItems = this.from.concat( this.joins.map(join => join.from) );
+            let column = this.columns.find(column => {
+                let alias = column.as && column.as.alias;
+                alias = alias && (alias.word || alias.content);
+                
+                if ( alias == link.column ) {
+                    return true;
+                }
+            });
+            
+            if ( column ) {
+                if ( column.expression.isLink() ) {
+                    objectLink = column.expression.getLink();
+                    return this.getColumnSource(params, objectLink);
+                } else {
+                    return {expression: column.expression};
+                }
+            } else {
+                fromItems = this.from.concat( this.joins.map(join => join.from) );
+            }
         } else {
             // @see _createFromMap
             fromItems = this._fromMap[ link.table ];
