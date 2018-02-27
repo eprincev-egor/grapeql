@@ -81,6 +81,16 @@
                                 scheme: "public"
                             }
                         }
+                    },
+                    order: {
+                        columns: {
+                            id: {
+                                type: "integer",
+                                name: "id",
+                                table: "order",
+                                scheme: "public"
+                            }
+                        }
                     }
                 }
             },
@@ -276,6 +286,39 @@
                 {number: "1"}
             ]}}
         });
+        
+        testGetDbColumn(assert, {
+            server: SERVER_1,
+            node: `with company as (
+                select *
+                from test.company
+            )
+                select *
+                from company
+            `,
+            link: "id",
+            source: {dbColumn: SERVER_1.schemes.test.tables.company.columns.id}
+        });
+        
+        // testin wo
+        
+        // testGetDbColumn(assert, {
+        //     server: SERVER_1,
+        //     node: `select
+        //             lastOrder.*
+        //         from company
+        // 
+        //         left join lateral (
+        //             select
+        //                 company.id
+        //             from public.order
+        // 
+        //             limit 1
+        //         ) as lastOrder on true
+        //     `,
+        //     link: "id",
+        //     source: {dbColumn: SERVER_1.schemes.public.tables.company.columns.id}
+        // });
     });
     
 })(window.QUnit, window.tests.GrapeQLCoach);

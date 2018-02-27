@@ -48,9 +48,12 @@ and with_query is:
 TABLE [ ONLY ] table_name [ * ]
  */
 
+const PUBLIC_SCHEME_NAME = "public";
+
 class Select extends Syntax {
     parse(coach) {
         this.parseWith(coach);
+        this._createWithMap();
         
         coach.expectWord("select");
         coach.skipSpace();
@@ -338,6 +341,24 @@ class Select extends Syntax {
         });
     }
     
+    _createWithMap() {
+        this._withMap = {};
+        
+        if ( !this.with ) {
+            return;
+        }
+        
+        this.with.forEach(query => {
+            let name = query.name.word || query.name.content;
+            
+            if ( name in this._withMap ) {
+                throw new Error(`WITH query name "${ name }" specified more than once`);
+            }
+            
+            this._withMap[ name ] = query;
+        });
+    }
+    
     _addFromItemToMap(fromItem) {
         let name;
         
@@ -364,14 +385,14 @@ class Select extends Syntax {
                     this._throwFromUniqError(name);
                 }
                 
-                let scheme = "public";
+                let scheme = PUBLIC_SCHEME_NAME;
                 if ( fromItem.table.link.length > 1 ) {
                     scheme = fromItem.table.link[ 0 ];
                     scheme = scheme.word || scheme.content;
                 }
                 
                 items.forEach(item => {
-                    let itemScheme = "public";
+                    let itemScheme = PUBLIC_SCHEME_NAME;
                     if ( item.table.link.length > 1 ) {
                         itemScheme = item.table.link[ 0 ];
                         itemScheme = itemScheme.word || itemScheme.content;
@@ -480,6 +501,7 @@ class Select extends Syntax {
         }
         
         clone._createFromMap();
+        clone._createWithMap();
         
         return clone;
     }
@@ -651,8 +673,6 @@ class Select extends Syntax {
     // params.node
     getColumnSource(params, objectLink) {
         let link = objectLink2schmeTableColumn( objectLink );
-        let server = params.server;
-        let fromItems;
         
         if ( !link.table ) {
             let column = this.columns.find(column => {
@@ -671,77 +691,83 @@ class Select extends Syntax {
                 } else {
                     return {expression: column.expression};
                 }
-            } else {
-                fromItems = this.from.concat( this.joins.map(join => join.from) );
-            }
-        } else {
-            // @see _createFromMap
-            fromItems = this._fromMap[ link.table ];
-            
-            
-            // only tables links without aliases 
-            if ( Array.isArray(fromItems) ) {
-                if ( !link.scheme && fromItems.length > 1 ) {
-                    throw new Error(`table reference "${ link.table }" is ambiguous`);
-                }
-            }
-            
-            // any fromItem by alias
-            else if ( fromItems ) {    
-                if ( link.scheme ) {
-                    throw new Error(`invalid reference ${ objectLink } to FROM-clause entry for table ${ fromItems.as.alias }`);
-                }
-                fromItems = [fromItems];
             }
         }
         
-        if ( link.scheme ) {
-            fromItems = fromItems.filter(fromItem => {
-                if ( fromItem.table ) {
-                    let from = objectLink2schmeTable(fromItem.table);
-                    return from.scheme == link.scheme;
-                }
-                
-                return false;
-            });
-        }
+        let sources = [];
         
-        let subLink = new this.Coach.ObjectLink();
-        subLink.add( link.columnObject.clone() );
-        
-        let outSource;
-        fromItems = fromItems.filter(fromItem => {
+        let fromItems = this.from.concat( this.joins.map(join => join.from) );
+        fromItems.forEach(fromItem => {
+            let source;
             if ( fromItem.table ) {
-                let from = objectLink2schmeTable(fromItem.table);
-                let dbTable = server.schemes[ from.scheme ].tables[ from.table ];
-                
-                return dbTable && link.column in dbTable.columns;
+                source = this._getColumnSourceByFromItem(params, fromItem, link);
             }
             else if ( fromItem.select ) {
-                let subSource = fromItem.select.getColumnSource(params, subLink);
-                if ( subSource ) {
-                    outSource = subSource;
-                    return true;
-                }
+                let subLink = new this.Coach.ObjectLink();
+                subLink.add( link.columnObject.clone() );
+                
+                source = fromItem.select.getColumnSource(params, subLink);
             }
             
-            return false;
+            if ( source ) {
+                sources.push(source);
+            }
         });
         
-        if ( fromItems.length === 0 ) {
+        if ( sources.length === 0 ) {
             throw new Error(`column "${ link.column }" does not exist`);
         }
-        if ( fromItems.length > 1 ) {
+        if ( sources.length > 1 ) {
             throw new Error(`column reference "${ link.column }" is ambiguous`);
         }
         
-        if ( outSource ) {
-            return outSource;
+        return sources[0];
+    }
+    
+    _getColumnSourceByFromItem(params, fromItem, link) {
+        let from = objectLink2schmeTable(fromItem.table);
+        
+        if ( link.scheme ) {
+            if ( (from.scheme || PUBLIC_SCHEME_NAME) != link.scheme ) {
+                return;
+            }
         }
         
-        let fromItem = fromItems[0];
-        let from = objectLink2schmeTable(fromItem.table);
-        let dbTable = server.schemes[ from.scheme ].tables[ from.table ];
+        if ( link.table ) {
+            if ( fromItem.as && fromItem.as.alias ) {
+                let alias = fromItem.as.alias;
+                alias = alias.word || alias.content;
+                
+                if ( alias != link.table ) {
+                    return;
+                }
+            }
+            
+            else if ( from.table != link.table ) {
+                return;
+            }
+        }
+        
+        if ( from.table in this._withMap ) {
+            let subLink = new this.Coach.ObjectLink();
+            subLink.add( link.columnObject.clone() );
+            
+            let withQuery = this._withMap[ from.table ];
+            return withQuery.select.getColumnSource(params, subLink);
+        }
+        // else {
+        //     let parentSelect = this.findParentInstance(Select);
+        // 
+        //     if ( parentSelect ) {
+        //         let source = parentSelect._getColumnSourceBy(params, from, link);
+        // 
+        //         if ( source ) {
+        //             return source;
+        //         }
+        //     }
+        // }
+        
+        let dbTable = params.server.schemes[ from.scheme || PUBLIC_SCHEME_NAME ].tables[ from.table ];
         let dbColumn = dbTable.columns[ link.column ];
         
         return {dbColumn};
@@ -749,12 +775,20 @@ class Select extends Syntax {
 }
 
 function objectLink2schmeTable(objectLink) {
-    let link = objectLink2schmeTableColumn( objectLink ),
-        table = link.column,
-        scheme = link.table;
+    let scheme = objectLink.link[0];
+    let table = objectLink.link[1];
     
-    if ( scheme == null ) {
-        scheme = "public";
+    if ( !table ) {
+        table = scheme;
+        scheme = null;
+    }
+    
+    if ( scheme ) {
+        scheme = scheme.word || scheme.content;
+    }
+    
+    if ( table ) {
+        table = table.word || table.content;
     }
     
     return {table, scheme};

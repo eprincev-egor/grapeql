@@ -57,6 +57,10 @@ class Syntax {
         return this.parent.findParent(callback, context);
     }
     
+    findParentInstance(SyntaxClass) {
+        return this.findParent(parent => parent instanceof SyntaxClass);
+    }
+    
     toString() {
         return this.coach.str.slice(this.startIndex, this.endIndex);
     }
