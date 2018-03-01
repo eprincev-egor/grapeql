@@ -671,7 +671,10 @@ class Select extends Syntax {
     
     // params.server
     // params.node
-    getColumnSource(params, objectLink, _childFromItem) {
+    getColumnSource(params, objectLink, options) {
+        options = options || {};
+        let _childFromItem = options._childFromItem;
+        
         let link = objectLink2schmeTableColumn( objectLink );
         
         if ( !link.table ) {
@@ -726,7 +729,9 @@ class Select extends Syntax {
                 return source;
             }
             
-            throw new Error(`column "${ link.column }" does not exist`);
+            if ( options.throwError !== false ) {
+                throw new Error(`column "${ link.column }" does not exist`);
+            }
         }
         if ( sources.length > 1 ) {
             throw new Error(`column reference "${ link.column }" is ambiguous`);
@@ -791,7 +796,7 @@ class Select extends Syntax {
                     let subLink = new this.Coach.ObjectLink();
                     subLink.add( link.columnObject.clone() );
                     
-                    return withQuery.select.getColumnSource(params, subLink);
+                    return withQuery.select.getColumnSource(params, subLink, {throwError: false});
                 }
             }
         }
@@ -815,7 +820,7 @@ class Select extends Syntax {
         
         let parentSelect = parentFromItem.findParentInstance(Select);
         if ( parentSelect ) {
-            return parentSelect.getColumnSource(params, objectLink, parentFromItem);
+            return parentSelect.getColumnSource(params, objectLink, {_childFromItem: parentFromItem});
         }
     }
 }

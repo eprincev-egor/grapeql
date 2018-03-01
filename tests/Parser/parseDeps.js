@@ -336,6 +336,37 @@
         
         testGetDbColumn(assert, {
             server: SERVER_1,
+            node: `with 
+                
+                company1 as (
+                    select *
+                    from test.company
+                ),
+                
+                company2 as (
+                    with 
+                        sub_company1 as (
+                            select *
+                            from company1
+                        ),
+                        sub_company2 as (
+                            select *
+                            from sub_company1
+                        )
+                    
+                    select *
+                    from sub_company2
+                )
+                
+                select *
+                from company2
+            `,
+            link: "id",
+            source: {dbColumn: SERVER_1.schemes.test.tables.company.columns.id}
+        });
+        
+        testGetDbColumn(assert, {
+            server: SERVER_1,
             node: `select
                     lastOrder.*
                 from company
