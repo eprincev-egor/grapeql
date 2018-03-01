@@ -406,6 +406,31 @@
             link: "company_id",
             source: {dbColumn: SERVER_1.schemes.test.tables.company.columns.id}
         });
+        
+        testGetDbColumn(assert, {
+            server: SERVER_1,
+            node: `with 
+                company as (
+                    select *
+                    from test.company
+                )
+                
+                select
+                    lastOrder.*
+                from company
+        
+                left join (
+                    select
+                        company.id as company_id
+                    from public.order
+        
+                    limit 1
+                ) as lastOrder on true
+            `,
+            link: "company_id",
+            error: true
+        });
+        
     });
     
 })(window.QUnit, window.tests.GrapeQLCoach);
