@@ -677,7 +677,7 @@ class Select extends Syntax {
         
         let link = objectLink2schmeTableColumn( objectLink );
         
-        if ( !link.table ) {
+        if ( !link.table && options._checkColumns !== false ) {
             let column = this.columns.find(column => {
                 let alias = column.as && column.as.alias;
                 alias = alias && (alias.word || alias.content);
@@ -690,7 +690,7 @@ class Select extends Syntax {
             if ( column ) {
                 if ( column.expression.isLink() ) {
                     objectLink = column.expression.getLink();
-                    return this.getColumnSource(params, objectLink);
+                    return this.getColumnSource(params, objectLink, { _checkColumns: false });
                 } else {
                     return {expression: column.expression};
                 }

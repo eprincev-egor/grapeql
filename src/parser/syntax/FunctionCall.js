@@ -49,6 +49,35 @@ class FunctionCall extends Syntax {
         let args = this.arguments.map(arg => arg.toString()).join(", ");
         return this.function.toString() + "(" + args + ")";
     }
+    
+    getType(params) {
+        let argumentsTypes = this.arguments.map(arg => arg.getType( params ));
+        let scheme = this.function.link[0];
+        let name = this.function.link[1];
+        
+        if ( !name ) {
+            name = scheme;
+            scheme = null;
+        }
+        name = name.word || name.content;
+        
+        if ( name == "coalesce" && !scheme ) {
+            return argumentsTypes[0];
+        }
+        
+        if ( scheme ) {
+            scheme = scheme.word || scheme.content;
+        } else {
+            scheme = "public";
+        }
+        
+        let dbFunction = params.server.schemes[ scheme ].getFunction( name, argumentsTypes );
+        if ( !dbFunction ) {
+            throw new Error(`function ${ this.function }() does not exist`);
+        }
+        
+        return dbFunction.returnType;
+    }
 }
 
 module.exports = FunctionCall;

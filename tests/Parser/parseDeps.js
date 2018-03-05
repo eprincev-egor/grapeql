@@ -431,6 +431,20 @@
             error: true
         });
         
+        testGetDbColumn(assert, {
+            server: SERVER_1,
+            node: "select id as id from company", 
+            link: "id",
+            source: {dbColumn: SERVER_1.schemes.public.tables.company.columns.id}
+        });
+        
+        testGetDbColumn(assert, {
+            server: SERVER_1,
+            node: "select id as id from test.company", 
+            link: "id",
+            source: {dbColumn: SERVER_1.schemes.test.tables.company.columns.id}
+        });
+        
     });
     
 })(window.QUnit, window.tests.GrapeQLCoach);

@@ -219,7 +219,7 @@ class Query {
         }
         
         if ( request.where ) {
-            let whereSql = request.where.toString( sqlModel );
+            let whereSql = request.where.toSql( sqlModel );
             this.select.addWhere( whereSql );
         }
     }

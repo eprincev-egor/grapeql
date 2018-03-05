@@ -7,7 +7,7 @@
         tests: [
             {
                 reqeustNode: "Company",
-                reqeust: {
+                request: {
                     columns: ["id", "inn", "name"],
                     offset: 0,
                     limit: 2
@@ -15,7 +15,9 @@
                 
                 result: `
                     select
-                        _grape_query_columns.*
+                        _grape_query_columns."id",
+                        _grape_query_columns."inn",
+                        _grape_query_columns."name"
                     from company
                     
                     left join lateral (select 
@@ -30,14 +32,15 @@
             
             {
                 reqeustNode: "Company",
-                reqeust: {
+                request: {
                     columns: ["id", "INN"],
                     offset: 1
                 },
                 
                 result: `
                     select
-                        _grape_query_columns.*
+                        _grape_query_columns."id",
+                        _grape_query_columns."INN"
                     from company
                     
                     left join lateral(select
@@ -51,11 +54,24 @@
             
             {
                 reqeustNode: "Company",
-                reqeust: {
+                request: {
                     columns: ["id"],
                     offset: 1,
-                    where: ["ID", "=", 1]
-                }
+                    where: ["id", "=", 1]
+                },
+                result: `
+                    select
+                        _grape_query_columns."id"
+                    from company
+                    
+                    left join lateral(select
+                        id as "id"
+                    ) as _grape_query_columns on true
+                    
+                    where
+                        _grape_query_columns."id" = 1
+                    offset 1
+                `
             }
         ],
         
@@ -90,7 +106,12 @@
                             }
                         }
                     }
-                }        
+                },
+                functions: {},
+                
+                getFunction(name/*, args */) {
+                    return this.functions[ name ];
+                }
             }
         }
     };

@@ -24,10 +24,11 @@
                 let query = new Query({
                     server, 
                     node: server.nodes[ requestTest.reqeustNode ],
-                    request: requestTest.reqeust
+                    request: requestTest.request
                 });
                 
-                let result = GrapeQLCoach.parseEntity( query.toString() );
+                let resultSql = query.toString();
+                let result = GrapeQLCoach.parseEntity( resultSql );
                 let testResult = GrapeQLCoach.parseEntity( requestTest.result );
                 
                 normolizeSyntaxBeforeEqual(result);
@@ -42,7 +43,7 @@
                     result: isEqual,
                     actual: query.toString(),
                     expected: requestTest.result,
-                    message: JSON.stringify( requestTest.reqeust, null, 4 )
+                    message: JSON.stringify( requestTest.request, null, 4 )
                 });
             });
         });

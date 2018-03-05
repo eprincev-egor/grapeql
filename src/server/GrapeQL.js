@@ -5,6 +5,11 @@ const pg = require("pg");
 const fs = require("fs");
 const Node = require("./Node");
 
+const DbScheme = require("./DbScheme");
+const DbTable = require("./DbTable");
+const DbColumn = require("./DbColumn");
+const DbFunction = require("./DbFunction");
+
 class GrapeQL {
     constructor(config) {
         this.config = config;
@@ -20,7 +25,9 @@ class GrapeQL {
     }
     
     async loadTables() {
-        let res = await this.db.query(`
+        let res;
+        
+        res = await this.db.query(`
             select
                 pg_columns.table_schema,
                 pg_columns.table_name,
@@ -36,31 +43,27 @@ class GrapeQL {
         `);
         
         this.schemes = {};
-        _.each(res.rows, (row) => {
+        _.each(res.rows, row => {
             let schemeName = row.schme_name,
                 scheme = this.schemes[ schemeName ];
             
             if ( !scheme ) {
-                scheme = {
-                    name: schemeName,
-                    tables: {}
-                };
+                scheme = new DbScheme({ name: schemeName });
                 this.schemes[ schemeName ] = scheme;
             }
             
             let tableName = row.table_name,
-                table = scheme.tables[ tableName ];
+                table = scheme.getTable( tableName );
             
             if ( !table ) {
-                table = {
+                table = new DbTable({
                     name: tableName,
-                    scheme: schemeName,
-                    columns: {}
-                };
-                scheme.tables[ tableName ] = table;
+                    scheme: schemeName
+                });
+                scheme.addTable( table );
             }
             
-            let column = {
+            let column = new DbColumn({
                 name: row.column_name,
                 default: row.column_default,
                 type: row.data_type,
@@ -68,9 +71,34 @@ class GrapeQL {
                 // for tests
                 table: tableName,
                 scheme: schemeName
-            };
+            });
             
-            table.columns[ column.name ] = column;
+            table.addColumn( column );
+        });
+        
+        res = await this.db.query(`
+            select
+                routines.routine_name,
+                routines.routine_schema,
+                routines.data_type
+            from information_schema.routines
+        `);
+        _.each(res.rows, row => {
+            let schemeName = row.routine_schema,
+                scheme = this.schemes[ schemeName ];
+            
+            if ( !scheme ) {
+                scheme = new DbScheme({ name: schemeName });
+                this.schemes[ schemeName ] = scheme;
+            }
+            
+            let dbFunction = new DbFunction({
+                scheme: schemeName,
+                name: row.routine_name,
+                returnType: row.data_type
+            });
+            
+            scheme.addFunction(dbFunction);
         });
     }
     
