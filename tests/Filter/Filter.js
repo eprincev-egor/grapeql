@@ -179,10 +179,24 @@
         checkPosible(assert, ["ID", "==", 1]);
         checkPosible(assert, ["ID", "!=", 1]);
         checkPosible(assert, ["ID", "<>", 1]);
+        
         checkPosible(assert, ["ID", ">", 1]);
         checkPosible(assert, ["ID", "<", 1]);
         checkPosible(assert, ["ID", "<=", 1]);
         checkPosible(assert, ["ID", ">=", 1]);
+        
+        checkImposible(assert, ["ID", ">", "abc"]);
+        checkImposible(assert, ["ID", ">", NaN]);
+        
+        checkImposible(assert, ["ID", ">=", "abc"]);
+        checkImposible(assert, ["ID", ">=", NaN]);
+        
+        checkImposible(assert, ["ID", "<", "abc"]);
+        checkImposible(assert, ["ID", "<", NaN]);
+        
+        checkImposible(assert, ["ID", "<=", "abc"]);
+        checkImposible(assert, ["ID", "<=", NaN]);
+        
         checkPosible(assert, ["ID", "contain", 1]);
         checkPosible(assert, ["ID", "in", [1,2]]);
         checkPosible(assert, ["ID", "is", "null"]);
