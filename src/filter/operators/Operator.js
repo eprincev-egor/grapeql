@@ -213,6 +213,10 @@ Operator.toSql = function(column, sqlOperator, value) {
             throw new Error("invalid value for date: " + value);
         }
     }
+    
+    else {
+        throw new Error(`unsoperted type "${ column.type } for operator ${ sqlOperator }"`);
+    }
 };
 
 module.exports = Operator;

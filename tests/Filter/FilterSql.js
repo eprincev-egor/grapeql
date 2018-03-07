@@ -3,6 +3,16 @@
     
     let normolizeSyntaxBeforeEqual = window.normolizeSyntaxBeforeEqual;
     
+    function todayStart() {
+        let date = new Date();
+        return +new Date(date.getFullYear(), date.getMonth(), date.getDate());
+    }
+
+    function todayEnd() {
+        let date = new Date();
+        return +new Date(date.getFullYear(), date.getMonth(), date.getDate(), 23, 59, 59, 999);
+    }
+
     function testFilter(assert, fromFilter, sql, model) {
         let parsedSql = new GrapeQLCoach(sql);
         parsedSql.skipSpace();
@@ -150,6 +160,55 @@
             }
         });
         
+        testFilter(assert, ["ID", "in", [1,2]], "ID in (1,2)", {
+            ID: {
+                type: "bigint",
+                sql: "ID"
+            }
+        });
+        
+        testFilter(assert, ["ID", "in", ["1",2]], "ID in (1,2)", {
+            ID: {
+                type: "bigint",
+                sql: "ID"
+            }
+        });
+        
+        testFilter(assert, ["NAME", "in", ["Igor", "Petr", "'", "\"", "$$", "$tag1$", 4]], "NAME in ('Igor', 'Petr', $$'$$, $$\"$$, '$tag1$', '4')", {
+            NAME: {
+                type: "text",
+                sql: "NAME"
+            }
+        });
+        
+        testFilter(assert, ["ID", "is", "null"], "ID is null", {
+            ID: {type: "bigint", sql: "ID"}
+        });
+        
+        testFilter(assert, ["NAME", "is", "null"], "NAME is null", {
+            NAME: {type: "text", sql: "NAME"}
+        });
+        
+        testFilter(assert, ["ID", "is", "not  Null"], "ID is not null", {
+            ID: {type: "bigint", sql: "ID"}
+        });
+        
+        testFilter(assert, ["NAME", "is", "not null"], "NAME is not null", {
+            NAME: {type: "text", sql: "NAME"}
+        });
+        
+        let startSql = todayStart(),
+            endSql = todayEnd();
+        
+        startSql = new Date(startSql);
+        endSql = new Date(endSql);
+        
+        startSql = "'" + startSql.toISOString() + "'::timestamp with time zone";
+        endSql = "'" + endSql.toISOString() + "'::timestamp with time zone";
+        
+        testFilter(assert, ["SOME_DATE", "is", "today"], "SOME_DATE >= " + startSql + " and SOME_DATE <= " + endSql, {
+            SOME_DATE: {type: "date", sql: "SOME_DATE"}
+        });
     });
     
 })(window.QUnit, window.tests.Filter, window.tests.GrapeQLCoach);

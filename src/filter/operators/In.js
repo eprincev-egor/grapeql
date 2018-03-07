@@ -32,6 +32,36 @@ class In extends Operator {
 
         return result;
     }
+    
+    compile2sql(column, elems) {
+        let out = column.sql + " in ";
+        
+        if ( Operator.isSqlNumber(column.type) ) {
+            out += "("; 
+            out += elems.map(value => {
+                if ( Operator.isLikeNumber(value) ) {
+                    return value;
+                } else {
+                    throw new Error("invalid value for number: " + value);
+                }
+            }).join(",");
+            out += ")";
+        }
+        
+        else if ( Operator.isSqlText(column.type) ) {
+            out += "(";
+            out += elems.map(value => {
+                if ( Operator.isLikeText(value) ) {
+                    return Operator.wrapText( value );
+                } else {
+                    throw new Error("invalid value for text: " + value);
+                }
+            }).join(",");
+            out += ")";
+        }
+        
+        return out;
+    }
 }
 
 Operator.addLiteral(["in"], In);

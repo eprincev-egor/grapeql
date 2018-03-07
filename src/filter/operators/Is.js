@@ -57,6 +57,49 @@ class Is extends Operator {
             throw new Error("imposible check: " + right);
         }
     }
+    
+    compile2sql(column, value) {
+        value = value.toLowerCase().trim().replace(/\s+/g, " ");
+        
+        if ( value === "null" ) {
+            return column.sql + " is null";
+        } 
+        else if ( value === "not null" ) {
+            return column.sql + " is not null";
+        } 
+        else if ( value === "today" ) {
+            if ( !Operator.isSqlDate(column.type) ) {
+                throw new Error("imposible check 'is today' for column type: " + column.type);
+            }
+            
+            let startSql = todayStart();
+            let endSql = todayEnd();
+            
+            startSql = new Date(startSql);
+            startSql = Operator.wrapDate(startSql);
+            
+            endSql = new Date(endSql);
+            endSql = Operator.wrapDate(endSql);
+            
+            return column.sql + " >= " + startSql + " and " + column.sql + " <= " + endSql;
+        } 
+        else if ( value === "tomorrow" ) {
+            if ( !Operator.isSqlDate(column.type) ) {
+                throw new Error("imposible check 'is tomorrow' for column type: " + column.type);
+            }
+            
+            let startSql = tomorrowStart();
+            let endSql = tomorrowEnd();
+            
+            startSql = new Date(startSql);
+            startSql = Operator.wrapDate(startSql);
+            
+            endSql = new Date(endSql);
+            endSql = Operator.wrapDate(endSql);
+            
+            return column.sql + " >= " + startSql + " and " + column.sql + " <= " + endSql;
+        }
+    }
 }
 
 Operator.addLiteral(["is"], Is);
