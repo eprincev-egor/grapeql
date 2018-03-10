@@ -34,6 +34,10 @@ class In extends Operator {
     }
     
     compile2sql(column, elems) {
+        if ( !_.isArray(elems) || !elems.length ) {
+            return "false";
+        }
+        
         let out = column.sql + " in ";
         
         if ( Operator.isSqlNumber(column.type) ) {
@@ -55,6 +59,18 @@ class In extends Operator {
                     return Operator.wrapText( value );
                 } else {
                     throw new Error("invalid value for text: " + value);
+                }
+            }).join(",");
+            out += ")";
+        }
+        
+        else if ( Operator.isSqlDate(column.type) ) {
+            out += "(";
+            out += elems.map(value => {
+                if ( Operator.isLikeDate(value) ) {
+                    return Operator.wrapDate( value, column.type );
+                } else {
+                    throw new Error("invalid value for date: " + value);
                 }
             }).join(",");
             out += ")";

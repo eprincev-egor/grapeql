@@ -76,10 +76,10 @@ class Is extends Operator {
             let endSql = todayEnd();
             
             startSql = new Date(startSql);
-            startSql = Operator.wrapDate(startSql);
+            startSql = Operator.wrapDate(startSql, column.type);
             
             endSql = new Date(endSql);
-            endSql = Operator.wrapDate(endSql);
+            endSql = Operator.wrapDate(endSql, column.type);
             
             return column.sql + " >= " + startSql + " and " + column.sql + " <= " + endSql;
         } 
@@ -92,10 +92,10 @@ class Is extends Operator {
             let endSql = tomorrowEnd();
             
             startSql = new Date(startSql);
-            startSql = Operator.wrapDate(startSql);
+            startSql = Operator.wrapDate(startSql, column.type);
             
             endSql = new Date(endSql);
-            endSql = Operator.wrapDate(endSql);
+            endSql = Operator.wrapDate(endSql, column.type);
             
             return column.sql + " >= " + startSql + " and " + column.sql + " <= " + endSql;
         }

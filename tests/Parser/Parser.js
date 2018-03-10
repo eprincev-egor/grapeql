@@ -1,8 +1,6 @@
 (function(QUnit, GrapeQLCoach) {
     "use strict";
     
-    let normolizeSyntaxBeforeEqual = window.normolizeSyntaxBeforeEqual;
-    
     let index = 0; // for conditional break point
     function testClass(className, SyntaxClass) {
         QUnit.test(className, (assert) => {
@@ -29,9 +27,6 @@
                     let coach = new GrapeQLCoach(str);
                     let result = coach[ parseFuncName ]();
                     
-                    normolizeSyntaxBeforeEqual(test.result);
-                    normolizeSyntaxBeforeEqual(result);
-                    
                     let isEqual = !!window.weakDeepEqual(test.result, result);
                     if ( !isEqual ) {
                         console.log("break here");
@@ -50,8 +45,6 @@
                     let cloneString = clone.toString();
                     let cloneCoach = new GrapeQLCoach( cloneString );
                     let cloneResult = cloneCoach[ parseFuncName ]();
-                    
-                    normolizeSyntaxBeforeEqual(cloneResult);
                     
                     isEqual = !!window.weakDeepEqual(test.result, result);
                     if ( !isEqual ) {

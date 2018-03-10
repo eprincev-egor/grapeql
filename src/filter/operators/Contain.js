@@ -9,7 +9,12 @@ class Contain extends Operator {
     
     compile2js(left, right) {
         if ( right == null ) {
-            right = "";
+            // it logic need for next case:
+            // 
+            // filter = ["NAME", "contain", someModel.get("NAME")]
+            // if someModel.get("NAME") is null then need return false
+            // 
+            return "false";
         }
         right = right + "";
         right = right.toLowerCase();
@@ -20,9 +25,26 @@ class Contain extends Operator {
     }
     
     compile2sql(column, value) {
-        if ( column ) {
-            
+        if ( value == null ) {
+            return "false";
         }
+        
+        value += "";
+        value = value.toLowerCase();
+        
+        value = value.replace(/([%_\\])/g, "\\$1");
+        value = Operator.wrapText( "%" + value + "%" );
+        
+        let columnSql = column.sql;
+        
+        if ( Operator.isSqlNumber(column.type) ) {
+            columnSql = column.sql + "::text";
+        }
+        else if ( Operator.isSqlDate(column.type) ) {
+            columnSql = column.sql + "::date::text";
+        }
+        
+        return columnSql + " ilike " + value;
     }
 }
 

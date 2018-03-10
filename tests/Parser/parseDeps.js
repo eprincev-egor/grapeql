@@ -2,7 +2,6 @@
     "use strict";
     
     QUnit.dump.maxDepth = 100;
-    let normolizeSyntaxBeforeEqual = window.normolizeSyntaxBeforeEqual;
     
     function testGetDbColumn(assert, test) {
         let coach;
@@ -32,9 +31,6 @@
             let source = select.getColumnSource({
                 server: test.server
             }, link);
-            
-            normolizeSyntaxBeforeEqual(source);
-            normolizeSyntaxBeforeEqual(test.source);
             
             let isEqual = !!window.weakDeepEqual(test.source, source);
             if ( !isEqual ) {

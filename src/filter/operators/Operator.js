@@ -23,6 +23,10 @@ class Operator {
             // or number
             _.isNumber(anyValue) &&
             !_.isNaN(anyValue)
+            ||
+            
+            // or date
+            Operator.isLikeDate(anyValue)
         );
     }
 
@@ -177,13 +181,13 @@ Operator.isLikeDate = function(value) {
     return false;
 };
 
-Operator.wrapDate = function(value) {
-    if ( value && value.toISOString ) {
-        return `'${ value.toISOString() }'::timestamp with time zone`;
+Operator.wrapDate = function(value, toType) {
+    if ( typeof value == "number" ) {
+        value = new Date(value);
     }
     
-    if ( typeof value == "number" ) {
-        return 1;
+    if ( value && value.toISOString ) {
+        return `'${ value.toISOString() }'::${ toType }`;
     }
 };
 
@@ -208,7 +212,7 @@ Operator.toSql = function(column, sqlOperator, value) {
     
     else if ( Operator.isSqlDate(column.type) ) {
         if ( Operator.isLikeDate(value) ) {
-            return `${column.sql} ${sqlOperator} ${Operator.wrapDate(value)}`;
+            return `${column.sql} ${sqlOperator} ${Operator.wrapDate(value, column.type)}`;
         } else {
             throw new Error("invalid value for date: " + value);
         }

@@ -66,6 +66,38 @@ class InRange extends Operator {
 
         return result;
     }
+    
+    compile2sql(column, elems) {
+        if ( !_.isArray(elems) || !elems.length ) {
+            return "false";
+        }
+        
+        let start, end,
+            sql = "",
+            columnSql = column.sql;
+            
+        for (let i = 0, n = elems.length; i < n; i++) {
+            let elem = elems[i];
+            
+            start = elem && elem.start;
+            end = elem && elem.end;
+            
+            if ( !Operator.isLikeDate(start) || !Operator.isLikeDate(end) ) {
+                continue;
+            }
+            
+            start = Operator.wrapDate( start, column.type );
+            end = Operator.wrapDate( end, column.type );
+            
+            if ( sql ) {
+                sql += " or ";
+            }
+            
+            sql += columnSql + " >= " + start + " and " + columnSql + " <= " + end;
+        }
+        
+        return sql;
+    }
 }
 
 Operator.addLiteral(["inRange"], InRange);

@@ -1,8 +1,6 @@
 (function(QUnit, Filter, GrapeQLCoach) {
     "use strict";
     
-    let normolizeSyntaxBeforeEqual = window.normolizeSyntaxBeforeEqual;
-    
     function todayStart() {
         let date = new Date();
         return +new Date(date.getFullYear(), date.getMonth(), date.getDate());
@@ -12,7 +10,17 @@
         let date = new Date();
         return +new Date(date.getFullYear(), date.getMonth(), date.getDate(), 23, 59, 59, 999);
     }
+    
+    function tomorrowStart() {
+        let date = new Date();
+        return +new Date(date.getFullYear(), date.getMonth(), date.getDate() + 1 );
+    }
 
+    function tomorrowEnd() {
+        let date = new Date();
+        return +new Date(date.getFullYear(), date.getMonth(), date.getDate() + 1, 23, 59, 59, 999);
+    }
+    
     function testFilter(assert, fromFilter, sql, model) {
         let parsedSql = new GrapeQLCoach(sql);
         parsedSql.skipSpace();
@@ -24,9 +32,6 @@
         
         parsedFilterSql.skipSpace();
         parsedFilterSql = parsedFilterSql.parseExpression();
-        
-        normolizeSyntaxBeforeEqual(parsedSql);
-        normolizeSyntaxBeforeEqual(parsedFilterSql);
         
         let isEqual = !!window.weakDeepEqual(parsedSql, parsedFilterSql);
         if ( !isEqual ) {
@@ -41,29 +46,51 @@
         });
     }
     
-    QUnit.test( "equal", function( assert ) {
+    QUnit.test( "equal, ==, =, =, >=, <=, <, >, <>", function( assert ) {
         
-        let simpleOperators = ["=", "=", ">=", "<=", "<", ">", "<>"];
+        let simpleOperators = ["equal", "==", "=", "=", ">=", "<=", "<", ">", "<>"];
         
         simpleOperators.forEach(operator => {
-            testFilter(assert, ["ID", operator, 4], `ID ${operator} 4`, {
+            let sqlOperator = operator;
+            if ( operator == "==" || operator == "equal" ) {
+                sqlOperator = "=";
+            }
+            
+            testFilter(assert, ["ID", operator, 4], `ID ${sqlOperator} 4`, {
                 ID: {
                     type: "integer",
                     sql: "ID"
                 }
             });
             
-            testFilter(assert, ["ID", operator, "123456789123456789123456789123456789123456789123456789"], `ID ${operator} 123456789123456789123456789123456789123456789123456789`, {
+            testFilter(assert, ["ID", operator, "123456789123456789123456789123456789123456789123456789"], `ID ${sqlOperator} 123456789123456789123456789123456789123456789123456789`, {
                 ID: {
                     type: "bigint",
                     sql: "ID"
                 }
             });
             
-            testFilter(assert, ["ID", operator, "4.2"], `ID ${operator} 4.2`, {
+            testFilter(assert, ["ID", operator, "4.2"], `ID ${sqlOperator} 4.2`, {
                 ID: {
                     type: "double precision",
                     sql: "ID"
+                }
+            });
+            
+            
+            let date = new Date();
+            
+            testFilter(assert, ["SOME_DATE", operator, date], `SOME_DATE ${sqlOperator} '${date.toISOString()}'::date`, {
+                SOME_DATE: {
+                    type: "date",
+                    sql: "SOME_DATE"
+                }
+            });
+            
+            testFilter(assert, ["SOME_TIMESTAMP", operator, date], `SOME_TIMESTAMP ${sqlOperator} '${date.toISOString()}'::timestamp with time zone`, {
+                SOME_TIMESTAMP: {
+                    type: "timestamp with time zone",
+                    sql: "SOME_TIMESTAMP"
                 }
             });
         });
@@ -160,6 +187,17 @@
             }
         });
         
+    });
+    
+    QUnit.test( "in", function( assert ) {
+        
+        testFilter(assert, ["ID", "in", []], "false", {
+            ID: {
+                type: "bigint",
+                sql: "ID"
+            }
+        });
+        
         testFilter(assert, ["ID", "in", [1,2]], "ID in (1,2)", {
             ID: {
                 type: "bigint",
@@ -181,6 +219,10 @@
             }
         });
         
+    });
+    
+    QUnit.test( "is", function( assert ) {
+        
         testFilter(assert, ["ID", "is", "null"], "ID is null", {
             ID: {type: "bigint", sql: "ID"}
         });
@@ -197,8 +239,11 @@
             NAME: {type: "text", sql: "NAME"}
         });
         
-        let startSql = todayStart(),
-            endSql = todayEnd();
+        let startSql, endSql;
+        
+        // today
+        startSql = todayStart();
+        endSql = todayEnd();
         
         startSql = new Date(startSql);
         endSql = new Date(endSql);
@@ -207,8 +252,87 @@
         endSql = "'" + endSql.toISOString() + "'::timestamp with time zone";
         
         testFilter(assert, ["SOME_DATE", "is", "today"], "SOME_DATE >= " + startSql + " and SOME_DATE <= " + endSql, {
+            SOME_DATE: {type: "timestamp with time zone", sql: "SOME_DATE"}
+        });
+        
+        // tomorrow
+        startSql = tomorrowStart();
+        endSql = tomorrowEnd();
+        
+        startSql = new Date(startSql);
+        endSql = new Date(endSql);
+        
+        startSql = "'" + startSql.toISOString() + "'::timestamp with time zone";
+        endSql = "'" + endSql.toISOString() + "'::timestamp with time zone";
+        
+        testFilter(assert, ["SOME_DATE", "is", "tomorrow"], "SOME_DATE >= " + startSql + " and SOME_DATE <= " + endSql, {
+            SOME_DATE: {type: "timestamp with time zone", sql: "SOME_DATE"}
+        });
+    });
+    
+    QUnit.test( "contain", function( assert ) {
+        testFilter(assert, ["NAME", "contain", "sUb"], "NAME ilike '%sub%'", {
+            NAME: {type: "text", sql: "NAME"}
+        });
+        
+        testFilter(assert, ["NAME", "contain", "x%"], "NAME ilike '%x\\%%'", {
+            NAME: {type: "text", sql: "NAME"}
+        });
+        
+        testFilter(assert, ["NAME", "contain", "_Y"], "NAME ilike '%\\_Y%'", {
+            NAME: {type: "text", sql: "NAME"}
+        });
+        
+        testFilter(assert, ["NAME", "contain", "_\\"], "NAME ilike '%\\_\\\\%'", {
+            NAME: {type: "text", sql: "NAME"}
+        });
+        
+        testFilter(assert, ["NAME", "contain", "''"], "NAME ilike $$%''%$$", {
+            NAME: {type: "text", sql: "NAME"}
+        });
+        
+        testFilter(assert, ["NAME", "contain", "\"\""], "NAME ilike $$%\"\"%$$", {
+            NAME: {type: "text", sql: "NAME"}
+        });
+        
+        testFilter(assert, ["NAME", "contain", "$tag1$some$tag1$"], "NAME ilike '$tag1$some$tag1$'", {
+            NAME: {type: "text", sql: "NAME"}
+        });
+        
+        testFilter(assert, ["NAME", "contain", ""], "NAME ilike '%%'", {
+            NAME: {type: "text", sql: "NAME"}
+        });
+        
+        testFilter(assert, ["NAME", "contain", " "], "NAME ilike '% %'", {
+            NAME: {type: "text", sql: "NAME"}
+        });
+        
+        testFilter(assert, ["ID", "contain", 1], "ID::text ilike '%1%'", {
+            ID: {type: "bigint", sql: "ID"}
+        });
+        
+        testFilter(assert, ["ID", "contain", null], "false", {
+            ID: {type: "bigint", sql: "ID"}
+        });
+        
+        testFilter(assert, ["SOME_TIMESTAMP", "contain", 2017], "SOME_TIMESTAMP::date::text ilike '%2017%'", {
+            SOME_TIMESTAMP: {type: "timestamp with time zone", sql: "SOME_TIMESTAMP"}
+        });
+    });
+    
+    QUnit.test( "inRange", function( assert ) {
+        testFilter(assert, ["SOME_DATE", "inRange", []], "false", {
+            SOME_DATE: {type: "date", sql: "SOME_DATE"}
+        });
+        
+        testFilter(assert, ["SOME_DATE", "inRange", [{start: 0, end: 1}]], "SOME_DATE >= '1970-01-01T00:00:00.000Z'::date and SOME_DATE <= '1970-01-01T00:00:00.001Z'::date", {
+            SOME_DATE: {type: "date", sql: "SOME_DATE"}
+        });
+        
+        testFilter(assert, ["SOME_DATE", "inRange", [{start: -10, end: 10}]], "SOME_DATE >= '1969-12-31T23:59:59.990Z'::date and SOME_DATE <= '1970-01-01T00:00:00.010Z'::date", {
             SOME_DATE: {type: "date", sql: "SOME_DATE"}
         });
     });
+    
     
 })(window.QUnit, window.tests.Filter, window.tests.GrapeQLCoach);

@@ -11,6 +11,10 @@ class NoRows extends Operator {
     compile2js() {
         return "false";
     }
+    
+    compile2sql() {
+        return "false";
+    }
 }
 
 Operator.addLiteral(["noRows"], NoRows);

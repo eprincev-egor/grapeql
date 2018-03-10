@@ -206,6 +206,7 @@
 
         checkPosible(assert, [["ID", "=", 1]]);
         checkPosible(assert, [["ID", "==", 1]]);
+        checkPosible(assert, [["ID", "==", new Date()]]);
 
         checkPosible(assert, [["ID", "=", 1], "or", ["ID", "=", 2]]);
         checkPosible(assert, [["ID", "=", 1], "||", ["ID", "=", 2]]);
@@ -793,17 +794,17 @@
         });
 
         checkModel(assert, ["NAME", "contain", ""], {NAME: "x"});
-        checkModel(assert, ["NAME", "contain", null], {NAME: "x"});
-        checkModel(assert, ["NAME", "contain", undefined], {NAME: "x"});
+        uncheckModel(assert, ["NAME", "contain", null], {NAME: "x"});
+        uncheckModel(assert, ["NAME", "contain", undefined], {NAME: "x"});
         checkModel(assert, ["NAME", "contain", ""], {NAME: "y"});
-        checkModel(assert, ["NAME", "contain", null], {NAME: "y"});
-        checkModel(assert, ["NAME", "contain", undefined], {NAME: "y"});
+        uncheckModel(assert, ["NAME", "contain", null], {NAME: "y"});
+        uncheckModel(assert, ["NAME", "contain", undefined], {NAME: "y"});
         checkModel(assert, ["NAME", "contain", ""], {NAME: ""});
-        checkModel(assert, ["NAME", "contain", null], {NAME: ""});
-        checkModel(assert, ["NAME", "contain", undefined], {NAME: ""});
+        uncheckModel(assert, ["NAME", "contain", null], {NAME: ""});
+        uncheckModel(assert, ["NAME", "contain", undefined], {NAME: ""});
         checkModel(assert, ["NAME", "contain", ""], {NAME: null});
-        checkModel(assert, ["NAME", "contain", null], {NAME: null});
-        checkModel(assert, ["NAME", "contain", undefined], {NAME: null});
+        uncheckModel(assert, ["NAME", "contain", null], {NAME: null});
+        uncheckModel(assert, ["NAME", "contain", undefined], {NAME: null});
 
         checkModel(assert, ["NAME", "contain", " "], {NAME: " "});
         uncheckModel(assert, ["NAME", "contain", " "], {NAME: "x"});

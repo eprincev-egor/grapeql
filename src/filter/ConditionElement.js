@@ -22,12 +22,13 @@ class ConditionElement {
             operator = column[1];
             column = column[0];
         }
-
+        
+        let operatorName = operator;
         operator = Operator.create(operator);
         let isValidValue = operator.validateValue(anyValue);
 
         if ( !isValidValue ) {
-            throw new Error("(" + operator.constructor.className + ") invalid value: " + anyValue, anyValue);
+            throw new Error("(" + operatorName + ") invalid value: " + anyValue, anyValue);
         }
 
         if ( !_.isString(column) || !/^\w+$/i.test(column) ) {

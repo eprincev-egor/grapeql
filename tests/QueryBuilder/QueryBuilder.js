@@ -1,9 +1,6 @@
 (function(QUnit, Query, GrapeQLCoach) {
     "use strict";
     
-    let normolizeSyntaxBeforeEqual = window.normolizeSyntaxBeforeEqual;
-    
-    
     window.tests.list.forEach(test => {
         let server = {nodes: {}};
         
@@ -30,9 +27,6 @@
                 let resultSql = query.toString();
                 let result = GrapeQLCoach.parseEntity( resultSql );
                 let testResult = GrapeQLCoach.parseEntity( requestTest.result );
-                
-                normolizeSyntaxBeforeEqual(result);
-                normolizeSyntaxBeforeEqual(testResult);
                 
                 let isEqual = !!window.weakDeepEqual(testResult, result);
                 if ( !isEqual ) {

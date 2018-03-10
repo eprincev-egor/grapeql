@@ -1,6 +1,15 @@
 (function() {
     "use strict";
     
+    var SKIP_KEYS = [
+        "Coach",
+        "coach",
+        "parent",
+        "startIndex",
+        "endIndex",
+        "children",
+        "_source"
+    ];
     
     var _typeof = function (obj) {
         return typeof obj;
@@ -265,7 +274,10 @@ getRegExpFlags(a) === getRegExpFlags(b);
 
                 // Be strict: don't ensure hasOwnProperty and go deep
                 for (i in a) {
-
+                    if ( SKIP_KEYS.includes(i) ) {
+                        continue;
+                    }
+                    
                     // Collect a's properties
                     aProperties.push(i);
 
