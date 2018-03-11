@@ -55,7 +55,7 @@ GrapeQLCoach.addSyntax("GroupByElement", require("./syntax/GroupByElement"));
 GrapeQLCoach.addSyntax("OrderByElement", require("./syntax/OrderByElement"));
 GrapeQLCoach.addSyntax("Join", require("./syntax/Join"));
 GrapeQLCoach.addSyntax("File", require("./syntax/File"));
-GrapeQLCoach.addSyntax("Select", require("./syntax/Select"));
+GrapeQLCoach.addSyntax("Select", require("./syntax/Select/Select"));
 GrapeQLCoach.addSyntax("WithQuery", require("./syntax/WithQuery"));
 
 GrapeQLCoach.parseEntity = function(str) {
