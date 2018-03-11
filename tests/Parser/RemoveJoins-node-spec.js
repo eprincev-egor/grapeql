@@ -63,7 +63,7 @@ QUnit.module("Select.removeUnnesaryJoins", {
                     country.id = company.id_country
             `, `
                 select from company
-            `, SERVER_1);
+        `, SERVER_1);
             
         testRemoveUnnesaryJoins(assert, `
                 select from company
@@ -72,7 +72,7 @@ QUnit.module("Select.removeUnnesaryJoins", {
                     country.id = company.id_country
                     
                 where country.id > 3
-            `, SERVER_1);
+        `, SERVER_1);
             
         testRemoveUnnesaryJoins(assert, `
                 select from company
@@ -83,7 +83,7 @@ QUnit.module("Select.removeUnnesaryJoins", {
                 left join company as company2 on
                     company2.id_country = country.id
                     
-            `, SERVER_1);
+        `, SERVER_1);
             
         testRemoveUnnesaryJoins(assert, `
                 select from public.order as orders
@@ -97,7 +97,7 @@ QUnit.module("Select.removeUnnesaryJoins", {
                 
             `, `
                 select from public.order as orders
-            `, SERVER_1);
+        `, SERVER_1);
             
         testRemoveUnnesaryJoins(assert, `
                 select
@@ -111,7 +111,7 @@ QUnit.module("Select.removeUnnesaryJoins", {
                     partner_link.id_order = orders.id and
                     company_client.id = partner_link.id_company
                 
-            `, SERVER_1);
+        `, SERVER_1);
             
         testRemoveUnnesaryJoins(assert, `
                 select
@@ -125,7 +125,7 @@ QUnit.module("Select.removeUnnesaryJoins", {
                     partner_link.id_order = orders.id and
                     company_client.id = partner_link.id_company
                 
-            `, SERVER_1);
+        `, SERVER_1);
             
         testRemoveUnnesaryJoins(assert, `
                 select
@@ -139,7 +139,7 @@ QUnit.module("Select.removeUnnesaryJoins", {
                     partner_link.id_order = orders.id and
                     company_client.id = partner_link.id_company
                 
-            `, SERVER_1);
+        `, SERVER_1);
             
         testRemoveUnnesaryJoins(assert, `
                 select
@@ -157,7 +157,7 @@ QUnit.module("Select.removeUnnesaryJoins", {
                     select 
                         1 as one
                 ) as some on true
-            `, SERVER_1);
+        `, SERVER_1);
             
         testRemoveUnnesaryJoins(assert, `
                 select
@@ -186,7 +186,7 @@ QUnit.module("Select.removeUnnesaryJoins", {
                 left join order_partner_link as partner_link on
                     partner_link.id_order = orders.id and
                     company_client.id = partner_link.id_company
-            `, SERVER_1);
+        `, SERVER_1);
             
         testRemoveUnnesaryJoins(assert, `
                 select from company
@@ -194,8 +194,48 @@ QUnit.module("Select.removeUnnesaryJoins", {
                 left join (select * from country limit 1) as country on true
             `, `
                 select from company
-            `, SERVER_1);
+        `, SERVER_1);
             
+        testRemoveUnnesaryJoins(assert, `
+                select from company
+                
+                left join (select * from country limit 1) as country on true
+                
+                order by country.id
+        `, SERVER_1);
+        
+        testRemoveUnnesaryJoins(assert, `
+                select from company
+                
+                left join (select * from country limit 1) as country on true
+                
+                group by country.id
+        `, SERVER_1);
+        
+        testRemoveUnnesaryJoins(assert, `
+                select from company
+                
+                left join (select * from country limit 1) as country on true
+                
+                group by cube (company.id, (country.id, 1))
+        `, SERVER_1);
+        
+        testRemoveUnnesaryJoins(assert, `
+                select from company
+                
+                left join (select * from country limit 1) as country on true
+                
+                group by rollup (company.id, (country.id, 1))
+        `, SERVER_1);
+        
+        testRemoveUnnesaryJoins(assert, `
+                select from company
+                
+                left join (select * from country limit 1) as country on true
+                
+                group by GROUPING SETS (company.id, country.code)
+        `, SERVER_1);
+        
         testRemoveUnnesaryJoins(assert, `
                 select from company
                 
@@ -218,7 +258,7 @@ QUnit.module("Select.removeUnnesaryJoins", {
                 left join public.order as orders on
                     orders.id_company_client = company.id
                 
-            `, SERVER_1);
+        `, SERVER_1);
     });
 
 });

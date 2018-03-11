@@ -940,42 +940,11 @@ class Select extends Syntax {
     }
     
     _isUsedFromLink(fromLink, joinIndex) {
-        let afterJoins = this.joins.slice(joinIndex + 1);
         return (
-            this.columns.some(column => {
-                // select *
-                if ( column.isStar() ) {
-                    let objectLink = column.expression.getLink();
-                    if ( objectLink.link.length == 1 ) {
-                        return true;
-                    }
-                }
-                
-                return this._isUsedFromLinkInExpresion( fromLink, column.expression );
-            })
-            ||
-            
-            this.where && this._isUsedFromLinkInExpresion( fromLink, this.where ) 
-            ||
-            
-            this.having && this._isUsedFromLinkInExpresion( fromLink, this.having ) 
-            ||
-            
-            afterJoins.some(join => {
-                let isUsed = false;
-                
-                if ( join.on ) {
-                    isUsed = isUsed || this._isUsedFromLinkInExpresion( fromLink, join.on );
-                }
-                
-                if ( join.from.select && join.from.lateral ) {
-                    // TODO: deepScan union and with and from all items
-                    isUsed = isUsed || join.from.select._isUsedFromLinkBySubSelect(fromLink);
-                }
-                return isUsed;
-            }) 
-            ||
-            
+            this._isUsedFromLinkInColumns( fromLink ) ||
+            this.where && this._isUsedFromLinkInExpresion( fromLink, this.where )  ||
+            this.having && this._isUsedFromLinkInExpresion( fromLink, this.having )  ||
+            this._isUsedFromLinkInJoins( fromLink, joinIndex ) ||
             this._isUsedFromLinkInGroupBy( fromLink ) ||
             this._isUsedFromLinkInOrderBy( fromLink ) 
         );
@@ -994,12 +963,80 @@ class Select extends Syntax {
         );
     }
     
-    _isUsedFromLinkInGroupBy(/* fromLink */) {
-        return false;
+    _isUsedFromLinkInColumns(fromLink) {
+        return this.columns.some(column => {
+            // select *
+            if ( column.isStar() ) {
+                let objectLink = column.expression.getLink();
+                if ( objectLink.link.length == 1 ) {
+                    return true;
+                }
+            }
+            
+            return this._isUsedFromLinkInExpresion( fromLink, column.expression );
+        });
     }
     
-    _isUsedFromLinkInOrderBy(/* fromLink */) {
-        return false;
+    _isUsedFromLinkInJoins(fromLink, joinIndex) {
+        let afterJoins = this.joins.slice(joinIndex + 1);
+        return afterJoins.some(join => {
+            let isUsed = false;
+            
+            if ( join.on ) {
+                isUsed = isUsed || this._isUsedFromLinkInExpresion( fromLink, join.on );
+            }
+            
+            if ( join.from.select && join.from.lateral ) {
+                // TODO: deepScan union and with and from all items
+                isUsed = isUsed || join.from.select._isUsedFromLinkBySubSelect(fromLink);
+            }
+            return isUsed;
+        }) ;
+    }
+    
+    _isUsedFromLinkInGroupBy(fromLink) {
+        if ( !this.groupBy ) {
+            return false;
+        }
+        
+        return this.groupBy.some(
+            elem => this._isUsedFromLinkInGroupByElem(fromLink, elem)
+        );
+    }
+    
+    _isUsedFromLinkInGroupByElem(fromLink, groupByElem) {
+        if ( groupByElem.expression ) {
+            return this._isUsedFromLinkInExpresion( 
+                fromLink, 
+                groupByElem.expression 
+            );
+        }
+        if ( groupByElem.groupingSets ) {
+            return groupByElem.groupingSets.some(
+                subElem => this._isUsedFromLinkInGroupByElem(fromLink, subElem)
+            );
+        }
+        if ( groupByElem.rollup || groupByElem.cube ) {
+            let elems = groupByElem.rollup || groupByElem.cube;
+            
+            return elems.some(subElem => {
+                if ( Array.isArray(subElem) ) {
+                    return subElem.some(
+                        elem => this._isUsedFromLinkInExpresion(fromLink, elem)
+                    );
+                } else {
+                    return this._isUsedFromLinkInExpresion(fromLink, subElem);
+                }
+            });
+        }
+    }
+    
+    _isUsedFromLinkInOrderBy(fromLink) {
+        if ( !this.orderBy ) {
+            return false;
+        }
+        
+        return this.orderBy.some(elem => this._isUsedFromLinkInExpresion(fromLink, elem.expression));
     }
     
     _isUsedFromLinkInExpresion(fromLink, expression) {
