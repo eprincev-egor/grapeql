@@ -1,14 +1,30 @@
 "use strict";
 
 const path = require("path");
+const glob = require("glob");
+
+let entry = {};
+
+let testsFiles = glob.sync("./tests/**/*-spec.js");
+testsFiles.forEach(filePath => {
+    let fileName = filePath.split(/[\\/]/) || [];
+    fileName = fileName.pop();
+    
+    let entryName = fileName.split("-")[0];
+    entryName = "test" + entryName[0].toUpperCase() + entryName.slice(1);
+    
+    entry[ entryName ] = filePath;
+});
 
 module.exports = {
     devtool: "source-map",
-    entry: {
-        Query: path.join(__dirname, "src/server/Query.js"),
-        Filter: path.join(__dirname, "src/filter/Filter.js"),
-        GrapeQLCoach: path.join(__dirname, "src/parser/GrapeQLCoach.js")
-    },
+    entry,
+    // {
+    //     testFilter: path.join(__dirname, "tests/Filter/Filter.js"),
+    //     testFilterSql: path.join(__dirname, "tests/Filter/FilterSql.js"),
+    //     testParser: path.join(__dirname, "tests/Parser/Parser.js"),
+    //     testQueryBuilder: path.join(__dirname, "tests/QueryBuilder/QueryBuilder.js")
+    // },
     output: {
         path: path.join(__dirname, "dist"),
         filename: "[name].js"

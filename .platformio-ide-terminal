@@ -1,0 +1,26 @@
+{
+    "icons": [
+        {
+            "name": "Watch",
+            "color": "Green",
+            "command": "npm run watch",
+			"templates": [
+				{
+					"name": "build",
+					"command": "npm run build",
+					"autoRun": true
+				},
+				{
+					"name": "npm i --dev",
+					"command": "npm i --dev",
+					"autoRun": true
+				}
+			]
+        },
+        {
+            "name": "Tests",
+            "color": "Pink",
+            "command": "npm run test"
+        }
+    ]
+}

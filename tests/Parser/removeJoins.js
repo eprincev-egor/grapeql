@@ -1,45 +1,53 @@
-(function(QUnit, GrapeQLCoach) {
-    "use strict";
-        
-    const SERVER_1 = window.tests.SERVER_1;
+"use strict";
+
+let QUnit;
+if ( typeof window == "undefined" ) {
+    QUnit = require("qunit").QUnit;
+} else {
+    QUnit = window.QUnit;
+}
     
-    function testRemoveUnnesaryJoins(assert, fromSelect, toSelect, server) {
-        if ( !server ) {
-            server = toSelect;
-            toSelect = fromSelect;
-        }
+const GrapeQLCoach = require("../../src/parser/GrapeQLCoach");
+const SERVER_1 = require("../test-servers/SERVER_1");
+const weakDeepEqual = require("../utils/weakDeepEqual");
+
+function testRemoveUnnesaryJoins(assert, fromSelect, toSelect, server) {
+    if ( !server ) {
+        server = toSelect;
+        toSelect = fromSelect;
+    }
         
-        let coach;
+    let coach;
         
-        coach = new GrapeQLCoach(fromSelect);
-        coach.skipSpace();
-        let parsedFromSelect = coach.parseSelect();
+    coach = new GrapeQLCoach(fromSelect);
+    coach.skipSpace();
+    let parsedFromSelect = coach.parseSelect();
         
-        coach = new GrapeQLCoach(toSelect);
-        coach.skipSpace();
-        let parsedToSelect = coach.parseSelect();
+    coach = new GrapeQLCoach(toSelect);
+    coach.skipSpace();
+    let parsedToSelect = coach.parseSelect();
         
-        parsedFromSelect.removeUnnesaryJoins({server});
+    parsedFromSelect.removeUnnesaryJoins({server});
         
-        let isEqual = !!window.weakDeepEqual(parsedFromSelect, parsedToSelect);
-        if ( !isEqual ) {
-            console.log("break here");
-        }
+    let isEqual = !!weakDeepEqual(parsedFromSelect, parsedToSelect);
+    if ( !isEqual ) {
+        console.log("break here");
+    }
         
-        assert.pushResult({
-            result: isEqual,
-            actual: parsedFromSelect.toString(),
-            expected: parsedToSelect.toString(),
-            message: `
+    assert.pushResult({
+        result: isEqual,
+        actual: parsedFromSelect.toString(),
+        expected: parsedToSelect.toString(),
+        message: `
                 ${ fromSelect }
                 --------------------------->
                 ${ toSelect }
             `
-        });
-    }
+    });
+}
     
-    QUnit.test("Select.removeUnnesaryJoins", function(assert) {
-        testRemoveUnnesaryJoins(assert, `
+QUnit.test("Select.removeUnnesaryJoins", function(assert) {
+    testRemoveUnnesaryJoins(assert, `
             select from company
             
             left join country on
@@ -48,7 +56,7 @@
             select from company
         `, SERVER_1);
         
-        testRemoveUnnesaryJoins(assert, `
+    testRemoveUnnesaryJoins(assert, `
             select from company
             
             left join country on
@@ -57,7 +65,7 @@
             where country.id > 3
         `, SERVER_1);
         
-        testRemoveUnnesaryJoins(assert, `
+    testRemoveUnnesaryJoins(assert, `
             select from company
             
             left join country on
@@ -68,7 +76,7 @@
                 
         `, SERVER_1);
         
-        testRemoveUnnesaryJoins(assert, `
+    testRemoveUnnesaryJoins(assert, `
             select from public.order as orders
             
             left join company as company_client on
@@ -82,7 +90,7 @@
             select from public.order as orders
         `, SERVER_1);
         
-        testRemoveUnnesaryJoins(assert, `
+    testRemoveUnnesaryJoins(assert, `
             select
                 partner_link.*
             from public.order as orders
@@ -96,7 +104,7 @@
             
         `, SERVER_1);
         
-        testRemoveUnnesaryJoins(assert, `
+    testRemoveUnnesaryJoins(assert, `
             select
                 *
             from public.order as orders
@@ -110,7 +118,7 @@
             
         `, SERVER_1);
         
-        testRemoveUnnesaryJoins(assert, `
+    testRemoveUnnesaryJoins(assert, `
             select
                 (company_client.id + partner_link.id_order)
             from public.order as orders
@@ -124,7 +132,7 @@
             
         `, SERVER_1);
         
-        testRemoveUnnesaryJoins(assert, `
+    testRemoveUnnesaryJoins(assert, `
             select
                 (company_client.id + partner_link.id_order + some.one)
             from public.order as orders
@@ -142,7 +150,7 @@
             ) as some on true
         `, SERVER_1);
         
-        testRemoveUnnesaryJoins(assert, `
+    testRemoveUnnesaryJoins(assert, `
             select
                 (company_client.id + partner_link.id_order)
             from public.order as orders
@@ -171,7 +179,7 @@
                 company_client.id = partner_link.id_company
         `, SERVER_1);
         
-        testRemoveUnnesaryJoins(assert, `
+    testRemoveUnnesaryJoins(assert, `
             select from company
             
             left join (select * from country limit 1) as country on true
@@ -179,7 +187,7 @@
             select from company
         `, SERVER_1);
         
-        testRemoveUnnesaryJoins(assert, `
+    testRemoveUnnesaryJoins(assert, `
             select from company
             
             left join public.order as orders on
@@ -202,6 +210,4 @@
                 orders.id_client = company.id
             
         `, SERVER_1);
-    });
-    
-})(window.QUnit, window.tests.GrapeQLCoach);
+});
