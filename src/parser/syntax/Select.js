@@ -994,11 +994,11 @@ class Select extends Syntax {
         );
     }
     
-    _isUsedFromLinkInGroupBy(fromLink) {
+    _isUsedFromLinkInGroupBy(/* fromLink */) {
         return false;
     }
     
-    _isUsedFromLinkInOrderBy(fromLink) {
+    _isUsedFromLinkInOrderBy(/* fromLink */) {
         return false;
     }
     

@@ -40,12 +40,12 @@ class GrapeQL {
             
             where
                 pg_columns.table_schema != 'pg_catalog' and 
-                pg_columns.table_name != 'information_schema'
+                pg_columns.table_schema != 'information_schema'
         `);
         
         this.schemes = {};
         _.each(res.rows, row => {
-            let schemeName = row.schme_name,
+            let schemeName = row.table_schema,
                 scheme = this.schemes[ schemeName ];
             
             if ( !scheme ) {

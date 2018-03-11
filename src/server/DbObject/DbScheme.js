@@ -12,8 +12,7 @@ class DbScheme {
     }
     
     addTable(table) {
-        let name = table.name;
-        this.tables[ name ] = table;
+        this.tables[ table.name ] = table;
     }
     
     addFunction(dbFunction) {
