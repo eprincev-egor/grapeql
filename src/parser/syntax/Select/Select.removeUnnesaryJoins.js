@@ -121,9 +121,11 @@ module.exports = {
         return this._isUsedFromLink(fromLink, index);
     },
     
-    _isUsedFromLink(fromLink, joinIndex) {
+    _isUsedFromLink(fromLink, joinIndex, options) {
+        options = options || {star: true};
+        
         return (
-            this._isUsedFromLinkInColumns( fromLink ) ||
+            this._isUsedFromLinkInColumns( fromLink, options ) ||
             this.where && this._isUsedFromLinkInExpresion( fromLink, this.where )  ||
             this.having && this._isUsedFromLinkInExpresion( fromLink, this.having )  ||
             this._isUsedFromLinkInJoins( fromLink, joinIndex ) ||
@@ -134,21 +136,23 @@ module.exports = {
     
     _isUsedFromLinkBySubSelect(fromLink) {
         return (
-            this._isUsedFromLink(fromLink, -1) 
-            ||
+            this._isUsedFromLink(fromLink, -1, {star: false}) ||
             
             this.from.some(fromItem => {
                 if ( fromItem.select ) {
                     return fromItem.select._isUsedFromLinkBySubSelect(fromLink);
                 }
-            })
+            }) 
+            ||
+            
+            this.union && this.union.select._isUsedFromLinkBySubSelect(fromLink)
         );
     },
     
-    _isUsedFromLinkInColumns(fromLink) {
+    _isUsedFromLinkInColumns(fromLink, options) {
         return this.columns.some(column => {
             // select *
-            if ( column.isStar() ) {
+            if ( options.star !== false && column.isStar() ) {
                 let objectLink = column.expression.getLink();
                 if ( objectLink.link.length == 1 ) {
                     return true;
@@ -169,7 +173,6 @@ module.exports = {
             }
             
             if ( join.from.select && join.from.lateral ) {
-                // TODO: deepScan union and with and from all items
                 isUsed = isUsed || join.from.select._isUsedFromLinkBySubSelect(fromLink);
             }
             return isUsed;
@@ -224,6 +227,11 @@ module.exports = {
     _isUsedFromLinkInExpresion(fromLink, expression) {
         const Expression = this.Coach.Expression;
         const ObjectLink = this.Coach.ObjectLink;
+        const Cast = this.Coach.Cast;
+        const In = this.Coach.In;
+        const Between = this.Coach.Between;
+        const CaseWhen = this.Coach.CaseWhen;
+        const FunctionCall = this.Coach.FunctionCall;
         
         return expression.elements.some(elem => {
             if ( elem instanceof Expression ) {
@@ -234,6 +242,52 @@ module.exports = {
                 let link = objectLink2schmeTableColumn( elem );
                 
                 return equalTableLink(fromLink, link);
+            }
+            
+            if ( elem instanceof Cast ) {
+                return this._isUsedFromLinkInExpresion(fromLink, elem.expression);
+            }
+            
+            if ( elem instanceof In ) {
+                if ( Array.isArray(elem.in) ) {
+                    return elem.in.some(
+                        expression => this._isUsedFromLinkInExpresion(
+                            fromLink, 
+                            expression
+                        )
+                    );
+                } else {
+                    // in (select ...)
+                    return elem.in._isUsedFromLinkBySubSelect( fromLink );
+                }
+            }
+            
+            if ( elem instanceof Between ) {
+                return (
+                    this._isUsedFromLinkInExpresion(fromLink, elem.start) ||
+                    this._isUsedFromLinkInExpresion(fromLink, elem.end)
+                );
+            }
+            
+            if ( elem instanceof CaseWhen ) {
+                let result;
+                if ( elem.else ) {
+                    result = this._isUsedFromLinkInExpresion(fromLink, elem.else);
+                }
+                if ( result === true ) {
+                    return true;
+                }
+                
+                return elem.case.some(caseElem => (
+                    this._isUsedFromLinkInExpresion(fromLink, caseElem.when) ||
+                    this._isUsedFromLinkInExpresion(fromLink, caseElem.then)
+                ));
+            }
+            
+            if ( elem instanceof FunctionCall ) {
+                return elem.arguments.some(
+                    arg => this._isUsedFromLinkInExpresion(fromLink, arg)
+                );
             }
         });
     }

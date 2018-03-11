@@ -5,7 +5,7 @@ const glob = require("glob");
 
 let entry = {};
 
-let testsFiles = glob.sync("./tests/**/*-spec.js");
+let testsFiles = glob.sync("./tests/**/*-spec.js").concat(glob.sync("./tests/**/*-brow.js"));
 testsFiles.forEach(filePath => {
     let fileName = filePath.split(/[\\/]/) || [];
     fileName = fileName.pop();
@@ -36,6 +36,10 @@ module.exports = {
                 query: {
                     presets: ["es2015"]
                 }
+            },
+            {
+                test: /\.json$/,
+                loader: "json-loader"
             }
         ]
     }

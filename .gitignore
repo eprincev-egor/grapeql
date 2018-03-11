@@ -3,3 +3,4 @@ dist
 package-lock.json
 config.js
 database.json
+server-dump.json
