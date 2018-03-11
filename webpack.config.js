@@ -10,8 +10,7 @@ testsFiles.forEach(filePath => {
     let fileName = filePath.split(/[\\/]/) || [];
     fileName = fileName.pop();
     
-    let entryName = fileName.split("-")[0];
-    entryName = "test" + entryName[0].toUpperCase() + entryName.slice(1);
+    let entryName = fileName.split(".")[0];
     
     entry[ entryName ] = filePath;
 });
