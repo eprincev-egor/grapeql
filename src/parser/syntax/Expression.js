@@ -22,7 +22,7 @@ class Expression extends Syntax {
     }
     
     parseElements(coach, options) {
-        let elem, i;
+        let elem, i, result;
         
         if ( options.posibleStar && coach.is("*") ) {
             elem = coach.parseObjectLink({ posibleStar: options.posibleStar });
@@ -31,7 +31,7 @@ class Expression extends Syntax {
             return;
         }
         
-        let result = this.parseOperators(coach, options);
+        result = this.parseOperators(coach, options);
         if ( result === false ) {
             return;
         }
@@ -45,21 +45,13 @@ class Expression extends Syntax {
         this.addChild(elem);
         this.elements.push(elem);
         
+        // company.id in (1,2)
+        // company.id between 1 and 2
         coach.skipSpace();
-        
-        if ( coach.isIn() ) {
-            elem = coach.parseIn();
+        if ( coach.isBetween() || coach.isIn() ) {
+            elem = this.parseElement( coach, options );
             this.addChild(elem);
             this.elements.push(elem);
-            
-            coach.skipSpace();
-        }
-        else if ( coach.isBetween() ) {
-            elem = coach.parseBetween();
-            this.addChild(elem);
-            this.elements.push(elem);
-            
-            coach.skipSpace();
         }
         
         // ::text::text::text
@@ -114,6 +106,14 @@ class Expression extends Syntax {
 
         else if ( coach.isCast() ) {
             elem = coach.parseCast();
+        }
+        
+        else if ( coach.isIn() ) {
+            elem = coach.parseIn();
+        }
+        
+        else if ( coach.isBetween() ) {
+            elem = coach.parseBetween();
         }
         
         else if ( coach.isPgNull() ) {

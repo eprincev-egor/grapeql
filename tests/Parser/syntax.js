@@ -816,6 +816,47 @@ GrapeQLCoach.Expression.tests = [
         }
     },
     {
+        str: "company.id not between 1 and 2 + 3",
+        result: {
+            elements: [
+                {link: [
+                    {word: "company"},
+                    {word: "id"}
+                ]},
+                {operator: "not"},
+                {
+                    start: {elements: [
+                        {number: "1"}
+                    ]},
+                    end: {elements: [
+                        {number: "2"},
+                        {operator: "+"},
+                        {number: "3"}
+                    ]}
+                }
+            ]
+        }
+    },
+    {
+        str: "id not in (1,2)",
+        result: {
+            elements: [
+                {link: [
+                    {word : "id"}
+                ]},
+                {operator: "not"},
+                {in: [
+                    {elements: [
+                        {number: "1"}
+                    ]},
+                    {elements: [
+                        {number: "2"}
+                    ]}
+                ]}
+            ]
+        }
+    },
+    {
         str: "test.id between 1 + 3 and 3 + 1 > test.id between ( 8 * test.id ) and 30 - 8",
         result: {
             elements: [
