@@ -408,6 +408,54 @@ module.exports = function(SERVER_1) {
         `, SERVER_1);
         
         testRemoveUnnesaryJoins(assert, `
+            select
+                comp_id.id
+            from (select 1 as id) as comp_id
+            
+            left join company on
+                company.id = comp_id.id
+            
+            left join lateral (
+                select * from (
+                    with 
+                		test as (
+                			select
+                				company.name
+                		)
+                	select * from test
+                ) as some_table
+            ) as some_table on true
+            
+        `, SERVER_1);
+        
+        testRemoveUnnesaryJoins(assert, `
+            select
+                comp_id.id
+            from (select 1 as id) as comp_id
+            
+            left join company on
+                company.id = comp_id.id
+            
+            left join lateral (
+                select * from (
+                    with 
+                		test as (
+                			select
+                				company.name
+                		)
+                	select * from test
+                ) as some_table
+                
+                limit 1
+            ) as some_table on true
+            
+        `, `
+            select
+                comp_id.id
+            from (select 1 as id) as comp_id
+        `, SERVER_1);
+        
+        testRemoveUnnesaryJoins(assert, `
                 select from company
                 
                 left join public.order as orders on

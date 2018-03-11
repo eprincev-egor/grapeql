@@ -6,6 +6,8 @@ const {
     equalTableLink
 } = require("./helpers");
 
+// TODO: from lateral func( some.id )
+
 module.exports = {
     
     // params.server
@@ -143,6 +145,11 @@ module.exports = {
                     return fromItem.select._isUsedFromLinkBySubSelect(fromLink);
                 }
             }) 
+            ||
+            
+            this.with && this.with.some(
+                withElem => withElem.select._isUsedFromLinkBySubSelect(fromLink)
+            ) 
             ||
             
             this.union && this.union.select._isUsedFromLinkBySubSelect(fromLink)
