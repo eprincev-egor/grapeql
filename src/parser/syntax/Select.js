@@ -654,6 +654,8 @@ class Select extends Syntax {
         let join = coach.parseJoin(sql);
         this.addChild(join);
         this.joins.push(join);
+        
+        this._createFromMap();
     }
     
     addWhere(sql) {
@@ -823,6 +825,207 @@ class Select extends Syntax {
             return parentSelect.getColumnSource(params, objectLink, {_childFromItem: parentFromItem});
         }
     }
+    
+    // params.server
+    removeUnnesaryJoins(params) {
+        for (let i = this.joins.length - 1; i >= 0; i--) {
+            let join = this.joins[ i ];
+            
+            if ( !this._isHelpfullJoin(join, i, params) ) {
+                this.joins.splice(i, 1);
+            }
+        }
+        
+        this._createFromMap();
+    }
+    
+    _isHelpfullJoin(join, index, params) {
+        let fromLink;
+        
+        if ( join.from.as && join.from.as.alias ) {
+            fromLink = new this.Coach.ObjectLink();
+            fromLink.add( join.from.as.alias );
+        } else {
+            fromLink = join.from.table;
+        }
+        fromLink = objectLink2schmeTable(fromLink);
+        
+        let isRemovable = false;
+        if ( join.type == "left join" && join.from.table && join.on ) {
+            let isConstraintExpression = true,
+                constraintColumns = [];
+            
+            for (let i = 0, n = join.on.elements.length; i < n; i += 3) {
+                let 
+                    leftElem = join.on.elements[ i ],
+                    operator = join.on.elements[ i + 1 ],
+                    rightElem = join.on.elements[ i + 2 ];
+                
+                if (
+                    operator.operator != "=" ||
+                    !leftElem.link ||
+                    !rightElem.link
+                )  {
+                    isConstraintExpression = false;
+                    break;
+                }
+                
+                let leftLink = objectLink2schmeTableColumn( leftElem ),
+                    rightLink = objectLink2schmeTableColumn( rightElem );
+                
+                if ( leftLink.table && equalTableLink(leftLink, fromLink) ) {
+                    constraintColumns.push(leftLink.column);
+                }
+                else if ( rightLink.table && equalTableLink(rightLink, fromLink) ) {
+                    constraintColumns.push(rightLink.column);
+                }
+                else {
+                    isConstraintExpression = false;
+                    break;
+                }
+                
+                let nextElem = join.on.elements[ i + 3 ];
+                if ( nextElem ) {
+                    if ( nextElem.operator != "and" ) {
+                        isConstraintExpression = false;
+                        break;
+                    }
+                    i++;
+                }
+            }
+            
+            if ( isConstraintExpression ) {
+                let server = params.server,
+                    link = objectLink2schmeTable( join.from.table ),
+                    scheme = link.scheme || "public",
+                    table = link.table,
+                    dbScheme = server.schemes[ scheme ],
+                    dbTable = dbScheme && dbScheme.tables[ table ];
+                
+                if ( dbTable ) {
+                    let _constraintColumns = constraintColumns.sort().join(",");
+                    
+                    for (let name in dbTable.constraints) {
+                        let constraint = dbTable.constraints[ name ];
+                        
+                        if ( 
+                            (constraint.type == "primary key" || 
+                            constraint.type == "unique") &&
+                            constraint.columns.sort().join(",") == _constraintColumns
+                        ) {
+                            isRemovable = true;
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+        if ( join.type == "left join" && join.from.select ) {
+            if ( 
+                // left join (select * from some limit 1)
+                join.from.select.limit == 1 || 
+                // left join (select 1)
+                !join.from.select.from.length
+            ) {
+                isRemovable = true;
+            }
+        }
+        
+        // join can change rows order
+        if ( !isRemovable ) {
+            return true;
+        }
+        
+        return this._isUsedFromLink(fromLink, index);
+    }
+    
+    _isUsedFromLink(fromLink, joinIndex) {
+        let afterJoins = this.joins.slice(joinIndex + 1);
+        return (
+            this.columns.some(column => {
+                // select *
+                if ( column.isStar() ) {
+                    let objectLink = column.expression.getLink();
+                    if ( objectLink.link.length == 1 ) {
+                        return true;
+                    }
+                }
+                
+                return this._isUsedFromLinkInExpresion( fromLink, column.expression );
+            })
+            ||
+            
+            this.where && this._isUsedFromLinkInExpresion( fromLink, this.where ) 
+            ||
+            
+            this.having && this._isUsedFromLinkInExpresion( fromLink, this.having ) 
+            ||
+            
+            afterJoins.some(join => {
+                let isUsed = false;
+                
+                if ( join.on ) {
+                    isUsed = isUsed || this._isUsedFromLinkInExpresion( fromLink, join.on );
+                }
+                
+                if ( join.from.select && join.from.lateral ) {
+                    // TODO: deepScan union and with and from all items
+                    isUsed = isUsed || join.from.select._isUsedFromLinkBySubSelect(fromLink);
+                }
+                return isUsed;
+            }) 
+            ||
+            
+            this._isUsedFromLinkInGroupBy( fromLink ) ||
+            this._isUsedFromLinkInOrderBy( fromLink ) 
+        );
+    }
+    
+    _isUsedFromLinkBySubSelect(fromLink) {
+        return (
+            this._isUsedFromLink(fromLink, -1) 
+            ||
+            
+            this.from.some(fromItem => {
+                if ( fromItem.select ) {
+                    return fromItem.select._isUsedFromLinkBySubSelect(fromLink);
+                }
+            })
+        );
+    }
+    
+    _isUsedFromLinkInGroupBy(fromLink) {
+        return false;
+    }
+    
+    _isUsedFromLinkInOrderBy(fromLink) {
+        return false;
+    }
+    
+    _isUsedFromLinkInExpresion(fromLink, expression) {
+        const Expression = this.Coach.Expression;
+        const ObjectLink = this.Coach.ObjectLink;
+        
+        return expression.elements.some(elem => {
+            if ( elem instanceof Expression ) {
+                return this._isUsedFromLinkInExpresion(fromLink, expression);
+            }
+            
+            if ( elem instanceof ObjectLink ) {
+                let link = objectLink2schmeTableColumn( elem );
+                
+                return equalTableLink(fromLink, link);
+            }
+        });
+    }
+}
+
+function equalTableLink(leftLink, rightLink) {
+    return (
+        // scheme can be null
+        leftLink.scheme == rightLink.scheme &&
+        leftLink.table == rightLink.table
+    );
 }
 
 function objectLink2schmeTable(objectLink) {

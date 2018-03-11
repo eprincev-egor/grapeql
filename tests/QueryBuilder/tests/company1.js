@@ -21,7 +21,7 @@
                     from company
                     
                     left join lateral (select 
-                        id as "id",
+                        company.id as "id",
                         public.company.inn as "inn",
                         coalesce( company.name, '(Не определено)' )  as "name"
                     ) as _grape_query_columns on true
@@ -44,7 +44,7 @@
                     from company
                     
                     left join lateral(select
-                        id as "id",
+                        company.id as "id",
                         public.company.inn as "INN"
                     ) as _grape_query_columns on true
                     
@@ -65,7 +65,7 @@
                     from company
                     
                     left join lateral(select
-                        id as "id"
+                        company.id as "id"
                     ) as _grape_query_columns on true
                     
                     where
@@ -78,10 +78,13 @@
         nodes: {
             Company: `
             select 
-                id,
+                company.id,
                 * ,
                 coalesce( company.name, '(Не определено)' ) as name
             from company
+            
+            left join country on
+                country.id = company.id_country
             `
         },
         
@@ -103,6 +106,27 @@
                             inn: {
                                 name: "inn",
                                 type: "text"
+                            },
+                            id_country: {
+                                name: "id_country",
+                                type: "integer"
+                            }
+                        }
+                    },
+                    country: {
+                        name: "country",
+                        scheme: null,
+                        columns: {
+                            id: {
+                                name: "id",
+                                type: "integer"
+                            }
+                        },
+                        constraints: {
+                            country_pk: {
+                                type: "primary key",
+                                name: "country_pk",
+                                columns: ["id"]
                             }
                         }
                     }

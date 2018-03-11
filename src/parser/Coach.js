@@ -159,13 +159,18 @@ class Coach {
     //    is: function,
     //    parse: function
     // }
-    parseComma(SyntaxName) {
+    parseComma(SyntaxName, options) {
         let elements = [],
             parseSyntax,
             isSyntax;
         
         if ( typeof SyntaxName == "string" ) {
-            parseSyntax = this[ "parse" + SyntaxName ].bind(this);
+            if ( options ) {
+                parseSyntax = this[ "parse" + SyntaxName ].bind(this, options);
+            } else {
+                parseSyntax = this[ "parse" + SyntaxName ].bind(this);
+            }
+            
             isSyntax = this[ "is" + SyntaxName ].bind(this);
         } else {
             parseSyntax = SyntaxName.parse;

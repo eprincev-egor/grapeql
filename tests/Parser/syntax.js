@@ -358,6 +358,66 @@
         }
     ];
     
+    GrapeQLCoach.In.tests = [
+        {
+            str: "in(1)",
+            result: {
+                in: [
+                    {elements: [
+                        {number: "1"}
+                    ]}
+                ]
+            }
+        },
+        {
+            str: "in ( 1 ,  'nice' )",
+            result: {
+                in: [
+                    {elements: [
+                        {number: "1"}
+                    ]},
+                    
+                    {elements: [
+                        {content: "nice"}
+                    ]}
+                ]
+            }
+        },
+        {
+            str: "in (select id from company)",
+            result: {
+                in: {
+                    columns: [
+                        {expression: {elements: [
+                            {link: [
+                                {word: "id"}
+                            ]}
+                        ]}}
+                    ],
+                    from: [
+                        {table: {link: [
+                            {word: "company"}
+                        ]}}
+                    ]
+                }
+            }
+        }
+    ];
+    
+    GrapeQLCoach.Between.tests = [
+        {
+            str: "Between 1 and 3",
+            result: {
+                start: {elements: [
+                    {number: "1"}
+                ]},
+                end: {elements: [
+                    {number: "3"}
+                ]}
+            }
+        }
+    ];
+    
     GrapeQLCoach.Expression.tests = [
         {
             str: "1 + 1",
@@ -581,6 +641,214 @@
                         {operator: "+"},
                         {number: "8"}
                     ]}
+                ]
+            }
+        },
+        {
+            str: "company.id in (1, (1+ 1),3)",
+            result: {
+                elements: [
+                    {link: [
+                        {word: "company"},
+                        {word: "id"}
+                    ]},
+                    {in: [
+                        {elements: [
+                            {number: "1"}
+                        ]},
+                        
+                        {elements: [
+                            {number: "1"},
+                            {operator: "+"},
+                            {number: "1"}
+                        ]},
+                        
+                        {elements: [
+                            {number: "3"}
+                        ]}
+                    ]}
+                ]
+            }
+        },
+        {
+            str: "company.id between 1 and 2",
+            result: {
+                elements: [
+                    {link: [
+                        {word: "company"},
+                        {word: "id"}
+                    ]},
+                    {
+                        start: {elements: [
+                            {number: "1"}
+                        ]},
+                        end: {elements: [
+                            {number: "2"}
+                        ]}
+                    }
+                ]
+            }
+        },
+        {
+            str: "company.id between 1 and 2 or company.id between 5 and 6",
+            result: {
+                elements: [
+                    {link: [
+                        {word: "company"},
+                        {word: "id"}
+                    ]},
+                    {
+                        start: {elements: [
+                            {number: "1"}
+                        ]},
+                        end: {elements: [
+                            {number: "2"}
+                        ]}
+                    },
+                    {operator: "or"},
+                    {link: [
+                        {word: "company"},
+                        {word: "id"}
+                    ]},
+                    {
+                        start: {elements: [
+                            {number: "5"}
+                        ]},
+                        end: {elements: [
+                            {number: "6"}
+                        ]}
+                    }
+                ]
+            }
+        },
+        {
+            str: "company.id between 1 and 2 > true",
+            result: {
+                elements: [
+                    {link: [
+                        {word: "company"},
+                        {word: "id"}
+                    ]},
+                    {
+                        start: {elements: [
+                            {number: "1"}
+                        ]},
+                        end: {elements: [
+                            {number: "2"}
+                        ]}
+                    },
+                    {operator: ">"},
+                    {boolean: true}
+                ]
+            }
+        },
+        {
+            str: "company.id between 1 and 2 >= true",
+            result: {
+                elements: [
+                    {link: [
+                        {word: "company"},
+                        {word: "id"}
+                    ]},
+                    {
+                        start: {elements: [
+                            {number: "1"}
+                        ]},
+                        end: {elements: [
+                            {number: "2"}
+                        ]}
+                    },
+                    {operator: ">="},
+                    {boolean: true}
+                ]
+            }
+        },
+        {
+            str: "company.id between 1 and 2 < true",
+            result: {
+                elements: [
+                    {link: [
+                        {word: "company"},
+                        {word: "id"}
+                    ]},
+                    {
+                        start: {elements: [
+                            {number: "1"}
+                        ]},
+                        end: {elements: [
+                            {number: "2"}
+                        ]}
+                    },
+                    {operator: "<"},
+                    {boolean: true}
+                ]
+            }
+        },
+        {
+            str: "company.id between 1 and 2 + 3 <= true",
+            result: {
+                elements: [
+                    {link: [
+                        {word: "company"},
+                        {word: "id"}
+                    ]},
+                    {
+                        start: {elements: [
+                            {number: "1"}
+                        ]},
+                        end: {elements: [
+                            {number: "2"},
+                            {operator: "+"},
+                            {number: "3"}
+                        ]}
+                    },
+                    {operator: "<="},
+                    {boolean: true}
+                ]
+            }
+        },
+        {
+            str: "test.id between 1 + 3 and 3 + 1 > test.id between ( 8 * test.id ) and 30 - 8",
+            result: {
+                elements: [
+                    {link: [
+                        {word: "test"},
+                        {word: "id"}
+                    ]},
+                    {
+                        start: {elements: [
+                            {number: "1"},
+                            {operator: "+"},
+                            {number: "3"}
+                        ]},
+                        end: {elements: [
+                            {number: "3"},
+                            {operator: "+"},
+                            {number: "1"}
+                        ]}
+                    },
+                    
+                    {operator: ">"},
+                    
+                    {link: [
+                        {word: "test"},
+                        {word: "id"}
+                    ]},
+                    {
+                        start: {elements: [
+                            {number: "8"},
+                            {operator: "*"},
+                            {link: [
+                                {word: "test"},
+                                {word: "id"}
+                            ]}
+                        ]},
+                        end: {elements: [
+                            {number: "30"},
+                            {operator: "-"},
+                            {number: "8"}
+                        ]}
+                    }
                 ]
             }
         }

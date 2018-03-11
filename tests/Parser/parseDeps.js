@@ -107,7 +107,7 @@
         }
     };
     
-    QUnit.test("Selec.getDbColumn", function(assert) {
+    QUnit.test("Select.getDbColumn", function(assert) {
         
         testGetDbColumn(assert, {
             server: SERVER_1,

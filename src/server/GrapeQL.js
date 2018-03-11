@@ -5,10 +5,11 @@ const pg = require("pg");
 const fs = require("fs");
 const Node = require("./Node");
 
-const DbScheme = require("./DbScheme");
-const DbTable = require("./DbTable");
-const DbColumn = require("./DbColumn");
-const DbFunction = require("./DbFunction");
+const DbScheme = require("./DbObject/DbScheme");
+const DbTable = require("./DbObject/DbTable");
+const DbColumn = require("./DbObject/DbColumn");
+const DbFunction = require("./DbObject/DbFunction");
+const DbConstraint = require("./DbObject/DbConstraint");
 
 class GrapeQL {
     constructor(config) {
@@ -99,6 +100,54 @@ class GrapeQL {
             });
             
             scheme.addFunction(dbFunction);
+        });
+        
+        res = await this.db.query(`
+            select 
+            	tc.constraint_type,
+            	tc.constraint_name,
+            	tc.table_schema, 
+            	tc.table_name,
+            	array_agg(kc.column_name::text) as columns
+
+            from information_schema.table_constraints tc
+
+            join information_schema.key_column_usage kc on 
+              kc.table_name = tc.table_name and 
+              kc.table_schema = tc.table_schema and 
+              kc.constraint_name = tc.constraint_name
+
+            group by tc.constraint_type,
+            	tc.constraint_name,
+            	tc.table_schema, 
+            	tc.table_name
+        `);
+        _.each(res.rows, row => {
+            let schemeName = row.table_schema,
+                scheme = this.schemes[ schemeName ];
+            
+            if ( !scheme ) {
+                scheme = new DbScheme({ name: schemeName });
+                this.schemes[ schemeName ] = scheme;
+            }
+            
+            let tableName = row.table_name,
+                table = scheme.getTable( tableName );
+            
+            if ( !table ) {
+                table = new DbTable({
+                    name: tableName,
+                    scheme: schemeName
+                });
+                scheme.addTable( table );
+            }
+            
+            let constraint = new DbConstraint({
+                name: row.constraint_name,
+                type: row.constraint_type.toLowerCase(),
+                columns: row.columns
+            });
+            table.addConstraint( constraint );
         });
     }
     

@@ -37,6 +37,8 @@ GrapeQLCoach.addSyntax("SystemVariable", require("./syntax/SystemVariable"));
 GrapeQLCoach.addSyntax("PgNumber", require("./syntax/PgNumber"));
 GrapeQLCoach.addSyntax("DoubleQuotes", require("./syntax/DoubleQuotes"));
 GrapeQLCoach.addSyntax("PgString", require("./syntax/PgString"));
+GrapeQLCoach.addSyntax("In", require("./syntax/In"));
+GrapeQLCoach.addSyntax("Between", require("./syntax/Between"));
 GrapeQLCoach.addSyntax("DataType", require("./syntax/DataType"));
 GrapeQLCoach.addSyntax("Cast", require("./syntax/Cast"));
 GrapeQLCoach.addSyntax("ToType", require("./syntax/ToType"));

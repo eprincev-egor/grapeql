@@ -10,7 +10,7 @@ class Expression extends Syntax {
     }
     
     parse(coach, options) {
-        options = options || {posibleStar: false};
+        options = options || {posibleStar: false, excludeOperators: false};
         
         this.parseElements( coach, options );
         this.elements = this.extrude(this.elements);
@@ -31,7 +31,10 @@ class Expression extends Syntax {
             return;
         }
         
-        this.parseOperators(coach);
+        let result = this.parseOperators(coach, options);
+        if ( result === false ) {
+            return;
+        }
         
         i = coach.i;
         elem = this.parseElement( coach, options );
@@ -42,27 +45,56 @@ class Expression extends Syntax {
         this.addChild(elem);
         this.elements.push(elem);
         
-        // ::text::text::text
         coach.skipSpace();
+        
+        if ( coach.isIn() ) {
+            elem = coach.parseIn();
+            this.addChild(elem);
+            this.elements.push(elem);
+            
+            coach.skipSpace();
+        }
+        else if ( coach.isBetween() ) {
+            elem = coach.parseBetween();
+            this.addChild(elem);
+            this.elements.push(elem);
+            
+            coach.skipSpace();
+        }
+        
+        // ::text::text::text
         this.parseToTypes(coach);
         
         // operator
         coach.skipSpace();
         if ( coach.isOperator() ) {
-            this.parseOperators(coach);
+            let result = this.parseOperators(coach, options);
+            if ( result === false ) {
+                return;
+            }
             
             this.parseElements(coach, options);
         }
     }
     
-    parseOperators(coach) {
+    parseOperators(coach, options) {
         if ( coach.isOperator() ) {
+            let i = coach.i;
+            
             let operator = coach.parseOperator();
+            
+            if ( options.excludeOperators ) {
+                if ( options.excludeOperators.includes(operator.operator) ) {
+                    coach.i = i;
+                    return false;
+                }
+            }
+            
             this.addChild(operator);
             this.elements.push( operator );
             coach.skipSpace();
             
-            this.parseOperators(coach);
+            this.parseOperators(coach, options);
         }
     }
     

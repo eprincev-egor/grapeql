@@ -1,7 +1,34 @@
 (function(QUnit, GrapeQLCoach) {
     "use strict";
     
-    let index = 0; // for conditional break point
+    const SKIP_KEYS = ["coach", "Coach", "parent", "startIndex", "endIndex", "children", "_source"];
+    
+    function normolizeSyntaxBeforePrint(value) {
+        if ( Array.isArray(value) ) {
+            return value.map(normolizeSyntaxBeforePrint);
+        }
+        else if ( value && typeof value == "object" ) {
+            let clone = {};
+            let syntax = value;
+            
+            for (let key in syntax) {
+                let value = syntax[ key ];
+                
+                if ( SKIP_KEYS.includes(key) ) {
+                    continue;
+                }
+                
+                clone[ key ] = normolizeSyntaxBeforePrint( value );
+            }
+            
+            return clone;
+        } 
+        else {
+            return value;
+        }
+    }
+    
+    //let index = 0; // for conditional break point
     function testClass(className, SyntaxClass) {
         QUnit.test(className, (assert) => {
             window.assert = assert;
@@ -10,8 +37,8 @@
                 let str = test.str,
                     parseFuncName = "parse" + className;
                 
-                index++;
-                console.log(index);
+                //index++;
+                //console.log(index);
                 
                 if ( test.err ) {
                     try {
@@ -34,7 +61,7 @@
                     
                     assert.pushResult({
                         result: isEqual,
-                        actual: result,
+                        actual: normolizeSyntaxBeforePrint(result),
                         expected: test.result,
                         message: test.str
                     });
@@ -53,7 +80,7 @@
                     
                     assert.pushResult({
                         result: isEqual,
-                        actual: cloneResult,
+                        actual: normolizeSyntaxBeforePrint(cloneResult),
                         expected: test.result,
                         message: "clone: " + test.str
                     });

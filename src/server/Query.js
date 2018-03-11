@@ -222,6 +222,8 @@ class Query {
             let whereSql = request.where.toSql( sqlModel );
             this.select.addWhere( whereSql );
         }
+        
+        this.select.removeUnnesaryJoins({ server: this.server });
     }
     
     toString() {
