@@ -5,10 +5,11 @@ jobs:
       # specify the version you desire here
       - image: circleci/node:7.10
     
-    working_directory: ~/repo
+    working_directory: ~/grapeql
 
     steps:
-        
+      - checkout
+      
       # Download and cache dependencies
       - restore_cache:
           keys:
