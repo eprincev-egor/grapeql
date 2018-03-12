@@ -91,3 +91,14 @@ CREATE TABLE public.order_partner_link
 WITH (
   OIDS=FALSE
 );
+
+CREATE SCHEMA test;
+
+CREATE TABLE test.company
+(
+  id serial NOT NULL,
+  CONSTRAINT company_pk PRIMARY KEY (id)
+)
+WITH (
+  OIDS=FALSE
+);

@@ -17,5 +17,8 @@ QUnit.module("Select.removeUnnesaryJoins", {
         SERVER_1 = await initServer1();
     }
 }, function() {
-    tests(SERVER_1);
+    QUnit.test("wait server", function(assert) {
+        assert.ok(!!SERVER_1, "server exists");
+        tests(SERVER_1);
+    });
 });

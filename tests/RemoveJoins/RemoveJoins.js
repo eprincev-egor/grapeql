@@ -46,7 +46,6 @@ function testRemoveUnnesaryJoins(assert, fromSelect, toSelect, server) {
 }
 
 module.exports = function(SERVER_1) {
-    
     QUnit.test("server 1", function(assert) {
         
         testRemoveUnnesaryJoins(assert, `
