@@ -4,12 +4,20 @@ jobs:
     docker:
       # specify the version you desire here
       - image: circleci/node:7.10
+      - image: postgres:9.5
+        environment:
+          POSTGRES_USER: root
+          POSTGRES_DB: grapeql-test
     
     working_directory: ~/grapeql
 
     steps:
       - checkout
       
+      - run:
+          command: sudo -u postgres psql -p 5433 -c "create user ubuntu with password 'ubuntu';"
+          command: sudo -u postgres psql -p 5433 -c "alter user ubuntu with superuser;"
+            
       # Download and cache dependencies
       - restore_cache:
           keys:
@@ -18,6 +26,8 @@ jobs:
           - v1-dependencies-
 
       - run: npm install
+      
+      - run: node ./scripts/init.js
 
       - save_cache:
           paths:
