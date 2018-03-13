@@ -10,7 +10,7 @@ module.exports = {
         host: "localhost",
         user: "ubuntu",
         password: "ubuntu",
-        port: 5433,
+        port: 5432,
         database: "grapeql-test"
     },
     nodes: __dirname + "/nodes"
