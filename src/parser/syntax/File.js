@@ -13,7 +13,9 @@ class File extends Syntax {
             coach.skipSpace();
             
             if ( !coach.is("/") && !coach.is(".") ) {
-                this.path.push({name: "."});
+                let elem = new this.Coach.FilePathElement();
+                elem.name = ".";
+                this.path.push(elem);
             }
             
             this.parsePath(coach, {first: true});
@@ -27,7 +29,7 @@ class File extends Syntax {
             elem = coach.parseDoubleQuotes();
             this.path.push(elem);
         } else {
-            elem = {name: coach.read(/[^\s/]+/)};
+            elem = coach.parseFilePathElement();
             
             if ( !elem.name ) {
                 if ( options.first !== true ) {
@@ -53,15 +55,7 @@ class File extends Syntax {
     
     clone() {
         let clone = new File();
-        
-        clone.path = this.path.map(elem => {
-            if ( elem.clone ) {
-                return elem.clone();
-            } else {
-                return {name: elem.name};
-            }
-        });
-        
+        clone.path = this.path.map(elem => elem.clone());
         return clone;
     }
     

@@ -9,8 +9,10 @@ if ( typeof window == "undefined" ) {
 
 const tests = require("./RemoveJoins");
 
-let SERVER_1 = require("../test-servers/server1/server-dump.json");
+let server1 = require("../test-servers/server1/server-dump.json");
 
 QUnit.module("Select.removeUnnesaryJoins", {}, function() {
-    tests(SERVER_1);
+    tests(() => ({
+        server1
+    }));
 });

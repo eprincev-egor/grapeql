@@ -4,6 +4,7 @@ const Syntax = require("../Syntax");
 
 const removeUnnesaryJoinsMethods = require("./Select.removeUnnesaryJoins");
 const getColumnSourceMethods = require("./Select.getColumnSource");
+const buildFromFilesMethods = require("./Select.buildFromFiles");
 const {PUBLIC_SCHEME_NAME} = require("./helpers");
 
 // https://www.postgresql.org/docs/9.5/static/sql-select.html
@@ -680,6 +681,9 @@ for (let key in removeUnnesaryJoinsMethods) {
 }
 for (let key in getColumnSourceMethods) {
     Select.prototype[ key ] = getColumnSourceMethods[ key ];
+}
+for (let key in buildFromFilesMethods) {
+    Select.prototype[ key ] = buildFromFilesMethods[ key ];
 }
 
 // stop keywords for alias
