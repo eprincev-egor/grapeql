@@ -9,16 +9,18 @@ if ( typeof window == "undefined" ) {
 
 const tests = require("./RemoveJoins");
 
-let SERVER_1;
+let server1;
 const initServer1 = require("../test-servers/server1/index");
 
 QUnit.module("Select.removeUnnesaryJoins", {
     before: async function() {
-        SERVER_1 = await initServer1();
+        server1 = await initServer1();
+    },
+    after: async function() {
+        await server1.stop();
     }
 }, function() {
-    QUnit.test("wait server", function(assert) {
-        assert.ok(!!SERVER_1, "server exists");
-        tests(SERVER_1);
-    });
+    tests(() => ({
+        server1
+    }));
 });

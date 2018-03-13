@@ -181,6 +181,10 @@ class GrapeQL {
 
         this.nodes = nodes;
     }
+    
+    async stop() {
+        await this.db.end();
+    }
 }
 
 GrapeQL.start = async function(config) {

@@ -63,6 +63,9 @@ QUnit.dump.maxDepth = 100;
 QUnit.module("Select.getDbColumn", {
     before: async function() {
         SERVER_1 = await initServer1();
+    },
+    after: async function() {
+        await SERVER_1.stop();
     }
 }, function() {
     

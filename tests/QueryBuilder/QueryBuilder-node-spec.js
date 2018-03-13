@@ -41,6 +41,9 @@ const initServer1 = require("../test-servers/server1/index");
 QUnit.module("GrapeQL building query", {
     before: async function() {
         SERVER_1 = await initServer1();
+    },
+    after: async function() {
+        await SERVER_1.stop();
     }
 }, function() {
     
