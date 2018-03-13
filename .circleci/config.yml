@@ -2,21 +2,18 @@ version: 2
 jobs:
   build:
     docker:
-      # specify the version you desire here
       - image: circleci/node:7.10
       - image: postgres:9.5
         environment:
-          POSTGRES_DB: grapeql-test
+        - POSTGRES_DB: grapeql-test
+        - POSTGRES_USER: ubuntu
+        - POSTGRES_PASSWORD: ubuntu
     
     working_directory: ~/grapeql
 
     steps:
       - checkout
       
-      - run:
-          command: sudo -u postgres psql -p 5433 -c "create user ubuntu with password 'ubuntu';"
-          command: sudo -u postgres psql -p 5433 -c "alter user ubuntu with superuser;"
-            
       # Download and cache dependencies
       - restore_cache:
           keys:
