@@ -7,64 +7,35 @@ if ( typeof window == "undefined" ) {
     QUnit = window.QUnit;
 }
 
-const GrapeQLCoach = require("../../src/parser/GrapeQLCoach");
-const weakDeepEqual = require("../utils/weakDeepEqual");
-
-function testFromFile(assert, test) {
-    assert.ok(false, "in work...");
-}
-
-
-
-let CompanyNode1 = `
-    select *
-    from company
-`;
-let OrderNode1 = `
-    select *
-    from public.Order
-    
-    left join ./Company as CompanyClient on
-        CompanyClient.id = public.Order.id_company_client
-`;
-
-let nodes1 = {
-    Company: CompanyNode1,
-    Order: OrderNode1
-};
-
+const testRequest = require("../helpers/testRequest");
 
 module.exports = function(getServers) {
-    QUnit.test("server 1", function(assert) {
-        let server1 = getServers().server1;
+    
+    QUnit.test("Order", (assert) => {
+        let SERVER_1 = getServers().server1;
         
-        testFromFile(assert, {
-            nodes: nodes1,
-            
-            requestNode: "Order",
+        
+        testRequest(assert, SERVER_1, {
+            reqeustNode: "Order",
             request: {
                 columns: ["id"]
             },
-            
             result: `
                 select
                     _grape_query_columns."id"
                 from public.Order
                 
                 left join lateral (select
-                    company.id as "id"
+                    public.Order.id as "id"
                 ) as _grape_query_columns on true
             `
         });
         
-        testFromFile(assert, {
-            nodes: nodes1,
-            
-            requestNode: "Order",
+        testRequest(assert, SERVER_1, {
+            reqeustNode: "Order",
             request: {
                 columns: ["id", "CompanyClient.inn"]
             },
-            
             result: `
                 select
                     _grape_query_columns."id",
@@ -75,20 +46,17 @@ module.exports = function(getServers) {
                     CompanyClient.id = public.Order.id_company_client
                 
                 left join lateral (select
-                    company.id as "id",
+                    public.Order.id as "id",
                     public.company.inn as "inn"
                 ) as _grape_query_columns on true
             `
         });
         
-        testFromFile(assert, {
-            nodes: nodes1,
-            
-            requestNode: "Order",
+        testRequest(assert, SERVER_1, {
+            reqeustNode: "Order",
             request: {
                 columns: ["id", "CompanyClient.inn", "CompanyClient.id"]
             },
-            
             result: `
                 select
                     _grape_query_columns."id",
@@ -100,9 +68,9 @@ module.exports = function(getServers) {
                     CompanyClient.id = public.Order.id_company_client
                 
                 left join lateral (select
-                    company.id as "id",
+                    public.Order.id as "id",
                     public.company.inn as "inn",
-                    public.company.id as "id"
+                    public.company.id as "CompanyClient.id"
                 ) as _grape_query_columns on true
             `
         });

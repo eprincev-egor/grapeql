@@ -6,13 +6,14 @@ module.exports = {
     buildFromFiles(params) {
         let server = params.server;
         
-        this.from.forEach(fromItem => {
+        this.joins.forEach(fromItem => {
             if ( !fromItem.file ) {
                 return;
             }
             
             let file = fromItem.file;
-            
+            let node = server.getNodeByPath( file.toString() );
+            console.log( node );
         });
     }
 };

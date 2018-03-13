@@ -3,7 +3,8 @@
 const config = require("./config");
 const GrapeQL = require("../../../src/server/GrapeQL");
 const DBMigrate = require("db-migrate");
-const fs = require("fs");
+
+const dumpTestServer = require("../../utils/dumpTestServer");
 
 module.exports = async function init() {
     let dbmigrate = DBMigrate.getInstance(true, {
@@ -25,8 +26,8 @@ module.exports = async function init() {
     
     let server = await GrapeQL.start(config);
     
-    let serverJSON = JSON.stringify({schemes: server.schemes}, null, 4);
-    fs.writeFileSync(__dirname + "/server-dump.json", serverJSON);
+    // for browser
+    dumpTestServer(server, __dirname + "/server-dump.json");
     
     return server;
 };

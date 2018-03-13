@@ -182,6 +182,17 @@ class GrapeQL {
         this.nodes = nodes;
     }
     
+    getNodeByPath(path) {
+        for (let name in this.nodes) {
+            let node = this.nodes[ name ];
+            let nodePath = "./" + name;
+            
+            if ( nodePath == path ) {
+                return node;
+            }
+        }
+    }
+    
     async stop() {
         await this.db.end();
     }

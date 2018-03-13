@@ -85,6 +85,11 @@ class Query {
             });
         }
         
+        this.select.buildFromFiles({
+            server: this.server,
+            columns: usedColumns
+        });
+        
         let columnExpressionByKey = {};
         usedColumns.forEach(key => {
             let findedColumn = this.originalSelect.columns.find(column => {
