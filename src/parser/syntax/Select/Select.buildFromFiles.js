@@ -5,15 +5,27 @@ module.exports = {
     // params.columns
     buildFromFiles(params) {
         let server = params.server;
-        
-        this.joins.forEach(fromItem => {
-            if ( !fromItem.file ) {
+
+        this.joins.forEach(join => {
+            if ( !join.from.file ) {
                 return;
             }
-            
-            let file = fromItem.file;
-            let node = server.getNodeByPath( file.toString() );
-            console.log( node );
+
+            let file = join.from.file;
+            let node = this._getNodeByPath( server, file.toString() );
+
+            if ( !node ) {
+                throw new Error(`Node ${ file.toString() } does not exist`);
+            }
         });
+    },
+
+    _getNodeByPath(server, path) {
+        path = path.replace(/\.sql$/, "").replace(/[/.]/g, "");
+        for (let name in server.nodes) {
+            if ( name == path ) {
+                return server.nodes[ name ];
+            }
+        }
     }
 };

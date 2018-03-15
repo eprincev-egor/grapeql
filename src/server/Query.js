@@ -9,36 +9,36 @@ class Query {
         this.request = params.request;
         this.server = params.server;
         this.node = params.node;
-        
+
         this.preapareRequest();
         this.build();
     }
-    
+
     preapareRequest() {
         let request = this.request;
         let offset = 0;
         let limit = "all";
-        
+
         if ( "offset" in request ) {
             offset = +request.offset;
-            
+
             if ( offset < 0 ) {
                 throw new Error("offset must by positive number: " + request.offset);
             }
         }
-        
+
         if ( "limit" in request ) {
             limit = request.limit;
-            
+
             if ( limit != "all" ) {
                 limit = +request.limit;
-                
+
                 if ( limit < 0 ) {
                     throw new Error("limit must be 'all' or positive number: " + request.limit);
                 }
             }
         }
-        
+
         let columns = [];
         if ( Array.isArray(request.columns) ) {
             columns = request.columns;
@@ -51,12 +51,12 @@ class Query {
         if ( !columns.length ) {
             throw new Error("columns must be array of strings: " + request.columns);
         }
-        
+
         let where = false;
         if ( request.where ) {
             where = new Filter( request.where );
         }
-        
+
         this.request = {
             offset,
             limit,
@@ -64,17 +64,17 @@ class Query {
             where
         };
     }
-    
+
     build() {
         let request = this.request;
         this.originalSelect = this.node.parsed;
         this.select = this.originalSelect.clone();
-        
-        
-        
+
+
+
         // select * in scheme
         let hasStarColumn = this.originalSelect.columns.find(column => column.isStar());
-        
+
         let usedColumns = request.columns.slice();
         if ( request.where ) {
             let filterColumns = request.where.getColumns();
@@ -84,23 +84,23 @@ class Query {
                 }
             });
         }
-        
+
         this.select.buildFromFiles({
             server: this.server,
             columns: usedColumns
         });
-        
+
         let columnExpressionByKey = {};
         usedColumns.forEach(key => {
             let findedColumn = this.originalSelect.columns.find(column => {
                 let as = column.as;
-                
+
                 if ( !as ) {
                     if ( column.expression.isLink() ) {
                         let link = column.expression.getLink();
                         let last = link.getLast();
-                        
-                        if ( 
+
+                        if (
                             last.word && last.word.toLowerCase() == key.toLowerCase() ||
                             last.content && last.content == key
                         ) {
@@ -108,7 +108,7 @@ class Query {
                         }
                     }
                 } else {
-                    if ( 
+                    if (
                         as.alias.word && as.alias.word.toLowerCase() == key.toLowerCase() ||
                         as.alias.content && as.alias.content == key
                     ) {
@@ -116,7 +116,7 @@ class Query {
                     }
                 }
             });
-            
+
             if ( findedColumn ) {
                 columnExpressionByKey[ key ] = findedColumn.expression.toString();
             } else {
@@ -127,7 +127,7 @@ class Query {
                     this.originalSelect.from.some(from => {
                         if ( from.table ) {
                             let scheme, table;
-                            
+
                             if ( from.table.link.length === 1 ) {
                                 scheme = {word: "public"};
                                 table = from.table.link[0];
@@ -135,34 +135,35 @@ class Query {
                                 scheme = from.table.link[0];
                                 table = from.table.link[1];
                             }
-                            
+
                             let schemeName;
                             if ( scheme.word ) {
                                 schemeName = scheme.word.toLowerCase();
                             } else {
                                 schemeName = scheme.content;
                             }
-                            
+
                             let dbScheme = this.server.schemes[ schemeName ];
-                            
+
                             let tableName;
                             if ( table.word ) {
                                 tableName = table.word.toLowerCase();
                             } else {
                                 tableName = table.content;
                             }
-                            
+
                             let dbTable = dbScheme && dbScheme.tables[ tableName ];
                             findedScheme = scheme;
                             findedTable = table;
                             findedTableSchemeColumn = dbTable && dbTable.columns[ key.toLowerCase() ];
                         }
                     });
-                    
+
                     if ( !findedTableSchemeColumn ) {
-                        throw new Error(`column ${key} not found in scheme`);
+                        //throw new Error(`column ${key} not found in scheme`);
+                        return;
                     }
-                    
+
                     let sql = "";
                     if ( findedScheme.word ) {
                         sql += findedScheme.word.toLowerCase();
@@ -170,67 +171,67 @@ class Query {
                     if ( findedScheme.content ) {
                         sql += findedScheme.toString();
                     }
-                    
+
                     sql += ".";
-                    
+
                     if ( findedTable.word ) {
                         sql += findedTable.word.toLowerCase();
                     }
                     if ( findedTable.content ) {
                         sql += findedTable.toString();
                     }
-                    
+
                     sql += ".";
                     sql += findedTableSchemeColumn.name.toString();
-                    
+
                     columnExpressionByKey[ key ] = sql;
                 }
             }
         });
-        
+
         this.select.clearColumns();
-        
+
         let columnsSql = [];
         let sqlModel = {};
         for (let key in columnExpressionByKey) {
             let sql = columnExpressionByKey[ key ];
             columnsSql.push(`  ${ sql } as "${ key }"`);
-            
+
             let columnSql = `${ _grape_query_columns }."${ key }"`;
             let column = this.select.addColumn(columnSql);
-            
+
             sqlModel[ key ] = {
                 sql: columnSql,
                 column
             };
         }
-        
+
         this.select.addJoin(`left join lateral ( select\n\n${ columnsSql.join(",\n") }\n\n) as ${ _grape_query_columns } on true`);
-        
+
         for (let key in sqlModel) {
             let column = sqlModel[ key ].column;
-            
+
             sqlModel[ key ].type = column.expression.getType({
                 server: this.server,
                 node: this.node
             });
         }
-        
+
         if ( "limit" in request && request.limit != "all" ) {
             this.select.setLimit(request.limit);
         }
         if ( "offset" in request && request.offset > 0 ) {
             this.select.setOffset(request.offset);
         }
-        
+
         if ( request.where ) {
             let whereSql = request.where.toSql( sqlModel );
             this.select.addWhere( whereSql );
         }
-        
+
         this.select.removeUnnesaryJoins({ server: this.server });
     }
-    
+
     toString() {
         return this.select.toString();
     }

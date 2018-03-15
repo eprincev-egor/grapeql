@@ -21,7 +21,7 @@ GrapeQLCoach.As.tests = [
     {
         str: "as Some1",
         result: {
-            alias: {word: "some1"}
+            alias: {word: "Some1"}
         }
     },
     {
@@ -208,7 +208,7 @@ GrapeQLCoach.Column.tests = [
                     {null: true}
                 ]
             },
-            as: { alias: {word: "null1"} }
+            as: { alias: {word: "nulL1"} }
         }
     },
     {
@@ -531,7 +531,7 @@ GrapeQLCoach.Expression.tests = [
                 ]},
                 {operator: "+"},
                 {link: [
-                    {word: "company"},
+                    {word: "Company"},
                     {word: "total"}
                 ]}
             ]
@@ -999,7 +999,7 @@ GrapeQLCoach.FromItem.tests = [
     {
         str: "public.company as Company",
         result: {
-            as: {alias: {word: "company"}},
+            as: {alias: {word: "Company"}},
             table: {link: [
                 {word: "public"},
                 {word: "company"}
@@ -1009,7 +1009,7 @@ GrapeQLCoach.FromItem.tests = [
     {
         str: "public.company as Company ( id, inn )",
         result: {
-            as: {alias: {word: "company"}},
+            as: {alias: {word: "Company"}},
             table: {link: [
                 {word: "public"},
                 {word: "company"}
@@ -1042,7 +1042,7 @@ GrapeQLCoach.FromItem.tests = [
                     as: {alias: null}
                 }]
             },
-            as: {alias: {word: "orders"}}
+            as: {alias: {word: "Orders"}}
         }
     },
     {
@@ -1247,7 +1247,7 @@ GrapeQLCoach.Join.tests = [
                 {operator: "="},
                 {link: [
                     {word: "company"},
-                    {word: "countryid"}
+                    {word: "countryId"}
                 ]}
             ]}
         }
@@ -1494,7 +1494,7 @@ GrapeQLCoach.ObjectLink.tests = [
         result: {
             link: [
                 {word: "a"},
-                {word: "b"},
+                {word: "B"},
                 {word: "c"}
             ]
         }
@@ -1508,7 +1508,7 @@ GrapeQLCoach.ObjectLink.tests = [
             link: [
                 {content: "Nice"},
                 {content: "test"},
-                {word: "x"},
+                {word: "X"},
                 {word: "y"},
                 {content: "some"}
             ]
@@ -2373,6 +2373,52 @@ GrapeQLCoach.Select.tests = [
     {
         str: "select from a as x left join b as x",
         error: Error
+    },
+    {
+        str: `select *
+        from public.Order
+
+        left join ./Company as CompanyClient on
+            CompanyClient.id = public.Order.id_company_client`,
+        result: {
+            columns: [
+                {expression: {elements: [
+                    {link: [
+                        "*"
+                    ]}
+                ]}}
+            ],
+            from: [
+                {table: {link: [
+                    {word: "public"},
+                    {word: "Order"}
+                ]}}
+            ],
+            joins: [
+                {
+                    type: "left join",
+                    from: {
+                        file: {path: [
+                            {name: "."},
+                            {name: "Company"}
+                        ]},
+                        as: {alias: {word: "CompanyClient"}}
+                    },
+                    on: {elements: [
+                        {link: [
+                            {word: "CompanyClient"},
+                            {word: "id"}
+                        ]},
+                        {operator: "="},
+                        {link: [
+                            {word: "public"},
+                            {word: "Order"},
+                            {word: "id_company_client"}
+                        ]}
+                    ]}
+                }
+            ]
+        }
     }
 ];
 
