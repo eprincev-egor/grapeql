@@ -9,18 +9,18 @@ class FromItem extends Syntax {
             this.file = coach.parseFile();
             this.addChild(this.file);
             coach.skipSpace();
-            
+
             let i = coach.i;
             let as = coach.parseAs();
             if ( !as.alias ) {
                 coach.i = i;
-                
+
                 coach.throwError("expected alias");
             }
             this.as = as;
             this.addChild(this.as);
         }
-        // [ LATERAL ] ( select ) [ AS ] alias 
+        // [ LATERAL ] ( select ) [ AS ] alias
         else if ( coach.is("(") || coach.is(/lateral\s*\(/i) ) {
             let isLateral = false;
             if ( coach.isWord("lateral") ) {
@@ -28,28 +28,28 @@ class FromItem extends Syntax {
                 coach.readWord(); // lateral
                 coach.skipSpace();
             }
-            
+
             coach.i++; // (
             coach.skipSpace();
-            
+
             this.lateral = isLateral;
             this.select = coach.parseSelect();
             this.addChild(this.select);
-            
+
             coach.skipSpace();
             coach.expect(")");
             coach.skipSpace();
-            
+
             let i = coach.i;
             let as = coach.parseAs();
             if ( !as.alias ) {
                 coach.i = i;
-                
+
                 coach.throwError("expected alias");
             }
             this.as = as;
             this.addChild(this.as);
-        } 
+        }
         // [ LATERAL ] function_name ( [ argument [, ...] ] )
         //            [ WITH ORDINALITY ] [ [ AS ] alias ]
         else if ( this.isFromFunctionCall(coach) ) {
@@ -59,23 +59,23 @@ class FromItem extends Syntax {
                 coach.readWord(); // lateral
                 coach.skipSpace();
             }
-            
+
             this.lateral = isLateral;
             this.withOrdinality = false;
             this.functionCall = coach.parseFunctionCall();
             this.addChild(this.functionCall);
-            
+
             coach.skipSpace();
-            
+
             if ( coach.isWord("with") ) {
                 coach.expect(/with\s+ordinality\s+/i);
                 this.withOrdinality = true;
             }
-            
+
             this.as = coach.parseAs();
             this.addChild(this.as);
         }
-        // [ ONLY ] table_name [ * ] [ [ AS ] alias 
+        // [ ONLY ] table_name [ * ] [ [ AS ] alias
         else {
             let isOnly = false;
             if ( coach.isWord("only") ) {
@@ -83,56 +83,56 @@ class FromItem extends Syntax {
                 coach.readWord(); // only
                 coach.skipSpace();
             }
-            
+
             this.only = isOnly;
             this.table =  coach.parseObjectLink();
             this.addChild(this.table);
-            
+
             coach.skipSpace();
-            
+
             if ( coach.is("*") ) {
                 coach.i++; // *
                 coach.skipSpace();
             }
-            
+
             this.as = coach.parseAs();
             this.addChild(this.as);
         }
-        
+
         // [ ( column_alias [, ...] ) ]
         if ( coach.is(/\s*\(/) ) {
             coach.skipSpace();
             coach.i++; // (
             coach.skipSpace();
-            
+
             this.columns = coach.parseComma("ObjectName")
                 .map(objectName => objectName.name);
             coach.skipSpace();
-            
+
             coach.expect(")");
         }
     }
-    
+
     isFromFunctionCall(coach) {
         let i = coach.i;
-        
+
         if ( coach.isWord("lateral") ) {
             coach.readWord();
             coach.skipSpace();
         }
         let isFunctionCall = coach.isFunctionCall();
-        
+
         coach.i = i;
         return isFunctionCall;
     }
-    
+
     is(coach) {
         return coach.is(/only|lateral|\(/) || coach.isWord() || coach.isDoubleQuotes();
     }
-    
+
     clone() {
         let clone = new FromItem();
-        
+
         if ( this.file ) {
             clone.file = this.file.clone();
             clone.addChild(clone.file);
@@ -148,10 +148,10 @@ class FromItem extends Syntax {
             if ( this.lateral ) {
                 clone.lateral = true;
             }
-            
+
             clone.functionCall = this.functionCall.clone();
             clone.addChild(clone.functionCall);
-            
+
             if ( this.withOrdinality ) {
                 clone.withOrdinality = true;
             }
@@ -160,28 +160,28 @@ class FromItem extends Syntax {
             if ( this.only ) {
                 clone.only = true;
             }
-            
+
             clone.table = this.table.clone();
             clone.addChild(clone.table);
         }
-        
+
         if ( this.as ) {
             clone.as = this.as.clone();
             clone.addChild(clone.as);
         }
-        
+
         if ( this.columns ) {
             clone.columns = this.columns.map(name => name.clone());
         }
-        
+
         return clone;
     }
-    
+
     toString() {
         let out = "";
-        
+
         if ( this.file ) {
-            this.file.toString();
+            out += this.file.toString();
         }
         else if ( this.select ) {
             if ( this.lateral ) {
@@ -195,9 +195,9 @@ class FromItem extends Syntax {
             if ( this.lateral ) {
                 out += "lateral ";
             }
-            
+
             out += this.functionCall.toString();
-            
+
             if ( this.withOrdinality ) {
                 out += " with ordinality";
             }
@@ -206,21 +206,21 @@ class FromItem extends Syntax {
             if ( this.only ) {
                 out += "only ";
             }
-            
+
             out += this.table.toString();
         }
-        
+
         if ( this.as ) {
             out += " ";
             out += this.as.toString();
         }
-        
+
         if ( this.columns ) {
             out += " (";
             out += this.columns.map(name => name.toString()).join(", ");
             out += ")";
         }
-        
+
         return out;
     }
 }

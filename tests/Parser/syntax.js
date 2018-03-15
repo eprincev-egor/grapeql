@@ -1,8 +1,8 @@
 "use strict";
-    
+
 const GrapeQLCoach = require("../../src/parser/GrapeQLCoach");
 
-    
+
 GrapeQLCoach.As.tests = [
     {
         str: "nice",
@@ -37,7 +37,7 @@ GrapeQLCoach.As.tests = [
         error: Error
     }
 ];
-    
+
 GrapeQLCoach.Boolean.tests = [
     {
         str: "true",
@@ -58,7 +58,7 @@ GrapeQLCoach.Boolean.tests = [
         }
     }
 ];
-    
+
 GrapeQLCoach.CaseWhen.tests = [
     {
         str: "case when (true) then 1 else 0 end",
@@ -72,7 +72,7 @@ GrapeQLCoach.CaseWhen.tests = [
             else: {elements: [{number: "0"}]}
         }
     },
-        
+
     {
         str: "case when 'some' then (1+1) when true or false then (1+1) else -2 end",
         result: {
@@ -105,7 +105,7 @@ GrapeQLCoach.CaseWhen.tests = [
         }
     }
 ];
-    
+
 GrapeQLCoach.CaseWhenElement.tests = [
     {
         str: "when true then 1",
@@ -115,7 +115,7 @@ GrapeQLCoach.CaseWhenElement.tests = [
         }
     }
 ];
-    
+
 GrapeQLCoach.Cast.tests = [
     {
         str: "cast(1 as numeric( 12, 12 ))",
@@ -184,7 +184,7 @@ GrapeQLCoach.Cast.tests = [
         }
     }
 ];
-    
+
 GrapeQLCoach.Column.tests = [
     {
         str: "company.id as id",
@@ -224,7 +224,7 @@ GrapeQLCoach.Column.tests = [
         }
     }
 ];
-    
+
 GrapeQLCoach.Comment.tests = [
     {
         str: "--123\n",
@@ -243,7 +243,7 @@ GrapeQLCoach.Comment.tests = [
         result: {content: "123\r456"}
     }
 ];
-    
+
 GrapeQLCoach.DataType.tests = [
     {
         str: "numeric  ( 10 )",
@@ -270,7 +270,7 @@ GrapeQLCoach.DataType.tests = [
         err: Error
     }
 ];
-    
+
 GrapeQLCoach.DoubleQuotes.tests = [
     {
         str: "\"test\"",
@@ -365,7 +365,7 @@ GrapeQLCoach.DoubleQuotes.tests = [
         error: Error
     }
 ];
-    
+
 GrapeQLCoach.In.tests = [
     {
         str: "in(1)",
@@ -384,7 +384,7 @@ GrapeQLCoach.In.tests = [
                 {elements: [
                     {number: "1"}
                 ]},
-                    
+
                 {elements: [
                     {content: "nice"}
                 ]}
@@ -411,7 +411,7 @@ GrapeQLCoach.In.tests = [
         }
     }
 ];
-    
+
 GrapeQLCoach.Between.tests = [
     {
         str: "Between 1 and 3",
@@ -425,7 +425,7 @@ GrapeQLCoach.Between.tests = [
         }
     }
 ];
-    
+
 GrapeQLCoach.Expression.tests = [
     {
         str: "1 + 1",
@@ -566,9 +566,9 @@ GrapeQLCoach.Expression.tests = [
                 ]},
                 {operator: "="},
                 {number: "2"},
-                    
+
                 {operator: "or"},
-                    
+
                 {link: [
                     {word: "id"}
                 ]},
@@ -587,13 +587,13 @@ GrapeQLCoach.Expression.tests = [
                 ]},
                 {operator: "="},
                 {number: "2"},
-                    
+
                 {operator: "or"},
-                    
+
                 {operator: "-"},
                 {operator: "-"},
                 {operator: "+"},
-                    
+
                 {link: [
                     {word: "id"}
                 ]},
@@ -609,14 +609,14 @@ GrapeQLCoach.Expression.tests = [
                 {number: "2"},
                 {dataType: {type: "date"}},
                 {dataType: {type: "text"}},
-                    
+
                 {operator: "||"},
-                    
+
                 {content: "120"},
                 {dataType: {type: "char(2)"}},
-                    
+
                 {operator: "-"},
-                    
+
                 {operator: "-"},
                 {number: "8"}
             ]
@@ -632,19 +632,19 @@ GrapeQLCoach.Expression.tests = [
                     {operator: "+"},
                     {number: "2.1"}
                 ]},
-                    
+
                 {operator: "*"},
-                    
+
                 {content: "0"},
                 {dataType: {type: "numeric"}},
-                    
+
                 {operator: "-"},
-                    
+
                 {elements: [
                     {elements: [
                         {content: "-2"}
                     ]},
-                        
+
                     {dataType: {type: "bigint"}},
                     {operator: "+"},
                     {number: "8"}
@@ -664,13 +664,13 @@ GrapeQLCoach.Expression.tests = [
                     {elements: [
                         {number: "1"}
                     ]},
-                        
+
                     {elements: [
                         {number: "1"},
                         {operator: "+"},
                         {number: "1"}
                     ]},
-                        
+
                     {elements: [
                         {number: "3"}
                     ]}
@@ -876,9 +876,9 @@ GrapeQLCoach.Expression.tests = [
                         {number: "1"}
                     ]}
                 },
-                    
+
                 {operator: ">"},
-                    
+
                 {link: [
                     {word: "test"},
                     {word: "id"}
@@ -902,7 +902,7 @@ GrapeQLCoach.Expression.tests = [
         }
     }
 ];
-    
+
 GrapeQLCoach.File.tests = [
     {
         str: "file Order",
@@ -985,8 +985,8 @@ GrapeQLCoach.File.tests = [
         }
     }
 ];
-    
-GrapeQLCoach.FromItem.test = [
+
+GrapeQLCoach.FromItem.tests = [
     {
         str: "public.company",
         result: {
@@ -1111,9 +1111,20 @@ GrapeQLCoach.FromItem.test = [
             },
             as: {alias: {word: "orders"}}
         }
+    },
+    {
+        str: "./Company.sql as Company",
+        result: {
+            file: {
+                path: [
+                    {name: "."},
+                    {name: "Company.sql"}
+                ]
+            }
+        }
     }
 ];
-    
+
 GrapeQLCoach.FunctionCall.tests = [
     {
         str: "public.get_totals( company.id, 1 + 2 )",
@@ -1142,7 +1153,7 @@ GrapeQLCoach.FunctionCall.tests = [
         }
     }
 ];
-    
+
 GrapeQLCoach.GroupByElement.tests = [
     {
         str: "id",
@@ -1349,7 +1360,7 @@ GrapeQLCoach.Join.tests = [
                     {word: "country"}
                 ]},
                 as: {alias: {word: "country"}}
-            }, 
+            },
             using: [
                 {link: [
                     {word: "a1"},
@@ -1476,7 +1487,7 @@ GrapeQLCoach.Join.tests = [
         }
     }
 ];
-    
+
 GrapeQLCoach.ObjectLink.tests = [
     {
         str: "a.B.c",
@@ -1504,7 +1515,7 @@ GrapeQLCoach.ObjectLink.tests = [
         }
     }
 ];
-    
+
 GrapeQLCoach.ObjectName.tests = [
     {
         str: "a",
@@ -1521,7 +1532,7 @@ GrapeQLCoach.ObjectName.tests = [
         }
     }
 ];
-    
+
 GrapeQLCoach.Operator.tests = [
     {
         str: "+",
@@ -1564,7 +1575,7 @@ GrapeQLCoach.Operator.tests = [
         result: {operator: "operator(pg_catalog.+)"}
     }
 ];
-    
+
 GrapeQLCoach.OrderByElement.tests = [
     {
         str: "id Desc",
@@ -1578,7 +1589,7 @@ GrapeQLCoach.OrderByElement.tests = [
         }
     }
 ];
-    
+
 GrapeQLCoach.PgNull.tests = [
     {
         str: "null",
@@ -1593,7 +1604,7 @@ GrapeQLCoach.PgNull.tests = [
         error: Error
     }
 ];
-    
+
 GrapeQLCoach.PgNumber.tests = [
     {
         str: "1",
@@ -1624,7 +1635,7 @@ GrapeQLCoach.PgNumber.tests = [
         result: {number: "1.925e+3"}
     }
 ];
-    
+
 GrapeQLCoach.PgString.tests = [
     {
         str: "'hello ''world'''",
@@ -1755,7 +1766,7 @@ GrapeQLCoach.PgString.tests = [
         result: {content: "[\\t\\r\\n\\v\\\\]"}
     }
 ];
-    
+
 GrapeQLCoach.Select.tests = [
     {
         str: "select * from company",
@@ -2145,21 +2156,21 @@ GrapeQLCoach.Select.tests = [
                 country.name,
                 partner_country.name
             from company
-            
-            left join country on 
+
+            left join country on
                 company.country_id = country.id
-            
+
             left join company as partner on
                 partner.id = company.partner_id
-            
-            left join country as partner_country on 
+
+            left join country as partner_country on
                 partner.country_id = partner_country.id
-            
+
             left join lateral (
                 select
                     sum(sale) as sum_sale
                 from orders
-                
+
                 where
                     orders.company_id = company.id or
                     orders.company_id = partner.id
@@ -2294,9 +2305,9 @@ GrapeQLCoach.Select.tests = [
                                     {word: "company"},
                                     {word: "id"}
                                 ]},
-                                    
+
                                 {operator: "or"},
-                                    
+
                                 {link: [
                                     {word: "orders"},
                                     {word: "company_id"}
@@ -2364,7 +2375,7 @@ GrapeQLCoach.Select.tests = [
         error: Error
     }
 ];
-    
+
 GrapeQLCoach.SystemVariable.tests = [
     {
         str: "{x}",
@@ -2387,7 +2398,7 @@ GrapeQLCoach.SystemVariable.tests = [
         error: Error
     }
 ];
-    
+
 GrapeQLCoach.ToType.tests = [
     {
         str: "::text",
@@ -2406,7 +2417,7 @@ GrapeQLCoach.ToType.tests = [
         }
     }
 ];
-    
+
 GrapeQLCoach.WithQuery.tests = [
     {
         str: "recursive orders as (select * from company)",
