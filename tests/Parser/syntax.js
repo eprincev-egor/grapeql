@@ -2358,6 +2358,10 @@ GrapeQLCoach.Select.tests = [
     {
         str: "select from public.company left join company on true",
         error: Error
+    },
+    {
+        str: "select from a as x left join b as x",
+        error: Error
     }
 ];
     

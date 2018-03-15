@@ -5,5 +5,5 @@ const OrderTests = require("./tests/Order");
 
 module.exports = function(getServers) {
     CompanyTests(getServers);
-    OrderTests(getServers);
+    //OrderTests(getServers);
 };

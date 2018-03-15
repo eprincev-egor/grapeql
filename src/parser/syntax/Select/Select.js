@@ -57,7 +57,6 @@ TABLE [ ONLY ] table_name [ * ]
 class Select extends Syntax {
     parse(coach) {
         this.parseWith(coach);
-        this._createWithMap();
         
         coach.expectWord("select");
         coach.skipSpace();
@@ -73,10 +72,9 @@ class Select extends Syntax {
         this.parseHaving(coach);
         this.parseOrderBy(coach);
         this.parseOffsets(coach);
-        
-        this._createFromMap();
-        
         this.parseUnion(coach);
+        
+        this._validate();
     }
     
     parseWith(coach) {
@@ -333,58 +331,54 @@ class Select extends Syntax {
         return coach.isWord("select") || coach.isWord("with");
     }
     
-    _createFromMap() {
-        this._fromMap = {};
+    _validate() {
+        // validate from items
+        let fromMap = {};
         
         this.from.forEach(fromItem => {
-            this._addFromItemToMap( fromItem );
+            this._validateFromItem( fromMap, fromItem );
         });
         
         this.joins.forEach(join => {
-            this._addFromItemToMap( join.from );
+            this._validateFromItem( fromMap, join.from );
         });
-    }
-    
-    _createWithMap() {
-        this._withMap = {};
         
-        if ( !this.with ) {
-            return;
-        }
+        // validate with
+        let withMap = {};
         
-        this.with.forEach(query => {
+        this.with && this.with.forEach(query => {
             let name = query.name.word || query.name.content;
             
-            if ( name in this._withMap ) {
+            if ( name in withMap ) {
                 throw new Error(`WITH query name "${ name }" specified more than once`);
             }
             
-            this._withMap[ name ] = query;
+            withMap[ name ] = query;
         });
     }
     
-    _addFromItemToMap(fromItem) {
+    _validateFromItem(fromMap, fromItem) {
         let name;
         
         if ( fromItem.as && fromItem.as.alias ) {
             name = fromItem.as.alias;
             name = name.word || name.content;
             
-            if ( name in this._fromMap ) {
+            if ( name in fromMap ) {
                 this._throwFromUniqError(name);
             }
             
-            this._fromMap[ name ] = fromItem;
+            fromMap[ name ] = fromItem;
         } else {
             // from scheme1.company, scheme2.company
             
             name = fromItem.table.link.slice(-1)[0]; // last
             name = name.word || name.content;
             
-            if ( !(name in this._fromMap) ) {
-                this._fromMap[ name ] = [fromItem];
+            if ( !(name in fromMap) ) {
+                fromMap[ name ] = [fromItem];
             } else {
-                let items = this._fromMap[ name ];
+                let items = fromMap[ name ];
                 if ( !Array.isArray(items) ) {
                     this._throwFromUniqError(name);
                 }
@@ -503,9 +497,6 @@ class Select extends Syntax {
             clone.union.select = this.union.select.clone();
             clone.addChild(clone.union.select);
         }
-        
-        clone._createFromMap();
-        clone._createWithMap();
         
         return clone;
     }
@@ -659,7 +650,7 @@ class Select extends Syntax {
         this.addChild(join);
         this.joins.push(join);
         
-        this._createFromMap();
+        this._validate();
     }
     
     addWhere(sql) {

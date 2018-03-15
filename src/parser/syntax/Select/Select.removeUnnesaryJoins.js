@@ -20,7 +20,7 @@ module.exports = {
             }
         }
         
-        this._createFromMap();
+        this._validate();
     },
     
     _isHelpfullJoin(join, index, params) {
