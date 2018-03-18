@@ -4,7 +4,8 @@ const {
     objectLink2schmeTable,
     objectLink2schmeTableColumn,
     equalTableLink,
-    getDbTable
+    getDbTable,
+    equalObject
 } = require("./helpers");
 
 // TODO: from lateral func( some.id )
@@ -143,6 +144,10 @@ module.exports = {
     },
 
     _isUsedFromLinkBySubSelect(fromLink) {
+        if ( this._isDefinedFromLink(fromLink) ) {
+            return false;
+        }
+
         return (
             this._isUsedFromLink(fromLink, -1, {star: false}) ||
 
@@ -245,6 +250,7 @@ module.exports = {
         const Between = this.Coach.Between;
         const CaseWhen = this.Coach.CaseWhen;
         const FunctionCall = this.Coach.FunctionCall;
+        const Select = this.Coach.Select;
 
         return expression.elements.some(elem => {
             if ( elem instanceof Expression ) {
@@ -302,6 +308,129 @@ module.exports = {
                     arg => this._isUsedFromLinkInExpresion(fromLink, arg)
                 );
             }
+
+            if ( elem instanceof Select ) {
+                return elem._isUsedFromLinkBySubSelect( fromLink );
+            }
         });
+    },
+
+    _isDefinedFromLink(fromLink) {
+        let fromItems = (this.joins || []).map(join => join.from).concat(this.from || []);
+
+        return fromItems.some(fromItem => {
+            if ( fromItem.as && fromItem.as.alias ) {
+                if ( fromLink.scheme ) {
+                    return;
+                }
+                return equalObject(fromItem.as.alias, fromLink.tableObject);
+            }
+            else if ( fromItem.table ) {
+                let tableLink = objectLink2schmeTable(fromItem.table);
+                return equalTableLink( tableLink, fromLink );
+            }
+        });
+    },
+
+    replaceLink(replace, to) {
+        let coach;
+
+        if ( typeof replace == "string" ) {
+            coach = new this.Coach(replace);
+            replace = coach.parseObjectLink().link;
+        }
+
+        if ( typeof to == "string" ) {
+            coach = new this.Coach(to);
+            to = coach.parseObjectLink().link;
+        }
+
+        let fromLink = objectLink2schmeTable({link: replace});
+        if ( this._isDefinedFromLink(fromLink) ) {
+            return;
+        }
+
+        if ( this.with ) {
+            this.with.forEach(elem => {
+                elem.select.replaceLink(replace, to);
+            });
+        }
+
+        this.columns.forEach(column => {
+            column.expression.replaceLink(replace, to);
+        });
+
+        if ( this.where ) {
+            this.where.replaceLink(replace, to);
+        }
+
+        if ( this.having ) {
+            this.having.replaceLink(replace, to);
+        }
+
+        if ( this.orderBy ) {
+            this.orderBy.forEach(elem => {
+                elem.expression.replaceLink(replace, to);
+            });
+        }
+
+        if ( this.groupBy ) {
+            return this.groupBy.forEach(groupByElem => {
+                this._replaceLinkInGroupByElem(groupByElem, replace, to);
+            });
+        }
+
+        if ( this.from ) {
+            this.from.forEach(fromItem => {
+                if ( fromItem.select ) {
+                    fromItem.select.replaceLink(replace, to);
+                }
+                else if ( fromItem.functionCall ) {
+                    fromItem.functionCall.arguments.forEach(arg => {
+                        arg.replaceLink( replace, to );
+                    });
+                }
+            });
+        }
+
+        if ( this.joins ) {
+            this.joins.forEach(join => {
+                if ( join.on ) {
+                    join.on.replaceLink( replace, to );
+                }
+                if ( join.from.select ) {
+                    join.from.select.replaceLink(replace, to);
+                }
+                else if ( join.from.functionCall ) {
+                    join.from.functionCall.arguments.forEach(arg => {
+                        arg.replaceLink( replace, to );
+                    });
+                }
+            });
+        }
+    },
+
+    _replaceLinkInGroupByElem(groupByElem, replace, to) {
+        if ( groupByElem.expression ) {
+            groupByElem.expression.replaceLink(replace, to);
+        }
+        if ( groupByElem.groupingSets ) {
+            groupByElem.groupingSets.forEach(
+                subElem => this._replaceLinkInGroupByElem(subElem, replace, to)
+            );
+        }
+        if ( groupByElem.rollup || groupByElem.cube ) {
+            let elems = groupByElem.rollup || groupByElem.cube;
+
+            return elems.some(subElem => {
+                if ( Array.isArray(subElem) ) {
+                    return subElem.forEach(
+                        elem => elem.replaceLink(replace, to)
+                    );
+                } else {
+                    subElem.replaceLink(replace, to);
+                }
+            });
+        }
     }
 };

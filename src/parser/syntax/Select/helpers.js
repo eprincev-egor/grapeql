@@ -15,14 +15,14 @@ function equalTableLink(leftLink, rightLink) {
     }
 
     return (
-        _equalObject(leftScheme, rightScheme) &&
+        equalObject(leftScheme, rightScheme) &&
 
         leftLink.tableObject && rightLink.tableObject &&
-        _equalObject(leftLink.tableObject, rightLink.tableObject)
+        equalObject(leftLink.tableObject, rightLink.tableObject)
     );
 }
 
-function _equalObject(left, right) {
+function equalObject(left, right) {
     if ( left.content || right.content ) {
         return left.content === right.content;
     }
@@ -184,5 +184,6 @@ module.exports = {
     objectLink2schmeTable,
     objectLink2schmeTableColumn,
     getDbTable,
-    getDbColumn
+    getDbColumn,
+    equalObject
 };

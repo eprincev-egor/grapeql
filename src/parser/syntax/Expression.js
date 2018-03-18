@@ -3,6 +3,21 @@
 const Syntax = require("./Syntax");
 const operatorsMap = require("./operators.map.js");
 
+function equalLinkElem(left, right) {
+    if ( !left && right ) {
+        return false;
+    }
+    if ( left && !right ) {
+        return false;
+    }
+
+    if ( left.content || right.content ) {
+        return left.content == right.content;
+    }
+
+    return left.word.toLowerCase() == right.word.toLowerCase();
+}
+
 class Expression extends Syntax {
     constructor() {
         super();
@@ -369,6 +384,112 @@ class Expression extends Syntax {
         }
 
         return operand;
+    }
+
+    replaceLink(replace, to) {
+        let coach;
+
+        if ( typeof replace == "string" ) {
+            coach = new this.Coach(replace);
+            replace = coach.parseObjectLink().link;
+        }
+
+        if ( typeof to == "string" ) {
+            coach = new this.Coach(to);
+            to = coach.parseObjectLink().link;
+        }
+
+
+        const Expression = this.Coach.Expression;
+        const ObjectLink = this.Coach.ObjectLink;
+        const Cast = this.Coach.Cast;
+        const In = this.Coach.In;
+        const Between = this.Coach.Between;
+        const CaseWhen = this.Coach.CaseWhen;
+        const FunctionCall = this.Coach.FunctionCall;
+        const Select = this.Coach.Select;
+
+        this.elements.forEach(elem => {
+            if ( elem instanceof Expression ) {
+                elem.replaceLink(replace, to);
+            }
+
+            if ( elem instanceof ObjectLink ) {
+                this._replaceLink(elem.link, replace, to);
+            }
+
+            if ( elem instanceof Cast ) {
+                elem.expression.replaceLink(replace, to);
+            }
+
+            if ( elem instanceof In ) {
+                if ( Array.isArray(elem.in) ) {
+                    elem.in.forEach(
+                        expression => expression.replaceLink(replace, to)
+                    );
+                } else {
+                    // in (select ...)
+                    return elem.in.replaceLink(replace, to);
+                }
+            }
+
+            if ( elem instanceof Between ) {
+                elem.start.replaceLink(replace, to);
+                elem.end.replaceLink(replace, to);
+            }
+
+            if ( elem instanceof CaseWhen ) {
+                if ( elem.else ) {
+                    elem.else.replaceLink(replace, to);
+                }
+
+                elem.case.forEach(caseElem => {
+                    caseElem.when.replaceLink(replace, to);
+                    caseElem.then.replaceLink(replace, to);
+                });
+            }
+
+            if ( elem instanceof FunctionCall ) {
+                elem.arguments.forEach(
+                    arg => arg.replaceLink(replace, to)
+                );
+            }
+
+            if ( elem instanceof Select ) {
+                elem.replaceLink(replace, to);
+            }
+        });
+    }
+
+    _replaceLink(link, replace, to) {
+        if ( link.length < replace.length ) {
+            return;
+        }
+
+        let spliceLength = 0;
+        for (let
+            i = 0,
+            n = link.length,
+            m = replace.length;
+            i < n && i < m;
+            i++
+        ) {
+            let elem = link[i];
+            let replaceElem = replace[i];
+
+            if ( !equalLinkElem(elem, replaceElem) ) {
+                return;
+            }
+            spliceLength++;
+        }
+
+        for (let i = 0; i < spliceLength; i++) {
+            link.shift();
+        }
+
+        for (let i = to.length - 1; i >= 0 ; i--) {
+            link.unshift( to[i] );
+        }
     }
 }
 

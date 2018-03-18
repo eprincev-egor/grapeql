@@ -10,6 +10,7 @@ if ( typeof window == "undefined" ) {
 const GrapeQLCoach = require("../../src/parser/GrapeQLCoach");
 const weakDeepEqual = require("../utils/weakDeepEqual");
 const normolizeSyntaxBeforePrint = require("../utils/normolizeSyntaxBeforePrint");
+const replaceLinksTests = require("./replaceLinks");
 
 require("./syntax");
 
@@ -163,4 +164,6 @@ QUnit.module("GrapeQLCoach parsing sql strings", {}, function() {
 
         assert.equal(str, "as x");
     });
+
+    replaceLinksTests(QUnit);
 });

@@ -524,5 +524,76 @@ module.exports = function(getServers) {
                     orders.id_company_client = company.id
 
         `, SERVER_1);
+
+        testRemoveUnnesaryJoins(assert, `
+            select CountryEnd.id
+            from company
+
+            left join country on
+                country.id = company.id_country
+
+            left join country as CountryEnd on
+                CountryEnd.id = (select country.id)
+        `, SERVER_1);
+
+        testRemoveUnnesaryJoins(assert, `
+            select from company
+
+            left join country on
+                country.id = company.id_country
+
+            left join country as CountryEnd on
+                CountryEnd.id = (select country.id)
+        `, `
+            select from company
+        `, SERVER_1);
+
+        testRemoveUnnesaryJoins(assert, `
+            select CountryEnd.id
+            from company
+
+            left join country on
+                country.id = company.id_country
+
+            left join country as CountryEnd on
+                CountryEnd.id = (
+                    select country.id
+                    from country
+                    limit 1
+                )
+        `, `
+            select CountryEnd.id
+            from company
+
+            left join country as CountryEnd on
+                CountryEnd.id = (
+                    select country.id
+                    from country
+                    limit 1
+                )
+        `, SERVER_1);
+
+        testRemoveUnnesaryJoins(assert, `
+            select CountryEnd.id
+            from company
+
+            left join country on
+                country.id = company.id_country
+
+            left join lateral (
+                select *
+                from country
+            ) as CountryEnd on
+                CountryEnd.id = 1
+        `, `
+            select CountryEnd.id
+            from company
+
+            left join lateral (
+                select *
+                from country
+            ) as CountryEnd on
+                CountryEnd.id = 1
+        `, SERVER_1);
     });
 };
