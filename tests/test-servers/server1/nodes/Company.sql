@@ -1,6 +1,7 @@
-select 
+select
     company.id,
     * ,
+    public.company.inn as inn,
     coalesce( company.name, '(Не определено)' ) as name
 from company
 

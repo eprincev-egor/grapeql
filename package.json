@@ -8,6 +8,8 @@
   },
   "scripts": {
     "test": "qunit tests/**/*-spec.js",
+    "test-builder": "qunit tests/QueryBuilder/*-spec.js",
+    "test-deps": "qunit tests/ParseDeps/*-spec.js",
     "build": "webpack",
     "watch": "webpack -w",
     "company": "call scripts/example-company.bat"

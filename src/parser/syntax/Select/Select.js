@@ -653,6 +653,7 @@ class Select extends Syntax {
         this.joins.push(join);
 
         this._validate();
+        return join;
     }
 
     addWhere(sql) {

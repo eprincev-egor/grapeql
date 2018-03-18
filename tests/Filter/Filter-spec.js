@@ -23,12 +23,12 @@ function tomorrowStart() {
     let date = new Date();
     return +new Date(date.getFullYear(), date.getMonth(), date.getDate() + 1 );
 }
-// 
+//
 // function tomorrowEnd() {
 //     let date = new Date();
 //     return +new Date(date.getFullYear(), date.getMonth(), date.getDate() + 1, 23, 59, 59, 999);
 // }
-// 
+//
 function checkPosible(assert, arr) {
     var filter;
 
@@ -174,40 +174,42 @@ function checkJSON(assert, from, to) {
 }
 
 QUnit.module("Filter JS", {}, function() {
-    
+
     QUnit.test( "instance and methods", function( assert ) {
         var filter = new Filter();
 
         assert.ok( filter instanceof Filter, "right instance of Filter" );
     });
-        
+
 
     QUnit.test( "posible filters", function( assert ) {
         checkPosible(assert, []);
+
+        checkPosible(assert, ["Company.ID", "=", 1]);
 
         checkPosible(assert, ["ID", "=", 1]);
         checkPosible(assert, ["ID", "equal", 1]);
         checkPosible(assert, ["ID", "==", 1]);
         checkPosible(assert, ["ID", "!=", 1]);
         checkPosible(assert, ["ID", "<>", 1]);
-        
+
         checkPosible(assert, ["ID", ">", 1]);
         checkPosible(assert, ["ID", "<", 1]);
         checkPosible(assert, ["ID", "<=", 1]);
         checkPosible(assert, ["ID", ">=", 1]);
-        
+
         checkImposible(assert, ["ID", ">", "abc"]);
         checkImposible(assert, ["ID", ">", NaN]);
-        
+
         checkImposible(assert, ["ID", ">=", "abc"]);
         checkImposible(assert, ["ID", ">=", NaN]);
-        
+
         checkImposible(assert, ["ID", "<", "abc"]);
         checkImposible(assert, ["ID", "<", NaN]);
-        
+
         checkImposible(assert, ["ID", "<=", "abc"]);
         checkImposible(assert, ["ID", "<=", NaN]);
-        
+
         checkPosible(assert, ["ID", "contain", 1]);
         checkPosible(assert, ["ID", "in", [1,2]]);
         checkPosible(assert, ["ID", "is", "null"]);
@@ -1661,7 +1663,7 @@ QUnit.module("Filter JS", {}, function() {
         });
 
     });
-    
+
     function checkGetColumns(assert, arr, columns) {
         var filter;
 
@@ -1677,7 +1679,7 @@ QUnit.module("Filter JS", {}, function() {
             assert.ok( false,  testName + "<br/>" + err);
         }
     }
-    
+
     QUnit.test("filter.getColumns()", function(assert) {
 
         checkGetColumns(assert, ["ID", "=", 1], ["ID"]);

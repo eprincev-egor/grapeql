@@ -22,7 +22,7 @@ class ConditionElement {
             operator = column[1];
             column = column[0];
         }
-        
+
         let operatorName = operator;
         operator = Operator.create(operator);
         let isValidValue = operator.validateValue(anyValue);
@@ -31,7 +31,7 @@ class ConditionElement {
             throw new Error("(" + operatorName + ") invalid value: " + anyValue, anyValue);
         }
 
-        if ( !_.isString(column) || !/^\w+$/i.test(column) ) {
+        if ( !_.isString(column) || !/^[\w.]+$/i.test(column) ) {
             throw new Error("invalid column: " + column);
         }
 
@@ -75,7 +75,7 @@ class ConditionElement {
 
         return [this.column, this.operator.literal, value];
     }
-    
+
     compile2sql(model) {
         if ( this.noRows ) {
             return "false";
