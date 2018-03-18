@@ -91,7 +91,13 @@ module.exports = {
                         columnExpressionByKey[ key ] = `${ fromItem.table.toString() }."${ key }"`;
                     }
                 } else {
-                    columnExpressionByKey[ key ] = `${ key }`;
+                    let sql = key.split(".");
+                    if ( sql.length > 1 ) {
+                        sql = "\"" + sql.slice(0, -1).join(".") + "\"." + sql.slice(-1)[0];
+                        columnExpressionByKey[ key ] = sql;
+                    } else {
+                        columnExpressionByKey[ key ] = key;
+                    }
                 }
             }
         });
@@ -151,6 +157,9 @@ module.exports = {
         let usedColumns = params.usedColumns;
         let server = params.server;
 
+        const Coach = this.Coach;
+        const As = Coach.As;
+
         for (let i = select.joins.length - 1; i >= 0; i--) {
             let join = select.joins[ i ];
 
@@ -166,12 +175,35 @@ module.exports = {
                 }
 
                 let nodeSelect = node.parsed.clone();
-                let as = join.from.as;
+                let hasWordAs = join.from.as && join.from.as.hasWordAs;
                 join.from = nodeSelect.from[0].clone();
-
-                if ( as ) {
-                    join.from.as = as.clone();
+                let oldFromFileName = getFromItemName( nodeSelect.from[0] );
+                let as = new As();
+                let coach = new Coach(`"${ name }"`);
+                as.alias = coach.parseDoubleQuotes();
+                as.hasWordAs = hasWordAs;
+                join.from.as = as;
+                let newFromFileName = as.alias.toString();
+                if ( join.on ) {
+                    join.on.replaceLink(name, `"${ name }"`);
                 }
+
+                nodeSelect.joins.forEach(join => {
+                    let addedJoin = select.addJoin( join.toString() );
+                    let joinName = getFromItemName( join.from );
+                    let as = new As();
+                    let newJoinName = `"${ name }.${ joinName }"`;
+                    let coach = new Coach(newJoinName);
+                    as.alias = coach.parseDoubleQuotes();
+                    as.hasWordAs = true;
+
+                    addedJoin.from.as = as;
+
+                    if ( addedJoin.on ) {
+                        addedJoin.on.replaceLink(joinName, newJoinName);
+                        addedJoin.on.replaceLink(oldFromFileName, newFromFileName);
+                    }
+                });
             } else {
                 select.joins.splice(i, 1);
             }
