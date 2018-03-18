@@ -9,6 +9,29 @@ const {
 
 // TODO: from lateral func( some.id )
 
+function pushConstraintColumns(elems, fromLink, constraintColumns) {
+    if (
+        elems.length != 3 ||
+        elems[1].operator != "="
+    )  {
+        return;
+    }
+
+    let link;
+    if ( elems[0].link ) {
+        link = objectLink2schmeTableColumn( elems[0] );
+        if ( link.table && equalTableLink(link, fromLink) ) {
+            constraintColumns.push(link.column);
+        }
+    }
+    if ( elems[2].link ) {
+        link = objectLink2schmeTableColumn( elems[2] );
+        if ( link.table && equalTableLink(link, fromLink) ) {
+            constraintColumns.push(link.column);
+        }
+    }
+}
+
 module.exports = {
 
     // params.server
@@ -38,46 +61,26 @@ module.exports = {
         let isRemovable = false;
         if ( join.type == "left join" && join.from.table && join.on ) {
             let isConstraintExpression = true,
-                constraintColumns = [];
+                constraintColumns = [],
 
-            for (let i = 0, n = join.on.elements.length; i < n; i += 3) {
-                let
-                    leftElem = join.on.elements[ i ],
-                    operator = join.on.elements[ i + 1 ],
-                    rightElem = join.on.elements[ i + 2 ];
+                elems = [];
 
-                if (
-                    operator.operator != "=" ||
-                    !leftElem.link ||
-                    !rightElem.link
-                )  {
+            for (let i = 0, n = join.on.elements.length; i < n; i++) {
+                let elem = join.on.elements[ i ];
+
+                if ( elem.operator == "or" ) {
                     isConstraintExpression = false;
                     break;
                 }
 
-                let leftLink = objectLink2schmeTableColumn( leftElem ),
-                    rightLink = objectLink2schmeTableColumn( rightElem );
-
-                if ( leftLink.table && equalTableLink(leftLink, fromLink) ) {
-                    constraintColumns.push(leftLink.column);
-                }
-                else if ( rightLink.table && equalTableLink(rightLink, fromLink) ) {
-                    constraintColumns.push(rightLink.column);
-                }
-                else {
-                    isConstraintExpression = false;
-                    break;
-                }
-
-                let nextElem = join.on.elements[ i + 3 ];
-                if ( nextElem ) {
-                    if ( nextElem.operator != "and" ) {
-                        isConstraintExpression = false;
-                        break;
-                    }
-                    i++;
+                if ( elem.operator == "and" ) {
+                    pushConstraintColumns(elems, fromLink, constraintColumns);
+                    elems = [];
+                } else {
+                    elems.push( elem );
                 }
             }
+            pushConstraintColumns(elems, fromLink, constraintColumns);
 
             if ( isConstraintExpression ) {
                 let link = objectLink2schmeTable( join.from.table ),
@@ -88,7 +91,7 @@ module.exports = {
                 } catch(err) {
                     dbTable = null;
                 }
-                
+
                 if ( dbTable ) {
                     let _constraintColumns = constraintColumns.sort().join(",");
 

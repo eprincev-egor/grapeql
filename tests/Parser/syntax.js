@@ -900,6 +900,42 @@ GrapeQLCoach.Expression.tests = [
                 }
             ]
         }
+    },
+    {
+        str: "(select 1)",
+        result: {
+            elements: [
+                {
+                    columns: [
+                        {
+                            expression: {elements: [
+                                {number: "1"}
+                            ]}
+                        }
+                    ]
+                }
+            ]
+        }
+    },
+    {
+        str: "x = (select 1)",
+        result: {
+            elements: [
+                {link: [
+                    {word: "x"}
+                ]},
+                {operator: "="},
+                {
+                    columns: [
+                        {
+                            expression: {elements: [
+                                {number: "1"}
+                            ]}
+                        }
+                    ]
+                }
+            ]
+        }
     }
 ];
 

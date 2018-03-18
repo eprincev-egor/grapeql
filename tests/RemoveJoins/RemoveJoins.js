@@ -71,6 +71,43 @@ module.exports = function(getServers) {
                 select from company
 
                 left join country on
+                    country.id = company.id_country and
+                    true
+            `, `
+                select from company
+        `, SERVER_1);
+
+        testRemoveUnnesaryJoins(assert, `
+                select from company
+
+                left join country on
+                    country.id = 1
+            `, `
+                select from company
+        `, SERVER_1);
+
+        testRemoveUnnesaryJoins(assert, `
+                select from company
+
+                left join country on
+                    country.id = (select 1) and
+                    true
+            `, `
+                select from company
+        `, SERVER_1);
+
+        testRemoveUnnesaryJoins(assert, `
+                select from company
+
+                left join country on
+                    country.id = (select 1) or
+                    true
+            `, SERVER_1);
+
+        testRemoveUnnesaryJoins(assert, `
+                select from company
+
+                left join country on
                     country.id = company.id_country
 
                 where country.id > 3
