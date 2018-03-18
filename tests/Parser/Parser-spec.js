@@ -154,4 +154,13 @@ QUnit.module("GrapeQLCoach parsing sql strings", {}, function() {
 
         assert.equal(str.replace(/\s+/g, " ").trim(), "select 1 from x left join y on true left join z on true");
     });
+
+    QUnit.test("As.clone().toString()", function(assert) {
+        let coach = new GrapeQLCoach("as x");
+        let as = coach.parseAs();
+
+        let str = as.clone().toString();
+
+        assert.equal(str, "as x");
+    });
 });

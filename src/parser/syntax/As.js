@@ -65,6 +65,7 @@ class As extends Syntax {
         }
 
         clone.alias = this.alias.clone();
+        clone.hasWordAs = this.hasWordAs;
         clone.addChild(clone.alias);
 
         return clone;
