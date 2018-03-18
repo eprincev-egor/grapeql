@@ -3,11 +3,31 @@
 const PUBLIC_SCHEME_NAME = "public";
 
 function equalTableLink(leftLink, rightLink) {
+    // scheme can be null
+    let leftScheme = leftLink.schemeObject;
+    if ( !leftScheme ) {
+        leftScheme = {word: PUBLIC_SCHEME_NAME};
+    }
+
+    let rightScheme = rightLink.schemeObject;
+    if ( !rightScheme ) {
+        rightScheme = {word: PUBLIC_SCHEME_NAME};
+    }
+
     return (
-        // scheme can be null
-        leftLink.scheme == rightLink.scheme &&
-        leftLink.table == rightLink.table
+        _equalObject(leftScheme, rightScheme) &&
+
+        leftLink.tableObject && rightLink.tableObject &&
+        _equalObject(leftLink.tableObject, rightLink.tableObject)
     );
+}
+
+function _equalObject(left, right) {
+    if ( left.content || right.content ) {
+        return left.content === right.content;
+    }
+
+    return left.word.toLowerCase() == right.word.toLowerCase();
 }
 
 function objectLink2schmeTable(objectLink) {
@@ -132,7 +152,7 @@ function getDbColumn(serverOrTable, link) {
     } else {
         table = getDbTable(serverOrTable, link);
     }
-    
+
     let column;
 
     if ( link.columnObject.content ) {

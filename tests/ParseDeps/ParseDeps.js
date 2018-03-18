@@ -396,6 +396,27 @@ module.exports = function(getServers) {
 
         testGetDbColumn(assert, {
             server: SERVER_1,
+            node: "select id as id from test.Company",
+            link: "id",
+            source: {dbColumn: SERVER_1.schemes.test.tables.company.columns.id}
+        });
+
+        testGetDbColumn(assert, {
+            server: SERVER_1,
+            node: "select id as id from Test.Company",
+            link: "id",
+            source: {dbColumn: SERVER_1.schemes.test.tables.company.columns.id}
+        });
+
+        testGetDbColumn(assert, {
+            server: SERVER_1,
+            node: "select id as id from Test.Company",
+            link: "Id",
+            source: {dbColumn: SERVER_1.schemes.test.tables.company.columns.id}
+        });
+
+        testGetDbColumn(assert, {
+            server: SERVER_1,
             node: `select
                     _grape_query_columns."id"
                 from public.order
