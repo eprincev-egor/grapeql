@@ -52,6 +52,13 @@ module.exports = {
 
         let columnExpressionByKey = {};
         usedColumns.forEach(key => {
+            if ( !/\./.test(key) ) {
+                if ( select.from.length !== 1 ) {
+                    throw new Error(`column '${ key }' can use only for selects with single 'from'`);
+                }
+            }
+
+
             let findedColumn = select.columns.find(column => {
                 let as = column.as;
 
@@ -80,7 +87,7 @@ module.exports = {
             if ( findedColumn ) {
                 columnExpressionByKey[ key ] = findedColumn.expression.toString();
             } else {
-                if ( !/\./.test(key) && select.from.length === 1 ) {
+                if ( !/\./.test(key) ) {
                     let fromItem = select.from[0];
                     if ( fromItem.as && fromItem.as.alias ) {
                         columnExpressionByKey[ key ] = `${ fromItem.as.alias.toString() }."${ key }"`;
