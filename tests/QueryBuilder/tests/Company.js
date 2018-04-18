@@ -10,10 +10,10 @@ if ( typeof window == "undefined" ) {
 const testRequest = require("../helpers/testRequest");
 
 module.exports = function(getServers) {
-    
+
     QUnit.test("Company", (assert) => {
         let SERVER_1 = getServers().server1;
-        
+
         testRequest(assert, SERVER_1, {
             reqeustNode: "Company",
             request: {
@@ -21,46 +21,35 @@ module.exports = function(getServers) {
                 offset: 0,
                 limit: 2
             },
-                
+
             result: `
                     select
-                        _grape_query_columns."id",
-                        _grape_query_columns."inn",
-                        _grape_query_columns."name"
-                    from company
-                    
-                    left join lateral (select 
                         company.id as "id",
                         public.company.inn as "inn",
                         coalesce( company.name, '(Не определено)' )  as "name"
-                    ) as _grape_query_columns on true
-                    
+                    from company
+
                     limit 2
                 `
         });
-            
+
         testRequest(assert, SERVER_1, {
             reqeustNode: "Company",
             request: {
                 columns: ["id", "INN"],
                 offset: 1
             },
-                
+
             result: `
                     select
-                        _grape_query_columns."id",
-                        _grape_query_columns."INN"
-                    from company
-                    
-                    left join lateral(select
                         company.id as "id",
                         public.company.inn as "INN"
-                    ) as _grape_query_columns on true
-                    
+                    from company
+
                     offset 1
                 `
         });
-            
+
         testRequest(assert, SERVER_1, {
             reqeustNode: "Company",
             request: {
@@ -70,19 +59,15 @@ module.exports = function(getServers) {
             },
             result: `
                     select
-                        _grape_query_columns."id"
-                    from company
-                    
-                    left join lateral(select
                         company.id as "id"
-                    ) as _grape_query_columns on true
-                    
+                    from company
+
                     where
-                        _grape_query_columns."id" = 1
+                        company.id = 1
                     offset 1
                 `
         });
-        
+
     });
-    
+
 };

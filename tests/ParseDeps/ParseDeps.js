@@ -418,13 +418,13 @@ module.exports = function(getServers) {
         testGetDbColumn(assert, {
             server: SERVER_1,
             node: `select
-                    _grape_query_columns."id"
+                    some_join1."id"
                 from public.order
 
                 left join lateral (
                     select
                         public.order."id" as "id"
-                ) as _grape_query_columns on true
+                ) as some_join1 on true
             `,
             link: "id",
             source: {dbColumn: SERVER_1.schemes.public.tables.order.columns.id}

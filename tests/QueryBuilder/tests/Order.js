@@ -22,12 +22,8 @@ module.exports = function(getServers) {
             },
             result: `
                 select
-                    _grape_query_columns."id"
-                from public.Order
-
-                left join lateral (select
                     public.Order."id" as "id"
-                ) as _grape_query_columns on true
+                from public.Order
             `
         });
 
@@ -38,17 +34,12 @@ module.exports = function(getServers) {
             },
             result: `
                 select
-                    _grape_query_columns."id",
-                    _grape_query_columns."CompanyClient.inn"
+                public.Order."id" as "id",
+                "CompanyClient".inn as "CompanyClient.inn"
                 from public.Order
 
                 left join company as "CompanyClient" on
                     "CompanyClient".id = public.Order.id_company_client
-
-                left join lateral (select
-                    public.Order."id" as "id",
-                    "CompanyClient".inn as "CompanyClient.inn"
-                ) as _grape_query_columns on true
             `
         });
 
@@ -60,19 +51,14 @@ module.exports = function(getServers) {
             },
             result: `
                 select
-                    _grape_query_columns."id"
+                    public.Order."id" as "id"
                 from public.Order
 
                 left join company as "CompanyClient" on
                     "CompanyClient".id = public.Order.id_company_client
 
-                left join lateral (select
-                    public.Order."id" as "id",
-                    "CompanyClient".inn as "CompanyClient.inn"
-                ) as _grape_query_columns on true
-
                 where
-                    _grape_query_columns."CompanyClient.inn" is not null
+                    "CompanyClient".inn is not null
             `
         });
 
@@ -83,8 +69,8 @@ module.exports = function(getServers) {
             },
             result: `
                 select
-                    _grape_query_columns."id",
-                    _grape_query_columns."CompanyClient.country.code"
+                public.Order."id" as "id",
+                "CompanyClient.country".code as "CompanyClient.country.code"
                 from public.Order
 
                 left join company as "CompanyClient" on
@@ -92,11 +78,6 @@ module.exports = function(getServers) {
 
                 left join country as "CompanyClient.country" on
                     "CompanyClient.country".id = "CompanyClient".id_country
-
-                left join lateral (select
-                    public.Order."id" as "id",
-                    "CompanyClient.country".code as "CompanyClient.country.code"
-                ) as _grape_query_columns on true
             `
         });
     });

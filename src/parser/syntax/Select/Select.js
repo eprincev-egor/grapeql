@@ -631,6 +631,14 @@ class Select extends Syntax {
         return column;
     }
 
+    removeColumn(column) {
+        this.removeChild(column);
+        let index = this.columns.indexOf(column);
+        if ( index != -1 ) {
+            this.columns.splice(index, 1);
+        }
+    }
+
     clearOffsets() {
         this.offset = null;
         this.limit = null;

@@ -2,7 +2,6 @@
 
 const _ = require("lodash");
 const Filter = require("../filter/Filter");
-const _grape_query_columns = "_grape_query_columns";
 
 class Query {
     constructor(params) {

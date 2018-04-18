@@ -1,7 +1,5 @@
 "use strict";
 
-const _grape_query_columns = "_grape_query_columns";
-
 function getFromItemName(fromItem) {
     if ( fromItem.as && fromItem.as.alias ) {
         let alias = fromItem.as.alias;
@@ -104,36 +102,24 @@ module.exports = {
 
         select.clearColumns();
 
-
-        params.columns.forEach(key => {
-            let columnSql = `${ _grape_query_columns }."${ key }"`;
-            select.addColumn(columnSql);
-        });
-
-
-        let columnsSql = [];
-        usedColumns.forEach(key => {
-            let sql = columnExpressionByKey[ key ];
-            columnsSql.push(`  ${ sql } as "${ key }"`);
-        });
-
-        let join = select.addJoin(`left join lateral ( select\n\n${ columnsSql.join(",\n") }\n\n) as ${ _grape_query_columns } on true`);
-
         let sqlModel = {};
-        if ( where ) {
-            join.from.select.columns.forEach(column => {
-                let key = column.as.alias;
-                key = key.word || key.content;
+        usedColumns.forEach(key => {
+            let expressionSql = columnExpressionByKey[key];
+            let columnSql = `${ expressionSql } as "${ key }"`;
+            let column = select.addColumn(columnSql);
 
-                sqlModel[ key ] = {
-                    sql: `${ _grape_query_columns }."${ key }"`,
-                    type: column.expression.getType({
-                        server,
-                        node: params.node
-                    })
-                };
-            });
-        }
+            sqlModel[ key ] = {
+                sql: expressionSql,
+                type: column.expression.getType({
+                    server,
+                    node: params.node
+                })
+            };
+
+            if ( !params.columns.includes(key) ) {
+                select.removeColumn(column);
+            }
+        });
 
         if ( params.limit != null && params.limit != "all" ) {
             select.setLimit(params.limit);
