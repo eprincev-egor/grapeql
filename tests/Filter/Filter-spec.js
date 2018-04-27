@@ -1,12 +1,6 @@
 "use strict";
 
-let QUnit;
-if ( typeof window == "undefined" ) {
-    QUnit = require("qunit").QUnit;
-} else {
-    QUnit = window.QUnit;
-}
-
+const assert = require("assert");
 const Filter = require("../../src/filter/Filter");
 
 function todayStart() {
@@ -29,7 +23,7 @@ function tomorrowStart() {
 //     return +new Date(date.getFullYear(), date.getMonth(), date.getDate() + 1, 23, 59, 59, 999);
 // }
 //
-function checkPosible(assert, arr) {
+function checkPosible(arr) {
     var filter;
 
     var testName = JSON.stringify( arr );
@@ -42,214 +36,249 @@ function checkPosible(assert, arr) {
     return filter;
 }
 
-function checkImposible(assert, arr) {
-    var filter;
+function checkImposible(arr) {
+    it("checkImposible " + arr, () => {
+        var filter;
 
-    var testName = JSON.stringify( arr );
-    try {
-        filter = new Filter(arr);
-        assert.ok( false, testName + "<br/> must be imposible" );
-    } catch(err) {
-        assert.ok( true, "imposible: " + testName + "<br/> " + err );
-    }
-    return filter;
-}
-
-function checkModel(assert, arr, data) {
-    var filter;
-
-    var testName = "filter: " + JSON.stringify( arr ) + "<br/> model: " + JSON.stringify(data) + "<br/>check() === true";
-    try {
-        if ( arr instanceof Filter ) {
-            filter = arr;
-        } else {
+        var testName = JSON.stringify( arr );
+        try {
             filter = new Filter(arr);
+            assert.ok( false, testName + "<br/> must be imposible" );
+        } catch(err) {
+            assert.ok( true, "imposible: " + testName + "<br/> " + err );
         }
-        assert.ok( filter.check( data ), testName );
-    } catch(err) {
-        assert.ok( false,  testName + "<br/>" + err);
-    }
+        return filter;
+    });
 }
 
-function uncheckModel(assert, arr, data) {
-    var filter;
+function checkModel(arr, data) {
+    it("checkModel " + arr, () => {
+        var filter;
 
-    var testName = "filter: " + JSON.stringify( arr ) + "<br/> model: " + JSON.stringify(data) + "<br/>check() === false";
-    try {
-        if ( arr instanceof Filter ) {
-            filter = arr;
-        } else {
-            filter = new Filter(arr);
+        var testName = "filter: " + JSON.stringify( arr ) + "<br/> model: " + JSON.stringify(data) + "<br/>check() === true";
+        try {
+            if ( arr instanceof Filter ) {
+                filter = arr;
+            } else {
+                filter = new Filter(arr);
+            }
+            assert.ok( filter.check( data ), testName );
+        } catch(err) {
+            assert.ok( false,  testName + "<br/>" + err);
         }
-        assert.ok( !filter.check( data ), testName );
-    } catch(err) {
-        assert.ok( false,  testName);
-    }
+    });
 }
 
-function checkEmpty(assert, arr) {
-    var filter;
+function uncheckModel(arr, data) {
+    it("uncheckModel " + arr, () => {
 
-    var testName = "filter: " + JSON.stringify( arr ) + "<br/> isEmpty() === true";
-    try {
-        if ( arr instanceof Filter ) {
-            filter = arr;
-        } else {
-            filter = new Filter(arr);
+        var filter;
+
+        var testName = "filter: " + JSON.stringify( arr ) + "<br/> model: " + JSON.stringify(data) + "<br/>check() === false";
+        try {
+            if ( arr instanceof Filter ) {
+                filter = arr;
+            } else {
+                filter = new Filter(arr);
+            }
+            assert.ok( !filter.check( data ), testName );
+        } catch(err) {
+            assert.ok( false,  testName);
         }
-        assert.ok( filter.isEmpty(), testName );
-    } catch(err) {
-        assert.ok( false,  testName);
-    }
+    });
 }
 
-function uncheckEmpty(assert, arr) {
-    var filter;
+function checkEmpty(arr) {
+    it("checkEmpty " + arr, () => {
+        var filter;
 
-    var testName = "filter: " + JSON.stringify( arr ) + "<br/> isEmpty() === false";
-    try {
-        if ( arr instanceof Filter ) {
-            filter = arr;
-        } else {
-            filter = new Filter(arr);
+        var testName = "filter: " + JSON.stringify( arr ) + "<br/> isEmpty() === true";
+        try {
+            if ( arr instanceof Filter ) {
+                filter = arr;
+            } else {
+                filter = new Filter(arr);
+            }
+            assert.ok( filter.isEmpty(), testName );
+        } catch(err) {
+            assert.ok( false,  testName);
         }
-        assert.ok( !filter.isEmpty(), testName );
-    } catch(err) {
-        assert.ok( false,  testName);
-    }
+    });
 }
 
-function checkHasColumn(assert, arr, column) {
-    var filter;
+function uncheckEmpty(arr) {
+    it("uncheckEmpty " + arr, () => {
+        var filter;
 
-    var testName = "filter: " + JSON.stringify( arr ) + "<br/> hasColumn('" + column + "') === true";
-    try {
-        if ( arr instanceof Filter ) {
-            filter = arr;
-        } else {
-            filter = new Filter(arr);
+        var testName = "filter: " + JSON.stringify( arr ) + "<br/> isEmpty() === false";
+        try {
+            if ( arr instanceof Filter ) {
+                filter = arr;
+            } else {
+                filter = new Filter(arr);
+            }
+            assert.ok( !filter.isEmpty(), testName );
+        } catch(err) {
+            assert.ok( false,  testName);
         }
-        assert.ok( filter.hasColumn(column), testName );
-    } catch(err) {
-        assert.ok( false,  testName);
-    }
+    });
 }
 
-function uncheckHasColumn(assert, arr, column) {
-    var filter;
+function checkHasColumn(arr, column) {
+    it("checkHasColumn " + arr, () => {
+        var filter;
 
-    var testName = "filter: " + JSON.stringify( arr ) + "<br/> hasColumn('" + column + "') === true";
-    try {
-        if ( arr instanceof Filter ) {
-            filter = arr;
-        } else {
-            filter = new Filter(arr);
+        var testName = "filter: " + JSON.stringify( arr ) + "<br/> hasColumn('" + column + "') === true";
+        try {
+            if ( arr instanceof Filter ) {
+                filter = arr;
+            } else {
+                filter = new Filter(arr);
+            }
+            assert.ok( filter.hasColumn(column), testName );
+        } catch(err) {
+            assert.ok( false,  testName);
         }
-        assert.ok( !filter.hasColumn(column), testName );
-    } catch(err) {
-        assert.ok( false,  testName);
-    }
+    });
 }
 
-function checkJSON(assert, from, to) {
-    var filter;
+function uncheckHasColumn(arr, column) {
+    it("uncheckHasColumn " + arr, () => {
+        var filter;
 
-    var fromString = JSON.stringify( from );
-    var toString = JSON.stringify( to );
-    var testName = "source: " + fromString + "<br/> must be " + toString;
-    try {
-        if ( from instanceof Filter ) {
-            filter = from;
-        } else {
-            filter = new Filter(from);
+        var testName = "filter: " + JSON.stringify( arr ) + "<br/> hasColumn('" + column + "') === true";
+        try {
+            if ( arr instanceof Filter ) {
+                filter = arr;
+            } else {
+                filter = new Filter(arr);
+            }
+            assert.ok( !filter.hasColumn(column), testName );
+        } catch(err) {
+            assert.ok( false,  testName);
         }
-        filter = filter.toJSON();
-        filter = JSON.stringify( filter );
-
-        testName += "<br/>result: " + filter;
-        assert.ok( filter === toString, testName );
-    } catch(err) {
-        assert.ok( false, testName + "<br/> error: " + err );
-    }
+    });
 }
 
-QUnit.module("Filter JS", {}, function() {
+function checkJSON(from, to) {
+    it("checkJSON " + from, () => {
+        var filter;
 
-    QUnit.test( "instance and methods", function( assert ) {
+        var fromString = JSON.stringify( from );
+        var toString = JSON.stringify( to );
+        var testName = "source: " + fromString + "<br/> must be " + toString;
+        try {
+            if ( from instanceof Filter ) {
+                filter = from;
+            } else {
+                filter = new Filter(from);
+            }
+            filter = filter.toJSON();
+            filter = JSON.stringify( filter );
+
+            testName += "<br/>result: " + filter;
+            assert.ok( filter === toString, testName );
+        } catch(err) {
+            assert.ok( false, testName + "<br/> error: " + err );
+        }
+    });
+}
+
+function checkGetColumns(arr, columns) {
+    it("checkGetColumns " + arr, () => {
+        var filter;
+
+        var testName = "filter: " + JSON.stringify( arr ) + "<br/> columns: " + JSON.stringify(columns) + "<br/> filter.getColumns()";
+        try {
+            if ( arr instanceof Filter ) {
+                filter = arr;
+            } else {
+                filter = new Filter(arr);
+            }
+            assert.deepEqual( filter.getColumns(), columns, testName );
+        } catch(err) {
+            assert.ok( false,  testName + "<br/>" + err);
+        }
+    });
+}
+
+describe("Filter JS", () => {
+
+    it( "instance and methods", () => {
         var filter = new Filter();
 
         assert.ok( filter instanceof Filter, "right instance of Filter" );
     });
 
 
-    QUnit.test( "posible filters", function( assert ) {
-        checkPosible(assert, []);
+    describe( "posible filters", () => {
+        checkPosible( []);
 
-        checkPosible(assert, ["Company.ID", "=", 1]);
+        checkPosible( ["Company.ID", "=", 1]);
 
-        checkPosible(assert, ["ID", "=", 1]);
-        checkPosible(assert, ["ID", "equal", 1]);
-        checkPosible(assert, ["ID", "==", 1]);
-        checkPosible(assert, ["ID", "!=", 1]);
-        checkPosible(assert, ["ID", "<>", 1]);
+        checkPosible( ["ID", "=", 1]);
+        checkPosible( ["ID", "equal", 1]);
+        checkPosible( ["ID", "==", 1]);
+        checkPosible( ["ID", "!=", 1]);
+        checkPosible( ["ID", "<>", 1]);
 
-        checkPosible(assert, ["ID", ">", 1]);
-        checkPosible(assert, ["ID", "<", 1]);
-        checkPosible(assert, ["ID", "<=", 1]);
-        checkPosible(assert, ["ID", ">=", 1]);
+        checkPosible( ["ID", ">", 1]);
+        checkPosible( ["ID", "<", 1]);
+        checkPosible( ["ID", "<=", 1]);
+        checkPosible( ["ID", ">=", 1]);
 
-        checkImposible(assert, ["ID", ">", "abc"]);
-        checkImposible(assert, ["ID", ">", NaN]);
+        checkImposible( ["ID", ">", "abc"]);
+        checkImposible( ["ID", ">", NaN]);
 
-        checkImposible(assert, ["ID", ">=", "abc"]);
-        checkImposible(assert, ["ID", ">=", NaN]);
+        checkImposible( ["ID", ">=", "abc"]);
+        checkImposible( ["ID", ">=", NaN]);
 
-        checkImposible(assert, ["ID", "<", "abc"]);
-        checkImposible(assert, ["ID", "<", NaN]);
+        checkImposible( ["ID", "<", "abc"]);
+        checkImposible( ["ID", "<", NaN]);
 
-        checkImposible(assert, ["ID", "<=", "abc"]);
-        checkImposible(assert, ["ID", "<=", NaN]);
+        checkImposible( ["ID", "<=", "abc"]);
+        checkImposible( ["ID", "<=", NaN]);
 
-        checkPosible(assert, ["ID", "contain", 1]);
-        checkPosible(assert, ["ID", "in", [1,2]]);
-        checkPosible(assert, ["ID", "is", "null"]);
-        checkPosible(assert, ["ID", "is", "not null"]);
+        checkPosible( ["ID", "contain", 1]);
+        checkPosible( ["ID", "in", [1,2]]);
+        checkPosible( ["ID", "is", "null"]);
+        checkPosible( ["ID", "is", "not null"]);
 
-        checkPosible(assert, ["not", ["ID", "=", 1]]);
+        checkPosible( ["not", ["ID", "=", 1]]);
 
-        checkPosible(assert, [["ID", "=", 1]]);
-        checkPosible(assert, [["ID", "==", 1]]);
-        checkPosible(assert, [["ID", "==", new Date()]]);
+        checkPosible( [["ID", "=", 1]]);
+        checkPosible( [["ID", "==", 1]]);
+        checkPosible( [["ID", "==", new Date()]]);
 
-        checkPosible(assert, [["ID", "=", 1], "or", ["ID", "=", 2]]);
-        checkPosible(assert, [["ID", "=", 1], "||", ["ID", "=", 2]]);
+        checkPosible( [["ID", "=", 1], "or", ["ID", "=", 2]]);
+        checkPosible( [["ID", "=", 1], "||", ["ID", "=", 2]]);
 
-        checkPosible(assert, [["ID", "=", 1], "and", [ ["ID", "=", 2], "or", ["ID", "=", 3] ]]);
-        checkPosible(assert, [["ID", "=", 1], "&&", [ ["ID", "=", 2], "||", ["ID", "=", 3] ]]);
+        checkPosible( [["ID", "=", 1], "and", [ ["ID", "=", 2], "or", ["ID", "=", 3] ]]);
+        checkPosible( [["ID", "=", 1], "&&", [ ["ID", "=", 2], "||", ["ID", "=", 3] ]]);
 
-        checkPosible(assert, [["ID", "=", 1], "or", ["ID", "=", 2], "or", ["ID", "=", 3]]);
-        checkPosible(assert, [["ID", "=", 1], "&&", ["ID", "=", 2], "||", ["ID", "=", 3]]);
+        checkPosible( [["ID", "=", 1], "or", ["ID", "=", 2], "or", ["ID", "=", 3]]);
+        checkPosible( [["ID", "=", 1], "&&", ["ID", "=", 2], "||", ["ID", "=", 3]]);
 
-        checkPosible(assert, [["ID", "=", 1], "and", ["ID", "=", 2]]);
-        checkPosible(assert, [["ID", "=", 1], "&&", ["ID", "=", 2]]);
-        checkPosible(assert, [["ID", "=", 1], "and", ["ID", "=", 2], "and", ["ID", "=", 3]]);
-        checkPosible(assert, [["ID", "=", 1], "&&", ["ID", "=", 2], "&&", ["ID", "=", 3]]);
+        checkPosible( [["ID", "=", 1], "and", ["ID", "=", 2]]);
+        checkPosible( [["ID", "=", 1], "&&", ["ID", "=", 2]]);
+        checkPosible( [["ID", "=", 1], "and", ["ID", "=", 2], "and", ["ID", "=", 3]]);
+        checkPosible( [["ID", "=", 1], "&&", ["ID", "=", 2], "&&", ["ID", "=", 3]]);
 
-        checkPosible(assert, [["ID", "=", 1], "and", ["ID", "=", 2], "or", ["ID", "=", 3]]);
-        checkPosible(assert, [["ID", "=", 1], "and", ["ID", "=", 2], "||", ["ID", "=", 3]]);
-        checkPosible(assert, [["ID", "=", 1], "&&", ["ID", "=", 2], "or", ["ID", "=", 3]]);
-        checkPosible(assert, [["ID", "=", 1], "&&", ["ID", "=", 2], "||", ["ID", "=", 3]]);
-        checkPosible(assert, [["ID", "=", 1], "or", ["ID", "=", 2], "and", ["ID", "=", 3]]);
+        checkPosible( [["ID", "=", 1], "and", ["ID", "=", 2], "or", ["ID", "=", 3]]);
+        checkPosible( [["ID", "=", 1], "and", ["ID", "=", 2], "||", ["ID", "=", 3]]);
+        checkPosible( [["ID", "=", 1], "&&", ["ID", "=", 2], "or", ["ID", "=", 3]]);
+        checkPosible( [["ID", "=", 1], "&&", ["ID", "=", 2], "||", ["ID", "=", 3]]);
+        checkPosible( [["ID", "=", 1], "or", ["ID", "=", 2], "and", ["ID", "=", 3]]);
 
-        checkPosible(assert, ["SOME_DATE", "inRange", [{start: 0, end: 1}]]);
-        checkPosible(assert, ["SOME_DATE", "inRange", []]);
-        checkImposible(assert, ["SOME_DATE", "inRange", [{start: NaN, end: 1}]]);
-        checkImposible(assert, ["SOME_DATE", "inRange", [{start: 0, end: NaN}]]);
-        checkImposible(assert, ["SOME_DATE", "inRange", false]);
+        checkPosible( ["SOME_DATE", "inRange", [{start: 0, end: 1}]]);
+        checkPosible( ["SOME_DATE", "inRange", []]);
+        checkImposible( ["SOME_DATE", "inRange", [{start: NaN, end: 1}]]);
+        checkImposible( ["SOME_DATE", "inRange", [{start: 0, end: NaN}]]);
+        checkImposible( ["SOME_DATE", "inRange", false]);
 
-        checkPosible(assert, ["noRows", "noRows", "noRows"]);
+        checkPosible( ["noRows", "noRows", "noRows"]);
 
-        checkPosible(assert, {
+        checkPosible( {
             user: {
                 key: "CURRENT_USER_MUST_SEE",
                 type: "equal",
@@ -262,7 +291,7 @@ QUnit.module("Filter JS", {}, function() {
             }
         });
 
-        checkPosible(assert, {
+        checkPosible( {
             onlyGroups: {
                 key: "ID",
                 type: "in",
@@ -270,7 +299,7 @@ QUnit.module("Filter JS", {}, function() {
             }
         });
 
-        checkPosible(assert, {
+        checkPosible( {
             onlyGroups: {
                 type: "composite",
                 key: "ID",
@@ -278,7 +307,7 @@ QUnit.module("Filter JS", {}, function() {
             }
         });
 
-        checkPosible(assert, {
+        checkPosible( {
             onlyGroups: {
                 type: "composite",
                 key: "ID",
@@ -286,7 +315,7 @@ QUnit.module("Filter JS", {}, function() {
             }
         });
 
-        checkPosible(assert, {
+        checkPosible( {
             onlyGroups: {
                 type: "composite",
                 key: "ID",
@@ -294,7 +323,7 @@ QUnit.module("Filter JS", {}, function() {
             }
         });
 
-        checkPosible(assert, {
+        checkPosible( {
             onlyGroups: {
                 type: "composite",
                 key: "ID",
@@ -303,7 +332,7 @@ QUnit.module("Filter JS", {}, function() {
             }
         });
 
-        checkPosible(assert, {
+        checkPosible( {
             onlyGroups: {
                 type: "composite",
                 key: "ID",
@@ -312,7 +341,7 @@ QUnit.module("Filter JS", {}, function() {
             }
         });
 
-        checkPosible(assert, {
+        checkPosible( {
             onlyGroups: {
                 type: "composite",
                 key: "ID",
@@ -320,7 +349,7 @@ QUnit.module("Filter JS", {}, function() {
             }
         });
 
-        checkPosible(assert, {
+        checkPosible( {
             onlyGroups: {
                 type: "composite",
                 key: "ID",
@@ -329,7 +358,7 @@ QUnit.module("Filter JS", {}, function() {
             }
         });
 
-        checkPosible(assert, {
+        checkPosible( {
             onlyGroups: {
                 type: "composite",
                 key: "ID",
@@ -337,7 +366,7 @@ QUnit.module("Filter JS", {}, function() {
             }
         });
 
-        checkPosible(assert, {
+        checkPosible( {
             onlyGroups: {
                 type: "composite",
                 key: "ID",
@@ -345,7 +374,7 @@ QUnit.module("Filter JS", {}, function() {
             }
         });
 
-        checkPosible(assert, {
+        checkPosible( {
             onlyGroups: {
                 type: "composite",
                 key: "ID",
@@ -353,7 +382,7 @@ QUnit.module("Filter JS", {}, function() {
             }
         });
 
-        checkPosible(assert, {
+        checkPosible( {
             onlyGroups: {
                 type: "composite",
                 key: "ID",
@@ -361,7 +390,7 @@ QUnit.module("Filter JS", {}, function() {
             }
         });
 
-        checkPosible(assert, {
+        checkPosible( {
             notValues: {
                 type: "composite",
                 key: "ID",
@@ -370,7 +399,7 @@ QUnit.module("Filter JS", {}, function() {
             }
         });
 
-        checkPosible(assert, {
+        checkPosible( {
             notValues: {
                 type: "composite",
                 key: "ID",
@@ -379,7 +408,7 @@ QUnit.module("Filter JS", {}, function() {
             }
         });
 
-        checkPosible(assert, {
+        checkPosible( {
             notValues: {
                 type: "composite",
                 key: "ID",
@@ -388,7 +417,7 @@ QUnit.module("Filter JS", {}, function() {
             }
         });
 
-        checkPosible(assert, {
+        checkPosible( {
             notValues: {
                 type: "composite",
                 key: "ID",
@@ -397,7 +426,7 @@ QUnit.module("Filter JS", {}, function() {
             }
         });
 
-        checkPosible(assert, {
+        checkPosible( {
             notValues: {
                 type: "composite",
                 key: "ID",
@@ -406,107 +435,107 @@ QUnit.module("Filter JS", {}, function() {
             }
         });
 
-        checkPosible(assert, ["DATE", "is", "today"]);
-        checkPosible(assert, ["DATE", "is", "tomorrow"]);
+        checkPosible( ["DATE", "is", "today"]);
+        checkPosible( ["DATE", "is", "tomorrow"]);
 
-        checkImposible(assert, ["or"]);
-        checkImposible(assert, ["||"]);
-        checkImposible(assert, ["or", []]);
-        checkImposible(assert, ["||", []]);
-        checkImposible(assert, [[], "or"]);
+        checkImposible( ["or"]);
+        checkImposible( ["||"]);
+        checkImposible( ["or", []]);
+        checkImposible( ["||", []]);
+        checkImposible( [[], "or"]);
 
-        checkImposible(assert, ["and"]);
-        checkImposible(assert, ["&&"]);
-        checkImposible(assert, ["and", []]);
-        checkImposible(assert, ["&&", []]);
-        checkImposible(assert, [[], "and"]);
-        checkImposible(assert, [[], "&&"]);
+        checkImposible( ["and"]);
+        checkImposible( ["&&"]);
+        checkImposible( ["and", []]);
+        checkImposible( ["&&", []]);
+        checkImposible( [[], "and"]);
+        checkImposible( [[], "&&"]);
 
-        checkImposible(assert, ["and", "and"]);
-        checkImposible(assert, ["and", "&&"]);
-        checkImposible(assert, ["&&", "and"]);
-        checkImposible(assert, ["&&", "&&"]);
-        checkImposible(assert, ["and", "or"]);
-        checkImposible(assert, ["and", "||"]);
-        checkImposible(assert, ["&&", "or"]);
-        checkImposible(assert, ["&&", "||"]);
-        checkImposible(assert, ["or", "and"]);
-        checkImposible(assert, ["or", "or"]);
-        checkImposible(assert, ["or", "or", []]);
-        checkImposible(assert, ["or", "or", [], "or", []]);
+        checkImposible( ["and", "and"]);
+        checkImposible( ["and", "&&"]);
+        checkImposible( ["&&", "and"]);
+        checkImposible( ["&&", "&&"]);
+        checkImposible( ["and", "or"]);
+        checkImposible( ["and", "||"]);
+        checkImposible( ["&&", "or"]);
+        checkImposible( ["&&", "||"]);
+        checkImposible( ["or", "and"]);
+        checkImposible( ["or", "or"]);
+        checkImposible( ["or", "or", []]);
+        checkImposible( ["or", "or", [], "or", []]);
     });
 
-    QUnit.test("test .check attributes, filterData, row", function( assert ) {
-        checkModel(assert, ["ID", "=", 1], {filterData: {ID: 1}});
-        uncheckModel(assert, ["ID", "=", 1], {filterData: {ID: 2}});
-        checkModel(assert, ["ID", "=", 1], {attributes: {ID: 1}});
-        uncheckModel(assert, ["ID", "=", 1], {attributes: {ID: 2}});
-        checkModel(assert, ["ID", "=", 1], {ID: 1});
-        uncheckModel(assert, ["ID", "=", 1], {ID: 2});
+    describe("test .check attributes, filterData, row", () => {
+        checkModel( ["ID", "=", 1], {filterData: {ID: 1}});
+        uncheckModel( ["ID", "=", 1], {filterData: {ID: 2}});
+        checkModel( ["ID", "=", 1], {attributes: {ID: 1}});
+        uncheckModel( ["ID", "=", 1], {attributes: {ID: 2}});
+        checkModel( ["ID", "=", 1], {ID: 1});
+        uncheckModel( ["ID", "=", 1], {ID: 2});
     });
 
-    QUnit.test("test .check", function( assert ) {
+    describe("test .check", () => {
 
-        checkModel(assert, ["ID", "=", 1], {ID: 1});
-        checkModel(assert, ["ID", "==", 1], {ID: 1});
-        checkModel(assert, ["ID", "equal", 1], {ID: 1});
-        checkModel(assert, ["ID", "=", 0], {ID: 0});
-        checkModel(assert, ["ID", "==", 0], {ID: 0});
-        checkModel(assert, ["ID", "equal", 0], {ID: 0});
-        checkModel(assert, ["ID", "=", 0], {ID: "0"});
-        checkModel(assert, ["ID", "==", 0], {ID: "0"});
-        checkModel(assert, ["ID", "equal", 0], {ID: "0"});
-        uncheckModel(assert, ["ID", "=", 0], {ID: null});
-        uncheckModel(assert, ["ID", "==", 0], {ID: null});
-        uncheckModel(assert, ["ID", "equal", 0], {ID: null});
-        uncheckModel(assert, ["ID", "=", 1], {ID: 2});
-        uncheckModel(assert, ["ID", "==", 1], {ID: 2});
-        uncheckModel(assert, ["ID", "equal", 1], {ID: 2});
+        checkModel( ["ID", "=", 1], {ID: 1});
+        checkModel( ["ID", "==", 1], {ID: 1});
+        checkModel( ["ID", "equal", 1], {ID: 1});
+        checkModel( ["ID", "=", 0], {ID: 0});
+        checkModel( ["ID", "==", 0], {ID: 0});
+        checkModel( ["ID", "equal", 0], {ID: 0});
+        checkModel( ["ID", "=", 0], {ID: "0"});
+        checkModel( ["ID", "==", 0], {ID: "0"});
+        checkModel( ["ID", "equal", 0], {ID: "0"});
+        uncheckModel( ["ID", "=", 0], {ID: null});
+        uncheckModel( ["ID", "==", 0], {ID: null});
+        uncheckModel( ["ID", "equal", 0], {ID: null});
+        uncheckModel( ["ID", "=", 1], {ID: 2});
+        uncheckModel( ["ID", "==", 1], {ID: 2});
+        uncheckModel( ["ID", "equal", 1], {ID: 2});
 
-        checkModel(assert, ["not", ["ID", "=", 1]], {ID: 2});
-        checkModel(assert, ["not", ["ID", "==", 1]], {ID: 2});
-        checkModel(assert, ["not", ["ID", "equal", 1]], {ID: 2});
-        checkModel(assert, ["!", ["ID", "=", 1]], {ID: 2});
-        checkModel(assert, ["!", ["ID", "==", 1]], {ID: 2});
-        checkModel(assert, ["!", ["ID", "equal", 1]], {ID: 2});
-        uncheckModel(assert, ["not", ["ID", "=", 1]], {ID: 1});
-        uncheckModel(assert, ["!", ["ID", "=", 1]], {ID: 1});
+        checkModel( ["not", ["ID", "=", 1]], {ID: 2});
+        checkModel( ["not", ["ID", "==", 1]], {ID: 2});
+        checkModel( ["not", ["ID", "equal", 1]], {ID: 2});
+        checkModel( ["!", ["ID", "=", 1]], {ID: 2});
+        checkModel( ["!", ["ID", "==", 1]], {ID: 2});
+        checkModel( ["!", ["ID", "equal", 1]], {ID: 2});
+        uncheckModel( ["not", ["ID", "=", 1]], {ID: 1});
+        uncheckModel( ["!", ["ID", "=", 1]], {ID: 1});
 
-        checkModel(assert, ["NAME", "contain", "ооо"], {NAME: " ООО "});
-        uncheckModel(assert, ["NAME", "contain", "ооо"], {NAME: " ОАО "});
+        checkModel( ["NAME", "contain", "ооо"], {NAME: " ООО "});
+        uncheckModel( ["NAME", "contain", "ооо"], {NAME: " ОАО "});
 
-        checkModel(assert, ["NAME", "is", "null"], {NAME: null});
-        checkModel(assert, ["NAME", "is", "null"], {NAME: undefined});
-        uncheckModel(assert, ["NAME", "is", "null"], {NAME: NaN});
-        uncheckModel(assert, ["NAME", "is", "null"], {NAME: " ООО "});
+        checkModel( ["NAME", "is", "null"], {NAME: null});
+        checkModel( ["NAME", "is", "null"], {NAME: undefined});
+        uncheckModel( ["NAME", "is", "null"], {NAME: NaN});
+        uncheckModel( ["NAME", "is", "null"], {NAME: " ООО "});
 
-        checkModel(assert, ["NAME", "is", "not null"], {NAME: "1"});
-        uncheckModel(assert, ["NAME", "is", "not null"], {NAME: null});
-        uncheckModel(assert, ["NAME", "is", "not null"], {NAME: undefined});
+        checkModel( ["NAME", "is", "not null"], {NAME: "1"});
+        uncheckModel( ["NAME", "is", "not null"], {NAME: null});
+        uncheckModel( ["NAME", "is", "not null"], {NAME: undefined});
 
-        checkModel(assert, ["ID", ">", 10], {ID: 11});
-        uncheckModel(assert, ["ID", ">", 10], {ID: 10});
+        checkModel( ["ID", ">", 10], {ID: 11});
+        uncheckModel( ["ID", ">", 10], {ID: 10});
 
-        checkModel(assert, ["ID", ">=", 10], {ID: 10});
-        checkModel(assert, ["ID", ">=", 10], {ID: 11});
-        uncheckModel(assert, ["ID", ">=", 10], {ID: 9});
+        checkModel( ["ID", ">=", 10], {ID: 10});
+        checkModel( ["ID", ">=", 10], {ID: 11});
+        uncheckModel( ["ID", ">=", 10], {ID: 9});
 
 
-        checkModel(assert, ["ID", "<", 10], {ID: 7});
-        uncheckModel(assert, ["ID", "<", 10], {ID: 10});
+        checkModel( ["ID", "<", 10], {ID: 7});
+        uncheckModel( ["ID", "<", 10], {ID: 10});
 
-        checkModel(assert, ["ID", "<=", 10], {ID: 10});
-        checkModel(assert, ["ID", "<=", 10], {ID: 9});
-        uncheckModel(assert, ["ID", "<=", 10], {ID: 20});
+        checkModel( ["ID", "<=", 10], {ID: 10});
+        checkModel( ["ID", "<=", 10], {ID: 9});
+        uncheckModel( ["ID", "<=", 10], {ID: 20});
 
-        checkModel(assert, ["ID", "!=", 10], {ID: 7});
-        checkModel(assert, ["ID", "!=", 10], {ID: {}});
+        checkModel( ["ID", "!=", 10], {ID: 7});
+        checkModel( ["ID", "!=", 10], {ID: {}});
 
-        checkModel(assert, ["ID", "in", [1,2,3,4]], {ID: 2});
-        checkModel(assert, ["ID", "in", [null]], {ID: null});
-        uncheckModel(assert, ["ID", "in", [1,2,3,4]], {ID: 0});
+        checkModel( ["ID", "in", [1,2,3,4]], {ID: 2});
+        checkModel( ["ID", "in", [null]], {ID: null});
+        uncheckModel( ["ID", "in", [1,2,3,4]], {ID: 0});
 
-        uncheckModel(assert, {
+        uncheckModel( {
             hasId: {
                 key: "ID",
                 type: "equal",
@@ -519,7 +548,7 @@ QUnit.module("Filter JS", {}, function() {
             }
         }, {ID: 7});
 
-        checkModel(assert, {
+        checkModel( {
             hasId: {
                 key: "ID",
                 type: "equal",
@@ -527,22 +556,22 @@ QUnit.module("Filter JS", {}, function() {
             }
         }, {ID: 7});
 
-        uncheckModel(assert, ["noRows", "noRows", "noRows"], {
+        uncheckModel( ["noRows", "noRows", "noRows"], {
             ID: 1
         });
 
-        uncheckModel(assert, [["ID", "=", 1], "or", ["noRows", "noRows", "noRows"]], {
+        uncheckModel( [["ID", "=", 1], "or", ["noRows", "noRows", "noRows"]], {
             ID: 1
         });
 
-        checkModel(assert, {
+        checkModel( {
             hasId: {
                 key: "ID",
                 type: "composite",
                 withNulls: false
             }
         }, {ID: 7});
-        uncheckModel(assert, {
+        uncheckModel( {
             hasId: {
                 key: "ID",
                 type: "composite",
@@ -550,14 +579,14 @@ QUnit.module("Filter JS", {}, function() {
             }
         }, {ID: null});
 
-        checkModel(assert, {
+        checkModel( {
             hasId: {
                 key: "ID",
                 type: "composite",
                 onlyNulls: true
             }
         }, {ID: null});
-        uncheckModel(assert, {
+        uncheckModel( {
             hasId: {
                 key: "ID",
                 type: "composite",
@@ -565,7 +594,7 @@ QUnit.module("Filter JS", {}, function() {
             }
         }, {ID: 7});
 
-        checkModel(assert, {
+        checkModel( {
             onlyGroups: {
                 type: "composite",
                 key: "NAME",
@@ -575,7 +604,7 @@ QUnit.module("Filter JS", {}, function() {
         }, {
             NAME: "0123456"
         });
-        uncheckModel(assert, {
+        uncheckModel( {
             onlyGroups: {
                 type: "composite",
                 key: "NAME",
@@ -586,7 +615,7 @@ QUnit.module("Filter JS", {}, function() {
             NAME: "012"
         });
 
-        checkModel(assert, {
+        checkModel( {
             onlyGroups: {
                 type: "composite",
                 key: "ID",
@@ -597,7 +626,7 @@ QUnit.module("Filter JS", {}, function() {
             ID: "xxx"
         });
 
-        uncheckModel(assert, {
+        uncheckModel( {
             onlyGroups: {
                 type: "composite",
                 key: "ID",
@@ -609,7 +638,7 @@ QUnit.module("Filter JS", {}, function() {
         });
 
 
-        checkModel(assert, {
+        checkModel( {
             onlyGroups: {
                 type: "composite",
                 key: "ID",
@@ -619,7 +648,7 @@ QUnit.module("Filter JS", {}, function() {
             ID: 1
         });
 
-        checkModel(assert, {
+        checkModel( {
             onlyGroups: {
                 type: "composite",
                 key: "ID",
@@ -629,7 +658,7 @@ QUnit.module("Filter JS", {}, function() {
             ID: ""
         });
 
-        uncheckModel(assert, {
+        uncheckModel( {
             onlyGroups: {
                 type: "composite",
                 key: "ID",
@@ -638,7 +667,7 @@ QUnit.module("Filter JS", {}, function() {
         }, {
             ID: null
         });
-        uncheckModel(assert, {
+        uncheckModel( {
             onlyGroups: {
                 type: "composite",
                 key: "ID",
@@ -649,7 +678,7 @@ QUnit.module("Filter JS", {}, function() {
         });
 
 
-        checkModel(assert, {
+        checkModel( {
             onlyGroups: {
                 type: "composite",
                 key: "ID",
@@ -659,7 +688,7 @@ QUnit.module("Filter JS", {}, function() {
         }, {
             ID: null
         });
-        checkModel(assert, {
+        checkModel( {
             onlyGroups: {
                 type: "composite",
                 key: "ID",
@@ -669,7 +698,7 @@ QUnit.module("Filter JS", {}, function() {
         }, {
             ID: 1
         });
-        checkModel(assert, {
+        checkModel( {
             onlyGroups: {
                 type: "composite",
                 key: "ID",
@@ -679,7 +708,7 @@ QUnit.module("Filter JS", {}, function() {
         }, {
             ID: 2
         });
-        checkModel(assert, {
+        checkModel( {
             onlyGroups: {
                 type: "composite",
                 key: "ID",
@@ -690,7 +719,7 @@ QUnit.module("Filter JS", {}, function() {
             ID: ""
         });
 
-        uncheckModel(assert, {
+        uncheckModel( {
             onlyGroups: {
                 type: "composite",
                 key: "ID",
@@ -701,7 +730,7 @@ QUnit.module("Filter JS", {}, function() {
             ID: 4
         });
 
-        uncheckModel(assert, {
+        uncheckModel( {
             onlyGroups: {
                 type: "composite",
                 key: "ID",
@@ -712,7 +741,7 @@ QUnit.module("Filter JS", {}, function() {
             ID: " "
         });
 
-        checkModel(assert, {
+        checkModel( {
             onlyGroups: {
                 type: "composite",
                 key: "NAME",
@@ -722,7 +751,7 @@ QUnit.module("Filter JS", {}, function() {
             NAME: "123"
         });
 
-        uncheckModel(assert, {
+        uncheckModel( {
             onlyGroups: {
                 type: "composite",
                 key: "NAME",
@@ -732,7 +761,7 @@ QUnit.module("Filter JS", {}, function() {
             NAME: "12"
         });
 
-        checkModel(assert, {
+        checkModel( {
             onlyGroups: {
                 type: "composite",
                 key: "NAME",
@@ -742,7 +771,7 @@ QUnit.module("Filter JS", {}, function() {
             NAME: null
         });
 
-        checkModel(assert, {
+        checkModel( {
             onlyGroups: {
                 type: "composite",
                 key: "NAME",
@@ -752,7 +781,7 @@ QUnit.module("Filter JS", {}, function() {
             NAME: "1"
         });
 
-        checkModel(assert, {
+        checkModel( {
             onlyGroups: {
                 type: "composite",
                 key: "NAME",
@@ -762,7 +791,7 @@ QUnit.module("Filter JS", {}, function() {
             NAME: "2"
         });
 
-        checkModel(assert, {
+        checkModel( {
             notValues: {
                 type: "composite",
                 key: "ID",
@@ -773,7 +802,7 @@ QUnit.module("Filter JS", {}, function() {
             ID: 2
         });
 
-        checkModel(assert, {
+        checkModel( {
             notValues: {
                 type: "composite",
                 key: "ID",
@@ -784,7 +813,7 @@ QUnit.module("Filter JS", {}, function() {
             ID: 1
         });
 
-        checkModel(assert, {
+        checkModel( {
             notValues: {
                 type: "composite",
                 key: "NAME",
@@ -795,7 +824,7 @@ QUnit.module("Filter JS", {}, function() {
             NAME: "xxx"
         });
 
-        uncheckModel(assert, {
+        uncheckModel( {
             notValues: {
                 type: "composite",
                 key: "NAME",
@@ -806,75 +835,75 @@ QUnit.module("Filter JS", {}, function() {
             NAME: "xx"
         });
 
-        checkModel(assert, ["NAME", "contain", ""], {NAME: "x"});
-        uncheckModel(assert, ["NAME", "contain", null], {NAME: "x"});
-        uncheckModel(assert, ["NAME", "contain", undefined], {NAME: "x"});
-        checkModel(assert, ["NAME", "contain", ""], {NAME: "y"});
-        uncheckModel(assert, ["NAME", "contain", null], {NAME: "y"});
-        uncheckModel(assert, ["NAME", "contain", undefined], {NAME: "y"});
-        checkModel(assert, ["NAME", "contain", ""], {NAME: ""});
-        uncheckModel(assert, ["NAME", "contain", null], {NAME: ""});
-        uncheckModel(assert, ["NAME", "contain", undefined], {NAME: ""});
-        checkModel(assert, ["NAME", "contain", ""], {NAME: null});
-        uncheckModel(assert, ["NAME", "contain", null], {NAME: null});
-        uncheckModel(assert, ["NAME", "contain", undefined], {NAME: null});
+        checkModel( ["NAME", "contain", ""], {NAME: "x"});
+        uncheckModel( ["NAME", "contain", null], {NAME: "x"});
+        uncheckModel( ["NAME", "contain", undefined], {NAME: "x"});
+        checkModel( ["NAME", "contain", ""], {NAME: "y"});
+        uncheckModel( ["NAME", "contain", null], {NAME: "y"});
+        uncheckModel( ["NAME", "contain", undefined], {NAME: "y"});
+        checkModel( ["NAME", "contain", ""], {NAME: ""});
+        uncheckModel( ["NAME", "contain", null], {NAME: ""});
+        uncheckModel( ["NAME", "contain", undefined], {NAME: ""});
+        checkModel( ["NAME", "contain", ""], {NAME: null});
+        uncheckModel( ["NAME", "contain", null], {NAME: null});
+        uncheckModel( ["NAME", "contain", undefined], {NAME: null});
 
-        checkModel(assert, ["NAME", "contain", " "], {NAME: " "});
-        uncheckModel(assert, ["NAME", "contain", " "], {NAME: "x"});
-        uncheckModel(assert, ["NAME", "contain", " "], {NAME: "y"});
-        uncheckModel(assert, ["NAME", "contain", " "], {NAME: ""});
-        uncheckModel(assert, ["NAME", "contain", " "], {NAME: null});
-        uncheckModel(assert, ["NAME", "contain", " "], {NAME: undefined});
+        checkModel( ["NAME", "contain", " "], {NAME: " "});
+        uncheckModel( ["NAME", "contain", " "], {NAME: "x"});
+        uncheckModel( ["NAME", "contain", " "], {NAME: "y"});
+        uncheckModel( ["NAME", "contain", " "], {NAME: ""});
+        uncheckModel( ["NAME", "contain", " "], {NAME: null});
+        uncheckModel( ["NAME", "contain", " "], {NAME: undefined});
 
-        checkModel(assert, ["NAME", "contain", "вася"], {NAME: "вася"});
-        checkModel(assert, ["NAME", "contain", "вася"], {NAME: "Xвася"});
-        checkModel(assert, ["NAME", "contain", "вася"], {NAME: "XвасяY"});
-        checkModel(assert, ["NAME", "contain", "вася"], {NAME: "ВАСЯ"});
-        uncheckModel(assert, ["NAME", "contain", "вася"], {NAME: null});
-        uncheckModel(assert, ["NAME", "contain", "вася"], {NAME: 1});
-        uncheckModel(assert, ["NAME", "contain", "вася"], {NAME: ""});
+        checkModel( ["NAME", "contain", "вася"], {NAME: "вася"});
+        checkModel( ["NAME", "contain", "вася"], {NAME: "Xвася"});
+        checkModel( ["NAME", "contain", "вася"], {NAME: "XвасяY"});
+        checkModel( ["NAME", "contain", "вася"], {NAME: "ВАСЯ"});
+        uncheckModel( ["NAME", "contain", "вася"], {NAME: null});
+        uncheckModel( ["NAME", "contain", "вася"], {NAME: 1});
+        uncheckModel( ["NAME", "contain", "вася"], {NAME: ""});
 
         // абстракция модели занимается преобразованием значений модели для фильтрации,
         // поэтому тестируем как-будто данные уже преобразованы для фильтров
-        checkModel(assert, ["SOME_DATE", "contain", "31."], {SOME_DATE: "31.12.2016"});
-        checkModel(assert, ["SOME_DATE", "contain", "31."], {SOME_DATE: "31.12.2016 10:19"});
-        uncheckModel(assert, ["SOME_DATE", "contain", "31."], {SOME_DATE: "30.12.2016 10:19"});
+        checkModel( ["SOME_DATE", "contain", "31."], {SOME_DATE: "31.12.2016"});
+        checkModel( ["SOME_DATE", "contain", "31."], {SOME_DATE: "31.12.2016 10:19"});
+        uncheckModel( ["SOME_DATE", "contain", "31."], {SOME_DATE: "30.12.2016 10:19"});
 
-        checkModel(assert, ["SOME_DATE", "contain", ".12."], {SOME_DATE: "31.12.2016"});
-        checkModel(assert, ["SOME_DATE", "contain", ".12."], {SOME_DATE: "31.12.2016 10:19"});
-        checkModel(assert, ["SOME_DATE", "contain", ".12."], {SOME_DATE: "30.12.2016"});
-        uncheckModel(assert, ["SOME_DATE", "contain", ".12."], {SOME_DATE: "30.11.2016"});
-        uncheckModel(assert, ["SOME_DATE", "contain", ".12."], {SOME_DATE: "30.11.2012"});
+        checkModel( ["SOME_DATE", "contain", ".12."], {SOME_DATE: "31.12.2016"});
+        checkModel( ["SOME_DATE", "contain", ".12."], {SOME_DATE: "31.12.2016 10:19"});
+        checkModel( ["SOME_DATE", "contain", ".12."], {SOME_DATE: "30.12.2016"});
+        uncheckModel( ["SOME_DATE", "contain", ".12."], {SOME_DATE: "30.11.2016"});
+        uncheckModel( ["SOME_DATE", "contain", ".12."], {SOME_DATE: "30.11.2012"});
 
-        checkModel(assert, ["SOME_DATE", "contain", ".2016"], {SOME_DATE: "30.12.2016"});
-        uncheckModel(assert, ["SOME_DATE", "contain", ".2016"], {SOME_DATE: "30.12.2017"});
+        checkModel( ["SOME_DATE", "contain", ".2016"], {SOME_DATE: "30.12.2016"});
+        uncheckModel( ["SOME_DATE", "contain", ".2016"], {SOME_DATE: "30.12.2017"});
 
-        checkModel(assert, ["SOME_DATE", "contain", ".20"], {SOME_DATE: "30.11.2016"});
-        checkModel(assert, ["SOME_DATE", "contain", ".20"], {SOME_DATE: "30.11.2017"});
-        uncheckModel(assert, ["SOME_DATE", "contain", ".20"], {SOME_DATE: "30.11.2117"});
-        uncheckModel(assert, ["SOME_DATE", "contain", ".20"], {SOME_DATE: "20.11.2117"});
+        checkModel( ["SOME_DATE", "contain", ".20"], {SOME_DATE: "30.11.2016"});
+        checkModel( ["SOME_DATE", "contain", ".20"], {SOME_DATE: "30.11.2017"});
+        uncheckModel( ["SOME_DATE", "contain", ".20"], {SOME_DATE: "30.11.2117"});
+        uncheckModel( ["SOME_DATE", "contain", ".20"], {SOME_DATE: "20.11.2117"});
 
-        checkModel(assert, ["NAME", "in", ["123"]], {NAME: "123"});
-        uncheckModel(assert, ["NAME", "in", ["123"]], {NAME: "1234"});
-        uncheckModel(assert, ["NAME", "in", ["123"]], {NAME: null});
+        checkModel( ["NAME", "in", ["123"]], {NAME: "123"});
+        uncheckModel( ["NAME", "in", ["123"]], {NAME: "1234"});
+        uncheckModel( ["NAME", "in", ["123"]], {NAME: null});
 
-        checkModel(assert, ["NAME", "in", ["null"]], {NAME: "null"});
-        checkModel(assert, ["NAME", "in", ["123", "null"]], {NAME: "null"});
-        checkModel(assert, ["NAME", "in", ["123", "null"]], {NAME: "123"});
-        uncheckModel(assert, ["NAME", "in", ["null"]], {NAME: null});
-        uncheckModel(assert, ["NAME", "in", ["null", "123"]], {NAME: null});
-        uncheckModel(assert, ["NAME", "in", ["null"]], {NAME: undefined});
+        checkModel( ["NAME", "in", ["null"]], {NAME: "null"});
+        checkModel( ["NAME", "in", ["123", "null"]], {NAME: "null"});
+        checkModel( ["NAME", "in", ["123", "null"]], {NAME: "123"});
+        uncheckModel( ["NAME", "in", ["null"]], {NAME: null});
+        uncheckModel( ["NAME", "in", ["null", "123"]], {NAME: null});
+        uncheckModel( ["NAME", "in", ["null"]], {NAME: undefined});
 
-        checkModel(assert, ["SOME_DATE", "inRange", [{start: 0, end: 1}]], { SOME_DATE: 0 });
-        checkModel(assert, ["SOME_DATE", "inRange", [{start: 0, end: 1}]], { SOME_DATE: 1 });
-        uncheckModel(assert, ["SOME_DATE", "inRange", [{start: 0, end: 1}]], { SOME_DATE: 2 });
-        uncheckModel(assert, ["SOME_DATE", "inRange", [{start: 0, end: 1}]], { SOME_DATE: null });
-        uncheckModel(assert, ["SOME_DATE", "inRange", [{start: 0, end: 1}]], { SOME_DATE: undefined });
-        checkModel(assert, ["SOME_DATE", "inRange", [{start: -10, end: 10}]], { SOME_DATE: -9 });
-        uncheckModel(assert, ["SOME_DATE", "inRange", [{start: -10, end: 10}]], { SOME_DATE: -11 });
-        uncheckModel(assert, ["SOME_DATE", "inRange", []], { SOME_DATE: -11 });
+        checkModel( ["SOME_DATE", "inRange", [{start: 0, end: 1}]], { SOME_DATE: 0 });
+        checkModel( ["SOME_DATE", "inRange", [{start: 0, end: 1}]], { SOME_DATE: 1 });
+        uncheckModel( ["SOME_DATE", "inRange", [{start: 0, end: 1}]], { SOME_DATE: 2 });
+        uncheckModel( ["SOME_DATE", "inRange", [{start: 0, end: 1}]], { SOME_DATE: null });
+        uncheckModel( ["SOME_DATE", "inRange", [{start: 0, end: 1}]], { SOME_DATE: undefined });
+        checkModel( ["SOME_DATE", "inRange", [{start: -10, end: 10}]], { SOME_DATE: -9 });
+        uncheckModel( ["SOME_DATE", "inRange", [{start: -10, end: 10}]], { SOME_DATE: -11 });
+        uncheckModel( ["SOME_DATE", "inRange", []], { SOME_DATE: -11 });
 
-        checkModel(assert, [
+        checkModel( [
             ["NAME", "contain", "xx"],
             "and", [
                 ["NAME", "contain", "y"],
@@ -885,7 +914,7 @@ QUnit.module("Filter JS", {}, function() {
             NAME: "xxy"
         });
 
-        checkModel(assert, [
+        checkModel( [
             ["NAME", "contain", "xx"],
             "and", [
                 ["NAME", "contain", "y"],
@@ -896,7 +925,7 @@ QUnit.module("Filter JS", {}, function() {
             NAME: "xxz"
         });
 
-        uncheckModel(assert, [
+        uncheckModel( [
             ["NAME", "contain", "xx"],
             "and", [
                 ["NAME", "contain", "y"],
@@ -907,7 +936,7 @@ QUnit.module("Filter JS", {}, function() {
             NAME: "xx"
         });
 
-        uncheckModel(assert, [
+        uncheckModel( [
             ["NAME", "contain", "xx"],
             "and", [
                 ["NAME", "contain", "y"],
@@ -918,7 +947,7 @@ QUnit.module("Filter JS", {}, function() {
             NAME: "xy"
         });
 
-        uncheckModel(assert, [
+        uncheckModel( [
             ["NAME", "contain", "xx"],
             "and", [
                 ["NAME", "contain", "y"],
@@ -929,7 +958,7 @@ QUnit.module("Filter JS", {}, function() {
             NAME: "xz"
         });
 
-        uncheckModel(assert, [
+        uncheckModel( [
             ["NAME", "contain", "xx"],
             "and", [
                 ["NAME", "contain", "y"],
@@ -940,7 +969,7 @@ QUnit.module("Filter JS", {}, function() {
             NAME: "yz"
         });
 
-        uncheckModel(assert, [
+        uncheckModel( [
             ["NAME", "contain", "xx"],
             "and", [
                 ["NAME", "contain", "y"],
@@ -951,7 +980,7 @@ QUnit.module("Filter JS", {}, function() {
             NAME: "xyz"
         });
 
-        checkModel(assert, [
+        checkModel( [
             ["NAME", "contain", "xx"],
             "and", [
                 ["NAME", "contain", "y"],
@@ -963,7 +992,7 @@ QUnit.module("Filter JS", {}, function() {
         });
 
 
-        checkModel(assert, [
+        checkModel( [
             ["NAME", "contain", "xx"],
             "or",
             ["NAME", "contain", "y"],
@@ -973,7 +1002,7 @@ QUnit.module("Filter JS", {}, function() {
             NAME: "xyz"
         });
 
-        uncheckModel(assert, [
+        uncheckModel( [
             ["NAME", "contain", "xx"],
             "or",
             ["NAME", "contain", "y"],
@@ -983,7 +1012,7 @@ QUnit.module("Filter JS", {}, function() {
             NAME: "y"
         });
 
-        uncheckModel(assert, [
+        uncheckModel( [
             ["NAME", "contain", "xx"],
             "or",
             ["NAME", "contain", "y"],
@@ -993,7 +1022,7 @@ QUnit.module("Filter JS", {}, function() {
             NAME: "z"
         });
 
-        checkModel(assert, [
+        checkModel( [
             ["NAME", "contain", "xx"],
             "or",
             ["NAME", "contain", "y"],
@@ -1006,37 +1035,37 @@ QUnit.module("Filter JS", {}, function() {
         var testString = new String("XX"); // jshint ignore: line
         testString._lowerCase = "xx";
 
-        checkModel(assert, [
+        checkModel( [
             "NAME", "contain", "xx"
         ], {
             NAME: testString
         });
 
-        checkModel(assert, [
+        checkModel( [
             "NAME", "contain", "XX"
         ], {
             NAME: testString
         });
 
-        uncheckModel(assert, [
+        uncheckModel( [
             "NAME", "contain", "xxx"
         ], {
             NAME: testString
         });
 
-        checkModel(assert, [
+        checkModel( [
             "NAME", "=", "XX"
         ], {
             NAME: testString
         });
 
-        checkModel(assert, [
+        checkModel( [
             "NAME", "!=", "xx"
         ], {
             NAME: testString
         });
 
-        uncheckModel(assert, [
+        uncheckModel( [
             "NAME", "=", "xx"
         ], {
             NAME: testString
@@ -1046,70 +1075,70 @@ QUnit.module("Filter JS", {}, function() {
         var testString2 = new String("aa"); // jshint ignore: line
         testString2._lowerCase = "bb";
 
-        checkModel(assert, [
+        checkModel( [
             "NAME", "=", "aa"
         ], {
             NAME: testString2
         });
 
-        uncheckModel(assert, [
+        uncheckModel( [
             "NAME", "=", "bb"
         ], {
             NAME: testString2
         });
 
-        checkModel(assert, [
+        checkModel( [
             "NAME", "contain", "bb"
         ], {
             NAME: testString2
         });
 
-        uncheckModel(assert, [
+        uncheckModel( [
             "NAME", "contain", "aa"
         ], {
             NAME: testString2
         });
 
 
-        checkModel(assert, ["DATE", "is", "today"], {
+        checkModel( ["DATE", "is", "today"], {
             DATE: Date.now()
         });
 
-        checkModel(assert, ["DATE", "is", "today"], {
+        checkModel( ["DATE", "is", "today"], {
             DATE: todayStart() + 23 * 60 * 60 * 1000
         });
 
-        uncheckModel(assert, ["DATE", "is", "today"], {
+        uncheckModel( ["DATE", "is", "today"], {
             DATE: todayEnd() + 1
         });
 
-        uncheckModel(assert, ["DATE", "is", "tomorrow"], {
+        uncheckModel( ["DATE", "is", "tomorrow"], {
             DATE: Date.now()
         });
 
-        checkModel(assert, ["DATE", "is", "tomorrow"], {
+        checkModel( ["DATE", "is", "tomorrow"], {
             DATE: todayEnd() + 1
         });
 
-        checkModel(assert, ["DATE", "is", "tomorrow"], {
+        checkModel( ["DATE", "is", "tomorrow"], {
             DATE: tomorrowStart() + 23 * 60 * 60 * 1000
         });
 
-        checkModel(assert, {some: {
+        checkModel( {some: {
             key: "SOME_FIELD",
             type: "equal",
             value: 1
         }}, {
             SOME_FIELD: 1
         });
-        uncheckModel(assert, {some: {
+        uncheckModel( {some: {
             key: "SOME_FIELD",
             type: "equal",
             value: 1
         }}, {
             SOME_FIELD: 2
         });
-        uncheckModel(assert, {some: {
+        uncheckModel( {some: {
             key: "SOME_FIELD",
             type: "equal",
             value: 1
@@ -1117,21 +1146,21 @@ QUnit.module("Filter JS", {}, function() {
             SOME_FIELD: null
         });
 
-        checkModel(assert, {some: {
+        checkModel( {some: {
             key: "SOME_FIELD",
             type: "equal",
             value: 0
         }}, {
             SOME_FIELD: 0
         });
-        checkModel(assert, {some: {
+        checkModel( {some: {
             key: "SOME_FIELD",
             type: "equal",
             value: "0"
         }}, {
             SOME_FIELD: "0"
         });
-        uncheckModel(assert, {some: {
+        uncheckModel( {some: {
             key: "SOME_FIELD",
             type: "equal",
             value: 0
@@ -1140,14 +1169,14 @@ QUnit.module("Filter JS", {}, function() {
         });
 
         // старые фильтры в этой ситуации не добавляют условие для поиска
-        checkModel(assert, {some: {
+        checkModel( {some: {
             key: "SOME_FIELD",
             type: "equal",
             value: null
         }}, {
             SOME_FIELD: null
         });
-        checkModel(assert, {some: {
+        checkModel( {some: {
             key: "SOME_FIELD",
             type: "equal",
             value: null
@@ -1155,149 +1184,149 @@ QUnit.module("Filter JS", {}, function() {
             SOME_FIELD: 1
         });
         // а новые автоматом ставят is null
-        checkModel(assert, ["SOME_FIELD", "=", null], {
+        checkModel( ["SOME_FIELD", "=", null], {
             SOME_FIELD: null
         });
-        uncheckModel(assert, ["SOME_FIELD", "=", null], {
+        uncheckModel( ["SOME_FIELD", "=", null], {
             SOME_FIELD: 1
         });
     });
 
-    QUnit.test("test .isEmpty", function( assert ) {
-        checkEmpty(assert, []);
-        uncheckEmpty(assert, ["x", "=", 1]);
+    describe("test .isEmpty", () => {
+        checkEmpty( []);
+        uncheckEmpty( ["x", "=", 1]);
 
-        checkEmpty(assert, [[]]);
-        uncheckEmpty(assert, [["x", "=", 1]]);
+        checkEmpty( [[]]);
+        uncheckEmpty( [["x", "=", 1]]);
 
-        checkEmpty(assert, [[], "and", []]);
-        checkEmpty(assert, [[], "&&", []]);
-        uncheckEmpty(assert, [[], "and", ["x", "=", 1]]);
-        uncheckEmpty(assert, [[], "&&", ["x", "=", 1]]);
-        uncheckEmpty(assert, [["x", "=", 1], "and", []]);
-        uncheckEmpty(assert, [["x", "=", 1], "&&", []]);
-        uncheckEmpty(assert, [["x", "=", 1], "and", ["x", "=", 1]]);
-        uncheckEmpty(assert, [["x", "=", 1], "&&", ["x", "=", 1]]);
+        checkEmpty( [[], "and", []]);
+        checkEmpty( [[], "&&", []]);
+        uncheckEmpty( [[], "and", ["x", "=", 1]]);
+        uncheckEmpty( [[], "&&", ["x", "=", 1]]);
+        uncheckEmpty( [["x", "=", 1], "and", []]);
+        uncheckEmpty( [["x", "=", 1], "&&", []]);
+        uncheckEmpty( [["x", "=", 1], "and", ["x", "=", 1]]);
+        uncheckEmpty( [["x", "=", 1], "&&", ["x", "=", 1]]);
 
-        checkEmpty(assert, [[], "or", []]);
-        checkEmpty(assert, [[], "||", []]);
-        uncheckEmpty(assert, [[], "or", ["x", "=", 1]]);
-        uncheckEmpty(assert, [[], "||", ["x", "=", 1]]);
-        uncheckEmpty(assert, [["x", "=", 1], "or", []]);
-        uncheckEmpty(assert, [["x", "=", 1], "||", []]);
-        uncheckEmpty(assert, [["x", "=", 1], "or", ["x", "=", 1]]);
-        uncheckEmpty(assert, [["x", "=", 1], "||", ["x", "=", 1]]);
+        checkEmpty( [[], "or", []]);
+        checkEmpty( [[], "||", []]);
+        uncheckEmpty( [[], "or", ["x", "=", 1]]);
+        uncheckEmpty( [[], "||", ["x", "=", 1]]);
+        uncheckEmpty( [["x", "=", 1], "or", []]);
+        uncheckEmpty( [["x", "=", 1], "||", []]);
+        uncheckEmpty( [["x", "=", 1], "or", ["x", "=", 1]]);
+        uncheckEmpty( [["x", "=", 1], "||", ["x", "=", 1]]);
 
-        checkEmpty(assert, [[], "and", [[[ [], "or", [] ]]]]);
-        checkEmpty(assert, [[], "&&", [[[ [], "||", [] ]]]]);
-        uncheckEmpty(assert, [["x", "=", 1], "and", [[[ [], "or", [] ]]]]);
-        uncheckEmpty(assert, [["x", "=", 1], "&&", [[[ [], "||", [] ]]]]);
-        uncheckEmpty(assert, [[], "and", [[[ ["x", "=", 1], "or", [] ]]]]);
-        uncheckEmpty(assert, [[], "&&", [[[ ["x", "=", 1], "||", [] ]]]]);
-        uncheckEmpty(assert, [[], "and", [[[ [], "or", ["x", "=", 1] ]]]]);
-        uncheckEmpty(assert, [[], "&&", [[[ [], "||", ["x", "=", 1] ]]]]);
-        uncheckEmpty(assert, [[], "and", [[[ ["x", "=", 1], "or", ["x", "=", 1] ]]]]);
-        uncheckEmpty(assert, [["x", "=", 1], "and", [[[ [], "or", ["x", "=", 1] ]]]]);
-        uncheckEmpty(assert, [["x", "=", 1], "and", [[[ ["x", "=", 1], "or", ["x", "=", 1] ]]]]);
+        checkEmpty( [[], "and", [[[ [], "or", [] ]]]]);
+        checkEmpty( [[], "&&", [[[ [], "||", [] ]]]]);
+        uncheckEmpty( [["x", "=", 1], "and", [[[ [], "or", [] ]]]]);
+        uncheckEmpty( [["x", "=", 1], "&&", [[[ [], "||", [] ]]]]);
+        uncheckEmpty( [[], "and", [[[ ["x", "=", 1], "or", [] ]]]]);
+        uncheckEmpty( [[], "&&", [[[ ["x", "=", 1], "||", [] ]]]]);
+        uncheckEmpty( [[], "and", [[[ [], "or", ["x", "=", 1] ]]]]);
+        uncheckEmpty( [[], "&&", [[[ [], "||", ["x", "=", 1] ]]]]);
+        uncheckEmpty( [[], "and", [[[ ["x", "=", 1], "or", ["x", "=", 1] ]]]]);
+        uncheckEmpty( [["x", "=", 1], "and", [[[ [], "or", ["x", "=", 1] ]]]]);
+        uncheckEmpty( [["x", "=", 1], "and", [[[ ["x", "=", 1], "or", ["x", "=", 1] ]]]]);
 
-        checkEmpty(assert, ["not", []]);
-        checkEmpty(assert, ["!", []]);
-        uncheckEmpty(assert, ["not", ["x", "=", 1]]);
-        uncheckEmpty(assert, ["!", ["x", "=", 1]]);
+        checkEmpty( ["not", []]);
+        checkEmpty( ["!", []]);
+        uncheckEmpty( ["not", ["x", "=", 1]]);
+        uncheckEmpty( ["!", ["x", "=", 1]]);
 
-        checkEmpty(assert, [["not", []], "or", ["not", []]]);
-        checkEmpty(assert, [["!", []], "or", ["not", []]]);
-        checkEmpty(assert, [["!", []], "or", ["!", []]]);
-        uncheckEmpty(assert, [["not", []], "or", ["not", ["x", "=", 1]]]);
-        uncheckEmpty(assert, [["not", ["x", "=", 1]], "or", ["not", []]]);
-        uncheckEmpty(assert, [["not", ["x", "=", 1]], "or", ["not", ["x", "=", 1]]]);
+        checkEmpty( [["not", []], "or", ["not", []]]);
+        checkEmpty( [["!", []], "or", ["not", []]]);
+        checkEmpty( [["!", []], "or", ["!", []]]);
+        uncheckEmpty( [["not", []], "or", ["not", ["x", "=", 1]]]);
+        uncheckEmpty( [["not", ["x", "=", 1]], "or", ["not", []]]);
+        uncheckEmpty( [["not", ["x", "=", 1]], "or", ["not", ["x", "=", 1]]]);
 
-        checkEmpty(assert, [["not", []], "and", ["not", []]]);
-        uncheckEmpty(assert, [["not", []], "and", ["not", ["x", "=", 1]]]);
-        uncheckEmpty(assert, [["not", ["x", "=", 1]], "and", ["not", []]]);
-        uncheckEmpty(assert, [["not", ["x", "=", 1]], "and", ["not", ["x", "=", 1]]]);
+        checkEmpty( [["not", []], "and", ["not", []]]);
+        uncheckEmpty( [["not", []], "and", ["not", ["x", "=", 1]]]);
+        uncheckEmpty( [["not", ["x", "=", 1]], "and", ["not", []]]);
+        uncheckEmpty( [["not", ["x", "=", 1]], "and", ["not", ["x", "=", 1]]]);
     });
 
-    QUnit.test("test lower, trimmed operators", function(assert) {
+    describe("test lower, trimmed operators", () => {
 
-        checkModel(assert, ["ID", " =", 1], {
+        checkModel( ["ID", " =", 1], {
             ID: 1
         });
-        uncheckModel(assert, ["ID", " =", 1], {
+        uncheckModel( ["ID", " =", 1], {
             ID: 2
         });
 
-        checkModel(assert, [["ID", "=", 1], "OR", ["ID", "=", 2]], {
+        checkModel( [["ID", "=", 1], "OR", ["ID", "=", 2]], {
             ID: 1
         });
-        uncheckModel(assert, [["ID", "=", 1], "OR", ["ID", "=", 2]], {
+        uncheckModel( [["ID", "=", 1], "OR", ["ID", "=", 2]], {
             ID: 3
         });
 
-        checkModel(assert, [["ID", "=", 1], "OR ", ["ID", "=", 2]], {
+        checkModel( [["ID", "=", 1], "OR ", ["ID", "=", 2]], {
             ID: 1
         });
-        uncheckModel(assert, [["ID", "=", 1], "OR ", ["ID", "=", 2]], {
+        uncheckModel( [["ID", "=", 1], "OR ", ["ID", "=", 2]], {
             ID: 3
         });
 
 
-        checkModel(assert, ["NAME", " coNtain ", "abc"], {
+        checkModel( ["NAME", " coNtain ", "abc"], {
             NAME: "ABC"
         });
-        uncheckModel(assert, ["NAME", " coNtain ", "abc"], {
+        uncheckModel( ["NAME", " coNtain ", "abc"], {
             NAME: "ab"
         });
 
-        checkModel(assert, ["NAME", " Is ", " Not  Null"], {
+        checkModel( ["NAME", " Is ", " Not  Null"], {
             NAME: "ABC"
         });
-        uncheckModel(assert, ["NAME", " Is ", " Not  Null"], {
+        uncheckModel( ["NAME", " Is ", " Not  Null"], {
             NAME: null
         });
 
-        checkModel(assert, ["NAME", "iS  ", "  nuLL  "], {
+        checkModel( ["NAME", "iS  ", "  nuLL  "], {
             NAME: null
         });
-        uncheckModel(assert, ["NAME", "iS  ", "  nuLL  "], {
+        uncheckModel( ["NAME", "iS  ", "  nuLL  "], {
             NAME: 1
         });
     });
 
 
 
-    QUnit.test("test .and, .or, .remove", function( assert ) {
+    describe("test .and, .or, .remove", () => {
         var filter, newFilter;
 
         // or 1 2
         filter = new Filter([
             "ID", "=", 1
         ]);
-        checkModel(assert, filter, {
+        checkModel( filter, {
             ID: 1
         });
-        uncheckModel(assert, filter, {
+        uncheckModel( filter, {
             ID: 2
         });
 
         newFilter = filter.or([
             "ID", "=", 2
         ]);
-        checkModel(assert, filter, {
+        checkModel( filter, {
             ID: 1
         });
-        uncheckModel(assert, filter, {
+        uncheckModel( filter, {
             ID: 2
         });
 
-        checkModel(assert, newFilter, {
+        checkModel( newFilter, {
             ID: 1
         });
-        checkModel(assert, newFilter, {
+        checkModel( newFilter, {
             ID: 2
         });
 
-        uncheckModel(assert, newFilter, {
+        uncheckModel( newFilter, {
             ID: 3
         });
 
@@ -1305,78 +1334,79 @@ QUnit.module("Filter JS", {}, function() {
         filter = new Filter([
             "NAME", "contain", "x"
         ]);
-        checkModel(assert, filter, {
+        checkModel( filter, {
             NAME: "uxu"
         });
-        uncheckModel(assert, filter, {
+        uncheckModel( filter, {
             NAME: "uyu"
         });
 
         newFilter = filter.and([
             "NAME", "contain", "y"
         ]);
-        checkModel(assert, filter, {
+        checkModel( filter, {
             NAME: "uxu"
         });
-        uncheckModel(assert, filter, {
+        uncheckModel( filter, {
             NAME: "uyu"
         });
 
-        checkModel(assert, newFilter, {
+        checkModel( newFilter, {
             NAME: "uxuyu"
         });
 
-        uncheckModel(assert, newFilter, {
+        uncheckModel( newFilter, {
             NAME: "uxu"
         });
 
-        uncheckModel(assert, newFilter, {
+        uncheckModel( newFilter, {
             NAME: "uyu"
         });
 
         // empty or id1
         filter = new Filter();
         filter = filter.or(["ID", "=", 1]);
-        checkModel(assert, filter, {
+        checkModel( filter, {
             ID: 1
         });
 
-        uncheckModel(assert, filter, {
+        uncheckModel( filter, {
             ID: 2
         });
 
         // empty or id1 or id2
         filter = new Filter();
         filter = filter.or(["ID", "=", 1]).or(["ID", "=", 2]);
-        checkModel(assert, filter, {
+        checkModel( filter, {
             ID: 1
         });
 
-        checkModel(assert, filter, {
+        checkModel( filter, {
             ID: 2
         });
 
-        uncheckModel(assert, filter, {
+        uncheckModel( filter, {
             ID: 3
         });
 
-        try {
-            filter = new Filter();
-            filter = filter.and({
-                test: {
-                    key: "ID",
-                    type: "equal",
-                    value: 1
-                }
-            });
+        it("check", () => {
+            try {
+                filter = new Filter();
+                filter = filter.and({
+                    test: {
+                        key: "ID",
+                        type: "equal",
+                        value: 1
+                    }
+                });
 
-            assert.ok(filter.check({
-                ID: 1
-            }), "and {ID=1}");
-        } catch(err) {
-            assert.ok(false, ".and({ key: ID, type: 'equal', value: 1 })<br/> Error: " + err);
-        }
-
+                assert.ok(filter.check({
+                    ID: 1
+                }), "and {ID=1}");
+            } catch(err) {
+                assert.ok(false, ".and({ key: ID, type: 'equal', value: 1 })<br/> Error: " + err);
+            }
+        });
 
         // remove 1 2
         (function() {
@@ -1386,25 +1416,25 @@ QUnit.module("Filter JS", {}, function() {
             var id2 = ["ID", "=", 2];
             newFilter = filter.or(id2);
 
-            checkModel(assert, newFilter, {
+            checkModel( newFilter, {
                 ID: 1
             });
 
-            checkModel(assert, newFilter, {
+            checkModel( newFilter, {
                 ID: 2
             });
 
-            uncheckModel(assert, newFilter, {
+            uncheckModel( newFilter, {
                 ID: 3
             });
 
             newFilter = newFilter.remove(id2);
 
-            checkModel(assert, newFilter, {
+            checkModel( newFilter, {
                 ID: 1
             });
 
-            uncheckModel(assert, newFilter, {
+            uncheckModel( newFilter, {
                 ID: 2
             });
         })();
@@ -1419,155 +1449,157 @@ QUnit.module("Filter JS", {}, function() {
 
             filter = new Filter(id1);
 
-            checkModel(assert, filter, {
+            checkModel( filter, {
                 ID: 1
             });
 
-            uncheckModel(assert, filter, {
+            uncheckModel( filter, {
                 ID: 2
             });
 
-            uncheckModel(assert, filter, {
+            uncheckModel( filter, {
                 ID: 3
             });
 
             filter = filter.or(id2).or(id3);
 
-            checkModel(assert, filter, {
+            checkModel( filter, {
                 ID: 1
             });
 
-            checkModel(assert, filter, {
+            checkModel( filter, {
                 ID: 2
             });
 
-            checkModel(assert, filter, {
+            checkModel( filter, {
                 ID: 3
             });
 
-            uncheckModel(assert, filter, {
+            uncheckModel( filter, {
                 ID: 4
             });
 
             filter = filter.remove(id1);
 
-            uncheckModel(assert, filter, {
+            uncheckModel( filter, {
                 ID: 1
             });
 
-            checkModel(assert, filter, {
+            checkModel( filter, {
                 ID: 2
             });
 
-            checkModel(assert, filter, {
+            checkModel( filter, {
                 ID: 3
             });
 
             filter = filter.remove(id2);
 
-            uncheckModel(assert, filter, {
+            uncheckModel( filter, {
                 ID: 1
             });
 
-            uncheckModel(assert, filter, {
+            uncheckModel( filter, {
                 ID: 2
             });
 
-            checkModel(assert, filter, {
+            checkModel( filter, {
                 ID: 3
             });
 
             filter = filter.remove(id3);
 
-            checkEmpty(assert, filter);
+            checkEmpty( filter);
 
-            checkModel(assert, filter, {
+            checkModel( filter, {
                 ID: 1
             });
 
-            checkModel(assert, filter, {
+            checkModel( filter, {
                 ID: 2
             });
 
-            checkModel(assert, filter, {
+            checkModel( filter, {
                 ID: 3
             });
 
         })();
     });
 
-    QUnit.test("test hasColumn", function( assert ) {
+    describe("test hasColumn", () => {
 
-        checkHasColumn(assert, ["NAME", "=", 1], "NAME");
-        uncheckHasColumn(assert, ["NAME", "=", 1], "=");
-        uncheckHasColumn(assert, ["NAME", "=", 1], 1);
+        checkHasColumn(["NAME", "=", 1], "NAME");
+        uncheckHasColumn(["NAME", "=", 1], "=");
+        uncheckHasColumn(["NAME", "=", 1], 1);
 
-        checkHasColumn(assert, [["NAME", "=", 1]], "NAME");
-        uncheckHasColumn(assert, [["NAME", "=", 1]], "=");
-        uncheckHasColumn(assert, [["NAME", "=", 1]], 1);
+        checkHasColumn([["NAME", "=", 1]], "NAME");
+        uncheckHasColumn([["NAME", "=", 1]], "=");
+        uncheckHasColumn([["NAME", "=", 1]], 1);
 
-        checkHasColumn(assert, [["NAME", "=", 1], "or", ["ID", "=", 1]], "NAME");
-        checkHasColumn(assert, [["NAME", "=", 1], "or", ["ID", "=", 1]], "ID");
-        uncheckHasColumn(assert, [["NAME", "=", 1], "or", ["ID", "=", 1]], "=");
-        uncheckHasColumn(assert, [["NAME", "=", 1], "or", ["ID", "=", 1]], 1);
-        uncheckHasColumn(assert, [["NAME", "=", 1], "or", ["ID", "=", 1]], "or");
+        checkHasColumn([["NAME", "=", 1], "or", ["ID", "=", 1]], "NAME");
+        checkHasColumn( [["NAME", "=", 1], "or", ["ID", "=", 1]], "ID");
+        uncheckHasColumn( [["NAME", "=", 1], "or", ["ID", "=", 1]], "=");
+        uncheckHasColumn( [["NAME", "=", 1], "or", ["ID", "=", 1]], 1);
+        uncheckHasColumn( [["NAME", "=", 1], "or", ["ID", "=", 1]], "or");
     });
 
-    QUnit.test("each", function(assert) {
-        var filter;
-        var mustBe, elementsCount;
+    describe("each", () => {
+        it("each", () => {
+            var filter;
+            var mustBe, elementsCount;
 
-        // ====================
-        mustBe = 1;
-        filter = new Filter([
-            "x", "=", 1
-        ]);
+            // ====================
+            mustBe = 1;
+            filter = new Filter([
+                "x", "=", 1
+            ]);
 
-        elementsCount = 0;
-        filter.each(function(element) {
-            var column = element && element[0];
-            if ( column == "x" ) {
-                elementsCount++;
-            }
+            elementsCount = 0;
+            filter.each(function(element) {
+                var column = element && element[0];
+                if ( column == "x" ) {
+                    elementsCount++;
+                }
+            });
+
+            assert.ok( mustBe == elementsCount, "each ['x', '=', 1]" );
+
+            // ====================
+            mustBe = 2;
+            filter = new Filter([
+                ["x", "=", 1],
+                "or",
+                ["y", "=", 2]
+            ]);
+
+            elementsCount = 0;
+            filter.each(function(element) {
+                var column = element && element[0];
+                if ( column == "x" ) {
+                    elementsCount++;
+                }
+                if ( column == "y" ) {
+                    elementsCount++;
+                }
+            });
+
+            assert.ok( mustBe == elementsCount, "each [['x', '=', 1], 'or', ['y', '=', 2]]" );
+
         });
-
-        assert.ok( mustBe == elementsCount, "each ['x', '=', 1]" );
-
-        // ====================
-        mustBe = 2;
-        filter = new Filter([
-            ["x", "=", 1],
-            "or",
-            ["y", "=", 2]
-        ]);
-
-        elementsCount = 0;
-        filter.each(function(element) {
-            var column = element && element[0];
-            if ( column == "x" ) {
-                elementsCount++;
-            }
-            if ( column == "y" ) {
-                elementsCount++;
-            }
-        });
-
-        assert.ok( mustBe == elementsCount, "each [['x', '=', 1], 'or', ['y', '=', 2]]" );
-
     // ====================
     });
 
-    QUnit.test("toJSON", function(assert) {
-        checkJSON(assert, ["ID_ORDER", "=", "3132"], ["ID_ORDER", "=", "3132"]);
-        checkJSON(assert, [["x", "=", "1"], "or", ["x", "=", 2]], [["x", "=", "1"], "or", ["x", "=", 2]]);
+    describe("toJSON", () => {
+        checkJSON( ["ID_ORDER", "=", "3132"], ["ID_ORDER", "=", "3132"]);
+        checkJSON( [["x", "=", "1"], "or", ["x", "=", 2]], [["x", "=", "1"], "or", ["x", "=", 2]]);
 
-        checkJSON(assert, [
+        checkJSON( [
             ["ID_ORDER", "=", "3132"],
             "or",
             []
         ], ["ID_ORDER", "=", "3132"]);
 
-        checkJSON(assert, [
+        checkJSON( [
             ["ID_ORDER", "=", "3132"],
             "or",
             [],
@@ -1575,7 +1607,7 @@ QUnit.module("Filter JS", {}, function() {
             []
         ], ["ID_ORDER", "=", "3132"]);
 
-        checkJSON(assert, [
+        checkJSON( [
             ["x", "=", "1"],
             "or",
             [],
@@ -1587,7 +1619,7 @@ QUnit.module("Filter JS", {}, function() {
             ["y", "=", "2"]
         ]);
 
-        checkJSON(assert, [
+        checkJSON( [
             ["x", "=", "1"],
             "and",
             [],
@@ -1599,33 +1631,33 @@ QUnit.module("Filter JS", {}, function() {
             ["y", "=", "2"]
         ]);
 
-        checkJSON(assert, [
+        checkJSON( [
             ["x", "=", "1"]
         ], ["x", "=", "1"]);
 
-        checkJSON(assert, [], []);
-        checkJSON(assert, [[]], []);
-        checkJSON(assert, [[], "or", []], []);
+        checkJSON( [], []);
+        checkJSON( [[]], []);
+        checkJSON( [[], "or", []], []);
 
-        checkJSON(assert, [
+        checkJSON( [
             [],
             "or",
             ["x", "=", "1"]
         ], ["x", "=", "1"]);
 
-        checkJSON(assert, [
+        checkJSON( [
             [],
             "and",
             ["ID_ORDER", "=", "3132"]
         ], ["ID_ORDER", "=", "3132"]);
 
-        checkJSON(assert, [
+        checkJSON( [
             ["x", "=", "y"],
             "or",
             []
         ], ["x", "=", "y"]);
 
-        checkJSON(assert, [
+        checkJSON( [
             [],
             "and",
             ["x", "=", "y"],
@@ -1633,7 +1665,7 @@ QUnit.module("Filter JS", {}, function() {
             []
         ], ["x", "=", "y"]);
 
-        checkJSON(assert, [
+        checkJSON( [
             [],
             "and",
             [
@@ -1648,15 +1680,15 @@ QUnit.module("Filter JS", {}, function() {
         ], [["x", "=", "y"], "or", ["a", "=", "b"]]);
     });
 
-    QUnit.test(".filterData in model", function(assert) {
+    describe(".filterData in model", () => {
 
-        checkModel(assert, ["ID", "=", 1], {
+        checkModel( ["ID", "=", 1], {
             filterData: {
                 ID: 1
             }
         });
 
-        uncheckModel(assert, ["ID", "=", 1], {
+        uncheckModel( ["ID", "=", 1], {
             filterData: {
                 ID: 2
             }
@@ -1664,28 +1696,12 @@ QUnit.module("Filter JS", {}, function() {
 
     });
 
-    function checkGetColumns(assert, arr, columns) {
-        var filter;
+    describe("filter.getColumns()", () => {
 
-        var testName = "filter: " + JSON.stringify( arr ) + "<br/> columns: " + JSON.stringify(columns) + "<br/> filter.getColumns()";
-        try {
-            if ( arr instanceof Filter ) {
-                filter = arr;
-            } else {
-                filter = new Filter(arr);
-            }
-            assert.deepEqual( filter.getColumns(), columns, testName );
-        } catch(err) {
-            assert.ok( false,  testName + "<br/>" + err);
-        }
-    }
-
-    QUnit.test("filter.getColumns()", function(assert) {
-
-        checkGetColumns(assert, ["ID", "=", 1], ["ID"]);
-        checkGetColumns(assert, [["ID", "=", 1], "or", ["ID", "=", 2]], ["ID"]);
-        checkGetColumns(assert, [["ID", "=", 1], "or", ["nAme", "=", 2], ["nAme", "=", 2]], ["ID", "nAme"]);
-        checkGetColumns(assert, [["ID", "=", 1], "or", ["nAme", "=", 2], ["Name", "=", 2]], ["ID", "nAme", "Name"]);
+        checkGetColumns(["ID", "=", 1], ["ID"]);
+        checkGetColumns([["ID", "=", 1], "or", ["ID", "=", 2]], ["ID"]);
+        checkGetColumns([["ID", "=", 1], "or", ["nAme", "=", 2], ["nAme", "=", 2]], ["ID", "nAme"]);
+        checkGetColumns([["ID", "=", 1], "or", ["nAme", "=", 2], ["Name", "=", 2]], ["ID", "nAme", "Name"]);
 
     });
 });

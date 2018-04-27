@@ -7,9 +7,7 @@
     "example": "examples"
   },
   "scripts": {
-    "test": "qunit tests/**/*-spec.js",
-    "test-builder": "qunit tests/QueryBuilder/*-spec.js",
-    "test-deps": "qunit tests/ParseDeps/*-spec.js",
+    "test": "mocha ./tests/**/*-spec.js",
     "build": "webpack",
     "watch": "webpack -w",
     "company": "call scripts/example-company.bat"
@@ -45,7 +43,7 @@
     "glob": "^7.1.2",
     "jquery": "^3.2.1",
     "json-loader": "^0.5.7",
-    "qunit": "^2.5.1",
+    "mocha": "^5.1.1",
     "webpack": "^3.10.0"
   }
 }

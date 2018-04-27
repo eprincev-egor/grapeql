@@ -1,6 +1,6 @@
-{  
+{
     "extends": "eslint:recommended",
-    "rules": {  
+    "rules": {
         "quotes": ["error", "double"],
         "semi": ["error", "always"],
         "no-console": "off",
