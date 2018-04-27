@@ -2,7 +2,7 @@
 
 const fs = require("fs");
 
-fs.writeFileSync("./tests/test-servers/server1/config.js", `
+fs.writeFileSync("./tests/config.js", `
 "use strict";
 
 module.exports = {
@@ -12,7 +12,6 @@ module.exports = {
         password: "ubuntu",
         port: 5432,
         database: "grapeql-test"
-    },
-    nodes: __dirname + "/nodes"
+    }
 };
 `);

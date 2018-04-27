@@ -1,15 +1,12 @@
 "use strict";
 
-const assert = require("assert");
-const pg = require("pg");
-const fs = require("fs");
-const GrapeQL = require("../../src/server/GrapeQL");
 const GrapeQLCoach = require("../../src/parser/GrapeQLCoach");
-const config = require("./config");
-const weakDeepEqual = require("../utils/weakDeepEqual");
 const Query = require("../../src/server/Query");
 
-const db = new pg.Client( config.db );
+const assert = require("assert");
+const weakDeepEqual = require("../utils/weakDeepEqual");
+const {stopServer, startServer} = require("../utils/serverHelpers");
+
 let server;
 
 
@@ -45,18 +42,14 @@ function testRequest(requestTest) {
     });
 }
 
-before(async() => {
-    await db.connect();
+before(startServer(
+    __dirname,
+    _server => {server = _server;}
+));
 
-    let sql = fs.readFileSync( __dirname + "/up.sql" );
-    await db.query( sql.toString() );
-
-    server = await GrapeQL.start( config );
-});
-
-after(async() => {
-    await db.end();
-});
+after(stopServer(
+    () => server
+));
 
 describe("RemoveJoins", () => {
     testRequest({
