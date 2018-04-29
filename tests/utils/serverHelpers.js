@@ -33,7 +33,10 @@ function startServer(dirname, callback) {
                 drop schema ${ row.schema_name } cascade;
             `;
         });
-        clearDbSql += "create schema public;";
+        clearDbSql += `
+            drop schema if exists public;
+            create schema public;
+        `;
 
         await db.query( clearDbSql );
 
