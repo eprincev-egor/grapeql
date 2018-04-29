@@ -568,6 +568,8 @@ class Select extends Syntax {
         }
 
         if ( this.fetch ) {
+            out += "fetch ";
+            
             if ( this.fetch.first ) {
                 out += "first ";
             }

@@ -1805,6 +1805,18 @@ GrapeQLCoach.PgString.tests = [
 
 GrapeQLCoach.Select.tests = [
     {
+        str: "select 1",
+        result: {
+            columns: [
+                {
+                    expression: {elements: [
+                        {number: "1"}
+                    ]}
+                }
+            ]
+        }
+    },
+    {
         str: "select * from company",
         result: {
             columns: [

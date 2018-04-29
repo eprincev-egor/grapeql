@@ -51,7 +51,7 @@ after(stopServer(
     () => server
 ));
 
-describe("RemoveJoins", () => {
+describe("QueryBuilder", () => {
     testRequest({
         reqeustNode: "Company",
         request: {},

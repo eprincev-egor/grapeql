@@ -205,6 +205,7 @@ class Expression extends Syntax {
     }
 
     toString() {
+        let Select = this.Coach.Select;
         let out = "";
 
         this.elements.forEach((elem, i) => {
@@ -212,7 +213,7 @@ class Expression extends Syntax {
                 out += " ";
             }
 
-            if ( elem instanceof Expression ) {
+            if ( elem instanceof Expression || elem instanceof Select ) {
                 out += "( ";
                 out += elem.toString();
                 out += " )";

@@ -49,11 +49,7 @@ function testClass(className, SyntaxClass) {
                     let cloneCoach = new GrapeQLCoach( cloneString );
                     let cloneResult = cloneCoach[ parseFuncName ]();
 
-                    isEqual = !!weakDeepEqual(test.result, result);
-                    if ( !isEqual ) {
-                        console.log("break here");
-                    }
-
+                    isEqual = !!weakDeepEqual(test.result, cloneResult);
                     assert.ok(isEqual);
                 }
 
