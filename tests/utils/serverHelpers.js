@@ -20,6 +20,24 @@ function startServer(dirname, callback) {
 
         await db.connect();
 
+        // clear db before run tests
+        let result = await db.query(`
+            select schema_name
+            from information_schema.schemata
+            where schema_owner <> 'postgres'
+        `);
+
+        let clearDbSql = "";
+        result.rows.forEach(row => {
+            clearDbSql += `
+                drop schema ${ row.schema_name } cascade;
+            `;
+        });
+        clearDbSql += "create schema public;";
+
+        await db.query( clearDbSql );
+
+        // creating needed tables
         let sql = fs.readFileSync( dirname + "/up.sql" );
         await db.query( sql.toString() );
 

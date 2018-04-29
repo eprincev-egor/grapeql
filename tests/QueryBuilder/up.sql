@@ -1,9 +1,4 @@
 
-drop schema public cascade;
-create schema public;
-drop schema if exists test cascade;
-
-
 CREATE TABLE public.country
 (
   id serial,
