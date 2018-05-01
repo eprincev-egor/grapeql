@@ -319,7 +319,7 @@ module.exports = {
 
         return fromItems.some(fromItem => {
             if ( fromItem.as ) {
-                if ( fromLink.scheme ) {
+                if ( fromLink.schema ) {
                     return;
                 }
                 return fromItem.as.equal( fromLink.tableObject );

@@ -8,7 +8,7 @@ class DbColumn {
         this.nulls = params.nulls;
         // for tests
         this.table = params.table;
-        this.scheme = params.scheme;
+        this.schema = params.schema;
     }
 }
 

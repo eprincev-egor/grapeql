@@ -1,21 +1,21 @@
 "use strict";
 
-const PUBLIC_SCHEME_NAME = "public";
+const PUBLIC_SCHEMA_NAME = "public";
 
 function equalTableLink(leftLink, rightLink) {
-    // scheme can be null
-    let leftScheme = leftLink.schemeObject;
-    if ( !leftScheme ) {
-        leftScheme = {word: PUBLIC_SCHEME_NAME};
+    // schema can be null
+    let leftSchema = leftLink.schemaObject;
+    if ( !leftSchema ) {
+        leftSchema = {word: PUBLIC_SCHEMA_NAME};
     }
 
-    let rightScheme = rightLink.schemeObject;
-    if ( !rightScheme ) {
-        rightScheme = {word: PUBLIC_SCHEME_NAME};
+    let rightSchema = rightLink.schemaObject;
+    if ( !rightSchema ) {
+        rightSchema = {word: PUBLIC_SCHEMA_NAME};
     }
 
     return (
-        equalObject(leftScheme, rightScheme) &&
+        equalObject(leftSchema, rightSchema) &&
 
         leftLink.tableObject && rightLink.tableObject &&
         equalObject(leftLink.tableObject, rightLink.tableObject)
@@ -31,17 +31,17 @@ function equalObject(left, right) {
 }
 
 function objectLink2schmeTable(objectLink) {
-    let scheme = objectLink.link[0];
+    let schema = objectLink.link[0];
     let table = objectLink.link[1];
 
     if ( !table ) {
-        table = scheme;
-        scheme = null;
+        table = schema;
+        schema = null;
     }
 
-    let schemeObject = scheme;
-    if ( scheme ) {
-        scheme = scheme.word || scheme.content;
+    let schemaObject = schema;
+    if ( schema ) {
+        schema = schema.word || schema.content;
     }
 
     let tableObject = table;
@@ -49,29 +49,29 @@ function objectLink2schmeTable(objectLink) {
         table = table.word || table.content;
     }
 
-    return {table, scheme, tableObject, schemeObject};
+    return {table, schema, tableObject, schemaObject};
 }
 
 function objectLink2schmeTableColumn(objectLink) {
-    let scheme = objectLink.link[0];
+    let schema = objectLink.link[0];
     let table = objectLink.link[1];
     let column = objectLink.link[2];
 
     if ( !column ) {
         column = table;
-        table = scheme;
-        scheme = null;
+        table = schema;
+        schema = null;
     }
 
     if ( !column ) {
         column = table;
         table = null;
-        scheme = null;
+        schema = null;
     }
 
-    let schemeObject = scheme;
-    if ( scheme ) {
-        scheme = scheme.word || scheme.content;
+    let schemaObject = schema;
+    if ( schema ) {
+        schema = schema.word || schema.content;
     }
 
     let tableObject = table;
@@ -82,7 +82,7 @@ function objectLink2schmeTableColumn(objectLink) {
     let columnObject = column;
     column = column.word || column.content;
 
-    return {scheme, table, column, columnObject, tableObject, schemeObject};
+    return {schema, table, column, columnObject, tableObject, schemaObject};
 }
 
 function getDbTable(server, link) {
@@ -90,46 +90,46 @@ function getDbTable(server, link) {
         throw new Error("invalid link");
     }
 
-    let scheme, table;
+    let schema, table;
 
-    if ( !link.schemeObject ) {
-        scheme = server.schemes[ PUBLIC_SCHEME_NAME ];
-        if ( !scheme ) {
-            throw new Error(`scheme ${ PUBLIC_SCHEME_NAME } does not exist`);
+    if ( !link.schemaObject ) {
+        schema = server.schemas[ PUBLIC_SCHEMA_NAME ];
+        if ( !schema ) {
+            throw new Error(`schema ${ PUBLIC_SCHEMA_NAME } does not exist`);
         }
     }
-    else if ( link.schemeObject.content ) {
-        let content = link.schemeObject.content;
-        scheme = server.schemes[ content ];
-        if ( !scheme ) {
-            throw new Error(`scheme ${ content } does not exist`);
+    else if ( link.schemaObject.content ) {
+        let content = link.schemaObject.content;
+        schema = server.schemas[ content ];
+        if ( !schema ) {
+            throw new Error(`schema ${ content } does not exist`);
         }
     }
-    else if ( link.schemeObject.word ) {
-        let word = link.schemeObject.word.toLowerCase();
-        for (let name in server.schemes ) {
+    else if ( link.schemaObject.word ) {
+        let word = link.schemaObject.word.toLowerCase();
+        for (let name in server.schemas ) {
             if ( name.toLowerCase() == word ) {
-                scheme = server.schemes[ name ];
+                schema = server.schemas[ name ];
                 break;
             }
         }
-        if ( !scheme ) {
-            throw new Error(`scheme ${ word } does not exist`);
+        if ( !schema ) {
+            throw new Error(`schema ${ word } does not exist`);
         }
     }
 
     if ( link.tableObject.content ) {
         let content = link.tableObject.content;
-        table = scheme.tables[ content ];
+        table = schema.tables[ content ];
         if ( !table ) {
             throw new Error(`table ${ content } does not exist`);
         }
     }
     else if ( link.tableObject.word ) {
         let word = link.tableObject.word.toLowerCase();
-        for (let name in scheme.tables ) {
+        for (let name in schema.tables ) {
             if ( name.toLowerCase() == word ) {
-                table = scheme.tables[ name ];
+                table = schema.tables[ name ];
                 break;
             }
         }
@@ -179,7 +179,7 @@ function getDbColumn(serverOrTable, link) {
 }
 
 module.exports = {
-    PUBLIC_SCHEME_NAME,
+    PUBLIC_SCHEMA_NAME,
     equalTableLink,
     objectLink2schmeTable,
     objectLink2schmeTableColumn,

@@ -5,7 +5,7 @@ const Syntax = require("../Syntax");
 const removeUnnesaryJoinsMethods = require("./Select.removeUnnesaryJoins");
 const getColumnSourceMethods = require("./Select.getColumnSource");
 const buildFromFilesMethods = require("./Select.buildFromFiles");
-const {PUBLIC_SCHEME_NAME} = require("./helpers");
+const {PUBLIC_SCHEMA_NAME} = require("./helpers");
 
 // https://www.postgresql.org/docs/9.5/static/sql-select.html
 /*
@@ -371,7 +371,7 @@ class Select extends Syntax {
             fromMap[ name ] = fromItem;
         } else {
             if ( fromItem.table ) {
-                // from scheme1.company, scheme2.company
+                // from schema1.company, schema2.company
 
                 name = fromItem.table.link.slice(-1)[0]; // last
                 name = name.word || name.content;
@@ -384,20 +384,20 @@ class Select extends Syntax {
                         this._throwFromUniqError(name);
                     }
 
-                    let scheme = PUBLIC_SCHEME_NAME;
+                    let schema = PUBLIC_SCHEMA_NAME;
                     if ( fromItem.table.link.length > 1 ) {
-                        scheme = fromItem.table.link[ 0 ];
-                        scheme = scheme.word || scheme.content;
+                        schema = fromItem.table.link[ 0 ];
+                        schema = schema.word || schema.content;
                     }
 
                     items.forEach(item => {
-                        let itemScheme = PUBLIC_SCHEME_NAME;
+                        let itemSchema = PUBLIC_SCHEMA_NAME;
                         if ( item.table.link.length > 1 ) {
-                            itemScheme = item.table.link[ 0 ];
-                            itemScheme = itemScheme.word || itemScheme.content;
+                            itemSchema = item.table.link[ 0 ];
+                            itemSchema = itemSchema.word || itemSchema.content;
                         }
 
-                        if ( itemScheme == scheme ) {
+                        if ( itemSchema == schema ) {
                             this._throwFromUniqError(name);
                         }
                     });

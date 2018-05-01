@@ -1,7 +1,7 @@
 "use strict";
 
 const {
-    PUBLIC_SCHEME_NAME,
+    PUBLIC_SCHEMA_NAME,
     objectLink2schmeTable,
     objectLink2schmeTableColumn,
     getDbColumn,
@@ -92,8 +92,8 @@ module.exports = {
     _getColumnSourceByFromItem(params, fromItem, link) {
         let from = objectLink2schmeTable(fromItem.table);
 
-        if ( link.scheme ) {
-            if ( (from.scheme || PUBLIC_SCHEME_NAME) != link.scheme ) {
+        if ( link.schema ) {
+            if ( (from.schema || PUBLIC_SCHEMA_NAME) != link.schema ) {
                 return;
             }
         }
@@ -113,7 +113,7 @@ module.exports = {
             }
         }
 
-        if ( !from.scheme ) {
+        if ( !from.schema ) {
             let source = this._findByWithQuery(params, from, link);
             if ( source ) {
                 return source;

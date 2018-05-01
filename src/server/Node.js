@@ -11,14 +11,23 @@ class Node {
             options = {file: options};
         }
         this.options = options;
-        
-        let fileBuffer = fs.readFileSync( options.file );
-        let parsed = GrapeQLCoach.parseEntity( fileBuffer.toString() );
-        this.parsed = parsed;
-        
+
+        if ( options.file ) {
+            let fileBuffer = fs.readFileSync( options.file );
+            let parsed = GrapeQLCoach.parseEntity( fileBuffer.toString() );
+            this.parsed = parsed;
+        }
+        else if ( options.sql ) {
+            let parsed = GrapeQLCoach.parseEntity( options.sql );
+            this.parsed = parsed;
+        }
+        else if ( options.parsed ) {
+            this.parsed = options.parsed;
+        }
+
         this.server = server;
     }
-    
+
     async get(request) {
         let query = new Query({
             request,
@@ -27,7 +36,7 @@ class Node {
         });
         console.log( query.toString() );
         let result = await this.server.db.query( query.toString() );
-        
+
         return result.rows;
     }
 }

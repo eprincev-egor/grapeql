@@ -69,6 +69,20 @@ describe("Expression.replaceLinks", () => {
     });
 
     testReplaceLinks({
+        expression: "\"cOmpany\".id = 1",
+        replace: "company",
+        to: "country",
+        result: "\"cOmpany\".id = 1"
+    });
+
+    testReplaceLinks({
+        expression: "\"cOmpany\".id = 1",
+        replace: "cOmpany",
+        to: "country",
+        result: "country.id = 1"
+    });
+
+    testReplaceLinks({
         expression: "\"company\".id = 1",
         replace: "\"company\"",
         to: "country",

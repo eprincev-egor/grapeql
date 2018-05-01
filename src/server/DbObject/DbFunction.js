@@ -3,7 +3,7 @@
 class DbFunction {
     constructor(params) {
         this.name = params.name;
-        this.scheme = params.scheme;
+        this.schema = params.schema;
         this.returnType = params.returnType;
     }
 }
