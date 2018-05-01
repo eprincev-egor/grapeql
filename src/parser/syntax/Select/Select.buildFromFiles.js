@@ -1,5 +1,30 @@
 "use strict";
 
+function getDbTable(server, fromItem) {
+    let tableLink = fromItem.table.link;
+    let tableName;
+
+    let dbSchema;
+    if ( tableLink.length > 1 ) {
+        let schemaObjectName = tableLink[0];
+
+        for (let schemaName in server.schemas) {
+            if ( schemaObjectName.equalString( schemaName ) ) {
+                dbSchema = server.schemas[ schemaName ];
+                break;
+            }
+        }
+
+        tableName = tableLink[1];
+    } else {
+        dbSchema = server.getSchema("public");
+        tableName = tableLink[0];
+    }
+
+    tableName = tableName.word || tableName.content;
+    return dbSchema.getTable( tableName );
+}
+
 module.exports = {
     // params.node
     // params.server
@@ -13,15 +38,23 @@ module.exports = {
 
         select.clearColumns();
 
-        let tableName = select.from[0].table.link[0].word;
-        let dbSchema = server.getSchema("public");
-        let dbTable = dbSchema.getTable( tableName );
+        let fromItem = select.from[0];
+        let dbTable = getDbTable( server, fromItem );
+
+        let fromSql;
+        if ( fromItem.as ) {
+            // public.company as company
+            fromSql = fromItem.as.toAliasSql();
+        } else {
+            // public.company
+            fromSql = fromItem.toString();
+        }
 
         params.columns.forEach(key => {
             let dbColumn = dbTable.getColumn( key );
 
             if ( dbColumn ) {
-                select.addColumn(`${ tableName }.${ dbColumn.name } as "${ key }"`);
+                select.addColumn(`${ fromSql }.${ dbColumn.name } as "${ key }"`);
             }
         });
 

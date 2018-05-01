@@ -52,6 +52,14 @@ class ObjectName extends DoubleQuotes {
             return this.content = anotherObject.content;
         }
     }
+
+    equalString(string) {
+        if ( this.word ) {
+            return this.word.toLowerCase() == string.toLowerCase();
+        } else {
+            return this.content == string;
+        }
+    }
 }
 
 module.exports = ObjectName;

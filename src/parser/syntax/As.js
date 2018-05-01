@@ -63,6 +63,13 @@ class As extends ObjectName {
         super.fillClone(clone);
     }
 
+    // as "some"
+    // returned
+    // "some"
+    toAliasSql() {
+        return super.toString();
+    }
+
     toString() {
         let out = super.toString();
 
