@@ -147,3 +147,30 @@ describe("As.clone().toString()", () => {
 
     assert.equal(str, "as x");
 });
+
+describe("ObjectName.equal", () => {
+    let coach;
+    let left, right;
+
+    it("\"hello\"  ==  hello", () => {
+        coach = new GrapeQLCoach("\"hello\"");
+        left = coach.parseObjectName();
+
+        coach = new GrapeQLCoach("hello");
+        right = coach.parseObjectName();
+
+        assert.ok( left.equal(right) );
+        assert.ok( right.equal(left) );
+    });
+
+    it("hEllo  ==  hello", () => {
+        coach = new GrapeQLCoach("hEllo");
+        left = coach.parseObjectName();
+
+        coach = new GrapeQLCoach("hello");
+        right = coach.parseObjectName();
+
+        assert.ok( left.equal(right) );
+        assert.ok( right.equal(left) );
+    });
+});

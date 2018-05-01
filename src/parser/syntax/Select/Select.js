@@ -360,8 +360,8 @@ class Select extends Syntax {
     _validateFromItem(fromMap, fromItem) {
         let name;
 
-        if ( fromItem.as && fromItem.as.alias ) {
-            name = fromItem.as.alias;
+        if ( fromItem.as ) {
+            name = fromItem.as;
             name = name.word || name.content;
 
             if ( name in fromMap ) {
@@ -370,38 +370,43 @@ class Select extends Syntax {
 
             fromMap[ name ] = fromItem;
         } else {
-            // from scheme1.company, scheme2.company
+            if ( fromItem.table ) {
+                // from scheme1.company, scheme2.company
 
-            name = fromItem.table.link.slice(-1)[0]; // last
-            name = name.word || name.content;
+                name = fromItem.table.link.slice(-1)[0]; // last
+                name = name.word || name.content;
 
-            if ( !(name in fromMap) ) {
-                fromMap[ name ] = [fromItem];
-            } else {
-                let items = fromMap[ name ];
-                if ( !Array.isArray(items) ) {
-                    this._throwFromUniqError(name);
-                }
-
-                let scheme = PUBLIC_SCHEME_NAME;
-                if ( fromItem.table.link.length > 1 ) {
-                    scheme = fromItem.table.link[ 0 ];
-                    scheme = scheme.word || scheme.content;
-                }
-
-                items.forEach(item => {
-                    let itemScheme = PUBLIC_SCHEME_NAME;
-                    if ( item.table.link.length > 1 ) {
-                        itemScheme = item.table.link[ 0 ];
-                        itemScheme = itemScheme.word || itemScheme.content;
-                    }
-
-                    if ( itemScheme == scheme ) {
+                if ( !(name in fromMap) ) {
+                    fromMap[ name ] = [fromItem];
+                } else {
+                    let items = fromMap[ name ];
+                    if ( !Array.isArray(items) ) {
                         this._throwFromUniqError(name);
                     }
-                });
 
-                items.push( fromItem );
+                    let scheme = PUBLIC_SCHEME_NAME;
+                    if ( fromItem.table.link.length > 1 ) {
+                        scheme = fromItem.table.link[ 0 ];
+                        scheme = scheme.word || scheme.content;
+                    }
+
+                    items.forEach(item => {
+                        let itemScheme = PUBLIC_SCHEME_NAME;
+                        if ( item.table.link.length > 1 ) {
+                            itemScheme = item.table.link[ 0 ];
+                            itemScheme = itemScheme.word || itemScheme.content;
+                        }
+
+                        if ( itemScheme == scheme ) {
+                            this._throwFromUniqError(name);
+                        }
+                    });
+
+                    items.push( fromItem );
+                }
+            }
+            else if ( fromItem.file ) {
+                let name = fromItem.file.path.slice(-1);
             }
         }
     }
@@ -569,7 +574,7 @@ class Select extends Syntax {
 
         if ( this.fetch ) {
             out += "fetch ";
-            
+
             if ( this.fetch.first ) {
                 out += "first ";
             }

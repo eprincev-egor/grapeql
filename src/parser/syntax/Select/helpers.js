@@ -184,6 +184,5 @@ module.exports = {
     objectLink2schmeTable,
     objectLink2schmeTableColumn,
     getDbTable,
-    getDbColumn,
-    equalObject
+    getDbColumn
 };

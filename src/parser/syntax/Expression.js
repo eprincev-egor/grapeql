@@ -3,21 +3,6 @@
 const Syntax = require("./Syntax");
 const operatorsMap = require("./operators.map.js");
 
-function equalLinkElem(left, right) {
-    if ( !left && right ) {
-        return false;
-    }
-    if ( left && !right ) {
-        return false;
-    }
-
-    if ( left.content || right.content ) {
-        return left.content == right.content;
-    }
-
-    return left.word.toLowerCase() == right.word.toLowerCase();
-}
-
 class Expression extends Syntax {
     constructor() {
         super();
@@ -478,7 +463,7 @@ class Expression extends Syntax {
             let elem = link[i];
             let replaceElem = replace[i];
 
-            if ( !equalLinkElem(elem, replaceElem) ) {
+            if ( !elem.equal(replaceElem) ) {
                 return;
             }
             spliceLength++;

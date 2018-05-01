@@ -4,8 +4,7 @@ const {
     objectLink2schmeTable,
     objectLink2schmeTableColumn,
     equalTableLink,
-    getDbTable,
-    equalObject
+    getDbTable
 } = require("./helpers");
 
 // TODO: from lateral func( some.id )
@@ -51,9 +50,9 @@ module.exports = {
     _isHelpfullJoin(join, index, params) {
         let fromLink;
 
-        if ( join.from.as && join.from.as.alias ) {
+        if ( join.from.as ) {
             fromLink = new this.Coach.ObjectLink();
-            fromLink.add( join.from.as.alias );
+            fromLink.add( join.from.as );
         } else {
             fromLink = join.from.table;
         }
@@ -319,11 +318,11 @@ module.exports = {
         let fromItems = (this.joins || []).map(join => join.from).concat(this.from || []);
 
         return fromItems.some(fromItem => {
-            if ( fromItem.as && fromItem.as.alias ) {
+            if ( fromItem.as ) {
                 if ( fromLink.scheme ) {
                     return;
                 }
-                return equalObject(fromItem.as.alias, fromLink.tableObject);
+                return fromItem.as.equal( fromLink.tableObject );
             }
             else if ( fromItem.table ) {
                 let tableLink = objectLink2schmeTable(fromItem.table);

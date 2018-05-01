@@ -1,11 +1,10 @@
 "use strict";
 
-const Syntax = require("./Syntax");
+const ObjectName = require("./ObjectName");
 
-class As extends Syntax {
+class As extends ObjectName {
     parse(coach) {
         let needAlias = false;
-        this.alias = null;
 
         if ( coach.isWord("as") ) {
             coach.expect("as");
@@ -14,17 +13,17 @@ class As extends Syntax {
             this.hasWordAs = true;
         }
 
-        if ( coach.isDoubleQuotes() ) {
-            this.alias = coach.parseDoubleQuotes();
-            this.addChild(this.alias);
-            return;
+        let index = coach.i;
+        try {
+            super.parse(coach);
+        } catch(err) {
+            coach.i = index;
+            coach.throwError("expected alias");
         }
 
-        if ( coach.isWord() ) {
-            let index = coach.i;
-            let word = coach.readWord();
-
-            if ( this.Coach.Select.keywords.includes(word.toLowerCase()) ) {
+        if ( this.word ) {
+            let word = this.word;
+            if ( this.Coach.Select.keywords.includes( word.toLowerCase() ) ) {
                 coach.i = index;
 
                 if ( needAlias ) {
@@ -33,9 +32,6 @@ class As extends Syntax {
                     // will be valid, but it is recommended that you use double quotes
                     coach.throwError("unexpected keyword: " + word);
                 }
-            } else {
-                this.alias = new Syntax.Word(word);
-                this.addChild(this.alias);
             }
         }
     }
@@ -58,25 +54,17 @@ class As extends Syntax {
 
     clone() {
         let clone = new As();
-
-        if ( !this.alias ) {
-            clone.alias = null;
-            return clone;
-        }
-
-        clone.alias = this.alias.clone();
-        clone.hasWordAs = this.hasWordAs;
-        clone.addChild(clone.alias);
-
+        this.fillClone( clone );
         return clone;
     }
 
-    toString() {
-        if ( !this.alias ) {
-            return "";
-        }
+    fillClone(clone) {
+        clone.hasWordAs = this.hasWordAs;
+        super.fillClone(clone);
+    }
 
-        let out = this.alias.toString();
+    toString() {
+        let out = super.toString();
 
         if ( this.hasWordAs ) {
             out = "as " + out;

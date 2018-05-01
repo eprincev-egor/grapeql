@@ -1,6 +1,6 @@
 
 "use strict";
-    
+
 var SKIP_KEYS = [
     "Coach",
     "coach",
@@ -10,11 +10,11 @@ var SKIP_KEYS = [
     "children",
     "_source"
 ];
-    
+
 var _typeof = function (obj) {
     return typeof obj;
 };
-    
+
 function objectType(obj) {
     if (typeof obj === "undefined") {
         return "undefined";
@@ -277,7 +277,7 @@ getRegExpFlags(a) === getRegExpFlags(b);
                 if ( SKIP_KEYS.includes(i) ) {
                     continue;
                 }
-                    
+
                 // Collect a's properties
                 aProperties.push(i);
 
@@ -349,5 +349,5 @@ getRegExpFlags(a) === getRegExpFlags(b);
         return result;
     };
 })();
-    
+
 module.exports = equiv;

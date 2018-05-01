@@ -34,7 +34,7 @@ function startServer(dirname, callback) {
             `;
         });
         clearDbSql += `
-            drop schema if exists public;
+            drop schema if exists public cascade;
             create schema public;
         `;
 

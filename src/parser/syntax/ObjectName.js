@@ -1,32 +1,56 @@
 "use strict";
 
-const Syntax = require("./Syntax");
+const DoubleQuotes = require("./DoubleQuotes");
 
-class ObjectName extends Syntax {
+class ObjectName extends DoubleQuotes {
     parse(coach) {
         if ( coach.isDoubleQuotes() ) {
-            this.name = coach.parseDoubleQuotes();
+            super.parse(coach);
         }
         else {
-            let word = coach.expectWord();
-            this.name = new Syntax.Word( word );
+            this.word = coach.expectWord();
         }
-        this.addChild(this.name);
     }
-    
+
     is(coach) {
         return coach.isDoubleQuotes() || coach.isWord();
     }
-    
+
     clone() {
         let clone = new ObjectName();
-        clone.name = this.name.clone();
-        clone.addChild(this.name);
+        this.fillClone( clone );
         return clone;
     }
-    
+
+    fillClone(clone) {
+        if ( this.word ) {
+            clone.word = this.word;
+        } else {
+            super.fillClone( clone );
+        }
+    }
+
     toString() {
-        return this.name.toString();
+        if ( this.word ) {
+            return this.word;
+        } else {
+            return super.toString();
+        }
+    }
+
+    equal(anotherObject) {
+        if ( this.word && anotherObject.word ) {
+            return this.word.toLowerCase() == anotherObject.word.toLowerCase();
+        }
+        else if ( this.word && anotherObject.content ) {
+            return this.word == anotherObject.content;
+        }
+        else if ( this.content && anotherObject.word ) {
+            return this.content == anotherObject.word;
+        }
+        else {
+            return this.content = anotherObject.content;
+        }
     }
 }
 

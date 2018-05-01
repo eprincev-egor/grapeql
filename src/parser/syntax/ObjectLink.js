@@ -16,8 +16,8 @@ class ObjectLink extends Syntax {
             coach.i++;
         } else {
             let elem = coach.parseObjectName();
-            this.addChild( elem.name );
-            this.link.push( elem.name );
+            this.addChild( elem );
+            this.link.push( elem );
         }
 
         if ( coach.is(/\s*\./) ) {
@@ -49,10 +49,6 @@ class ObjectLink extends Syntax {
                 return "*";
             }
 
-            if ( elem.word ) {
-                return {word: elem.word};
-            }
-
             let elemClone = elem.clone();
             clone.addChild(elemClone);
             return elemClone;
@@ -65,10 +61,6 @@ class ObjectLink extends Syntax {
         return this.link.map(elem => {
             if ( elem == "*" ) {
                 return "*";
-            }
-
-            if ( elem.word ) {
-                return elem.word;
             }
 
             return elem.toString();

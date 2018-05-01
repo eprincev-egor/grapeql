@@ -7,29 +7,25 @@ GrapeQLCoach.As.tests = [
     {
         str: "nice",
         result: {
-            alias: {word: "nice"}
+            word: "nice"
         }
     },
     {
         str: "\" Yep\"",
         result: {
-            alias: {
-                content: " Yep"
-            }
+            content: " Yep"
         }
     },
     {
         str: "as Some1",
         result: {
-            alias: {word: "Some1"}
+            word: "Some1"
         }
     },
     {
         str: "as \"order\"",
         result: {
-            alias: {
-                content: "order"
-            }
+            content: "order"
         }
     },
     {
@@ -197,7 +193,7 @@ GrapeQLCoach.Column.tests = [
                     ]}
                 ]
             },
-            as: { alias: {word: "id"} }
+            as: { word: "id"}
         }
     },
     {
@@ -208,7 +204,7 @@ GrapeQLCoach.Column.tests = [
                     {null: true}
                 ]
             },
-            as: { alias: {word: "nulL1"} }
+            as: { word: "nulL1"}
         }
     },
     {
@@ -1035,7 +1031,7 @@ GrapeQLCoach.FromItem.tests = [
     {
         str: "public.company as Company",
         result: {
-            as: {alias: {word: "Company"}},
+            as: { word: "Company" },
             table: {link: [
                 {word: "public"},
                 {word: "company"}
@@ -1045,7 +1041,7 @@ GrapeQLCoach.FromItem.tests = [
     {
         str: "public.company as Company ( id, inn )",
         result: {
-            as: {alias: {word: "Company"}},
+            as: { word: "Company" },
             table: {link: [
                 {word: "public"},
                 {word: "company"}
@@ -1074,11 +1070,10 @@ GrapeQLCoach.FromItem.tests = [
                     table: {link: [
                         {word: "public"},
                         {word: "order"}
-                    ]},
-                    as: {alias: null}
+                    ]}
                 }]
             },
-            as: {alias: {word: "Orders"}}
+            as: { word: "Orders" }
         }
     },
     {
@@ -1099,11 +1094,10 @@ GrapeQLCoach.FromItem.tests = [
                 from: [{
                     table: {link: [
                         {word: "company"}
-                    ]},
-                    as: {alias: null}
+                    ]}
                 }]
             },
-            as: {alias: {word: "company"}},
+            as: { word: "company" },
             columns: [
                 {word: "id"},
                 {word: "inn"}
@@ -1132,7 +1126,7 @@ GrapeQLCoach.FromItem.tests = [
                 ]
             },
             as: {
-                alias: {word: "some_rows"}
+                word: "some_rows"
             }
         }
     },
@@ -1145,7 +1139,7 @@ GrapeQLCoach.FromItem.tests = [
                     {name: "Order.sql"}
                 ]
             },
-            as: {alias: {word: "orders"}}
+            as: { word: "orders" }
         }
     },
     {
@@ -1155,6 +1149,17 @@ GrapeQLCoach.FromItem.tests = [
                 path: [
                     {name: "."},
                     {name: "Company.sql"}
+                ]
+            }
+        }
+    },
+    {
+        str: "./Company",
+        result: {
+            file: {
+                path: [
+                    {name: "."},
+                    {name: "Company"}
                 ]
             }
         }
@@ -1395,7 +1400,7 @@ GrapeQLCoach.Join.tests = [
                     {word: "public"},
                     {word: "country"}
                 ]},
-                as: {alias: {word: "country"}}
+                as: { word: "country" }
             },
             using: [
                 {link: [
@@ -1436,7 +1441,7 @@ GrapeQLCoach.Join.tests = [
                     }]
                 },
                 as: {
-                    alias: {word: "sub_company"}
+                    word: "sub_company"
                 }
             },
             on: {elements: [
@@ -1455,7 +1460,7 @@ GrapeQLCoach.Join.tests = [
                         {name: "Company.sql"}
                     ]
                 },
-                as: {alias: {word: "company"}}
+                as: { word: "company" }
             },
             on: {elements: [
                 {boolean: true}
@@ -1489,7 +1494,7 @@ GrapeQLCoach.Join.tests = [
                         ]}
                     ]}]
                 },
-                as: {alias: {word: "order_id"}}
+                as: { word: "order_id" }
             },
             on: {elements: [
                 {boolean: true}
@@ -1515,7 +1520,7 @@ GrapeQLCoach.Join.tests = [
                         ]}
                     ]}]
                 },
-                as: {alias: {word: "order_id"}}
+                as: { word: "order_id" }
             },
             on: {elements: [
                 {boolean: true}
@@ -1556,15 +1561,13 @@ GrapeQLCoach.ObjectName.tests = [
     {
         str: "a",
         result: {
-            name: {word: "a"}
+            word: "a"
         }
     },
     {
         str: "\"Nice\"",
         result: {
-            name: {
-                content: "Nice"
-            }
+            content: "Nice"
         }
     }
 ];
@@ -1832,10 +1835,7 @@ GrapeQLCoach.Select.tests = [
             from: [{
                 table: {link: [
                     {word: "company"}
-                ]},
-                as: {
-                    alias: null
-                }
+                ]}
             }]
         }
     },
@@ -1855,10 +1855,7 @@ GrapeQLCoach.Select.tests = [
             from: [{
                 table: {link: [
                     {content: " company"}
-                ]},
-                as: {
-                    alias: null
-                }
+                ]}
             }]
         }
     },
@@ -1867,7 +1864,7 @@ GrapeQLCoach.Select.tests = [
         result: {
             columns: [
                 {
-                    as: {alias: {word: "id"}},
+                    as: { word: "id" },
                     expression: {elements: [
                         {link: [
                             {word: "company"},
@@ -1876,7 +1873,7 @@ GrapeQLCoach.Select.tests = [
                     ]}
                 },
                 {
-                    as: {alias: {word: "n"}},
+                    as: { word: "n" },
                     expression: {elements: [
                         {null: true}
                     ]}
@@ -1886,8 +1883,7 @@ GrapeQLCoach.Select.tests = [
                 table: {link: [
                     {word: "public"},
                     {word: "company"}
-                ]},
-                as: {alias: null}
+                ]}
             }]
         }
     },
@@ -1898,8 +1894,7 @@ GrapeQLCoach.Select.tests = [
             from: [{
                 table: {link: [
                     {word: "company"}
-                ]},
-                as: {alias: null}
+                ]}
             }],
             where: {elements: [
                 {link: [
@@ -1917,8 +1912,7 @@ GrapeQLCoach.Select.tests = [
             from: [{
                 table: {link: [
                     {word: "company"}
-                ]},
-                as: {alias: null}
+                ]}
             }],
             having: {elements: [
                 {link: [
@@ -1936,8 +1930,7 @@ GrapeQLCoach.Select.tests = [
             from: [{
                 table: {link: [
                     {word: "company"}
-                ]},
-                as: {alias: null}
+                ]}
             }],
             offset: 1,
             limit: 10
@@ -1950,8 +1943,7 @@ GrapeQLCoach.Select.tests = [
             from: [{
                 table: {link: [
                     {word: "company"}
-                ]},
-                as: {alias: null}
+                ]}
             }],
             offset: 100,
             limit: "all"
@@ -1964,8 +1956,7 @@ GrapeQLCoach.Select.tests = [
             from: [{
                 table: {link: [
                     {word: "company"}
-                ]},
-                as: {alias: null}
+                ]}
             }],
             fetch: {first: true, count: 5, rows: true}
         }
@@ -1977,8 +1968,7 @@ GrapeQLCoach.Select.tests = [
             from: [{
                 table: {link: [
                     {word: "company"}
-                ]},
-                as: {alias: null}
+                ]}
             }],
             fetch: {next: true, count: 1, row: true}
         }
@@ -2003,10 +1993,7 @@ GrapeQLCoach.Select.tests = [
                         from: [{
                             table: {link: [
                                 {word: "company"}
-                            ]},
-                            as: {
-                                alias: null
-                            }
+                            ]}
                         }]
                     }
                 }
@@ -2024,10 +2011,7 @@ GrapeQLCoach.Select.tests = [
             from: [{
                 table: {link: [
                     {word: "orders"}
-                ]},
-                as: {
-                    alias: null
-                }
+                ]}
             }]
         }
     },
@@ -2048,7 +2032,7 @@ GrapeQLCoach.Select.tests = [
                 table: {link: [
                     {word: "company"}
                 ]},
-                as: { alias: {word: "company"} },
+                as: { word: "company" },
                 columns: [
                     {word: "id"},
                     {word: "inn"}
@@ -2072,10 +2056,7 @@ GrapeQLCoach.Select.tests = [
             from: [{
                 table: {link: [
                     {word: "company"}
-                ]},
-                as: {
-                    alias: null
-                }
+                ]}
             }],
             union: {
                 all: true,
@@ -2093,10 +2074,7 @@ GrapeQLCoach.Select.tests = [
                     from: [{
                         table: {link: [
                             {word: "company"}
-                        ]},
-                        as: {
-                            alias: null
-                        }
+                        ]}
                     }]
                 }
             }
@@ -2109,10 +2087,7 @@ GrapeQLCoach.Select.tests = [
             from: [{
                 table: {link: [
                     {word: "company"}
-                ]},
-                as: {
-                    alias: null
-                }
+                ]}
             }],
             orderBy: [
                 {
@@ -2174,8 +2149,7 @@ GrapeQLCoach.Select.tests = [
             ],
             from: [
                 {
-                    table: {link: [{word: "items_sold"}]},
-                    as: {alias: null}
+                    table: {link: [{word: "items_sold"}]}
                 }
             ],
             groupBy: [
@@ -2280,7 +2254,7 @@ GrapeQLCoach.Select.tests = [
                         table: {link: [
                             {word: "company"}
                         ]},
-                        as: {alias: {word: "partner"}}
+                        as: { word: "partner" }
                     },
                     on: {elements: [
                         {link: [
@@ -2300,7 +2274,7 @@ GrapeQLCoach.Select.tests = [
                         table: {link: [
                             {word: "country"}
                         ]},
-                        as: {alias: {word: "partner_country"}}
+                        as: { word: "partner_country" }
                     },
                     on: {elements: [
                         {link: [
@@ -2335,7 +2309,7 @@ GrapeQLCoach.Select.tests = [
                                             ]
                                         }
                                     ]},
-                                    as: {alias: {word: "sum_sale"}}
+                                    as: { word: "sum_sale" }
                                 }
                             ],
                             from: [{
@@ -2450,7 +2424,7 @@ GrapeQLCoach.Select.tests = [
                             {name: "."},
                             {name: "Company"}
                         ]},
-                        as: {alias: {word: "CompanyClient"}}
+                        as: { word: "CompanyClient" }
                     },
                     on: {elements: [
                         {link: [
@@ -2521,7 +2495,6 @@ GrapeQLCoach.WithQuery.tests = [
             select: {
                 columns: [
                     {
-                        as: null,
                         expression: {elements: [
                             {link: [
                                 "*"
@@ -2532,10 +2505,7 @@ GrapeQLCoach.WithQuery.tests = [
                 from: [{
                     table: {link: [
                         {word: "company"}
-                    ]},
-                    as: {
-                        alias: null
-                    }
+                    ]}
                 }]
             }
         }
@@ -2563,10 +2533,7 @@ GrapeQLCoach.WithQuery.tests = [
                 from: [{
                     table: {link: [
                         {word: "company"}
-                    ]},
-                    as: {
-                        alias: null
-                    }
+                    ]}
                 }]
             }
         }

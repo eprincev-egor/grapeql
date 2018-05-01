@@ -10,15 +10,11 @@ class FromItem extends Syntax {
             this.addChild(this.file);
             coach.skipSpace();
 
-            let i = coach.i;
-            let as = coach.parseAs();
-            if ( !as.alias ) {
-                coach.i = i;
-
-                coach.throwError("expected alias");
+            if ( coach.isAs() ) {
+                let as = coach.parseAs();
+                this.as = as;
+                this.addChild(this.as);
             }
-            this.as = as;
-            this.addChild(this.as);
         }
         // [ LATERAL ] ( select ) [ AS ] alias
         else if ( coach.is("(") || coach.is(/lateral\s*\(/i) ) {
@@ -40,14 +36,7 @@ class FromItem extends Syntax {
             coach.expect(")");
             coach.skipSpace();
 
-            let i = coach.i;
-            let as = coach.parseAs();
-            if ( !as.alias ) {
-                coach.i = i;
-
-                coach.throwError("expected alias");
-            }
-            this.as = as;
+            this.as = coach.parseAs();
             this.addChild(this.as);
         }
         // [ LATERAL ] function_name ( [ argument [, ...] ] )
@@ -95,8 +84,10 @@ class FromItem extends Syntax {
                 coach.skipSpace();
             }
 
-            this.as = coach.parseAs();
-            this.addChild(this.as);
+            if ( coach.isAs() ) {
+                this.as = coach.parseAs();
+                this.addChild(this.as);
+            }
         }
 
         // [ ( column_alias [, ...] ) ]
@@ -105,8 +96,7 @@ class FromItem extends Syntax {
             coach.i++; // (
             coach.skipSpace();
 
-            this.columns = coach.parseComma("ObjectName")
-                .map(objectName => objectName.name);
+            this.columns = coach.parseComma("ObjectName");
             coach.skipSpace();
 
             coach.expect(")");

@@ -1,9 +1,8 @@
 "use strict";
 
 function getFromItemName(fromItem) {
-    if ( fromItem.as && fromItem.as.alias ) {
-        let alias = fromItem.as.alias;
-        return alias.word || alias.content;
+    if ( fromItem.as ) {
+        return fromItem.as.word || fromItem.as.content;
     }
     else if ( fromItem.table ) {
         let link = fromItem.table.link;
@@ -21,6 +20,10 @@ function getNodeByPath(server, path) {
             return server.nodes[ name ];
         }
     }
+}
+
+function getJoinName(join) {
+
 }
 
 module.exports = {
@@ -45,7 +48,8 @@ module.exports = {
             });
         }
 
-        select.buildFromFiles({
+        this.buildFromFiles({
+            select,
             server,
             usedColumns
         });
@@ -76,8 +80,8 @@ module.exports = {
                     }
                 } else {
                     if (
-                        as.alias.word && as.alias.word.toLowerCase() == key.toLowerCase() ||
-                        as.alias.content && as.alias.content == key
+                        as.word && as.word.toLowerCase() == key.toLowerCase() ||
+                        as.content && as.content == key
                     ) {
                         return column;
                     }
@@ -89,8 +93,8 @@ module.exports = {
             } else {
                 if ( !/\./.test(key) ) {
                     let fromItem = select.from[0];
-                    if ( fromItem.as && fromItem.as.alias ) {
-                        columnExpressionByKey[ key ] = `${ fromItem.as.alias.toString() }."${ key }"`;
+                    if ( fromItem.as ) {
+                        columnExpressionByKey[ key ] = `${ fromItem.as.toString() }."${ key }"`;
                     }
                     else if ( fromItem.table ) {
                         columnExpressionByKey[ key ] = `${ fromItem.table.toString() }."${ key }"`;
@@ -146,61 +150,42 @@ module.exports = {
     },
 
     buildFromFiles(params) {
-        let select = this;
+        let select = params.select;
         let usedColumns = params.usedColumns;
         let server = params.server;
 
-        const Coach = this.Coach;
-        const As = Coach.As;
+        let fromNames = {};
+        let nativeKeys = {};
 
-        for (let i = select.joins.length - 1; i >= 0; i--) {
-            let join = select.joins[ i ];
+        usedColumns.forEach(key => {
+            key = key.toLowerCase();
 
-            if ( !join.from.file ) {
+            if ( /\./.test(key) ) {
+                let fromName = key.split(".")[0];
+
+                if ( !(fromName in fromNames) ) {
+                    fromNames[ fromName ] = [];
+                }
+
+                fromNames.push
+            } else {
+                nativeKeys[ key ] = true;
+            }
+        });
+
+        nativeKeys = Object.keys( nativeKeys );
+
+        for (let i = this.joins.length - 1; i >= 0; i--) {
+            let join = this.joins[ i ];
+            let joinName = getJoinName( join );
+
+            if ( !(joinName in fromNames) ) {
                 continue;
             }
 
-            let name = getFromItemName( join.from );
-            if ( usedColumns.some(column => column.indexOf(name + ".") === 0 ) ) {
-                let node = getNodeByPath( server, join.from.file.path );
-                if ( !node ) {
-                    throw new Error(`Node ${ join.from.file.toString() } does not exist`);
-                }
-
-                let nodeSelect = node.parsed.clone();
-                let hasWordAs = join.from.as && join.from.as.hasWordAs;
-                join.from = nodeSelect.from[0].clone();
-                let oldFromFileName = getFromItemName( nodeSelect.from[0] );
-                let as = new As();
-                let coach = new Coach(`"${ name }"`);
-                as.alias = coach.parseDoubleQuotes();
-                as.hasWordAs = hasWordAs;
-                join.from.as = as;
-                let newFromFileName = as.alias.toString();
-                if ( join.on ) {
-                    join.on.replaceLink(name, `"${ name }"`);
-                }
-
-                nodeSelect.joins.forEach(join => {
-                    let addedJoin = select.addJoin( join.toString() );
-                    let joinName = getFromItemName( join.from );
-                    let as = new As();
-                    let newJoinName = `"${ name }.${ joinName }"`;
-                    let coach = new Coach(newJoinName);
-                    as.alias = coach.parseDoubleQuotes();
-                    as.hasWordAs = true;
-
-                    addedJoin.from.as = as;
-
-                    if ( addedJoin.on ) {
-                        addedJoin.on.replaceLink(joinName, newJoinName);
-                        addedJoin.on.replaceLink(oldFromFileName, newFromFileName);
-                    }
-                });
-            } else {
-                select.joins.splice(i, 1);
+            if ( !join.from.file ) {
+                select.addJoin( join.toString() );
             }
         }
-
     }
 };

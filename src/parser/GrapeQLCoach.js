@@ -7,21 +7,21 @@ class GrapeQLCoach extends Coach {
         let coach = this,
             startIndex = coach.i,
             newStr = coach.str.split("");
-        
+
         for (; coach.i < coach.n; coach.i++) {
             let i = coach.i;
-            
+
             if ( coach.isComment() ) {
                 coach.parseComment();
-                
+
                 let length = coach.i - i;
                 // safe \n\r
                 let spaceStr = coach.str.slice(i, i + length).replace(/[^\n\r]/g, " ");
-                
+
                 newStr.splice.apply(newStr, [i, length].concat( spaceStr.split("") ));
             }
         }
-        
+
         coach.i = startIndex;
         coach.str = newStr.join("");
     }
@@ -68,9 +68,7 @@ GrapeQLCoach.parseEntity = function(str) {
 
 // need for tests
 if ( typeof window !== "undefined" ) {
-    if ( typeof window.tests !== "undefined" ) {
-        window.tests.GrapeQLCoach = GrapeQLCoach;
-    }
+    window.GrapeQLCoach = GrapeQLCoach;
 }
 
 module.exports = GrapeQLCoach;

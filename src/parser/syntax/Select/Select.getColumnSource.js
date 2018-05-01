@@ -19,7 +19,7 @@ module.exports = {
 
         if ( !link.table && options._checkColumns !== false ) {
             let column = this.columns.find(column => {
-                let alias = column.as && column.as.alias;
+                let alias = column.as;
                 alias = alias && (alias.word || alias.content);
 
                 if ( !alias && column.expression.isLink() ) {
@@ -99,8 +99,8 @@ module.exports = {
         }
 
         if ( link.table ) {
-            if ( fromItem.as && fromItem.as.alias ) {
-                let alias = fromItem.as.alias;
+            if ( fromItem.as ) {
+                let alias = fromItem.as;
                 alias = alias.word || alias.content;
 
                 if ( alias != link.table ) {
