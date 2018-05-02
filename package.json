@@ -10,7 +10,7 @@
     "test": "mocha ./tests/**/*-spec.js --exit",
     "build": "webpack",
     "watch": "webpack -w",
-    "sandbox": "node --inspect src/sandbox.js"
+    "sandbox": "node --inspect tests/sandbox.js"
   },
   "repository": {
     "type": "git",

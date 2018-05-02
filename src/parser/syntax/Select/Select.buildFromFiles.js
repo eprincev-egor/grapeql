@@ -1,30 +1,5 @@
 "use strict";
 
-function getDbTable(server, fromItem) {
-    let tableLink = fromItem.table.link;
-    let tableName;
-
-    let dbSchema;
-    if ( tableLink.length > 1 ) {
-        let schemaObjectName = tableLink[0];
-
-        for (let schemaName in server.schemas) {
-            if ( schemaObjectName.equalString( schemaName ) ) {
-                dbSchema = server.schemas[ schemaName ];
-                break;
-            }
-        }
-
-        tableName = tableLink[1];
-    } else {
-        dbSchema = server.getSchema("public");
-        tableName = tableLink[0];
-    }
-
-    tableName = tableName.word || tableName.content;
-    return dbSchema.getTable( tableName );
-}
-
 module.exports = {
     // params.node
     // params.server
@@ -33,25 +8,33 @@ module.exports = {
     // params.limit
     // params.where
     build(params) {
+        let originalSelect = this;
         let select = this.clone();
         let server = params.server;
 
         select.clearColumns();
 
-        let fromItem = select.from[0];
-        let dbTable = getDbTable( server, fromItem );
 
-        let fromSql;
-        if ( fromItem.as ) {
-            // public.company as company
-            fromSql = fromItem.as.toAliasSql();
-        } else {
-            // public.company
-            fromSql = fromItem.toString();
-        }
 
         params.columns.forEach(key => {
-            let dbColumn = dbTable.getColumn( key );
+            let definedColumn = originalSelect.getColumnByAlias( key );
+            if ( definedColumn ) {
+                select.addColumn(`${ definedColumn.expression } as "${ key }"`);
+                return;
+            }
+
+            let dbColumnKey = key;
+            let fromItem;
+            if ( /\./.test(key) ) {
+                fromItem = select.getFromItemByAlias( key.split(".")[0] );
+                dbColumnKey = key.split(".")[1];
+            } else {
+                fromItem = select.from[0];
+            }
+
+            let fromSql = fromItem.getAliasSql();
+            let dbTable = fromItem.getDbTable( server );
+            let dbColumn = dbTable.getColumn( dbColumnKey );
 
             if ( dbColumn ) {
                 select.addColumn(`${ fromSql }.${ dbColumn.name } as "${ key }"`);

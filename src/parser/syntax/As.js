@@ -66,7 +66,7 @@ class As extends ObjectName {
     // as "some"
     // returned
     // "some"
-    toAliasSql() {
+    getAliasSql() {
         return super.toString();
     }
 

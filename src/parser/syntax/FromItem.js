@@ -213,6 +213,39 @@ class FromItem extends Syntax {
 
         return out;
     }
+
+    getAliasSql() {
+        if ( this.as ) {
+            return this.as.getAliasSql();
+        } else {
+            return this.toString();
+        }
+    }
+
+    getDbTable(server) {
+        let tableLink = this.table.link;
+        let tableName;
+
+        let dbSchema;
+        if ( tableLink.length > 1 ) {
+            let schemaObjectName = tableLink[0];
+
+            for (let schemaName in server.schemas) {
+                if ( schemaObjectName.equalString( schemaName ) ) {
+                    dbSchema = server.schemas[ schemaName ];
+                    break;
+                }
+            }
+
+            tableName = tableLink[1];
+        } else {
+            dbSchema = server.getSchema("public");
+            tableName = tableLink[0];
+        }
+
+        tableName = tableName.word || tableName.content;
+        return dbSchema.getTable( tableName );
+    }
 }
 
 module.exports = FromItem;

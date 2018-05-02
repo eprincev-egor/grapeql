@@ -55,4 +55,17 @@ describe("Builder", () => {
         `
     });
 
+    testRequest({
+        server: () => server,
+        node: "select * from test.company as my_company",
+        request: {
+            columns: ["is_some"]
+        },
+        result: `
+            select
+                my_company.is_some as "is_some"
+            from test.company as my_company
+        `
+    });
+
 });

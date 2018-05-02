@@ -683,6 +683,45 @@ class Select extends Syntax {
         this.where = coach.parseExpression();
         this.addChild(this.where);
     }
+
+    getColumnByAlias(alias) {
+        return this.columns.find(column => {
+            if ( column.as ) {
+                if ( column.as.equalString(alias) ) {
+                    return true;
+                }
+            } else {
+                if ( column.expression.isLink() ) {
+                    let link = column.expression.getLink();
+                    let elem = link.getLast();
+
+                    if ( typeof elem != "string" ) {
+                        if ( elem.equalString(alias) ) {
+                            return true;
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    getFromItemByAlias(alias) {
+        let fromItems = this.joins.map(join => join.from).concat(this.from);
+
+        return fromItems.find(fromItem => {
+            if ( fromItem.as ) {
+                if ( fromItem.as.equalString(alias) ) {
+                    return true;
+                }
+            }
+            else if ( fromItem.table ) {
+                let elem = fromItem.table.getLast();
+                if ( elem.equalString(alias) ) {
+                    return true;
+                }
+            }
+        });
+    }
 }
 
 for (let key in removeUnnesaryJoinsMethods) {
