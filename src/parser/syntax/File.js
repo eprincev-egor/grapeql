@@ -6,46 +6,39 @@ class File extends Syntax {
     parse(coach) {
         this.path = [];
 
-        if ( coach.is(/\.*\//) ) {
-            this.parsePath(coach, {first: true});
-        } else {
+        if ( !coach.is(/\.*\//) ) {
             coach.expectWord("file");
             coach.skipSpace();
+        }
 
-            if ( !coach.is("/") && !coach.is(".") ) {
-                let elem = new this.Coach.FilePathElement();
-                elem.name = ".";
-                this.path.push(elem);
-            }
+        if ( !coach.is("/") && !coach.is(".") ) {
+            let elem = new this.Coach.FilePathElement();
+            elem.name = ".";
+            this.path.push(elem);
+        }
 
-            this.parsePath(coach, {first: true});
+        if ( coach.is("/") ) {
+            coach.i++;
+        }
+
+        let oldLength = this.path.length;
+        this.parsePath(coach);
+
+        if ( this.path.length == oldLength ) {
+            coach.throwError("expected file name");
         }
     }
 
-    parsePath(coach, options) {
-        let elem;
-
-        if ( coach.isDoubleQuotes() ) {
-            elem = coach.parseDoubleQuotes();
-            this.path.push(elem);
-        } else {
-            elem = coach.parseFilePathElement();
-
-            if ( !elem.name ) {
-                if ( options.first !== true ) {
-                    coach.throwError("expected file name");
-                }
-            } else {
-                this.path.push(elem);
-            }
-        }
+    parsePath(coach) {
+        let elem = coach.parseFilePathElement();
+        this.path.push(elem);
 
         if ( coach.is(/\s*\//) ) {
             coach.skipSpace();
             coach.read(/\/+/);
             coach.skipSpace();
 
-            this.parsePath(coach, {first: false});
+            this.parsePath(coach);
         }
     }
 
@@ -67,6 +60,18 @@ class File extends Syntax {
         }
 
         return out;
+    }
+
+    equalAlias(alias) {
+        let last = this.path.slice(-1)[0];
+        if ( last ) {
+            if ( last.content ) {
+                return last.content == alias;
+            }
+            else if ( last.name ) {
+                return last.name.toLowerCase() == alias.toLowerCase();
+            }
+        }
     }
 }
 

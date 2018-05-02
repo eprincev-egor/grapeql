@@ -8,6 +8,15 @@ const assert = require("assert");
 module.exports = function testRequest(test) {
     it(test.result, () => {
         let server = test.server();
+
+        if ( test.nodes ) {
+            for (let name in test.nodes) {
+                let node = test.nodes[ name ];
+                node = server.addNode(name, node);
+                node.options.file = "./" + name + ".sql";
+            }
+        }
+
         let node = test.node;
 
         if ( /^\w+$/.test(node) ) {

@@ -55,6 +55,16 @@ TABLE [ ONLY ] table_name [ * ]
  */
 
 class Select extends Syntax {
+    constructor() {
+        super();
+        this.columns = [];
+        this.joins = [];
+        this.from = [];
+        this.offset = null;
+        this.limit = null;
+        this.fetch = null;
+    }
+
     parse(coach) {
         this.parseWith(coach);
 
@@ -405,9 +415,6 @@ class Select extends Syntax {
                     items.push( fromItem );
                 }
             }
-            else if ( fromItem.file ) {
-                let name = fromItem.file.path.slice(-1);
-            }
         }
     }
 
@@ -660,10 +667,27 @@ class Select extends Syntax {
         this.offset = offset;
     }
 
-    addJoin(sql) {
-        let coach = new this.Coach(sql);
-        coach.skipSpace();
-        let join = coach.parseJoin(sql);
+    addFrom(fromItem) {
+        if ( typeof fromItem == "string" ) {
+            let coach = new this.Coach(fromItem);
+            coach.skipSpace();
+            fromItem = coach.parseFromItem();
+        }
+
+        this.addChild(fromItem);
+        this.from.push( fromItem );
+
+        this._validate();
+        return fromItem;
+    }
+
+    addJoin(join) {
+        if ( typeof join == "string" ) {
+            let coach = new this.Coach(join);
+            coach.skipSpace();
+            join = coach.parseJoin();
+        }
+
         this.addChild(join);
         this.joins.push(join);
 
@@ -717,6 +741,11 @@ class Select extends Syntax {
             else if ( fromItem.table ) {
                 let elem = fromItem.table.getLast();
                 if ( elem.equalString(alias) ) {
+                    return true;
+                }
+            }
+            else if ( fromItem.file ) {
+                if ( fromItem.file.equalAlias( alias ) ) {
                     return true;
                 }
             }

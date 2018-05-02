@@ -1,9 +1,8 @@
 "use strict";
 
-const GrapeQLCoach = require("../../src/parser/GrapeQLCoach");
+let tests = {};
 
-
-GrapeQLCoach.As.tests = [
+tests.As = [
     {
         str: "nice",
         result: {
@@ -34,7 +33,7 @@ GrapeQLCoach.As.tests = [
     }
 ];
 
-GrapeQLCoach.Boolean.tests = [
+tests.Boolean = [
     {
         str: "true",
         result: {
@@ -55,7 +54,7 @@ GrapeQLCoach.Boolean.tests = [
     }
 ];
 
-GrapeQLCoach.CaseWhen.tests = [
+tests.CaseWhen = [
     {
         str: "case when (true) then 1 else 0 end",
         result: {
@@ -102,7 +101,7 @@ GrapeQLCoach.CaseWhen.tests = [
     }
 ];
 
-GrapeQLCoach.CaseWhenElement.tests = [
+tests.CaseWhenElement = [
     {
         str: "when true then 1",
         result: {
@@ -112,7 +111,7 @@ GrapeQLCoach.CaseWhenElement.tests = [
     }
 ];
 
-GrapeQLCoach.Cast.tests = [
+tests.Cast = [
     {
         str: "cast(1 as numeric( 12, 12 ))",
         result: {
@@ -181,7 +180,7 @@ GrapeQLCoach.Cast.tests = [
     }
 ];
 
-GrapeQLCoach.Column.tests = [
+tests.Column = [
     {
         str: "company.id as id",
         result: {
@@ -221,7 +220,7 @@ GrapeQLCoach.Column.tests = [
     }
 ];
 
-GrapeQLCoach.Comment.tests = [
+tests.Comment = [
     {
         str: "--123\n",
         result: {content: "123"}
@@ -240,7 +239,7 @@ GrapeQLCoach.Comment.tests = [
     }
 ];
 
-GrapeQLCoach.DataType.tests = [
+tests.DataType = [
     {
         str: "numeric  ( 10 )",
         result: {type: "numeric(10)"}
@@ -267,7 +266,7 @@ GrapeQLCoach.DataType.tests = [
     }
 ];
 
-GrapeQLCoach.DoubleQuotes.tests = [
+tests.DoubleQuotes = [
     {
         str: "\"test\"",
         result: {content: "test"}
@@ -362,7 +361,7 @@ GrapeQLCoach.DoubleQuotes.tests = [
     }
 ];
 
-GrapeQLCoach.In.tests = [
+tests.In = [
     {
         str: "in(1)",
         result: {
@@ -408,7 +407,7 @@ GrapeQLCoach.In.tests = [
     }
 ];
 
-GrapeQLCoach.Between.tests = [
+tests.Between = [
     {
         str: "Between 1 and 3",
         result: {
@@ -422,7 +421,7 @@ GrapeQLCoach.Between.tests = [
     }
 ];
 
-GrapeQLCoach.Expression.tests = [
+tests.Expression = [
     {
         str: "1 + 1",
         result: {
@@ -935,7 +934,7 @@ GrapeQLCoach.Expression.tests = [
     }
 ];
 
-GrapeQLCoach.File.tests = [
+tests.File = [
     {
         str: "file Order",
         result: {
@@ -1018,7 +1017,7 @@ GrapeQLCoach.File.tests = [
     }
 ];
 
-GrapeQLCoach.FromItem.tests = [
+tests.FromItem = [
     {
         str: "public.company",
         result: {
@@ -1166,7 +1165,7 @@ GrapeQLCoach.FromItem.tests = [
     }
 ];
 
-GrapeQLCoach.FunctionCall.tests = [
+tests.FunctionCall = [
     {
         str: "public.get_totals( company.id, 1 + 2 )",
         result: {
@@ -1195,7 +1194,7 @@ GrapeQLCoach.FunctionCall.tests = [
     }
 ];
 
-GrapeQLCoach.GroupByElement.tests = [
+tests.GroupByElement = [
     {
         str: "id",
         result: {
@@ -1270,7 +1269,7 @@ GrapeQLCoach.GroupByElement.tests = [
     }
 ];
 
-GrapeQLCoach.Join.tests = [
+tests.Join = [
     {
         str: "left join country on country.id = company.countryId",
         result: {
@@ -1529,7 +1528,7 @@ GrapeQLCoach.Join.tests = [
     }
 ];
 
-GrapeQLCoach.ObjectLink.tests = [
+tests.ObjectLink = [
     {
         str: "a.B.c",
         result: {
@@ -1557,7 +1556,7 @@ GrapeQLCoach.ObjectLink.tests = [
     }
 ];
 
-GrapeQLCoach.ObjectName.tests = [
+tests.ObjectName = [
     {
         str: "a",
         result: {
@@ -1572,7 +1571,7 @@ GrapeQLCoach.ObjectName.tests = [
     }
 ];
 
-GrapeQLCoach.Operator.tests = [
+tests.Operator = [
     {
         str: "+",
         result: {operator: "+"}
@@ -1615,7 +1614,7 @@ GrapeQLCoach.Operator.tests = [
     }
 ];
 
-GrapeQLCoach.OrderByElement.tests = [
+tests.OrderByElement = [
     {
         str: "id Desc",
         result: {
@@ -1629,7 +1628,7 @@ GrapeQLCoach.OrderByElement.tests = [
     }
 ];
 
-GrapeQLCoach.PgNull.tests = [
+tests.PgNull = [
     {
         str: "null",
         result: {null: true}
@@ -1644,7 +1643,7 @@ GrapeQLCoach.PgNull.tests = [
     }
 ];
 
-GrapeQLCoach.PgNumber.tests = [
+tests.PgNumber = [
     {
         str: "1",
         result: {number: "1"}
@@ -1675,7 +1674,7 @@ GrapeQLCoach.PgNumber.tests = [
     }
 ];
 
-GrapeQLCoach.PgString.tests = [
+tests.PgString = [
     {
         str: "'hello ''world'''",
         result: {content: "hello 'world'"}
@@ -1806,7 +1805,7 @@ GrapeQLCoach.PgString.tests = [
     }
 ];
 
-GrapeQLCoach.Select.tests = [
+tests.Select = [
     {
         str: "select 1",
         result: {
@@ -2444,7 +2443,7 @@ GrapeQLCoach.Select.tests = [
     }
 ];
 
-GrapeQLCoach.SystemVariable.tests = [
+tests.SystemVariable = [
     {
         str: "{x}",
         result: {name: "x"}
@@ -2467,7 +2466,7 @@ GrapeQLCoach.SystemVariable.tests = [
     }
 ];
 
-GrapeQLCoach.ToType.tests = [
+tests.ToType = [
     {
         str: "::text",
         result: {
@@ -2486,7 +2485,7 @@ GrapeQLCoach.ToType.tests = [
     }
 ];
 
-GrapeQLCoach.WithQuery.tests = [
+tests.WithQuery = [
     {
         str: "recursive orders as (select * from company)",
         result: {
@@ -2539,3 +2538,5 @@ GrapeQLCoach.WithQuery.tests = [
         }
     }
 ];
+
+module.exports = tests;

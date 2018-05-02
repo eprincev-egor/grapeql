@@ -58,4 +58,33 @@ describe("UnnesaryJoins", () => {
         `
     });
 
+    testRequest({
+        server: () => server,
+        node: `
+            select *
+            from company
+
+            left join company as NextCompany on
+                NextCompany.id = company.id + 1
+
+            left join country as NextCompanyCountry on
+                NextCompanyCountry.id = NextCompany.id_country
+        `,
+        request: {
+            columns: ["id", "NextCompanyCountry.code"]
+        },
+        result: `
+            select
+                company.id as "id",
+                NextCompanyCountry.code as "NextCompanyCountry.code"
+            from company
+
+            left join company as NextCompany on
+                NextCompany.id = company.id + 1
+
+            left join country as NextCompanyCountry on
+                NextCompanyCountry.id = NextCompany.id_country
+        `
+    });
+
 });
