@@ -41,6 +41,8 @@ module.exports = {
             }
         });
 
+        select.removeUnnesaryJoins({ server });
+
         if ( params.limit != null && params.limit != "all" ) {
             select.setLimit(params.limit);
         }
