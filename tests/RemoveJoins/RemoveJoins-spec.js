@@ -594,4 +594,31 @@ describe("RemoveJoins", () => {
         ) as CountryEnd on
             CountryEnd.id = 1
     `);
+    
+    testRemoveUnnesaryJoins(`
+        select company.id
+        from company
+        
+        left join ./Country on
+            Country.id = company.id_country
+    `, `
+        select company.id
+        from company
+    `);
+    
+    testRemoveUnnesaryJoins(`
+        select Country.id
+        from company
+        
+        left join ./Country on
+            Country.id = company.id_country
+    `);
+    
+    testRemoveUnnesaryJoins(`
+        select "Country".id
+        from company
+        
+        left join ./Country as "Country" on
+            "Country".id = company.id_country
+    `);
 });

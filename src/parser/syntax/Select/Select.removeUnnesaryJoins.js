@@ -53,7 +53,23 @@ module.exports = {
         if ( join.from.as ) {
             fromLink = new this.Coach.ObjectLink();
             fromLink.add( join.from.as );
-        } else {
+        } 
+        else if ( join.from.file ) {
+            fromLink = new this.Coach.ObjectLink();
+            let last = join.from.file.path.slice(-1)[0];
+            let elem;
+            
+            if ( last.content ) {
+                elem = new this.Coach.DoubleQuotes();
+                last.fillClone( elem );
+                elem.content = elem.content.replace(/\.sql$/, "");
+            } else {
+                elem = new this.Coach.ObjectName();
+                elem.word = last.name.replace(/\.sql$/, "");
+            }
+            fromLink.add( elem );
+        }
+        else {
             fromLink = join.from.table;
         }
         fromLink = objectLink2schmeTable(fromLink);
@@ -110,6 +126,7 @@ module.exports = {
                 }
             }
         }
+        
         if ( join.type == "left join" && join.from.select ) {
             if (
                 // left join (select * from some limit 1)
@@ -119,6 +136,10 @@ module.exports = {
             ) {
                 isRemovable = true;
             }
+        }
+        
+        if ( join.type == "left join" && join.from.file ) {
+            isRemovable = true;
         }
 
         // join can change rows order
