@@ -61,6 +61,11 @@ class File extends Syntax {
 
         return out;
     }
+    
+    toObjectName() {
+        let last = this.path.slice(-1)[0];
+        return last.toObjectName();
+    }
 
     equalAlias(alias) {
         let last = this.path.slice(-1)[0];
