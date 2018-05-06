@@ -53,12 +53,12 @@ module.exports = {
         if ( join.from.as ) {
             fromLink = new this.Coach.ObjectLink();
             fromLink.add( join.from.as );
-        } 
+        }
         else if ( join.from.file ) {
             fromLink = new this.Coach.ObjectLink();
             let last = join.from.file.path.slice(-1)[0];
             let elem;
-            
+
             if ( last.content ) {
                 elem = new this.Coach.DoubleQuotes();
                 last.fillClone( elem );
@@ -126,7 +126,7 @@ module.exports = {
                 }
             }
         }
-        
+
         if ( join.type == "left join" && join.from.select ) {
             if (
                 // left join (select * from some limit 1)
@@ -137,7 +137,7 @@ module.exports = {
                 isRemovable = true;
             }
         }
-        
+
         if ( join.type == "left join" && join.from.file ) {
             isRemovable = true;
         }
@@ -357,15 +357,15 @@ module.exports = {
 
         if ( typeof replace == "string" ) {
             coach = new this.Coach(replace);
-            replace = coach.parseObjectLink().link;
+            replace = coach.parseObjectLink();
         }
 
         if ( typeof to == "string" ) {
             coach = new this.Coach(to);
-            to = coach.parseObjectLink().link;
+            to = coach.parseObjectLink();
         }
 
-        let fromLink = objectLink2schmeTable({link: replace});
+        let fromLink = objectLink2schmeTable(replace);
         if ( this._isDefinedFromLink(fromLink) ) {
             return;
         }

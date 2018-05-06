@@ -377,12 +377,12 @@ class Expression extends Syntax {
 
         if ( typeof replace == "string" ) {
             coach = new this.Coach(replace);
-            replace = coach.parseObjectLink().link;
+            replace = coach.parseObjectLink();
         }
 
         if ( typeof to == "string" ) {
             coach = new this.Coach(to);
-            to = coach.parseObjectLink().link;
+            to = coach.parseObjectLink();
         }
 
 
@@ -401,7 +401,7 @@ class Expression extends Syntax {
             }
 
             if ( elem instanceof ObjectLink ) {
-                this._replaceLink(elem.link, replace, to);
+                this._replaceLink(elem, replace, to);
             }
 
             if ( elem instanceof Cast ) {
@@ -447,7 +447,11 @@ class Expression extends Syntax {
         });
     }
 
-    _replaceLink(link, replace, to) {
+    _replaceLink(objectLink, replace, to) {
+        let link = objectLink.link;
+        replace = replace.link;
+        to = to.link;
+
         if ( link.length < replace.length ) {
             return;
         }

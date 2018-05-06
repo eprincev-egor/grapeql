@@ -387,4 +387,11 @@ describe("Expression.replaceLinks", () => {
             ) = 1
         `
     });
+
+    testReplaceLinks({
+        expression: "a.b.c.d.e.f",
+        replace: "a.b.c",
+        to: "x.y.z",
+        result: "x.y.z.d.e.f"
+    });
 });

@@ -1540,6 +1540,19 @@ tests.ObjectLink = [
         }
     },
     {
+        str: "a.b.c.d.e.f",
+        result: {
+            link: [
+                {word: "a"},
+                {word: "b"},
+                {word: "c"},
+                {word: "d"},
+                {word: "e"},
+                {word: "f"}
+            ]
+        }
+    },
+    {
         str: `"Nice"
             .
             "test"   . X.y."some"
