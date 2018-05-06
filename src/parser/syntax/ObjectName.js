@@ -60,6 +60,14 @@ class ObjectName extends DoubleQuotes {
             return this.content == string;
         }
     }
+
+    strictEqualString(string) {
+        if ( this.word ) {
+            return this.word == string;
+        } else {
+            return this.content == string;
+        }
+    }
 }
 
 module.exports = ObjectName;

@@ -63,6 +63,12 @@ class As extends ObjectName {
         super.fillClone(clone);
     }
 
+    toObjectName() {
+        let object = new ObjectName();
+        super.fillClone( object );
+        return object;
+    }
+
     // as "some"
     // returned
     // "some"

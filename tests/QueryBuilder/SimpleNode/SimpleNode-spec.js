@@ -14,7 +14,7 @@ after(stopServer(
     () => server
 ));
 
-describe("Builder", () => {
+describe("SimpleNode", () => {
     testRequest({
         server: () => server,
         node: "select * from company",
@@ -23,7 +23,7 @@ describe("Builder", () => {
         },
         result: `
             select
-                company.id as "id"
+                company.id
             from company
         `
     });
@@ -36,7 +36,7 @@ describe("Builder", () => {
         },
         result: `
             select
-                company.id as "Id"
+                company.Id
             from company
         `
     });
@@ -49,8 +49,8 @@ describe("Builder", () => {
         },
         result: `
             select
-                company.id as "id",
-                company.name as "name"
+                company.id,
+                company.name
             from company
         `
     });
@@ -65,8 +65,8 @@ describe("Builder", () => {
         },
         result: `
             select
-                company.id as "id",
-                company.name as "name"
+                company.id,
+                company.name
             from company
         `
     });
@@ -79,7 +79,7 @@ describe("Builder", () => {
         },
         result: `
             select
-                Company.id as "id"
+                Company.id
             from Company
         `
     });
@@ -92,7 +92,7 @@ describe("Builder", () => {
         },
         result: `
             select
-                Company.id as "iD"
+                Company.iD
             from Company
         `
     });
@@ -107,8 +107,8 @@ describe("Builder", () => {
         },
         result: `
             select
-                company.id as "id",
-                company.name as "name"
+                company.id,
+                company.name
             from company
 
             offset 10

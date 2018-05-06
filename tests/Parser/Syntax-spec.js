@@ -173,49 +173,115 @@ describe("ObjectName.equal", () => {
 describe("File.toObjectName", () => {
     let coach, file, filePathElem,
         objectName;
-    
+
     it("Country.sql => Country", () => {
         coach = new GrapeQLCoach("Country.sql");
         filePathElem = coach.parseFilePathElement();
-        
+
         objectName = filePathElem.toObjectName();
-        
+
         assert.equal("Country", objectName.toString());
     });
-    
+
     it("Country-start => \"Country-start\"", () => {
         coach = new GrapeQLCoach("Country-start");
         filePathElem = coach.parseFilePathElement();
-        
+
         objectName = filePathElem.toObjectName();
-        
+
         assert.equal("\"Country-start\"", objectName.toString());
     });
-    
+
     it("Country-start.sql => \"Country-start\"", () => {
         coach = new GrapeQLCoach("Country-start.sql");
         filePathElem = coach.parseFilePathElement();
-        
+
         objectName = filePathElem.toObjectName();
-        
+
         assert.equal("\"Country-start\"", objectName.toString());
     });
-    
+
     it("\"some\"\"name\" => \"some\"\"name\"", () => {
         coach = new GrapeQLCoach("\"some\"\"name\"");
         filePathElem = coach.parseFilePathElement();
-        
+
         objectName = filePathElem.toObjectName();
-        
+
         assert.equal("\"some\"\"name\"", objectName.toString());
     });
-    
+
     it("./Check/Path/Country.sql => Country", () => {
         coach = new GrapeQLCoach("./Check/Path/Country.sql");
         file = coach.parseFile();
-        
+
         objectName = file.toObjectName();
-        
+
         assert.equal("Country", objectName.toString());
+    });
+});
+
+describe("File.toAs", () => {
+    let coach, file, filePathElem,
+        as;
+
+    it("Country.sql => as Country", () => {
+        coach = new GrapeQLCoach("Country.sql");
+        filePathElem = coach.parseFilePathElement();
+
+        as = filePathElem.toAs();
+
+        assert.equal("as Country", as.toString());
+    });
+
+    it("Country-start => as \"Country-start\"", () => {
+        coach = new GrapeQLCoach("Country-start");
+        filePathElem = coach.parseFilePathElement();
+
+        as = filePathElem.toAs();
+
+        assert.equal("as \"Country-start\"", as.toString());
+    });
+
+    it("Country-start.sql => as \"Country-start\"", () => {
+        coach = new GrapeQLCoach("Country-start.sql");
+        filePathElem = coach.parseFilePathElement();
+
+        as = filePathElem.toAs();
+
+        assert.equal("as \"Country-start\"", as.toString());
+    });
+
+    it("\"some\"\"name\" => as \"some\"\"name\"", () => {
+        coach = new GrapeQLCoach("\"some\"\"name\"");
+        filePathElem = coach.parseFilePathElement();
+
+        as = filePathElem.toAs();
+
+        assert.equal("as \"some\"\"name\"", as.toString());
+    });
+
+    it("./Check/Path/Country.sql => as Country", () => {
+        coach = new GrapeQLCoach("./Check/Path/Country.sql");
+        file = coach.parseFile();
+
+        as = file.toAs();
+
+        assert.equal("as Country", as.toString());
+    });
+});
+
+describe("new Syntax('some str')", () => {
+    it("new ObjectName('word')", () => {
+        const ObjectName = GrapeQLCoach.ObjectName;
+
+        let object = new ObjectName("word");
+        assert.equal("word", object.toString());
+    });
+
+    it("new ObjectName('word')", () => {
+        const ObjectLink = GrapeQLCoach.ObjectLink;
+
+        let link = new ObjectLink(" a.b.c.d");
+        assert.equal("a.b.c.d", link.toString());
     });
 });

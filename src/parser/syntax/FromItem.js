@@ -217,8 +217,12 @@ class FromItem extends Syntax {
     getAliasSql() {
         if ( this.as ) {
             return this.as.getAliasSql();
-        } else {
+        }
+        else if ( this.table ) {
             return this.toString();
+        }
+        else if ( this.file ) {
+            return this.file.toObjectName().toString();
         }
     }
 

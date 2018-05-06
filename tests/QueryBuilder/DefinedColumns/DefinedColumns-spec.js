@@ -45,7 +45,7 @@ describe("DefinedColumns", () => {
         },
         result: `
             select
-                public.company.id as "id"
+                public.company.id
             from company
         `
     });

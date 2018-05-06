@@ -30,7 +30,7 @@ describe("UnnesaryJoins", () => {
         },
         result: `
             select
-                company.id as "id"
+                company.id
             from company
         `
     });
@@ -49,7 +49,7 @@ describe("UnnesaryJoins", () => {
         },
         result: `
             select
-                company.id as "id",
+                company.id,
                 CountryStart.name as "CountryStart.name"
             from company
 
@@ -75,7 +75,7 @@ describe("UnnesaryJoins", () => {
         },
         result: `
             select
-                company.id as "id",
+                company.id,
                 NextCompanyCountry.code as "NextCompanyCountry.code"
             from company
 

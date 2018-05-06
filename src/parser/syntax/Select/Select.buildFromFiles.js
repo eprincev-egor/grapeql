@@ -13,99 +13,107 @@ function getNode(file, server) {
 }
 
 module.exports = {
-    // params.node
-    // params.server
-    // params.columns
-    // params.offset
-    // params.limit
-    // params.where
-    build(params) {
-        let Select = this.Coach.Select;
-        let select = new Select();
-        let server = params.server;
+    build({
+        //node,
+        server,
+        columns,
+        offset,
+        limit
+        //, where
+    }) {
+        let originalSelect = this;
+        let select = originalSelect.clone();
 
-        this._build(params, select);
+        select.clearColumns();
+
+        columns.forEach(key => {
+            let definedColumn = originalSelect.getColumnByAlias( key );
+            if ( definedColumn ) {
+                if ( definedColumn.expression.isLink() ) {
+                    let link = definedColumn.expression.getLink();
+                    let last = link.getLast();
+
+                    if ( last.strictEqualString(key) ) {
+                        select.addColumn(`${ definedColumn.expression }`);
+                        return;
+                    }
+                }
+
+                select.addColumn(`${ definedColumn.expression } as "${ key }"`);
+                return;
+            }
+
+            let columnKey = key;
+            let fromItem;
+            if ( /\./.test(key) ) {
+                fromItem = select.getFromItemByAlias( key.split(".")[0] );
+                columnKey = key.split(".").slice(-1)[0];
+            } else {
+                fromItem = select.from[0];
+            }
+
+            let fromSql = fromItem.getAliasSql();
+
+            if ( columnKey == key ) {
+                select.addColumn(`${ fromSql }.${ columnKey }`);
+            } else {
+                select.addColumn(`${ fromSql }.${ columnKey } as "${ key }"`);
+            }
+        });
 
         select.removeUnnesaryJoins({ server });
+        select.buildFromFiles({ server });
 
-        if ( params.limit != null && params.limit != "all" ) {
-            select.setLimit(params.limit);
+        if ( limit != null && limit != "all" ) {
+            select.setLimit(limit);
         }
 
-        if ( params.offset != null && params.offset > 0 ) {
-            select.setOffset(params.offset);
+        if ( offset != null && offset > 0 ) {
+            select.setOffset(offset);
         }
 
         return select;
     },
 
-    _build(params, select) {
-        let originalSelect = this;
-        let server = params.server;
+    buildFromFiles({ server }) {
+        const As = this.Coach.As;
 
-        this.from.forEach(fromItem => {
-            select.addFrom( fromItem.clone() );
-        });
-        this.joins.forEach(join => {
-            select.addJoin( join.clone() );
-        });
+        for (let i = 0, n = this.joins.length; i < n; i++) {
+            let join = this.joins[i];
 
-        params.columns.forEach(key => {
-            let definedColumn = originalSelect.getColumnByAlias( key );
-            if ( definedColumn ) {
-                select.addColumn(`${ definedColumn.expression } as "${ key }"`);
-                return;
+            if ( !join.from.file ) {
+                continue;
             }
 
-            let dbColumnKey = key;
-            let fromItem;
-            if ( /\./.test(key) ) {
-                fromItem = select.getFromItemByAlias( key.split(".")[0] );
-                dbColumnKey = key.split(".")[1];
-            } else {
-                fromItem = select.from[0];
+            let oldFromItem = join.from;
+            let node = getNode(join.from.file, server);
+
+            join.from = node.parsed.from[0].clone();
+
+            for (let j = 0, m = node.parsed.joins.length; j < m; j++) {
+                let anotherJoin = node.parsed.joins[ 0 ];
+                anotherJoin = anotherJoin.clone();
+                anotherJoin.as = new As(`as "${ 1 }"`);
+
+                this.addJoinAfter( anotherJoin, join );
             }
 
-            if ( fromItem.file ) {
-                let node = getNode(fromItem.file, server);
-                let join = fromItem.parent;
-
-                join.from = node.parsed.from[0];
-
-                if ( !fromItem.as ) {
-                    let As = this.Coach.As;
-                    let as = new As();
-                    as.hasWordAs = true;
-
-                    let last = fromItem.file.path.slice(-1)[0];
-
-                    if ( last.content ) {
-                        as.fillClone.call( this, as );
-                    } else {
-                        as.content = last.name;
-                    }
-                    as.content = as.content.replace(/\.sql$/, "");
-
-                    if ( last.name ) {
-                        join.on.replaceLink(
-                            last.name.replace(/\.sql$/, ""),
-                            as.getAliasSql()
-                        );
-                    }
-                    join.from.as = as;
-                }
-
-                fromItem = join.from;
+            let as = oldFromItem.as;
+            if ( !as ) {
+                as = oldFromItem.file.toAs();
             }
 
-            let fromSql = fromItem.getAliasSql();
-            let dbTable = fromItem.getDbTable( server );
-            let dbColumn = dbTable.getColumn( dbColumnKey );
+            join.from.as = as;
+        }
+    },
 
-            if ( dbColumn ) {
-                select.addColumn(`${ fromSql }.${ dbColumn.name } as "${ key }"`);
-            }
-        });
+    addJoinAfter(join, afterJoin) {
+        this.addChild(join);
 
+        let index = this.joins.indexOf( afterJoin );
+        this.joins.splice(index + 1, 0, join);
+
+        this._validate();
+        return join;
     }
 };

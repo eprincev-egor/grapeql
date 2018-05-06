@@ -1,11 +1,17 @@
 "use strict";
 
 class Syntax {
-    constructor() {
+    constructor(fromString) {
         this.parent = null;
         this.coach = null;
         this.startIndex = null;
         this.endIndex;
+
+        if ( typeof fromString === "string" ) {
+            fromString = fromString.trim();
+            let coach = new this.Coach(fromString);
+            this.parse(coach);
+        }
     }
 
     addChild(child) {

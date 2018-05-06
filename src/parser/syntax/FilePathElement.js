@@ -37,13 +37,13 @@ class FilePathElement extends DoubleQuotes {
             return super.toString();
         }
     }
-    
+
     toObjectName() {
         let object = new this.Coach.ObjectName();
-        
+
         if ( this.name ) {
             let name = this.name.replace(/\.sql$/i, "");
-            
+
             if ( /^\w+$/i.test(name) ) {
                 object.word = name;
             } else {
@@ -52,10 +52,29 @@ class FilePathElement extends DoubleQuotes {
         } else {
             super.fillClone(object);
         }
-        
+
         return object;
     }
-    
+
+    toAs() {
+        let as = new this.Coach.As();
+        as.hasWordAs = true;
+
+        if ( this.name ) {
+            let name = this.name.replace(/\.sql$/i, "");
+
+            if ( /^\w+$/i.test(name) ) {
+                as.word = name;
+            } else {
+                as.content = name;
+            }
+        } else {
+            super.fillClone(as);
+        }
+
+        return as;
+    }
+
     equal(anotherObject) {
         if ( this.name && anotherObject.name ) {
             return this.name == anotherObject.name;

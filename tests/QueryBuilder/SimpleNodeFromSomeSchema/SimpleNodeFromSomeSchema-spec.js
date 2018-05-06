@@ -14,7 +14,7 @@ after(stopServer(
     () => server
 ));
 
-describe("Builder", () => {
+describe("SimpleNodeFromSomeSchema", () => {
 
     testRequest({
         server: () => server,
@@ -24,7 +24,7 @@ describe("Builder", () => {
         },
         result: `
             select
-                public.company.inn as "inn"
+                public.company.inn
             from public.company
         `
     });
@@ -37,7 +37,7 @@ describe("Builder", () => {
         },
         result: `
             select
-                company.inn as "inn"
+                company.inn
             from public.company as company
         `
     });
@@ -50,7 +50,7 @@ describe("Builder", () => {
         },
         result: `
             select
-                test.company.is_some as "is_some"
+                test.company.is_some
             from test.company
         `
     });
@@ -63,7 +63,7 @@ describe("Builder", () => {
         },
         result: `
             select
-                my_company.is_some as "is_some"
+                my_company.is_some
             from test.company as my_company
         `
     });
