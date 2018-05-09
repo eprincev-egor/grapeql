@@ -68,6 +68,7 @@ module.exports = {
 
         select.removeUnnesaryJoins({ server });
         select.buildFromFiles({ server });
+        select.removeUnnesaryJoins({ server });
 
         if ( limit != null && limit != "all" ) {
             select.setLimit(limit);

@@ -112,4 +112,115 @@ describe("SimpleJoinFile", () => {
         `
     });
 
+    testRequest({
+        server: () => server,
+        nodes: {
+            Order: `
+                select * from public.order
+
+                left join ./Company as CompanyClient on
+                    CompanyClient.id = public.order.id_company_client
+            `,
+            Company: `
+                select * from company
+
+                left join country on
+                    country.id = company.id_country
+            `
+        },
+        node: "Order",
+        request: {
+            columns: ["id", "CompanyClient.Country.code"]
+        },
+        result: `
+            select
+                public.order.id,
+                "CompanyClient.country".code as "CompanyClient.Country.code"
+            from public.order
+
+            left join company as CompanyClient on
+                CompanyClient.id = public.order.id_company_client
+
+            left join country as "CompanyClient.country" on
+                "CompanyClient.country".id = CompanyClient.id_country
+        `
+    });
+
+    testRequest({
+        server: () => server,
+        nodes: {
+            Order: `
+                select
+                    *,
+                    CompanyClient.inn as client_inn
+                from public.order
+
+                left join ./Company as CompanyClient on
+                    CompanyClient.id = public.order.id_company_client
+            `,
+            Company: `
+                select * from company
+
+                left join country on
+                    country.id = company.id_country
+            `
+        },
+        node: "Order",
+        request: {
+            columns: ["id", "client_inn"]
+        },
+        result: `
+            select
+                public.order.id,
+                CompanyClient.inn as "client_inn"
+            from public.order
+
+            left join company as CompanyClient on
+                CompanyClient.id = public.order.id_company_client
+        `
+    });
+
+    testRequest({
+        server: () => server,
+        nodes: {
+            Order: `
+                select
+                    *,
+                    CompanyClient.inn as client_inn
+                from public.order
+
+                left join ./Company as CompanyClient on
+                    CompanyClient.id = public.order.id_company_client
+
+                where
+                    CompanyClient.Country.code is not null
+            `,
+            Company: `
+                select * from company
+
+                left join country on
+                    country.id = company.id_country
+            `
+        },
+        node: "Order",
+        request: {
+            columns: ["id", "client_inn"]
+        },
+        result: `
+            select
+                public.order.id,
+                CompanyClient.inn as "client_inn"
+            from public.order
+
+            left join company as CompanyClient on
+                CompanyClient.id = public.order.id_company_client
+
+            left join country as "CompanyClient.country" on
+                "CompanyClient.country".id = CompanyClient.id_country
+
+            where
+                "CompanyClient.country".code is not null
+        `
+    });
+
 });
