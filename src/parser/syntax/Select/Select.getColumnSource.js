@@ -1,6 +1,9 @@
 "use strict";
 
 const {
+    PUBLIC_SCHEMA_NAME,
+    objectLink2schmeTable,
+    objectLink2schmeTableColumn,
     getDbColumn,
     getDbTable
 } = require("./helpers");
@@ -83,16 +86,27 @@ module.exports = {
     },
 
     _getColumnSourceByFromItem(params, fromItem, objectLink) {
-        if ( objectLink.link.length > 1 ) {
+        let from = objectLink2schmeTable(fromItem.table);
+        let link = objectLink2schmeTableColumn( objectLink );
+
+        if ( link.schema ) {
+            if ( (from.schema || PUBLIC_SCHEMA_NAME) != link.schema ) {
+                return;
+            }
+        }
+
+        if ( link.table ) {
             if ( fromItem.as ) {
-                let alias = fromItem.as.toObjectName();
-                if ( objectLink.lastEqual( alias ) ) {
+                let alias = fromItem.as;
+                alias = alias.word || alias.content;
+
+                if ( alias != link.table ) {
                     return;
                 }
-            } else {
-                if ( !objectLink.containLink( fromItem.table ) ) {
-                    return;
-                }
+            }
+
+            else if ( from.table != link.table ) {
+                return;
             }
         }
 
@@ -126,7 +140,7 @@ module.exports = {
                     break;
                 }
 
-                if ( fromLink.lastEqual( withQuery.name ) ) {
+                if ( fromLink.link[0].equal( withQuery.name ) ) {
                     let subLink = link.slice(-1);
                     return withQuery.select.getColumnSource(params, subLink, {throwError: false});
                 }

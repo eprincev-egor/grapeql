@@ -396,4 +396,24 @@ describe("ParseDeps", () => {
         link: "id",
         source: () => ({dbColumn: server.schemas.public.tables.order.columns.id})
     });
+
+    testGetDbColumn({
+        node: `with
+            public as (select * from test.company)
+            select public.company.id
+            from public, company
+        `,
+        link: "id",
+        source: () => ({dbColumn: server.schemas.public.tables.company.columns.id})
+    });
+
+    testGetDbColumn({
+        node: `with
+            public as (select * from test.company)
+            select public.id
+            from public, company
+        `,
+        link: "id",
+        source: () => ({dbColumn: server.schemas.test.tables.company.columns.id})
+    });
 });

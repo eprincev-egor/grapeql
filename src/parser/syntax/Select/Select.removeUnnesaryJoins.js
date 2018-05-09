@@ -136,7 +136,7 @@ module.exports = {
     },
 
     _isUsedFromLinkBySubSelect(fromLink) {
-        if ( this._isDefinedFromLink(fromLink) ) {
+        if ( this.isDefinedFromLink(fromLink) ) {
             return false;
         }
 
@@ -305,7 +305,7 @@ module.exports = {
         });
     },
 
-    _isDefinedFromLink(fromLink) {
+    isDefinedFromLink(fromLink) {
         let fromItems = (this.joins || []).map(join => join.from).concat(this.from || []);
 
         return fromItems.some(fromItem => {
@@ -327,7 +327,7 @@ module.exports = {
             to = coach.parseObjectLink();
         }
 
-        if ( this._isDefinedFromLink(replace) ) {
+        if ( this.isDefinedFromLink(replace) ) {
             return;
         }
 

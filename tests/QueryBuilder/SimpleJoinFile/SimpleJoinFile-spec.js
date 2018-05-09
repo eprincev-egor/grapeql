@@ -78,38 +78,38 @@ describe("SimpleJoinFile", () => {
         `
     });
 
-    testRequest({
-        server: () => server,
-        nodes: {
-            Order: `
-                select * from public.order
-
-                left join ./Company as CompanyClient on
-                    CompanyClient.id = public.order.id_company_client
-            `,
-            Company: `
-                select * from company
-
-                left join country on
-                    country.id = company.id_country
-            `
-        },
-        node: "Order",
-        request: {
-            columns: ["id", "CompanyClient.Country.code"]
-        },
-        result: `
-            select
-                public.order.id,
-                CompanyClient.Country.code as "CompanyClient.Country.code"
-            from public.order
-
-            left join company as CompanyClient on
-                CompanyClient.id = public.order.id_company_client
-
-            left join country as CompanyClient.Country on
-                CompanyClient.Country.id = CompanyClient.id_country
-        `
-    });
+    // testRequest({
+    //     server: () => server,
+    //     nodes: {
+    //         Order: `
+    //             select * from public.order
+    //
+    //             left join ./Company as CompanyClient on
+    //                 CompanyClient.id = public.order.id_company_client
+    //         `,
+    //         Company: `
+    //             select * from company
+    //
+    //             left join country on
+    //                 country.id = company.id_country
+    //         `
+    //     },
+    //     node: "Order",
+    //     request: {
+    //         columns: ["id", "CompanyClient.Country.code"]
+    //     },
+    //     result: `
+    //         select
+    //             public.order.id,
+    //             CompanyClient.Country.code as "CompanyClient.Country.code"
+    //         from public.order
+    //
+    //         left join company as CompanyClient on
+    //             CompanyClient.id = public.order.id_company_client
+    //
+    //         left join country as CompanyClient.Country on
+    //             CompanyClient.Country.id = CompanyClient.id_country
+    //     `
+    // });
 
 });

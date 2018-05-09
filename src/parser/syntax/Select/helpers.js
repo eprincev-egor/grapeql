@@ -157,6 +157,7 @@ function getDbColumn(serverOrTable, objectLink) {
 module.exports = {
     PUBLIC_SCHEMA_NAME,
     objectLink2schmeTableColumn,
+    objectLink2schmeTable,
     getDbTable,
     getDbColumn
 };
