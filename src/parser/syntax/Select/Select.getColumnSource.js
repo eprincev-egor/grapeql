@@ -90,22 +90,23 @@ module.exports = {
         let link = objectLink2schmeTableColumn( objectLink );
 
         if ( link.schema ) {
-            if ( (from.schema || PUBLIC_SCHEMA_NAME) != link.schema ) {
+            let fromSchema = from.schemaObject;
+            if ( !fromSchema ) {
+                fromSchema = new this.Coach.ObjectName(PUBLIC_SCHEMA_NAME);
+            }
+            if ( !link.schemaObject.equal( fromSchema ) ) {
                 return;
             }
         }
 
         if ( link.table ) {
             if ( fromItem.as ) {
-                let alias = fromItem.as;
-                alias = alias.word || alias.content;
-
-                if ( alias != link.table ) {
+                if ( !fromItem.as.equal( link.tableObject ) ) {
                     return;
                 }
             }
 
-            else if ( from.table != link.table ) {
+            else if ( !from.tableObject.equal( link.tableObject ) ) {
                 return;
             }
         }
