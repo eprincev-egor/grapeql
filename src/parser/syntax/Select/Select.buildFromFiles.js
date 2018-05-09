@@ -27,6 +27,8 @@ module.exports = {
         select.clearColumns();
 
         columns.forEach(key => {
+            let keyParts = key.split(".");
+
             let definedColumn = originalSelect.getColumnByAlias( key );
             if ( definedColumn ) {
                 if ( definedColumn.expression.isLink() ) {
@@ -45,9 +47,9 @@ module.exports = {
 
             let columnKey = key;
             let fromItem;
-            if ( /\./.test(key) ) {
-                fromItem = select.getFromItemByAlias( key.split(".")[0] );
-                columnKey = key.split(".").slice(-1)[0];
+            if ( keyParts.length > 1 ) {
+                fromItem = select.getFromItemByAlias( keyParts[0] );
+                columnKey = keyParts.slice(-1)[0];
             } else {
                 fromItem = select.from[0];
             }
@@ -56,7 +58,11 @@ module.exports = {
                 let fromSql = fromItem.getAliasSql();
                 select.addColumn(`${ fromSql }.${ columnKey }`);
             } else {
-                select.addColumn(`${ key } as "${ key }"`);
+                if ( keyParts.length == 2 ) {
+                    select.addColumn(`${ key } as "${ key }"`);
+                } else {
+                    select.addColumn(`${ key } as "${ key }"`);
+                }
             }
         });
 
@@ -103,9 +109,12 @@ module.exports = {
 
                 let alias = anotherJoin.from.getAliasSql();
                 let newAlias = `"${ as.getAliasSql() }.${ alias }"`;
+                let newAliasWithoutQuotes = `${ as.getAliasSql() }.${ alias }`;
 
                 anotherJoin.from.as = new As(`as ${ newAlias }`);
+
                 anotherJoin.on.replaceLink(alias, newAlias);
+                this.replaceLink(newAliasWithoutQuotes, newAlias);
 
                 anotherJoin.on.replaceLink(nodeAliasSql, as.getAliasSql());
 
