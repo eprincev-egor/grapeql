@@ -52,12 +52,11 @@ module.exports = {
                 fromItem = select.from[0];
             }
 
-            let fromSql = fromItem.getAliasSql();
-
             if ( columnKey == key ) {
+                let fromSql = fromItem.getAliasSql();
                 select.addColumn(`${ fromSql }.${ columnKey }`);
             } else {
-                select.addColumn(`${ fromSql }.${ columnKey } as "${ key }"`);
+                select.addColumn(`${ key } as "${ key }"`);
             }
         });
 
@@ -87,16 +86,9 @@ module.exports = {
 
             let oldFromItem = join.from;
             let node = getNode(join.from.file, server);
-
-            join.from = node.parsed.from[0].clone();
-
-            for (let j = 0, m = node.parsed.joins.length; j < m; j++) {
-                let anotherJoin = node.parsed.joins[ 0 ];
-                anotherJoin = anotherJoin.clone();
-                anotherJoin.as = new As(`as "${ 1 }"`);
-
-                this.addJoinAfter( anotherJoin, join );
-            }
+            let nodeFrom = node.parsed.from[0].clone();
+            let nodeAliasSql = nodeFrom.getAliasSql();
+            join.from = nodeFrom;
 
             let as = oldFromItem.as;
             if ( !as ) {
@@ -104,6 +96,21 @@ module.exports = {
             }
 
             join.from.as = as;
+
+            for (let j = 0, m = node.parsed.joins.length; j < m; j++) {
+                let anotherJoin = node.parsed.joins[ j ];
+                anotherJoin = anotherJoin.clone();
+
+                let alias = anotherJoin.from.getAliasSql();
+                let newAlias = `"${ as.getAliasSql() }.${ alias }"`;
+
+                anotherJoin.from.as = new As(`as ${ newAlias }`);
+                anotherJoin.on.replaceLink(alias, newAlias);
+
+                anotherJoin.on.replaceLink(nodeAliasSql, as.getAliasSql());
+
+                this.addJoinAfter( anotherJoin, join );
+            }
         }
     },
 

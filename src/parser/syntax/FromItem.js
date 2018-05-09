@@ -226,6 +226,12 @@ class FromItem extends Syntax {
         }
     }
 
+    toObjectLink() {
+        const ObjectLink = this.Coach.ObjectLink;
+        let sql = this.getAliasSql();
+        return new ObjectLink(sql);
+    }
+
     getDbTable(server) {
         let tableLink = this.table.link;
         let tableName;

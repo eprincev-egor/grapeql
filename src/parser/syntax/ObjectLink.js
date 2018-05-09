@@ -112,6 +112,61 @@ class ObjectLink extends Syntax {
         this.link.unshift(elem);
         this.addChild(elem);
     }
+
+    slice(from, to) {
+        let subLink;
+
+        if ( to != null ) {
+            subLink = this.link.slice(from, to);
+        } else {
+            subLink = this.link.slice(from);
+        }
+
+        let clone = new ObjectLink();
+        subLink.forEach(elem => clone.add(elem));
+
+        return clone;
+    }
+
+    containLink(objectLink) {
+        if ( this.link.length < objectLink.link.length ) {
+            return false;
+        }
+
+        for (let i = 0, n = objectLink.link.length; i < n; i++) {
+            let myElem = this.link[i];
+            let himElem = objectLink.link[i];
+
+            if (
+                myElem == "*" && himElem != "*"  ||
+                myElem != "*" && himElem == "*"
+            ) {
+                return false;
+            }
+
+            if ( myElem == "*" && himElem == "*" ) {
+                continue;
+            }
+
+            if ( !myElem.equal( himElem ) ) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    equalLink(objectLink) {
+        return (
+            this.link.length == objectLink.link.length &&
+            this.containLink( objectLink )
+        );
+    }
+
+    lastEqual(objectName) {
+        let lastElem = this.getLast();
+        return lastElem.equal( objectName );
+    }
 }
 
 module.exports = ObjectLink;

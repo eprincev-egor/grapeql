@@ -1,9 +1,6 @@
 "use strict";
 
 const {
-    PUBLIC_SCHEMA_NAME,
-    objectLink2schmeTable,
-    objectLink2schmeTableColumn,
     getDbColumn,
     getDbTable
 } = require("./helpers");
@@ -15,24 +12,22 @@ module.exports = {
         options = options || {};
         let _childFromItem = options._childFromItem;
 
-        let link = objectLink2schmeTableColumn( objectLink );
-
-        if ( !link.table && options._checkColumns !== false ) {
+        if (
+            objectLink.link.length == 1 &&
+            options._checkColumns !== false
+        ) {
             let column = this.columns.find(column => {
-                let alias = column.as;
-                alias = alias && (alias.word || alias.content);
-
-                if ( !alias && column.expression.isLink() ) {
-                    let objectLink = column.expression.getLink();
-                    let tmpLink = objectLink2schmeTableColumn( objectLink );
-
-                    if ( link.column == tmpLink.column ) {
-                        return true;
-                    }
+                if ( column.as ) {
+                    return column.as.equal( objectLink.link[0] );
                 }
 
-                if ( alias == link.column ) {
-                    return true;
+                if ( column.expression.isLink() ) {
+                    let columnLink = column.expression.getLink();
+                    let columnName = columnLink.getLast();
+
+                    if ( columnName != "*" ) {
+                        return columnName.equal( objectLink.link[0] );
+                    }
                 }
             });
 
@@ -58,12 +53,10 @@ module.exports = {
 
             let source;
             if ( fromItem.table ) {
-                source = this._getColumnSourceByFromItem(params, fromItem, link);
+                source = this._getColumnSourceByFromItem(params, fromItem, objectLink);
             }
             else if ( fromItem.select ) {
-                let subLink = new this.Coach.ObjectLink();
-                subLink.add( link.columnObject.clone() );
-
+                let subLink = objectLink.slice(-1);
                 source = fromItem.select.getColumnSource(params, subLink);
             }
 
@@ -79,51 +72,42 @@ module.exports = {
             }
 
             if ( options.throwError !== false ) {
-                throw new Error(`column "${ link.column }" does not exist`);
+                throw new Error(`column "${ objectLink.getLast() }" does not exist`);
             }
         }
         if ( sources.length > 1 ) {
-            throw new Error(`column reference "${ link.column }" is ambiguous`);
+            throw new Error(`column reference "${ objectLink.getLast() }" is ambiguous`);
         }
 
         return sources[0];
     },
 
-    _getColumnSourceByFromItem(params, fromItem, link) {
-        let from = objectLink2schmeTable(fromItem.table);
-
-        if ( link.schema ) {
-            if ( (from.schema || PUBLIC_SCHEMA_NAME) != link.schema ) {
-                return;
-            }
-        }
-
-        if ( link.table ) {
+    _getColumnSourceByFromItem(params, fromItem, objectLink) {
+        if ( objectLink.link.length > 1 ) {
             if ( fromItem.as ) {
-                let alias = fromItem.as;
-                alias = alias.word || alias.content;
-
-                if ( alias != link.table ) {
+                let alias = fromItem.as.toObjectName();
+                if ( objectLink.lastEqual( alias ) ) {
+                    return;
+                }
+            } else {
+                if ( !objectLink.containLink( fromItem.table ) ) {
                     return;
                 }
             }
-
-            else if ( from.table != link.table ) {
-                return;
-            }
         }
 
-        if ( !from.schema ) {
-            let source = this._findByWithQuery(params, from, link);
+
+        if ( fromItem.table.link.length == 1 ) {
+            let source = this._findByWithQuery(params, fromItem.table, objectLink);
             if ( source ) {
                 return source;
             }
         }
 
-        let dbTable = getDbTable(params.server, from);
+        let dbTable = getDbTable(params.server, fromItem.table);
         let dbColumn = null;
         try {
-            dbColumn = getDbColumn(dbTable, link);
+            dbColumn = getDbColumn(dbTable, objectLink);
         } catch(err) {
             dbColumn = null;
         }
@@ -133,7 +117,7 @@ module.exports = {
         }
     },
 
-    _findByWithQuery(params, from, link, _childWithQuery) {
+    _findByWithQuery(params, fromLink, link, _childWithQuery) {
         if ( this.with ) {
             for (let i = 0, n = this.with.length; i < n; i++) {
                 let withQuery = this.with[ i ];
@@ -142,13 +126,8 @@ module.exports = {
                     break;
                 }
 
-                let name = withQuery.name;
-                name = name.word || name.content;
-
-                if ( name == from.table ) {
-                    let subLink = new this.Coach.ObjectLink();
-                    subLink.add( link.columnObject.clone() );
-
+                if ( fromLink.lastEqual( withQuery.name ) ) {
+                    let subLink = link.slice(-1);
                     return withQuery.select.getColumnSource(params, subLink, {throwError: false});
                 }
             }
@@ -160,7 +139,7 @@ module.exports = {
         if ( parentWithQuery ) {
             let Select = this.Coach.Select;
             let parentSelect = parentWithQuery.findParentInstance(Select);
-            return parentSelect._findByWithQuery(params, from, link, parentWithQuery);
+            return parentSelect._findByWithQuery(params, fromLink, link, parentWithQuery);
         }
     },
 

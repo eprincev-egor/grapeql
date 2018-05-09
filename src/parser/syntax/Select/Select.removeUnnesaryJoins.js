@@ -1,9 +1,7 @@
 "use strict";
 
 const {
-    objectLink2schmeTable,
     objectLink2schmeTableColumn,
-    equalTableLink,
     getDbTable
 } = require("./helpers");
 
@@ -19,14 +17,14 @@ function pushConstraintColumns(elems, fromLink, constraintColumns) {
 
     let link;
     if ( elems[0].link ) {
-        link = objectLink2schmeTableColumn( elems[0] );
-        if ( link.table && equalTableLink(link, fromLink) ) {
+        if ( elems[0].containLink( fromLink ) ) {
+            link = objectLink2schmeTableColumn( elems[0] );
             constraintColumns.push(link.column);
         }
     }
     if ( elems[2].link ) {
-        link = objectLink2schmeTableColumn( elems[2] );
-        if ( link.table && equalTableLink(link, fromLink) ) {
+        if ( elems[2].containLink( fromLink ) ) {
+            link = objectLink2schmeTableColumn( elems[2] );
             constraintColumns.push(link.column);
         }
     }
@@ -34,12 +32,11 @@ function pushConstraintColumns(elems, fromLink, constraintColumns) {
 
 module.exports = {
 
-    // params.server
-    removeUnnesaryJoins(params) {
+    removeUnnesaryJoins({server}) {
         for (let i = this.joins.length - 1; i >= 0; i--) {
             let join = this.joins[ i ];
 
-            if ( !this._isHelpfullJoin(join, i, params) ) {
+            if ( !this._isHelpfullJoin(join, i, server) ) {
                 this.joins.splice(i, 1);
             }
         }
@@ -47,32 +44,8 @@ module.exports = {
         this._validate();
     },
 
-    _isHelpfullJoin(join, index, params) {
-        let fromLink;
-
-        if ( join.from.as ) {
-            fromLink = new this.Coach.ObjectLink();
-            fromLink.add( join.from.as );
-        }
-        else if ( join.from.file ) {
-            fromLink = new this.Coach.ObjectLink();
-            let last = join.from.file.path.slice(-1)[0];
-            let elem;
-
-            if ( last.content ) {
-                elem = new this.Coach.DoubleQuotes();
-                last.fillClone( elem );
-                elem.content = elem.content.replace(/\.sql$/, "");
-            } else {
-                elem = new this.Coach.ObjectName();
-                elem.word = last.name.replace(/\.sql$/, "");
-            }
-            fromLink.add( elem );
-        }
-        else {
-            fromLink = join.from.table;
-        }
-        fromLink = objectLink2schmeTable(fromLink);
+    _isHelpfullJoin(join, index, server) {
+        let fromLink = join.from.toObjectLink();
 
         let isRemovable = false;
         if ( join.type == "left join" && join.from.table && join.on ) {
@@ -99,11 +72,10 @@ module.exports = {
             pushConstraintColumns(elems, fromLink, constraintColumns);
 
             if ( isConstraintExpression ) {
-                let link = objectLink2schmeTable( join.from.table ),
-                    dbTable;
+                let dbTable;
 
                 try {
-                    dbTable = getDbTable( params.server, link );
+                    dbTable = getDbTable( server, join.from.table );
                 } catch(err) {
                     dbTable = null;
                 }
@@ -278,9 +250,7 @@ module.exports = {
             }
 
             if ( elem instanceof ObjectLink ) {
-                let link = objectLink2schmeTableColumn( elem );
-
-                return equalTableLink(fromLink, link);
+                return elem.containLink( fromLink );
             }
 
             if ( elem instanceof Cast ) {
@@ -339,16 +309,8 @@ module.exports = {
         let fromItems = (this.joins || []).map(join => join.from).concat(this.from || []);
 
         return fromItems.some(fromItem => {
-            if ( fromItem.as ) {
-                if ( fromLink.schema ) {
-                    return;
-                }
-                return fromItem.as.equal( fromLink.tableObject );
-            }
-            else if ( fromItem.table ) {
-                let tableLink = objectLink2schmeTable(fromItem.table);
-                return equalTableLink( tableLink, fromLink );
-            }
+            let link = fromItem.toObjectLink();
+            return link.equalLink( fromLink );
         });
     },
 
@@ -365,8 +327,7 @@ module.exports = {
             to = coach.parseObjectLink();
         }
 
-        let fromLink = objectLink2schmeTable(replace);
-        if ( this._isDefinedFromLink(fromLink) ) {
+        if ( this._isDefinedFromLink(replace) ) {
             return;
         }
 

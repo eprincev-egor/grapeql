@@ -10,33 +10,50 @@ global.it = function(testName, callback) {
     callback();
 };
 
-function testReplaceLinks(test) {
-    // test.expression + "  =>  " + test.result
+function testRemoveUnnesaryJoins(fromSelect, toSelect) {
+    if ( !toSelect ) {
+        toSelect = fromSelect;
+    }
+
     it(`
-        expression:
-        ${test.expression}
-        replace
-        ${test.replace}
-        to
-        ${test.to}
+            ${ fromSelect }
+            --------------------------->
+            ${ toSelect }
     `, () => {
 
         let coach;
 
-        coach = new GrapeQLCoach(test.expression);
+        coach = new GrapeQLCoach(fromSelect);
         coach.skipSpace();
-        let expression = coach.parseExpression();
+        let parsedFromSelect = coach.parseSelect();
 
-        expression.replaceLink(test.replace, test.to);
-
-        coach = new GrapeQLCoach(test.result);
+        coach = new GrapeQLCoach(toSelect);
         coach.skipSpace();
-        let expectedExpression = coach.parseExpression();
+        let parsedToSelect = coach.parseSelect();
 
-        let isEqual = !!weakDeepEqual(expression, expectedExpression);
-        if ( !isEqual ) {
-            console.log("break here");
-        }
+        parsedFromSelect.removeUnnesaryJoins({server});
+
+        return weakDeepEqual(parsedFromSelect, parsedToSelect);
+    });
+}
+
+function testGetDbColumn(test) {
+    it(`
+        find ${ test.link } in
+        ${ test.node }
+    `, () => {
+
+        let coach;
+
+        coach = new GrapeQLCoach(test.link.trim());
+        let link = coach.parseObjectLink();
+
+        coach = new GrapeQLCoach(test.node.trim());
+        let select = coach.parseSelect();
+
+        select.getColumnSource({
+            server
+        }, link);
     });
 }
 
@@ -46,11 +63,11 @@ let server;
 
     global.server = server;
     global.testRequest = testRequest;
-    global.testReplaceLinks = testReplaceLinks;
+    global.testGetDbColumn = testGetDbColumn;
+    global.testRemoveUnnesaryJoins = testRemoveUnnesaryJoins;
+    global.GrapeQL = GrapeQL;
+    global.GrapeQLCoach = GrapeQLCoach;
 
-    console.log( GrapeQL );
-    console.log( GrapeQLCoach );
-    console.log( testRequest );
 })();
 
 

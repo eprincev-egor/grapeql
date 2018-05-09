@@ -2,34 +2,6 @@
 
 const PUBLIC_SCHEMA_NAME = "public";
 
-function equalTableLink(leftLink, rightLink) {
-    // schema can be null
-    let leftSchema = leftLink.schemaObject;
-    if ( !leftSchema ) {
-        leftSchema = {word: PUBLIC_SCHEMA_NAME};
-    }
-
-    let rightSchema = rightLink.schemaObject;
-    if ( !rightSchema ) {
-        rightSchema = {word: PUBLIC_SCHEMA_NAME};
-    }
-
-    return (
-        equalObject(leftSchema, rightSchema) &&
-
-        leftLink.tableObject && rightLink.tableObject &&
-        equalObject(leftLink.tableObject, rightLink.tableObject)
-    );
-}
-
-function equalObject(left, right) {
-    if ( left.content || right.content ) {
-        return left.content === right.content;
-    }
-
-    return left.word.toLowerCase() == right.word.toLowerCase();
-}
-
 function objectLink2schmeTable(objectLink) {
     let schema = objectLink.link[0];
     let table = objectLink.link[1];
@@ -86,6 +58,8 @@ function objectLink2schmeTableColumn(objectLink) {
 }
 
 function getDbTable(server, link) {
+    link = objectLink2schmeTable( link );
+
     if ( !link.tableObject ) {
         throw new Error("invalid link");
     }
@@ -141,7 +115,9 @@ function getDbTable(server, link) {
     return table;
 }
 
-function getDbColumn(serverOrTable, link) {
+function getDbColumn(serverOrTable, objectLink) {
+    let link = objectLink2schmeTableColumn( objectLink );
+
     if ( !link.columnObject ) {
         throw new Error("invalid link");
     }
@@ -180,8 +156,6 @@ function getDbColumn(serverOrTable, link) {
 
 module.exports = {
     PUBLIC_SCHEMA_NAME,
-    equalTableLink,
-    objectLink2schmeTable,
     objectLink2schmeTableColumn,
     getDbTable,
     getDbColumn
