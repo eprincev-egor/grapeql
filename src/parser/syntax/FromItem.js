@@ -101,6 +101,9 @@ class FromItem extends Syntax {
 
             coach.expect(")");
         }
+
+        this.joins = coach.parseChain("Join");
+        this.joins.map(join => this.addChild(join));
     }
 
     isFromFunctionCall(coach) {
@@ -164,6 +167,9 @@ class FromItem extends Syntax {
             clone.columns = this.columns.map(name => name.clone());
         }
 
+        clone.joins = this.joins.map(join => join.clone());
+        clone.joins.forEach(join => clone.addChild(join));
+
         return clone;
     }
 
@@ -211,6 +217,13 @@ class FromItem extends Syntax {
             out += ")";
         }
 
+        if ( this.joins ) {
+            this.joins.forEach(join => {
+                out += " ";
+                out += join.toString();
+            });
+        }
+
         return out;
     }
 
@@ -255,6 +268,64 @@ class FromItem extends Syntax {
 
         tableName = tableName.word || tableName.content;
         return dbSchema.getTable( tableName );
+    }
+
+    eachFromItem(iteration) {
+        let result;
+
+        for (let i = 0, n = this.joins.length; i < n; i++) {
+            let fromItem = this.joins[i].from;
+            result = iteration(fromItem);
+
+            if ( result === false ) {
+                return;
+            }
+
+            result = fromItem.eachFromItem(iteration);
+            if ( result === false ) {
+                return;
+            }
+        }
+    }
+
+    replaceLink(replace, to) {
+        if ( this.select ) {
+            this.select.replaceLink(replace, to);
+        }
+        else if ( this.functionCall ) {
+            this.functionCall.arguments.forEach(arg => {
+                arg.replaceLink( replace, to );
+            });
+        }
+
+        if ( this.joins ) {
+            this.joins.forEach(join => {
+                if ( join.on ) {
+                    join.on.replaceLink( replace, to );
+                }
+                if ( join.from.select ) {
+                    join.from.select.replaceLink(replace, to);
+                }
+                else if ( join.from.functionCall ) {
+                    join.from.functionCall.arguments.forEach(arg => {
+                        arg.replaceLink( replace, to );
+                    });
+                }
+            });
+        }
+    }
+
+    isDefinedFromLink(fromLink) {
+        let link = this.toObjectLink();
+        if ( link.equalLink( fromLink ) ) {
+            return true;
+        }
+
+        if ( this.joins ) {
+            return this.joins.some(join => (
+                join.from.isDefinedFromLink(fromLink)
+            ));
+        }
     }
 }
 

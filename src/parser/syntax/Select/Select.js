@@ -58,7 +58,6 @@ class Select extends Syntax {
     constructor() {
         super();
         this.columns = [];
-        this.joins = [];
         this.from = [];
         this.offset = null;
         this.limit = null;
@@ -76,7 +75,6 @@ class Select extends Syntax {
         coach.skipSpace();
 
         this.parseFrom(coach);
-        this.parseJoins(coach);
         this.parseWhere(coach);
         this.parseGroupBy(coach);
         this.parseHaving(coach);
@@ -118,11 +116,6 @@ class Select extends Syntax {
         this.from.map(item => this.addChild(item));
 
         coach.skipSpace();
-    }
-
-    parseJoins(coach) {
-        this.joins = coach.parseChain("Join");
-        this.joins.map(join => this.addChild(join));
     }
 
     parseWhere(coach) {
@@ -349,10 +342,6 @@ class Select extends Syntax {
             this._validateFromItem( fromMap, fromItem );
         });
 
-        this.joins.forEach(join => {
-            this._validateFromItem( fromMap, join.from );
-        });
-
         // validate with
         let withMap = {};
 
@@ -435,9 +424,6 @@ class Select extends Syntax {
 
         clone.from = this.from.map(item => item.clone());
         clone.from.map(item => clone.addChild(item));
-
-        clone.joins = this.joins.map(item => item.clone());
-        clone.joins.map(item => clone.addChild(item));
 
         if ( this.where ) {
             clone.where = this.where.clone();
@@ -529,11 +515,6 @@ class Select extends Syntax {
         if ( this.from.length ) {
             out += "from ";
             out += this.from.map(item => item.toString()).join(", ");
-            out += " ";
-        }
-
-        if ( this.joins.length ) {
-            out += this.joins.map(item => item.toString()).join(" ");
             out += " ";
         }
 
@@ -681,20 +662,6 @@ class Select extends Syntax {
         return fromItem;
     }
 
-    addJoin(join) {
-        if ( typeof join == "string" ) {
-            let coach = new this.Coach(join);
-            coach.skipSpace();
-            join = coach.parseJoin();
-        }
-
-        this.addChild(join);
-        this.joins.push(join);
-
-        this._validate();
-        return join;
-    }
-
     addWhere(sql) {
         if ( this.where ) {
             sql = `( ${ this.where } ) and ${ sql }`;
@@ -729,27 +696,45 @@ class Select extends Syntax {
         });
     }
 
-    getFromItemByAlias(alias) {
-        let fromItems = this.joins.map(join => join.from).concat(this.from);
+    eachFromItem(iteration) {
+        let result;
 
-        return fromItems.find(fromItem => {
-            if ( fromItem.as ) {
-                if ( fromItem.as.equalString(alias) ) {
-                    return true;
-                }
+        for (let i = 0, n = this.from.length; i < n; i++) {
+            let fromItem = this.from[i];
+            result = iteration(fromItem);
+
+            if ( result === false ) {
+                return;
             }
-            else if ( fromItem.table ) {
-                let elem = fromItem.table.getLast();
-                if ( elem.equalString(alias) ) {
-                    return true;
-                }
+
+            result = fromItem.eachFromItem(iteration);
+            if ( result === false ) {
+                return;
             }
-            else if ( fromItem.file ) {
-                if ( fromItem.file.equalAlias( alias ) ) {
-                    return true;
-                }
-            }
-        });
+        }
+    }
+
+    getFromItemByAlias(/* alias */) {
+        // let fromItems = this.joins.map(join => join.from).concat(this.from);
+        //
+        // return fromItems.find(fromItem => {
+        //     if ( fromItem.as ) {
+        //         if ( fromItem.as.equalString(alias) ) {
+        //             return true;
+        //         }
+        //     }
+        //     else if ( fromItem.table ) {
+        //         let elem = fromItem.table.getLast();
+        //         if ( elem.equalString(alias) ) {
+        //             return true;
+        //         }
+        //     }
+        //     else if ( fromItem.file ) {
+        //         if ( fromItem.file.equalAlias( alias ) ) {
+        //             return true;
+        //         }
+        //     }
+        // });
     }
 }
 

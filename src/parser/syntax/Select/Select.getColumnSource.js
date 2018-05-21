@@ -46,12 +46,9 @@ module.exports = {
 
         let sources = [];
 
-        let fromItems = this.from.concat( this.joins.map(join => join.from) );
-        for (let i = 0, n = fromItems.length; i < n; i++) {
-            let fromItem = fromItems[ i ];
-
+        this.eachFromItem(fromItem => {
             if ( fromItem == _childFromItem ) {
-                break;
+                return false;
             }
 
             let source;
@@ -66,7 +63,7 @@ module.exports = {
             if ( source ) {
                 sources.push(source);
             }
-        }
+        });
 
         if ( sources.length === 0 ) {
             let source = this._findSourceByLateal(params, objectLink);

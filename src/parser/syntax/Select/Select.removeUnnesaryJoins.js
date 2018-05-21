@@ -306,12 +306,9 @@ module.exports = {
     },
 
     isDefinedFromLink(fromLink) {
-        let fromItems = (this.joins || []).map(join => join.from).concat(this.from || []);
-
-        return fromItems.some(fromItem => {
-            let link = fromItem.toObjectLink();
-            return link.equalLink( fromLink );
-        });
+        return this.from.some(fromItem => (
+            fromItem.isDefinedFromLink(fromLink)
+        ));
     },
 
     replaceLink(replace, to) {
@@ -363,30 +360,7 @@ module.exports = {
 
         if ( this.from ) {
             this.from.forEach(fromItem => {
-                if ( fromItem.select ) {
-                    fromItem.select.replaceLink(replace, to);
-                }
-                else if ( fromItem.functionCall ) {
-                    fromItem.functionCall.arguments.forEach(arg => {
-                        arg.replaceLink( replace, to );
-                    });
-                }
-            });
-        }
-
-        if ( this.joins ) {
-            this.joins.forEach(join => {
-                if ( join.on ) {
-                    join.on.replaceLink( replace, to );
-                }
-                if ( join.from.select ) {
-                    join.from.select.replaceLink(replace, to);
-                }
-                else if ( join.from.functionCall ) {
-                    join.from.functionCall.arguments.forEach(arg => {
-                        arg.replaceLink( replace, to );
-                    });
-                }
+                fromItem.replaceLink(replace, to);
             });
         }
     },
