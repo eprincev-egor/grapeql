@@ -33,18 +33,25 @@ function pushConstraintColumns(elems, fromLink, constraintColumns) {
 module.exports = {
 
     removeUnnesaryJoins({server}) {
-        for (let i = this.joins.length - 1; i >= 0; i--) {
-            let join = this.joins[ i ];
-
-            if ( !this._isHelpfullJoin(join, i, server) ) {
-                this.joins.splice(i, 1);
-            }
+        for (let i = 0, n = this.from.length; i < n; i++) {
+            let fromItem = this.from[i];
+            this._removeUnnesaryJoins({fromItem, server});
         }
 
         this._validate();
     },
 
-    _isHelpfullJoin(join, index, server) {
+    _removeUnnesaryJoins({fromItem, server}) {
+        for (let i = fromItem.joins.length - 1; i >= 0; i--) {
+            let join = fromItem.joins[ i ];
+
+            if ( !this._isHelpfullJoin(fromItem, join, i, server) ) {
+                fromItem.joins.splice(i, 1);
+            }
+        }
+    },
+
+    _isHelpfullJoin(fromItem, join, index, server) {
         let fromLink = join.from.toObjectLink();
 
         let isRemovable = false;
@@ -119,17 +126,17 @@ module.exports = {
             return true;
         }
 
-        return this._isUsedFromLink(fromLink, index);
+        return this._isUsedFromLink(fromItem, fromLink, index);
     },
 
-    _isUsedFromLink(fromLink, joinIndex, options) {
+    _isUsedFromLink(fromItem, fromLink, joinIndex, options) {
         options = options || {star: true};
 
         return (
             this._isUsedFromLinkInColumns( fromLink, options ) ||
             this.where && this._isUsedFromLinkInExpresion( fromLink, this.where )  ||
             this.having && this._isUsedFromLinkInExpresion( fromLink, this.having )  ||
-            this._isUsedFromLinkInJoins( fromLink, joinIndex ) ||
+            this._isUsedFromLinkInJoins( fromItem, joinIndex, fromLink ) ||
             this._isUsedFromLinkInGroupBy( fromLink ) ||
             this._isUsedFromLinkInOrderBy( fromLink )
         );
@@ -141,7 +148,7 @@ module.exports = {
         }
 
         return (
-            this._isUsedFromLink(fromLink, -1, {star: false}) ||
+            this._isUsedFromLink(null, fromLink, -1, {star: false}) ||
 
             this.from.some(fromItem => {
                 if ( fromItem.select ) {
@@ -173,9 +180,17 @@ module.exports = {
         });
     },
 
-    _isUsedFromLinkInJoins(fromLink, joinIndex) {
-        let afterJoins = this.joins.slice(joinIndex + 1);
-        return afterJoins.some(join => {
+    _isUsedFromLinkInJoins(fromItem, joinIndex, fromLink) {
+        if ( fromItem == null ) {
+            return this.from.some(
+                fromItem => this._isUsedFromLinkInJoins(
+                    fromItem, joinIndex, fromLink
+                )
+            );
+        }
+        
+        for (let i = joinIndex + 1, n = fromItem.joins.length; i < n; i++ ) {
+            let join = fromItem.joins[ i ];
             let isUsed = false;
 
             if ( join.on ) {
@@ -185,8 +200,39 @@ module.exports = {
             if ( join.from.select && join.from.lateral ) {
                 isUsed = isUsed || join.from.select._isUsedFromLinkBySubSelect(fromLink);
             }
-            return isUsed;
-        }) ;
+            
+            if ( join.from.joins.length ) {
+                isUsed = isUsed || this._isUsedFromLinkInJoins(join.from, -1, fromLink);
+            }
+            
+            if ( isUsed ) {
+                return true;
+            }
+        }
+        
+        let parent = this._getParentFromItem(fromItem);
+        if ( parent ) {
+            return this._isUsedFromLinkInJoins(parent, -1, fromLink);
+        }
+    },
+    
+    _getParentFromItem(fromItem) {
+        let parent = fromItem.parent;
+        if ( !parent ) {
+            return;
+        }
+        
+        const Select = this.Coach.Select;
+        if ( parent instanceof Select ) {
+            return;
+        }
+        
+        const FromItem = this.Coach.FromItem;
+        if ( parent instanceof FromItem ) {
+            return parent;
+        }
+        
+        return this._getParentFromItem(parent);
     },
 
     _isUsedFromLinkInGroupBy(fromLink) {
@@ -303,89 +349,5 @@ module.exports = {
                 return elem._isUsedFromLinkBySubSelect( fromLink );
             }
         });
-    },
-
-    isDefinedFromLink(fromLink) {
-        return this.from.some(fromItem => (
-            fromItem.isDefinedFromLink(fromLink)
-        ));
-    },
-
-    replaceLink(replace, to) {
-        let coach;
-
-        if ( typeof replace == "string" ) {
-            coach = new this.Coach(replace);
-            replace = coach.parseObjectLink();
-        }
-
-        if ( typeof to == "string" ) {
-            coach = new this.Coach(to);
-            to = coach.parseObjectLink();
-        }
-
-        if ( this.isDefinedFromLink(replace) ) {
-            return;
-        }
-
-        if ( this.with ) {
-            this.with.forEach(elem => {
-                elem.select.replaceLink(replace, to);
-            });
-        }
-
-        this.columns.forEach(column => {
-            column.expression.replaceLink(replace, to);
-        });
-
-        if ( this.where ) {
-            this.where.replaceLink(replace, to);
-        }
-
-        if ( this.having ) {
-            this.having.replaceLink(replace, to);
-        }
-
-        if ( this.orderBy ) {
-            this.orderBy.forEach(elem => {
-                elem.expression.replaceLink(replace, to);
-            });
-        }
-
-        if ( this.groupBy ) {
-            return this.groupBy.forEach(groupByElem => {
-                this._replaceLinkInGroupByElem(groupByElem, replace, to);
-            });
-        }
-
-        if ( this.from ) {
-            this.from.forEach(fromItem => {
-                fromItem.replaceLink(replace, to);
-            });
-        }
-    },
-
-    _replaceLinkInGroupByElem(groupByElem, replace, to) {
-        if ( groupByElem.expression ) {
-            groupByElem.expression.replaceLink(replace, to);
-        }
-        if ( groupByElem.groupingSets ) {
-            groupByElem.groupingSets.forEach(
-                subElem => this._replaceLinkInGroupByElem(subElem, replace, to)
-            );
-        }
-        if ( groupByElem.rollup || groupByElem.cube ) {
-            let elems = groupByElem.rollup || groupByElem.cube;
-
-            return elems.some(subElem => {
-                if ( Array.isArray(subElem) ) {
-                    return subElem.forEach(
-                        elem => elem.replaceLink(replace, to)
-                    );
-                } else {
-                    subElem.replaceLink(replace, to);
-                }
-            });
-        }
     }
 };

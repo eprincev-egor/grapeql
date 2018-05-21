@@ -5,6 +5,7 @@ const Syntax = require("../Syntax");
 const removeUnnesaryJoinsMethods = require("./Select.removeUnnesaryJoins");
 const getColumnSourceMethods = require("./Select.getColumnSource");
 const buildFromFilesMethods = require("./Select.buildFromFiles");
+const replaceLinkMethods = require("./Select.replaceLink");
 const {PUBLIC_SCHEMA_NAME} = require("./helpers");
 
 // https://www.postgresql.org/docs/9.5/static/sql-select.html
@@ -713,7 +714,13 @@ class Select extends Syntax {
             }
         }
     }
-
+    
+    isDefinedFromLink(fromLink) {
+        return this.from.some(fromItem => (
+            fromItem.isDefinedFromLink(fromLink)
+        ));
+    }
+    
     getFromItemByAlias(/* alias */) {
         // let fromItems = this.joins.map(join => join.from).concat(this.from);
         //
@@ -746,6 +753,9 @@ for (let key in getColumnSourceMethods) {
 }
 for (let key in buildFromFilesMethods) {
     Select.prototype[ key ] = buildFromFilesMethods[ key ];
+}
+for (let key in replaceLinkMethods) {
+    Select.prototype[ key ] = replaceLinkMethods[ key ];
 }
 
 // stop keywords for alias
