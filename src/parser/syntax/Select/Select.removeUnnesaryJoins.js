@@ -1,144 +1,34 @@
 "use strict";
 
-const {
-    objectLink2schmeTableColumn,
-    getDbTable
-} = require("./helpers");
-
 // TODO: from lateral func( some.id )
-
-function pushConstraintColumns(elems, fromLink, constraintColumns) {
-    if (
-        elems.length != 3 ||
-        elems[1].operator != "="
-    )  {
-        return;
-    }
-
-    let link;
-    if ( elems[0].link ) {
-        if ( elems[0].containLink( fromLink ) ) {
-            link = objectLink2schmeTableColumn( elems[0] );
-            constraintColumns.push(link.column);
-        }
-    }
-    if ( elems[2].link ) {
-        if ( elems[2].containLink( fromLink ) ) {
-            link = objectLink2schmeTableColumn( elems[2] );
-            constraintColumns.push(link.column);
-        }
-    }
-}
 
 module.exports = {
 
     removeUnnesaryJoins({server}) {
         for (let i = 0, n = this.from.length; i < n; i++) {
             let fromItem = this.from[i];
-            this._removeUnnesaryJoins({fromItem, server});
+            fromItem.removeUnnesaryJoins({ server, select: this });
         }
 
         this._validate();
     },
 
-    _removeUnnesaryJoins({fromItem, server}) {
-        for (let i = fromItem.joins.length - 1; i >= 0; i--) {
-            let join = fromItem.joins[ i ];
-
-            if ( !this._isHelpfullJoin(fromItem, join, i, server) ) {
-                fromItem.joins.splice(i, 1);
-            }
-        }
-    },
-
-    _isHelpfullJoin(fromItem, join, index, server) {
+    _isHelpfullJoin(join, options) {
         let fromLink = join.from.toObjectLink();
-
-        let isRemovable = false;
-        if ( join.type == "left join" && join.from.table && join.on ) {
-            let isConstraintExpression = true,
-                constraintColumns = [],
-
-                elems = [];
-
-            for (let i = 0, n = join.on.elements.length; i < n; i++) {
-                let elem = join.on.elements[ i ];
-
-                if ( elem.operator == "or" ) {
-                    isConstraintExpression = false;
-                    break;
-                }
-
-                if ( elem.operator == "and" ) {
-                    pushConstraintColumns(elems, fromLink, constraintColumns);
-                    elems = [];
-                } else {
-                    elems.push( elem );
-                }
-            }
-            pushConstraintColumns(elems, fromLink, constraintColumns);
-
-            if ( isConstraintExpression ) {
-                let dbTable;
-
-                try {
-                    dbTable = getDbTable( server, join.from.table );
-                } catch(err) {
-                    dbTable = null;
-                }
-
-                if ( dbTable ) {
-                    let _constraintColumns = constraintColumns.sort().join(",");
-
-                    for (let name in dbTable.constraints) {
-                        let constraint = dbTable.constraints[ name ];
-
-                        if (
-                            (constraint.type == "primary key" ||
-                            constraint.type == "unique") &&
-                            constraint.columns.sort().join(",") == _constraintColumns
-                        ) {
-                            isRemovable = true;
-                            break;
-                        }
-                    }
-                }
-            }
-        }
-
-        if ( join.type == "left join" && join.from.select ) {
-            if (
-                // left join (select * from some limit 1)
-                join.from.select.limit == 1 ||
-                // left join (select 1)
-                !join.from.select.from.length
-            ) {
-                isRemovable = true;
-            }
-        }
-
-        if ( join.type == "left join" && join.from.file ) {
-            isRemovable = true;
-        }
-
-        // join can change rows order
-        if ( !isRemovable ) {
-            return true;
-        }
-
-        return this._isUsedFromLink(fromItem, fromLink, index);
+        return this._isUsedFromLink(fromLink, options);
     },
 
-    _isUsedFromLink(fromItem, fromLink, joinIndex, options) {
-        options = options || {star: true};
+    _isUsedFromLink(fromLink, options) {
+        options = options || {star: true, checkJoins: true};
 
         return (
             this._isUsedFromLinkInColumns( fromLink, options ) ||
             this.where && this._isUsedFromLinkInExpresion( fromLink, this.where )  ||
             this.having && this._isUsedFromLinkInExpresion( fromLink, this.having )  ||
-            this._isUsedFromLinkInJoins( fromItem, joinIndex, fromLink ) ||
             this._isUsedFromLinkInGroupBy( fromLink ) ||
-            this._isUsedFromLinkInOrderBy( fromLink )
+            this._isUsedFromLinkInOrderBy( fromLink ) ||
+
+            options.checkJoins && this._isUsedFromLinkInJoins( fromLink )
         );
     },
 
@@ -148,7 +38,7 @@ module.exports = {
         }
 
         return (
-            this._isUsedFromLink(null, fromLink, -1, {star: false}) ||
+            this._isUsedFromLink(fromLink, {star: false}) ||
 
             this.from.some(fromItem => {
                 if ( fromItem.select ) {
@@ -180,59 +70,34 @@ module.exports = {
         });
     },
 
-    _isUsedFromLinkInJoins(fromItem, joinIndex, fromLink) {
-        if ( fromItem == null ) {
-            return this.from.some(
-                fromItem => this._isUsedFromLinkInJoins(
-                    fromItem, joinIndex, fromLink
-                )
-            );
-        }
-        
-        for (let i = joinIndex + 1, n = fromItem.joins.length; i < n; i++ ) {
-            let join = fromItem.joins[ i ];
-            let isUsed = false;
+    _isUsedFromLinkInJoins(fromLink) {
+        let isUsed = false;
 
-            if ( join.on ) {
-                isUsed = isUsed || this._isUsedFromLinkInExpresion( fromLink, join.on );
-            }
+        for (let i = 0, n = this.from.length; i < n; i++) {
+            let fromItem = this.from[i];
+            fromItem.eachJoin(join => {
+                if ( this._isUsedFromLinkInJoin(fromLink, join) ) {
+                    isUsed = true;
+                    return false;
+                }
+            });
+        }
 
-            if ( join.from.select && join.from.lateral ) {
-                isUsed = isUsed || join.from.select._isUsedFromLinkBySubSelect(fromLink);
-            }
-            
-            if ( join.from.joins.length ) {
-                isUsed = isUsed || this._isUsedFromLinkInJoins(join.from, -1, fromLink);
-            }
-            
-            if ( isUsed ) {
-                return true;
-            }
-        }
-        
-        let parent = this._getParentFromItem(fromItem);
-        if ( parent ) {
-            return this._isUsedFromLinkInJoins(parent, -1, fromLink);
-        }
+        return isUsed;
     },
-    
-    _getParentFromItem(fromItem) {
-        let parent = fromItem.parent;
-        if ( !parent ) {
-            return;
+
+    _isUsedFromLinkInJoin(fromLink, join) {
+        let isUsed = false;
+
+        if ( join.on ) {
+            isUsed = isUsed || this._isUsedFromLinkInExpresion( fromLink, join.on );
         }
-        
-        const Select = this.Coach.Select;
-        if ( parent instanceof Select ) {
-            return;
+
+        if ( join.from.select && join.from.lateral ) {
+            isUsed = isUsed || join.from.select._isUsedFromLinkBySubSelect(fromLink);
         }
-        
-        const FromItem = this.Coach.FromItem;
-        if ( parent instanceof FromItem ) {
-            return parent;
-        }
-        
-        return this._getParentFromItem(parent);
+
+        return isUsed;
     },
 
     _isUsedFromLinkInGroupBy(fromLink) {

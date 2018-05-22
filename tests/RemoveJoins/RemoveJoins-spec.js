@@ -652,14 +652,14 @@ describe("RemoveJoins", () => {
         left join company as CompanyClient on
             CompanyClient.id = public.order.id_company_client
     `);
-    
-    // testRemoveUnnesaryJoins(`
-    //     select country_second.id
-    //     from company
-    // 
-    //     left join country as country_first
-    //         left join country as country_second
-    //         on country_second.id = company.id_country + 1
-    //     on country_first.id = company.id_country
-    // `);
+
+    testRemoveUnnesaryJoins(`
+        select country_second.id
+        from company
+
+        left join country as country_first
+            left join country as country_second
+            on country_second.id = company.id_country + 1
+        on country_first.id = company.id_country
+    `);
 });

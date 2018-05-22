@@ -288,6 +288,24 @@ class FromItem extends Syntax {
         }
     }
 
+    eachJoin(iteration) {
+        let result;
+
+        for (let i = 0, n = this.joins.length; i < n; i++) {
+            let join = this.joins[i];
+            result = iteration(join);
+
+            if ( result === false ) {
+                return;
+            }
+
+            result = join.from.eachFromItem(iteration);
+            if ( result === false ) {
+                return;
+            }
+        }
+    }
+
     replaceLink(replace, to) {
         if ( this.select ) {
             this.select.replaceLink(replace, to);
@@ -325,6 +343,52 @@ class FromItem extends Syntax {
             return this.joins.some(join => (
                 join.from.isDefinedFromLink(fromLink)
             ));
+        }
+    }
+
+    removeUnnesaryJoins({server, select}) {
+        for (let i = this.joins.length - 1; i >= 0; i--) {
+            let join = this.joins[ i ];
+
+            if ( !join.isRemovable({ server }) ) {
+                continue;
+            }
+
+            join.from.removeUnnesaryJoins({ server, select });
+
+            if ( join.from.joins.length ) {
+                continue;
+            }
+
+            if ( select._isHelpfullJoin(join, {checkJoins: false}) ) {
+                continue;
+            }
+
+            let fromLink = join.from.toObjectLink();
+            if ( this._isUsedFromLinkAfter({select, fromLink, i}) ) {
+                continue;
+            }
+
+            this.joins.splice(i, 1);
+        }
+    }
+
+    _isUsedFromLinkAfter({select, fromLink, i}) {
+        i++;
+        for (let n = this.joins.length; i < n; i++) {
+            let nextJoin = this.joins[ i ];
+
+            if ( select._isUsedFromLinkInJoin(fromLink, nextJoin) ) {
+                return true;
+            }
+
+            if ( nextJoin.from._isUsedFromLinkAfter({
+                select,
+                fromLink,
+                i: -1
+            }) ) {
+                return true;
+            }
         }
     }
 }
