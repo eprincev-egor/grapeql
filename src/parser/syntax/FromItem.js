@@ -299,7 +299,7 @@ class FromItem extends Syntax {
                 return;
             }
 
-            result = join.from.eachFromItem(iteration);
+            result = join.from.eachJoin(iteration);
             if ( result === false ) {
                 return;
             }
@@ -390,6 +390,13 @@ class FromItem extends Syntax {
                 return true;
             }
         }
+    }
+
+    addJoinAfter(join, afterJoin) {
+        this.addChild(join);
+
+        let index = this.joins.indexOf( afterJoin );
+        this.joins.splice(index + 1, 0, join);
     }
 }
 

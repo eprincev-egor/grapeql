@@ -84,13 +84,7 @@ module.exports = {
     buildFromFiles({ server }) {
         const As = this.Coach.As;
 
-        for (let i = 0, n = this.joins.length; i < n; i++) {
-            let join = this.joins[i];
-
-            if ( !join.from.file ) {
-                continue;
-            }
-
+        this._eachJoinFile(join => {
             let oldFromItem = join.from;
             let node = getNode(join.from.file, server);
             let nodeFrom = node.parsed.from[0].clone();
@@ -104,8 +98,9 @@ module.exports = {
 
             join.from.as = as;
 
-            for (let j = 0, m = node.parsed.joins.length; j < m; j++) {
-                let anotherJoin = node.parsed.joins[ j ];
+            let nodeJoins = node.parsed.from[0].joins;
+            for (let j = 0, m = nodeJoins.length; j < m; j++) {
+                let anotherJoin = nodeJoins[ j ];
                 anotherJoin = anotherJoin.clone();
 
                 let alias = anotherJoin.from.getAliasSql();
@@ -121,16 +116,25 @@ module.exports = {
 
                 this.addJoinAfter( anotherJoin, join );
             }
+        });
+    },
+
+    _eachJoinFile(iteration) {
+        for (let i = 0, n = this.from.length; i < n; i++) {
+            let fromItem = this.from[ i ];
+
+            fromItem.eachJoin(join => {
+                if ( !join.from.file ) {
+                    return;
+                }
+
+                iteration(join);
+            });
         }
     },
 
     addJoinAfter(join, afterJoin) {
-        this.addChild(join);
-
-        let index = this.joins.indexOf( afterJoin );
-        this.joins.splice(index + 1, 0, join);
-
+        afterJoin.parent.addJoinAfter(join, afterJoin);
         this._validate();
-        return join;
     }
 };
