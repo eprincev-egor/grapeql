@@ -232,7 +232,7 @@ class FromItem extends Syntax {
             return this.as.getAliasSql();
         }
         else if ( this.table ) {
-            return this.toString();
+            return this.table.toString();
         }
         else if ( this.file ) {
             return this.file.toObjectName().toString();

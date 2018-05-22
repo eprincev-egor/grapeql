@@ -58,11 +58,7 @@ module.exports = {
                 let fromSql = fromItem.getAliasSql();
                 select.addColumn(`${ fromSql }.${ columnKey }`);
             } else {
-                if ( keyParts.length == 2 ) {
-                    select.addColumn(`${ key } as "${ key }"`);
-                } else {
-                    select.addColumn(`${ key } as "${ key }"`);
-                }
+                select.addColumn(`${ key } as "${ key }"`);
             }
         });
 
