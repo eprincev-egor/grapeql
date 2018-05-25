@@ -64,7 +64,6 @@ module.exports = {
 
         select.removeUnnesaryJoins({ server });
         select.buildFromFiles({ server });
-        select.removeUnnesaryJoins({ server });
 
         if ( limit != null && limit != "all" ) {
             select.setLimit(limit);
@@ -78,44 +77,61 @@ module.exports = {
     },
 
     buildFromFiles({ server }) {
-        const As = this.Coach.As;
-
-        this._eachJoinFile(join => {
-            let oldFromItem = join.from;
-            let node = getNode(join.from.file, server);
-            let nodeFrom = node.parsed.from[0].clone();
-            let nodeAliasSql = nodeFrom.getAliasSql();
-            join.from = nodeFrom;
-
-            let as = oldFromItem.as;
-            if ( !as ) {
-                as = oldFromItem.file.toAs();
-            }
-
-            join.from.as = as;
-
-            let nodeJoins = node.parsed.from[0].joins;
-            for (let j = 0, m = nodeJoins.length; j < m; j++) {
-                let anotherJoin = nodeJoins[ j ];
-                anotherJoin = anotherJoin.clone();
-
-                let alias = anotherJoin.from.getAliasSql();
-                let newAlias = `"${ as.getAliasSql() }.${ alias }"`;
-                let newAliasWithoutQuotes = `${ as.getAliasSql() }.${ alias }`;
-
-                anotherJoin.from.as = new As(`as ${ newAlias }`);
-
-                anotherJoin.on.replaceLink(alias, newAlias);
-                this.replaceLink(newAliasWithoutQuotes, newAlias);
-
-                anotherJoin.on.replaceLink(nodeAliasSql, as.getAliasSql());
-
-                this.addJoinAfter( anotherJoin, join );
-            }
+        let joins = this._getJoinFiles();
+        if ( !joins.length ) {
+            return;
+        }
+        
+        joins.forEach(join => {
+            this._buildFromFile({ 
+                server, 
+                fromItem: join.from 
+            });
         });
+        this.removeUnnesaryJoins({ server });
+        
+        this.buildFromFiles({ server });
+    },
+    
+    _buildFromFile({ server, fromItem }) {
+        const As = this.Coach.As;
+        
+        let join = fromItem.parent;
+        
+        let node = getNode(fromItem.file, server);
+        let nodeFrom = node.parsed.from[0].clone();
+        let nodeAliasSql = nodeFrom.getAliasSql();
+        join.from = nodeFrom;
+
+        let as = fromItem.as;
+        if ( !as ) {
+            as = fromItem.file.toAs();
+        }
+        nodeFrom.as = as;
+
+        let nodeJoins = node.parsed.from[0].joins;
+        for (let j = 0, m = nodeJoins.length; j < m; j++) {
+            let anotherJoin = nodeJoins[ j ];
+            anotherJoin = anotherJoin.clone();
+
+            let alias = anotherJoin.from.getAliasSql();
+            let newAliasWithoutQuotes = `${ trimQuotes( as.getAliasSql() ) }.${ trimQuotes( alias ) }`;
+            let newAlias = `"${ newAliasWithoutQuotes }"`;
+
+            anotherJoin.from.as = new As(`as ${ newAlias }`);
+
+            anotherJoin.on.replaceLink(alias, newAlias);
+            this.replaceLink(newAliasWithoutQuotes, newAlias);
+
+            anotherJoin.on.replaceLink(nodeAliasSql, as.getAliasSql());
+
+            this.addJoinAfter( anotherJoin, join );
+        }
     },
 
-    _eachJoinFile(iteration) {
+    _getJoinFiles() {
+        let joins = [];
+        
         for (let i = 0, n = this.from.length; i < n; i++) {
             let fromItem = this.from[ i ];
 
@@ -123,10 +139,12 @@ module.exports = {
                 if ( !join.from.file ) {
                     return;
                 }
-
-                iteration(join);
+                
+                joins.push( join );
             });
         }
+        
+        return joins;
     },
 
     addJoinAfter(join, afterJoin) {
@@ -134,3 +152,7 @@ module.exports = {
         this._validate();
     }
 };
+
+function trimQuotes(str) {
+    return str.replace(/^"|"$/g, "");
+}
