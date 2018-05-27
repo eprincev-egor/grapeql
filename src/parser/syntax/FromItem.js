@@ -83,7 +83,7 @@ class FromItem extends Syntax {
             coach.expectWord("as");
             coach.skipSpace();
 
-            this.as = coach.parseObjectLink();
+            this.as = coach.parseObjectName();
             this.addChild(this.as);
         }
 

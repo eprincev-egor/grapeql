@@ -12,8 +12,8 @@ class Column extends Syntax {
         if ( coach.isWord("as") ) {
             coach.readWord();
             coach.skipSpace();
-            
-            this.as = coach.parseObjectLink();
+
+            this.as = coach.parseObjectName();
             this.addChild(this.as);
         }
     }

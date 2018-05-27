@@ -161,9 +161,7 @@ tests.Column = [
                     ]}
                 ]
             },
-            as: {link: [
-                {word: "id"}
-            ]}
+            as: { word: "id"}
         }
     },
     {
@@ -174,9 +172,7 @@ tests.Column = [
                     {null: true}
                 ]
             },
-            as: {link: [
-                {word: "nulL1"}
-            ]}
+            as: { word: "nulL1"}
         }
     },
     {
@@ -1003,9 +999,7 @@ tests.FromItem = [
     {
         str: "public.company as Company",
         result: {
-            as: {link: [
-                {word: "Company"}
-            ]},
+            as: { word: "Company" },
             table: {link: [
                 {word: "public"},
                 {word: "company"}
@@ -1015,9 +1009,7 @@ tests.FromItem = [
     {
         str: "public.company as Company ( id, inn )",
         result: {
-            as: {link: [
-                {word: "Company"}
-            ]},
+            as: { word: "Company" },
             table: {link: [
                 {word: "public"},
                 {word: "company"}
@@ -1049,9 +1041,7 @@ tests.FromItem = [
                     ]}
                 }]
             },
-            as: {link: [
-                {word: "Orders"}
-            ]}
+            as: { word: "Orders" }
         }
     },
     {
@@ -1075,9 +1065,7 @@ tests.FromItem = [
                     ]}
                 }]
             },
-            as: {link: [
-                {word: "company"}
-            ]},
+            as: { word: "company" },
             columns: [
                 {word: "id"},
                 {word: "inn"}
@@ -1105,9 +1093,9 @@ tests.FromItem = [
                     ]}
                 ]
             },
-            as: {link: [
-                {word: "some_rows"}
-            ]}
+            as: {
+                word: "some_rows"
+            }
         }
     },
     {
@@ -1119,9 +1107,7 @@ tests.FromItem = [
                     {name: "Order.sql"}
                 ]
             },
-            as: {link: [
-                {word: "orders"}
-            ]}
+            as: { word: "orders" }
         }
     },
     {
@@ -1133,9 +1119,9 @@ tests.FromItem = [
                     {name: "Company.sql"}
                 ]
             },
-            as: {link: [
-                {word: "Company"}
-            ]}
+            as: {
+                word: "Company"
+            }
         }
     },
     {
@@ -1385,9 +1371,7 @@ tests.Join = [
                     {word: "public"},
                     {word: "country"}
                 ]},
-                as: {link: [
-                    {word: "country"}
-                ]}
+                as: { word: "country" }
             },
             using: [
                 {link: [
@@ -1427,9 +1411,9 @@ tests.Join = [
                         ]}
                     }]
                 },
-                as: {link: [
-                    {word: "sub_company"}
-                ]}
+                as: {
+                    word: "sub_company"
+                }
             },
             on: {elements: [
                 {boolean: true}
@@ -1447,9 +1431,7 @@ tests.Join = [
                         {name: "Company.sql"}
                     ]
                 },
-                as: {link: [
-                    {word: "company"}
-                ]}
+                as: { word: "company" }
             },
             on: {elements: [
                 {boolean: true}
@@ -1483,9 +1465,7 @@ tests.Join = [
                         ]}
                     ]}]
                 },
-                as: {link: [
-                    {word: "order_id"}
-                ]}
+                as: { word: "order_id" }
             },
             on: {elements: [
                 {boolean: true}
@@ -1511,9 +1491,7 @@ tests.Join = [
                         ]}
                     ]}]
                 },
-                as: {link: [
-                    {word: "order_id"}
-                ]}
+                as: { word: "order_id" }
             },
             on: {elements: [
                 {boolean: true}
@@ -1870,9 +1848,7 @@ tests.Select = [
         result: {
             columns: [
                 {
-                    as: {link: [
-                        {word: "id"}
-                    ]},
+                    as: { word: "id" },
                     expression: {elements: [
                         {link: [
                             {word: "company"},
@@ -1881,9 +1857,7 @@ tests.Select = [
                     ]}
                 },
                 {
-                    as: {link: [
-                        {word: "n"}
-                    ]},
+                    as: { word: "n" },
                     expression: {elements: [
                         {null: true}
                     ]}
@@ -2042,9 +2016,7 @@ tests.Select = [
                 table: {link: [
                     {word: "company"}
                 ]},
-                as: {link: [
-                    {word: "company"}
-                ]},
+                as: { word: "company" },
                 columns: [
                     {word: "id"},
                     {word: "inn"}
@@ -2265,9 +2237,7 @@ tests.Select = [
                             table: {link: [
                                 {word: "company"}
                             ]},
-                            as: {link: [
-                                {word: "partner"}
-                            ]}
+                            as: { word: "partner" }
                         },
                         on: {elements: [
                             {link: [
@@ -2287,9 +2257,7 @@ tests.Select = [
                             table: {link: [
                                 {word: "country"}
                             ]},
-                            as: {link: [
-                                {word: "partner_country"}
-                            ]}
+                            as: { word: "partner_country" }
                         },
                         on: {elements: [
                             {link: [
@@ -2324,9 +2292,7 @@ tests.Select = [
                                                 ]
                                             }
                                         ]},
-                                        as: {link: [
-                                            {word: "sum_sale"}
-                                        ]}
+                                        as: { word: "sum_sale" }
                                     }
                                 ],
                                 from: [{
@@ -2442,9 +2408,7 @@ tests.Select = [
                                     {name: "."},
                                     {name: "Company"}
                                 ]},
-                                as: {link: [
-                                    {word: "CompanyClient"}
-                                ]}
+                                as: { word: "CompanyClient" }
                             },
                             on: {elements: [
                                 {link: [

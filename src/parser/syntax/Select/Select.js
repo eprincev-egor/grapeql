@@ -679,7 +679,7 @@ class Select extends Syntax {
     getColumnByAlias(alias) {
         return this.columns.find(column => {
             if ( column.as ) {
-                if ( column.as.getLast().equalString(alias) ) {
+                if ( column.as.equalString(alias) ) {
                     return true;
                 }
             } else {
