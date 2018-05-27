@@ -94,7 +94,7 @@ module.exports = {
     },
 
     _buildFromFile({ server, fromItem }) {
-        const As = this.Coach.As;
+        const ObjectLink = this.Coach.ObjectLink;
 
         let node = getNode(fromItem.file, server);
         let nodeFrom = node.parsed.from[0];
@@ -115,7 +115,7 @@ module.exports = {
             let newAliasWithoutQuotes = `${ trimQuotes( as.toString({as: false}) ) }.${ trimQuotes( alias ) }`;
             let newAlias = `"${ newAliasWithoutQuotes }"`;
 
-            join.from.as = new As(`as ${ newAlias }`);
+            join.from.as = new ObjectLink(`${ newAlias }`);
 
             join.on.replaceLink(alias, newAlias);
             join.on.replaceLink(nodeAlias, as.toString({ as: false }));

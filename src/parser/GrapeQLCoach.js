@@ -48,7 +48,6 @@ GrapeQLCoach.addSyntax("ObjectName", require("./syntax/ObjectName"));
 GrapeQLCoach.addSyntax("ObjectLink", require("./syntax/ObjectLink"));
 GrapeQLCoach.addSyntax("FunctionCall", require("./syntax/FunctionCall"));
 GrapeQLCoach.addSyntax("Expression", require("./syntax/Expression"));
-GrapeQLCoach.addSyntax("As", require("./syntax/As"));
 GrapeQLCoach.addSyntax("Column", require("./syntax/Column"));
 GrapeQLCoach.addSyntax("FromItem", require("./syntax/FromItem"));
 GrapeQLCoach.addSyntax("GroupByElement", require("./syntax/GroupByElement"));

@@ -679,7 +679,7 @@ class Select extends Syntax {
     getColumnByAlias(alias) {
         return this.columns.find(column => {
             if ( column.as ) {
-                if ( column.as.equalString(alias) ) {
+                if ( column.as.getLast().equalString(alias) ) {
                     return true;
                 }
             } else {
@@ -714,13 +714,13 @@ class Select extends Syntax {
             }
         }
     }
-    
+
     isDefinedFromLink(fromLink) {
         return this.from.some(fromItem => (
             fromItem.isDefinedFromLink(fromLink)
         ));
     }
-    
+
     getFromItemByAlias(/* alias */) {
         // let fromItems = this.joins.map(join => join.from).concat(this.from);
         //

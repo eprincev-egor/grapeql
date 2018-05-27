@@ -157,6 +157,13 @@ class ObjectLink extends Syntax {
     }
 
     equalLink(objectLink) {
+        if ( objectLink instanceof this.Coach.ObjectName ) {
+            return (
+                this.link.length == 1 &&
+                this.lastEqual( objectLink )
+            );
+        }
+
         return (
             this.link.length == objectLink.link.length &&
             this.containLink( objectLink )

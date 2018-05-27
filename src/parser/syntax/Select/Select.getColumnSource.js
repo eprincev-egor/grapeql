@@ -21,7 +21,7 @@ module.exports = {
         ) {
             let column = this.columns.find(column => {
                 if ( column.as ) {
-                    return column.as.equal( objectLink.link[0] );
+                    return column.as.equalLink( objectLink.slice(0, 1) );
                 }
 
                 if ( column.expression.isLink() ) {
@@ -98,7 +98,7 @@ module.exports = {
 
         if ( link.table ) {
             if ( fromItem.as ) {
-                if ( !fromItem.as.equal( link.tableObject ) ) {
+                if ( !fromItem.as.equalLink( link.tableObject ) ) {
                     return;
                 }
             }

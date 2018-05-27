@@ -57,21 +57,8 @@ class FilePathElement extends DoubleQuotes {
     }
 
     toAs() {
-        let as = new this.Coach.As();
-        as.hasWordAs = true;
-
-        if ( this.name ) {
-            let name = this.name.replace(/\.sql$/i, "");
-
-            if ( /^\w+$/i.test(name) ) {
-                as.word = name;
-            } else {
-                as.content = name;
-            }
-        } else {
-            super.fillClone(as);
-        }
-
+        let as = new this.Coach.ObjectLink();
+        as.add( this.toObjectName() );
         return as;
     }
 

@@ -4,17 +4,13 @@ const Syntax = require("./Syntax");
 
 class FromItem extends Syntax {
     parse(coach) {
+        let needAs = false;
+
         // file Order.sql
         if ( coach.isFile() ) {
             this.file = coach.parseFile();
             this.addChild(this.file);
             coach.skipSpace();
-
-            if ( coach.isAs() ) {
-                let as = coach.parseAs();
-                this.as = as;
-                this.addChild(this.as);
-            }
         }
         // [ LATERAL ] ( select ) [ AS ] alias
         else if ( coach.is("(") || coach.is(/lateral\s*\(/i) ) {
@@ -36,8 +32,7 @@ class FromItem extends Syntax {
             coach.expect(")");
             coach.skipSpace();
 
-            this.as = coach.parseAs();
-            this.addChild(this.as);
+            needAs = true;
         }
         // [ LATERAL ] function_name ( [ argument [, ...] ] )
         //            [ WITH ORDINALITY ] [ [ AS ] alias ]
@@ -61,8 +56,7 @@ class FromItem extends Syntax {
                 this.withOrdinality = true;
             }
 
-            this.as = coach.parseAs();
-            this.addChild(this.as);
+            needAs = true;
         }
         // [ ONLY ] table_name [ * ] [ [ AS ] alias
         else {
@@ -83,11 +77,14 @@ class FromItem extends Syntax {
                 coach.i++; // *
                 coach.skipSpace();
             }
+        }
 
-            if ( coach.isAs() ) {
-                this.as = coach.parseAs();
-                this.addChild(this.as);
-            }
+        if ( needAs || coach.isWord("as") ) {
+            coach.expectWord("as");
+            coach.skipSpace();
+
+            this.as = coach.parseObjectLink();
+            this.addChild(this.as);
         }
 
         // [ ( column_alias [, ...] ) ]
@@ -226,7 +223,7 @@ class FromItem extends Syntax {
         }
 
         if ( this.as ) {
-            out += " ";
+            out += " as ";
             out += this.as.toString();
         }
 
@@ -248,7 +245,7 @@ class FromItem extends Syntax {
 
     getAliasSql() {
         if ( this.as ) {
-            return this.as.toString({as: false});
+            return this.as.toString();
         }
         else if ( this.table ) {
             return this.table.toString();

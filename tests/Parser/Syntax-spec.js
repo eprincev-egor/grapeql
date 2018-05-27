@@ -134,15 +134,6 @@ describe("select.toString() joins without commad", () => {
     assert.equal(str.replace(/\s+/g, " ").trim(), "select 1 from x left join y on true left join z on true");
 });
 
-describe("As.clone().toString()", () => {
-    let coach = new GrapeQLCoach("as x");
-    let as = coach.parseAs();
-
-    let str = as.clone().toString();
-
-    assert.equal(str, "as x");
-});
-
 describe("ObjectName.equal", () => {
     let coach;
     let left, right;
@@ -224,49 +215,49 @@ describe("File.toAs", () => {
     let coach, file, filePathElem,
         as;
 
-    it("Country.sql => as Country", () => {
+    it("Country.sql => Country", () => {
         coach = new GrapeQLCoach("Country.sql");
         filePathElem = coach.parseFilePathElement();
 
         as = filePathElem.toAs();
 
-        assert.equal("as Country", as.toString());
+        assert.equal("Country", as.toString());
     });
 
-    it("Country-start => as \"Country-start\"", () => {
+    it("Country-start => \"Country-start\"", () => {
         coach = new GrapeQLCoach("Country-start");
         filePathElem = coach.parseFilePathElement();
 
         as = filePathElem.toAs();
 
-        assert.equal("as \"Country-start\"", as.toString());
+        assert.equal("\"Country-start\"", as.toString());
     });
 
-    it("Country-start.sql => as \"Country-start\"", () => {
+    it("Country-start.sql => \"Country-start\"", () => {
         coach = new GrapeQLCoach("Country-start.sql");
         filePathElem = coach.parseFilePathElement();
 
         as = filePathElem.toAs();
 
-        assert.equal("as \"Country-start\"", as.toString());
+        assert.equal("\"Country-start\"", as.toString());
     });
 
-    it("\"some\"\"name\" => as \"some\"\"name\"", () => {
+    it("\"some\"\"name\" => \"some\"\"name\"", () => {
         coach = new GrapeQLCoach("\"some\"\"name\"");
         filePathElem = coach.parseFilePathElement();
 
         as = filePathElem.toAs();
 
-        assert.equal("as \"some\"\"name\"", as.toString());
+        assert.equal("\"some\"\"name\"", as.toString());
     });
 
-    it("./Check/Path/Country.sql => as Country", () => {
+    it("./Check/Path/Country.sql => Country", () => {
         coach = new GrapeQLCoach("./Check/Path/Country.sql");
         file = coach.parseFile();
 
         as = file.toAs();
 
-        assert.equal("as Country", as.toString());
+        assert.equal("Country", as.toString());
     });
 });
 
