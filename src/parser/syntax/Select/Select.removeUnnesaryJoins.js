@@ -9,8 +9,6 @@ module.exports = {
             let fromItem = this.from[i];
             fromItem.removeUnnesaryJoins({ server, select: this });
         }
-
-        this._validate();
     },
 
     _isHelpfullJoin(join, options) {

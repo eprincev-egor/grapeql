@@ -47,10 +47,10 @@ describe("HardJoinFile", () => {
             left join company as company_client
                 left join country as "company_client.country"
                 on "company_client.country".id = company_client.id_country
-            on company_client.id = public.order.id_company_client 
+            on company_client.id = public.order.id_company_client
         `
     });
-    /*
+
     testRequest({
         server: () => server,
         nodes: {
@@ -87,18 +87,16 @@ describe("HardJoinFile", () => {
                 "orders.company_client.country".code as "orders.company_client.country.code"
             from order_sale
 
-            left join public.order as orders on
-                orders.id = order_sale.id_order
-
-            left join company as "orders.company_client" on
-                "orders.company_client".id = orders.id_company_client
-
-            left join country as "orders.company_client.country" on
-                "orders.company_client.country".id = "orders.company_client".id_country
+            left join public.order as orders
+                left join company as "orders.company_client"
+                    left join country as "orders.company_client.country"
+                    on "orders.company_client.country".id = "orders.company_client".id_country
+                on "orders.company_client".id = orders.id_company_client
+            on orders.id = order_sale.id_order
         `
     });
 
-
+/*
     testRequest({
         server: () => server,
         nodes: {

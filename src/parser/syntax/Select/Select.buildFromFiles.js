@@ -106,22 +106,29 @@ module.exports = {
         nodeFrom.fillClone(fromItem, { joins: false });
         fromItem.as = newNodeAlias;
 
-        let joins = nodeFrom.joins;
-        let prevJoin = false;
-        for (let j = 0, m = joins.length; j < m; j++) {
-            let join = joins[ j ];
+        let joins = [];
+        for (let j = 0, m = nodeFrom.joins.length; j < m; j++) {
+            let join = nodeFrom.joins[ j ];
             join = join.clone();
 
             let oldAlias = join.from.getAliasSql();
             let newAliasWithoutQuotes = `${ trimQuotes( newNodeAlias.toString() ) }.${ trimQuotes( oldAlias ) }`;
             let newAlias = `"${ newAliasWithoutQuotes }"`;
 
-            join.from.as = new ObjectName(`${ newAlias }`);
+            join.from.as = new ObjectName(newAlias);
 
             join.replaceLink(oldAlias, newAlias);
             join.replaceLink(oldNodeAlias, newNodeAlias);
 
             this.replaceLink(newAliasWithoutQuotes, newAlias);
+            this.replaceLink(`${ newNodeAlias.toString() }.${ trimQuotes( oldAlias ) }`, newAlias);
+
+            joins.push(join);
+        }
+
+        let prevJoin = false;
+        for (let j = 0, m = joins.length; j < m; j++) {
+            let join = joins[ j ];
 
             fromItem.addJoinAfter(join, prevJoin);
             prevJoin = join;
