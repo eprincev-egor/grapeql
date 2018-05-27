@@ -69,18 +69,13 @@ class As extends ObjectName {
         return object;
     }
 
-    // as "some"
-    // returned
-    // "some"
-    getAliasSql() {
-        return super.toString();
-    }
-
-    toString() {
+    toString(options) {
         let out = super.toString();
 
-        if ( this.hasWordAs ) {
-            out = "as " + out;
+        if ( !options || options.as !== false ) {
+            if ( this.hasWordAs ) {
+                out = "as " + out;
+            }
         }
 
         return out;

@@ -662,4 +662,26 @@ describe("RemoveJoins", () => {
             on country_second.id = company.id_country + 1
         on country_first.id = company.id_country
     `);
+
+    testRemoveUnnesaryJoins(`
+        select
+            public.order.id,
+            CompanyClient.inn as "client_inn"
+        from public.order
+
+        left join company as CompanyClient on
+            CompanyClient.id = public.order.id_company_client
+
+        left join country as "CompanyClient.country" on
+            "CompanyClient.country".id = CompanyClient.id_country
+    `, `
+        select
+            public.order.id,
+            CompanyClient.inn as "client_inn"
+        from public.order
+
+        left join company as CompanyClient on
+            CompanyClient.id = public.order.id_company_client
+        
+    `);
 });

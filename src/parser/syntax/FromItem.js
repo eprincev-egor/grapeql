@@ -125,6 +125,12 @@ class FromItem extends Syntax {
 
     clone() {
         let clone = new FromItem();
+        this.fillClone(clone);
+        return clone;
+    }
+
+    fillClone(clone, options) {
+        options = options || {joins: true};
 
         if ( this.file ) {
             clone.file = this.file.clone();
@@ -167,10 +173,23 @@ class FromItem extends Syntax {
             clone.columns = this.columns.map(name => name.clone());
         }
 
-        clone.joins = this.joins.map(join => join.clone());
-        clone.joins.forEach(join => clone.addChild(join));
+        if ( options.joins !== false ) {
+            clone.joins = this.joins.map(join => join.clone());
+            clone.joins.forEach(join => clone.addChild(join));
+        }
+    }
 
-        return clone;
+    clear() {
+        delete this.file;
+        delete this.functionCall;
+        delete this.withOrdinality;
+        delete this.table;
+        delete this.select;
+        delete this.only;
+        delete this.lateral;
+        delete this.as;
+        delete this.columns;
+        this.joins = [];
     }
 
     toString() {
@@ -229,7 +248,7 @@ class FromItem extends Syntax {
 
     getAliasSql() {
         if ( this.as ) {
-            return this.as.getAliasSql();
+            return this.as.toString({as: false});
         }
         else if ( this.table ) {
             return this.table.toString();

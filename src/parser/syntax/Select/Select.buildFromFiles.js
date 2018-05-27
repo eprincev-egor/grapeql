@@ -81,57 +81,57 @@ module.exports = {
         if ( !joins.length ) {
             return;
         }
-        
+
         joins.forEach(join => {
-            this._buildFromFile({ 
-                server, 
-                fromItem: join.from 
+            this._buildFromFile({
+                server,
+                fromItem: join.from
             });
         });
         this.removeUnnesaryJoins({ server });
-        
+
         this.buildFromFiles({ server });
     },
-    
+
     _buildFromFile({ server, fromItem }) {
         const As = this.Coach.As;
-        
-        let join = fromItem.parent;
-        
+
         let node = getNode(fromItem.file, server);
-        let nodeFrom = node.parsed.from[0].clone();
-        let nodeAliasSql = nodeFrom.getAliasSql();
-        join.from = nodeFrom;
+        let nodeFrom = node.parsed.from[0];
 
-        let as = fromItem.as;
-        if ( !as ) {
-            as = fromItem.file.toAs();
-        }
-        nodeFrom.as = as;
+        let nodeAlias = nodeFrom.getAliasSql();
+        let as = fromItem.as || fromItem.file.toAs();
 
-        let nodeJoins = node.parsed.from[0].joins;
-        for (let j = 0, m = nodeJoins.length; j < m; j++) {
-            let anotherJoin = nodeJoins[ j ];
-            anotherJoin = anotherJoin.clone();
+        fromItem.clear();
+        nodeFrom.fillClone(fromItem, {joins: false});
+        fromItem.as = as;
 
-            let alias = anotherJoin.from.getAliasSql();
-            let newAliasWithoutQuotes = `${ trimQuotes( as.getAliasSql() ) }.${ trimQuotes( alias ) }`;
+        let joins = nodeFrom.joins;
+        for (let j = 0, m = joins.length; j < m; j++) {
+            let join = joins[ j ];
+            join = join.clone();
+
+            let alias = join.from.getAliasSql();
+            let newAliasWithoutQuotes = `${ trimQuotes( as.toString({as: false}) ) }.${ trimQuotes( alias ) }`;
             let newAlias = `"${ newAliasWithoutQuotes }"`;
 
-            anotherJoin.from.as = new As(`as ${ newAlias }`);
+            join.from.as = new As(`as ${ newAlias }`);
 
-            anotherJoin.on.replaceLink(alias, newAlias);
+            join.on.replaceLink(alias, newAlias);
+            join.on.replaceLink(nodeAlias, as.toString({ as: false }));
+
             this.replaceLink(newAliasWithoutQuotes, newAlias);
 
-            anotherJoin.on.replaceLink(nodeAliasSql, as.getAliasSql());
 
-            this.addJoinAfter( anotherJoin, join );
+            // fromItem.parent is join
+            // fromItem.parent.parent is fromItem
+            fromItem.parent.parent.addJoinAfter(join, fromItem.parent);
         }
     },
 
     _getJoinFiles() {
         let joins = [];
-        
+
         for (let i = 0, n = this.from.length; i < n; i++) {
             let fromItem = this.from[ i ];
 
@@ -139,17 +139,12 @@ module.exports = {
                 if ( !join.from.file ) {
                     return;
                 }
-                
+
                 joins.push( join );
             });
         }
-        
-        return joins;
-    },
 
-    addJoinAfter(join, afterJoin) {
-        afterJoin.parent.addJoinAfter(join, afterJoin);
-        this._validate();
+        return joins;
     }
 };
 
