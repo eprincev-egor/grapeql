@@ -103,7 +103,7 @@ module.exports = {
         let newNodeAlias = fromItem.as || fromItem.file.toObjectName();
 
         fromItem.clear({ joins: false });
-        nodeFrom.fillClone(fromItem, {joins: false});
+        nodeFrom.fillClone(fromItem, { joins: false });
         fromItem.as = newNodeAlias;
 
         let joins = nodeFrom.joins;
@@ -118,8 +118,8 @@ module.exports = {
 
             join.from.as = new ObjectName(`${ newAlias }`);
 
-            join.on.replaceLink(oldAlias, newAlias);
-            join.on.replaceLink(oldNodeAlias, newNodeAlias);
+            join.replaceLink(oldAlias, newAlias);
+            join.replaceLink(oldNodeAlias, newNodeAlias);
 
             this.replaceLink(newAliasWithoutQuotes, newAlias);
 

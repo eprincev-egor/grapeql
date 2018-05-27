@@ -337,17 +337,7 @@ class FromItem extends Syntax {
 
         if ( this.joins ) {
             this.joins.forEach(join => {
-                if ( join.on ) {
-                    join.on.replaceLink( replace, to );
-                }
-                if ( join.from.select ) {
-                    join.from.select.replaceLink(replace, to);
-                }
-                else if ( join.from.functionCall ) {
-                    join.from.functionCall.arguments.forEach(arg => {
-                        arg.replaceLink( replace, to );
-                    });
-                }
+                join.replaceLink( replace, to );
             });
         }
     }
