@@ -104,11 +104,11 @@ describe("SimpleJoinFile", () => {
                 "CompanyClient.country".code as "CompanyClient.country.code"
             from public.order
 
-            left join company as CompanyClient on
-                CompanyClient.id = public.order.id_company_client
+            left join company as CompanyClient
+                left join country as "CompanyClient.country"
+                on "CompanyClient.country".id = CompanyClient.id_country
 
-            left join country as "CompanyClient.country" on
-                "CompanyClient.country".id = CompanyClient.id_country
+            on CompanyClient.id = public.order.id_company_client
         `
     });
 
@@ -138,11 +138,11 @@ describe("SimpleJoinFile", () => {
                 "CompanyClient.country".code as "CompanyClient.Country.code"
             from public.order
 
-            left join company as CompanyClient on
-                CompanyClient.id = public.order.id_company_client
+            left join company as CompanyClient
+                left join country as "CompanyClient.country"
+                on "CompanyClient.country".id = CompanyClient.id_country
 
-            left join country as "CompanyClient.country" on
-                "CompanyClient.country".id = CompanyClient.id_country
+            on CompanyClient.id = public.order.id_company_client
         `
     });
 
@@ -212,11 +212,12 @@ describe("SimpleJoinFile", () => {
                 CompanyClient.inn as "client_inn"
             from public.order
 
-            left join company as CompanyClient on
-                CompanyClient.id = public.order.id_company_client
+            left join company as CompanyClient
+                left join country as "CompanyClient.country" 
+                on "CompanyClient.country".id = CompanyClient.id_country
+            on CompanyClient.id = public.order.id_company_client
 
-            left join country as "CompanyClient.country" on
-                "CompanyClient.country".id = CompanyClient.id_country
+
 
             where
                 "CompanyClient.country".code is not null

@@ -176,7 +176,7 @@ class FromItem extends Syntax {
         }
     }
 
-    clear() {
+    clear(options) {
         delete this.file;
         delete this.functionCall;
         delete this.withOrdinality;
@@ -186,7 +186,10 @@ class FromItem extends Syntax {
         delete this.lateral;
         delete this.as;
         delete this.columns;
-        this.joins = [];
+
+        if ( !options || options.joins !== false ) {
+            this.joins = [];
+        }
     }
 
     toString() {
@@ -411,8 +414,16 @@ class FromItem extends Syntax {
     addJoinAfter(join, afterJoin) {
         this.addChild(join);
 
-        let index = this.joins.indexOf( afterJoin );
-        this.joins.splice(index + 1, 0, join);
+        if ( afterJoin ) {
+            let index = this.joins.indexOf( afterJoin );
+            if ( index == -1 ) {
+                this.joins.push( join );
+            } else {
+                this.joins.splice(index + 1, 0, join);
+            }
+        } else {
+            this.joins.unshift( join );
+        }
     }
 }
 

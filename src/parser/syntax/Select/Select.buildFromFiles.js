@@ -102,11 +102,12 @@ module.exports = {
         let oldNodeAlias = nodeFrom.getAliasSql();
         let newNodeAlias = fromItem.as || fromItem.file.toObjectName();
 
-        fromItem.clear();
+        fromItem.clear({ joins: false });
         nodeFrom.fillClone(fromItem, {joins: false});
         fromItem.as = newNodeAlias;
 
         let joins = nodeFrom.joins;
+        let prevJoin = false;
         for (let j = 0, m = joins.length; j < m; j++) {
             let join = joins[ j ];
             join = join.clone();
@@ -122,10 +123,8 @@ module.exports = {
 
             this.replaceLink(newAliasWithoutQuotes, newAlias);
 
-
-            // fromItem.parent is join
-            // fromItem.parent.parent is fromItem
-            fromItem.parent.parent.addJoinAfter(join, fromItem.parent);
+            fromItem.addJoinAfter(join, prevJoin);
+            prevJoin = join;
         }
     },
 
