@@ -56,12 +56,6 @@ class FilePathElement extends DoubleQuotes {
         return object;
     }
 
-    toAs() {
-        let as = new this.Coach.ObjectLink();
-        as.add( this.toObjectName() );
-        return as;
-    }
-
     equal(anotherObject) {
         if ( this.name && anotherObject.name ) {
             return this.name == anotherObject.name;

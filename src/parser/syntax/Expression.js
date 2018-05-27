@@ -373,27 +373,30 @@ class Expression extends Syntax {
     }
 
     replaceLink(replace, to) {
-        let coach;
-
-        if ( typeof replace == "string" ) {
-            coach = new this.Coach(replace);
-            replace = coach.parseObjectLink();
-        }
-
-        if ( typeof to == "string" ) {
-            coach = new this.Coach(to);
-            to = coach.parseObjectLink();
-        }
-
-
         const Expression = this.Coach.Expression;
         const ObjectLink = this.Coach.ObjectLink;
+        const ObjectName = this.Coach.ObjectName;
         const Cast = this.Coach.Cast;
         const In = this.Coach.In;
         const Between = this.Coach.Between;
         const CaseWhen = this.Coach.CaseWhen;
         const FunctionCall = this.Coach.FunctionCall;
         const Select = this.Coach.Select;
+
+        if ( typeof replace == "string" ) {
+            replace = new ObjectLink( replace );
+        }
+        else if ( replace instanceof ObjectName ) {
+            replace = new ObjectLink( replace.toString() );
+        }
+
+        if ( typeof to == "string" ) {
+            to = new ObjectLink( to );
+        }
+        else if ( to instanceof ObjectName ) {
+            to = new ObjectLink( to.toString() );
+        }
+
 
         this.elements.forEach(elem => {
             if ( elem instanceof Expression ) {

@@ -94,31 +94,31 @@ module.exports = {
     },
 
     _buildFromFile({ server, fromItem }) {
-        const ObjectLink = this.Coach.ObjectLink;
+        const ObjectName = this.Coach.ObjectName;
 
         let node = getNode(fromItem.file, server);
         let nodeFrom = node.parsed.from[0];
 
-        let nodeAlias = nodeFrom.getAliasSql();
-        let as = fromItem.as || fromItem.file.toAs();
+        let oldNodeAlias = nodeFrom.getAliasSql();
+        let newNodeAlias = fromItem.as || fromItem.file.toObjectName();
 
         fromItem.clear();
         nodeFrom.fillClone(fromItem, {joins: false});
-        fromItem.as = as;
+        fromItem.as = newNodeAlias;
 
         let joins = nodeFrom.joins;
         for (let j = 0, m = joins.length; j < m; j++) {
             let join = joins[ j ];
             join = join.clone();
 
-            let alias = join.from.getAliasSql();
-            let newAliasWithoutQuotes = `${ trimQuotes( as.toString({as: false}) ) }.${ trimQuotes( alias ) }`;
+            let oldAlias = join.from.getAliasSql();
+            let newAliasWithoutQuotes = `${ trimQuotes( newNodeAlias.toString() ) }.${ trimQuotes( oldAlias ) }`;
             let newAlias = `"${ newAliasWithoutQuotes }"`;
 
-            join.from.as = new ObjectLink(`${ newAlias }`);
+            join.from.as = new ObjectName(`${ newAlias }`);
 
-            join.on.replaceLink(alias, newAlias);
-            join.on.replaceLink(nodeAlias, as.toString({ as: false }));
+            join.on.replaceLink(oldAlias, newAlias);
+            join.on.replaceLink(oldNodeAlias, newNodeAlias);
 
             this.replaceLink(newAliasWithoutQuotes, newAlias);
 
