@@ -481,7 +481,7 @@ class Expression extends Syntax {
         }
 
         for (let i = to.length - 1; i >= 0 ; i--) {
-            link.unshift( to[i] );
+            link.unshift( to[i].clone() );
         }
     }
 }
