@@ -49,7 +49,7 @@ class ObjectName extends DoubleQuotes {
             return this.content == anotherObject.word;
         }
         else {
-            return this.content = anotherObject.content;
+            return this.content == anotherObject.content;
         }
     }
 
