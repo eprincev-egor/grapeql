@@ -96,7 +96,7 @@ describe("HardJoinFile", () => {
         `
     });
 
-/*
+
     testRequest({
         server: () => server,
         nodes: {
@@ -134,24 +134,19 @@ describe("HardJoinFile", () => {
             columns: ["company_client.last_order.company_partner.country.code"]
         },
         result: `
-            select
-                country.code as "company_client.last_order.company_partner.country.code"
-            from public.order
+            select 
+                "company_client.last_order.company_partner.Country".code as "company_client.last_order.company_partner.country.code" 
+            from public.order 
 
-            left join company as company_client on
-                company_client.id = public.order.id_company_client
-
-            left join public.order as last_order on
-                last_order.id = company_client.id_last_order
-
-            left join company as company_partner on
-                company_partner.id = last_order.id_company_partner
-
-            left join country on
-                country.id = company_partner.id_country
+            left join company as company_client 
+                left join public.order as "company_client.last_order" 
+                    left join company as "company_client.last_order.company_partner" 
+                        left join country as "company_client.last_order.company_partner.Country" 
+                        on "company_client.last_order.company_partner.Country".id = "company_client.last_order.company_partner".id_country 
+                    on "company_client.last_order.company_partner".id = "company_client.last_order".id_company_partner 
+                on "company_client.last_order".id = company_client.id_last_order 
+            on company_client.id = public.order.id_company_client
         `
     });
-
-    */
 
 });
