@@ -77,15 +77,15 @@ module.exports = {
     },
 
     buildFromFiles({ server }) {
-        let joins = this._getJoinFiles();
-        if ( !joins.length ) {
+        let fromItems = this._getFromFiles();
+        if ( !fromItems.length ) {
             return;
         }
 
-        joins.forEach(join => {
+        fromItems.forEach(fromItem => {
             this._buildFromFile({
                 server,
-                fromItem: join.from
+                fromItem
             });
         });
         this.removeUnnesaryJoins({ server });
@@ -95,6 +95,14 @@ module.exports = {
 
     _buildFromFile({ server, fromItem }) {
         const ObjectName = this.Coach.ObjectName;
+        const Join = this.Coach.Join;
+        const Select = this.Coach.Select;
+
+        let isJoin = fromItem.parent instanceof Join;
+        let isManyFrom = (
+            fromItem.parent instanceof Select &&
+            fromItem.parent.from.length > 1
+        );
 
         let node = getNode(fromItem.file, server);
         let nodeFrom = node.parsed.from[0];
@@ -112,16 +120,35 @@ module.exports = {
             join = join.clone();
 
             let oldAlias = join.from.getAliasSql();
-            let newAliasWithoutQuotes = `${ trimQuotes( newNodeAlias.toString() ) }.${ trimQuotes( oldAlias ) }`;
-            let newAlias = `"${ newAliasWithoutQuotes }"`;
+            let newAliasWithoutQuotes;
+            if ( isJoin || isManyFrom ) {
+                newAliasWithoutQuotes = `${ trimQuotes( newNodeAlias.toString() ) }.${ trimQuotes( oldAlias ) }`;
+            } else {
+                newAliasWithoutQuotes = `${ trimQuotes( oldAlias ) }`;
+            }
+
+            let newAlias;
+            if ( /^\w+$/.test(newAliasWithoutQuotes) ) {
+                newAlias = newAliasWithoutQuotes;
+            } else {
+                newAlias = `"${ newAliasWithoutQuotes }"`;
+            }
 
             join.from.as = new ObjectName(newAlias);
 
-            join.replaceLink(oldAlias, newAlias);
             join.replaceLink(oldNodeAlias, newNodeAlias);
+            if ( oldAlias != newAlias ) {
+                join.replaceLink(oldAlias, newAlias);
+                this.replaceLink(newAliasWithoutQuotes, newAlias);
+            }
 
-            this.replaceLink(newAliasWithoutQuotes, newAlias);
-            this.replaceLink(`${ newNodeAlias.toString() }.${ trimQuotes( oldAlias ) }`, newAlias);
+            if ( isJoin || isManyFrom ) {
+                this.replaceLink(`${ newNodeAlias.toString() }.${ trimQuotes( oldAlias ) }`, newAlias);
+            } else {
+                if ( newAlias != oldAlias ) {
+                    this.replaceLink(`${ trimQuotes( oldAlias ) }`, newAlias);
+                }
+            }
 
             joins.push({
                 join,
@@ -149,22 +176,26 @@ module.exports = {
         }
     },
 
-    _getJoinFiles() {
-        let joins = [];
+    _getFromFiles() {
+        let fromItems = [];
 
         for (let i = 0, n = this.from.length; i < n; i++) {
             let fromItem = this.from[ i ];
+
+            if ( fromItem.file ) {
+                fromItems.push(fromItem);
+            }
 
             fromItem.eachJoin(join => {
                 if ( !join.from.file ) {
                     return;
                 }
 
-                joins.push( join );
+                fromItems.push( join.from );
             });
         }
 
-        return joins;
+        return fromItems;
     }
 };
 
