@@ -2427,6 +2427,24 @@ tests.Select = [
                 }
             ]
         }
+    },
+    {
+        str: "select * from ./Company",
+        result: {
+            columns: [
+                {expression: {elements: [
+                    {link: [
+                        "*"
+                    ]}
+                ]}}
+            ],
+            from: [
+                {file: {path: [
+                    {name: "."},
+                    {name: "Company"}
+                ]}}
+            ]
+        }
     }
 ];
 
