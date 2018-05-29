@@ -123,15 +123,29 @@ module.exports = {
             this.replaceLink(newAliasWithoutQuotes, newAlias);
             this.replaceLink(`${ newNodeAlias.toString() }.${ trimQuotes( oldAlias ) }`, newAlias);
 
-            joins.push(join);
+            joins.push({
+                join,
+                oldAlias,
+                newAlias
+            });
         }
 
         let prevJoin = false;
-        for (let j = 0, m = joins.length; j < m; j++) {
-            let join = joins[ j ];
+        for (let i = 0, n = joins.length; i < n; i++) {
+            let {
+                join,
+                oldAlias,
+                newAlias
+            } = joins[ i ];
 
             fromItem.addJoinAfter(join, prevJoin);
             prevJoin = join;
+
+            for (let j = i + 1; j < n; j++) {
+                let nextJoin = joins[ j ].join;
+
+                nextJoin.replaceLink(oldAlias, newAlias);
+            }
         }
     },
 
