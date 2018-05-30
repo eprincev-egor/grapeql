@@ -19,6 +19,14 @@ class CreateCacheReverseExpression extends Syntax {
         this.addChild(this.table);
         coach.skipSpace();
         
+        if ( coach.isWord("as") ) {
+            coach.expectWord("as");
+            coach.skipSpace();
+            
+            this.as = coach.parseObjectName();
+            coach.skipSpace();
+        }
+        
         coach.expectWord("set");
         coach.skipSpace();
         
@@ -39,6 +47,11 @@ class CreateCacheReverseExpression extends Syntax {
         clone.table = this.table.clone();
         clone.addChild(clone.table);
         
+        if ( this.as ) {
+            clone.as = this.as.clone();
+            clone.addChild(clone.as);
+        }
+        
         clone.expression = this.expression.clone();
         clone.addChild(clone.expression);
         
@@ -50,6 +63,12 @@ class CreateCacheReverseExpression extends Syntax {
         
         out += "after change ";
         out += this.table.toString();
+        
+        if ( this.as ) {
+            out += " as ";
+            out += this.as.toString();
+        }
+        
         out += " set where ";
         out += this.expression.toString();
         
