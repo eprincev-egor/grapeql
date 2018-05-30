@@ -326,18 +326,32 @@ class FromItem extends Syntax {
     }
 
     replaceLink(replace, to) {
+        if ( typeof replace == "string" ) {
+            replace = new this.Coach.ObjectLink(replace);
+        }
+
+        if ( typeof to == "string" ) {
+            to = new this.Coach.ObjectLink(to);
+        }
+        
+        this.eachLink(replace, (link) => {
+            link.replace(replace, to);
+        });
+    }
+    
+    eachLink(link, iteration) {
         if ( this.select ) {
-            this.select.replaceLink(replace, to);
+            this.select.eachLink(link, iteration);
         }
         else if ( this.functionCall ) {
             this.functionCall.arguments.forEach(arg => {
-                arg.replaceLink( replace, to );
+                arg.eachLink( link, iteration );
             });
         }
 
         if ( this.joins ) {
             this.joins.forEach(join => {
-                join.replaceLink( replace, to );
+                join.eachLink( link, iteration );
             });
         }
     }

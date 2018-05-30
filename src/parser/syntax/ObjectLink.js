@@ -174,6 +174,45 @@ class ObjectLink extends Syntax {
         let lastElem = this.getLast();
         return lastElem.equal( objectName );
     }
+    
+    replace(replace, to) {
+        replace = replace.link;
+        
+        if ( to instanceof this.Coach.ObjectName ) {
+            to = [to];
+        } else {
+            to = to.link;
+        }
+
+        if ( this.link.length < replace.length ) {
+            return;
+        }
+
+        let spliceLength = 0;
+        for (let
+            i = 0,
+            n = this.link.length,
+            m = replace.length;
+            i < n && i < m;
+            i++
+        ) {
+            let elem = this.link[i];
+            let replaceElem = replace[i];
+
+            if ( !elem.equal(replaceElem) ) {
+                return;
+            }
+            spliceLength++;
+        }
+
+        for (let i = 0; i < spliceLength; i++) {
+            this.link.shift();
+        }
+
+        for (let i = to.length - 1; i >= 0 ; i--) {
+            this.link.unshift( to[i].clone() );
+        }
+    }
 }
 
 module.exports = ObjectLink;

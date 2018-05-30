@@ -371,11 +371,24 @@ class Expression extends Syntax {
 
         return operand;
     }
-
+    
     replaceLink(replace, to) {
+        if ( typeof replace == "string" ) {
+            replace = new this.Coach.ObjectLink(replace);
+        }
+        
+        if ( typeof to == "string" ) {
+            to = new this.Coach.ObjectLink(to);
+        }
+        
+        this.eachLink(replace, (link) => {
+            link.replace(replace, to);
+        });
+    }
+    
+    eachLink(link, iteration) {
         const Expression = this.Coach.Expression;
         const ObjectLink = this.Coach.ObjectLink;
-        const ObjectName = this.Coach.ObjectName;
         const Cast = this.Coach.Cast;
         const In = this.Coach.In;
         const Between = this.Coach.Between;
@@ -383,106 +396,58 @@ class Expression extends Syntax {
         const FunctionCall = this.Coach.FunctionCall;
         const Select = this.Coach.Select;
 
-        if ( typeof replace == "string" ) {
-            replace = new ObjectLink( replace );
-        }
-        else if ( replace instanceof ObjectName ) {
-            replace = new ObjectLink( replace.toString() );
-        }
-
-        if ( typeof to == "string" ) {
-            to = new ObjectLink( to );
-        }
-        else if ( to instanceof ObjectName ) {
-            to = new ObjectLink( to.toString() );
-        }
-
-
         this.elements.forEach(elem => {
             if ( elem instanceof Expression ) {
-                elem.replaceLink(replace, to);
+                elem.eachLink(link, iteration);
             }
 
             if ( elem instanceof ObjectLink ) {
-                this._replaceLink(elem, replace, to);
+                if ( elem.containLink(link) ) {
+                    iteration(elem);
+                }
             }
 
             if ( elem instanceof Cast ) {
-                elem.expression.replaceLink(replace, to);
+                elem.expression.eachLink(link, iteration);
             }
 
             if ( elem instanceof In ) {
                 if ( Array.isArray(elem.in) ) {
                     elem.in.forEach(
-                        expression => expression.replaceLink(replace, to)
+                        expression => expression.eachLink(link, iteration)
                     );
                 } else {
                     // in (select ...)
-                    return elem.in.replaceLink(replace, to);
+                    return elem.in.eachLink(link, iteration);
                 }
             }
 
             if ( elem instanceof Between ) {
-                elem.start.replaceLink(replace, to);
-                elem.end.replaceLink(replace, to);
+                elem.start.eachLink(link, iteration);
+                elem.end.eachLink(link, iteration);
             }
 
             if ( elem instanceof CaseWhen ) {
                 if ( elem.else ) {
-                    elem.else.replaceLink(replace, to);
+                    elem.else.eachLink(link, iteration);
                 }
 
                 elem.case.forEach(caseElem => {
-                    caseElem.when.replaceLink(replace, to);
-                    caseElem.then.replaceLink(replace, to);
+                    caseElem.when.eachLink(link, iteration);
+                    caseElem.then.eachLink(link, iteration);
                 });
             }
 
             if ( elem instanceof FunctionCall ) {
                 elem.arguments.forEach(
-                    arg => arg.replaceLink(replace, to)
+                    arg => arg.eachLink(link, iteration)
                 );
             }
 
             if ( elem instanceof Select ) {
-                elem.replaceLink(replace, to);
+                elem.eachLink(link, iteration);
             }
         });
-    }
-
-    _replaceLink(objectLink, replace, to) {
-        let link = objectLink.link;
-        replace = replace.link;
-        to = to.link;
-
-        if ( link.length < replace.length ) {
-            return;
-        }
-
-        let spliceLength = 0;
-        for (let
-            i = 0,
-            n = link.length,
-            m = replace.length;
-            i < n && i < m;
-            i++
-        ) {
-            let elem = link[i];
-            let replaceElem = replace[i];
-
-            if ( !elem.equal(replaceElem) ) {
-                return;
-            }
-            spliceLength++;
-        }
-
-        for (let i = 0; i < spliceLength; i++) {
-            link.shift();
-        }
-
-        for (let i = to.length - 1; i >= 0 ; i--) {
-            link.unshift( to[i].clone() );
-        }
     }
 }
 

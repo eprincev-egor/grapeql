@@ -173,6 +173,13 @@ class Join extends Syntax {
         }
         this.from.replaceLink(replace, to);
     }
+    
+    eachLink(link, iteration) {
+        if ( this.on ) {
+            this.on.eachLink(link, iteration);
+        }
+        this.from.eachLink(link, iteration);
+    }
 }
 
 function pushConstraintColumns(elems, fromLink, constraintColumns) {
