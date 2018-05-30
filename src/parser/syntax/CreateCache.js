@@ -30,6 +30,15 @@ class CreateCache extends Syntax {
         this.addChild(this.table);
         coach.skipSpace();
         
+        if ( coach.isWord("as") ) {
+            coach.expectWord("as");
+            coach.skipSpace();
+            
+            this.as = coach.parseObjectName();
+            this.addChild(this.as);
+            coach.skipSpace();
+        }
+        
         coach.expect("(");
         coach.skipSpace();
         
@@ -53,6 +62,11 @@ class CreateCache extends Syntax {
         clone.table = this.table.clone();
         clone.addChild(clone.table);
         
+        if ( this.as ) {
+            clone.as = this.as.clone();
+            clone.addChild(clone.as);
+        }
+        
         clone.select = this.select.clone();
         clone.addChild(clone.select);
         
@@ -67,6 +81,12 @@ class CreateCache extends Syntax {
         
         out += "create cache for ";
         out += this.table.toString();
+        
+        if ( this.as ) {
+            out += " as ";
+            out += this.as.toString();    
+        }
+        
         out += " ( ";
         out += this.select.toString();
         out += " )";

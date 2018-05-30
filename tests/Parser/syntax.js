@@ -2570,6 +2570,25 @@ tests.CreateCacheReverseExpression = [
 
 tests.CreateCache = [
     {
+        str: `create cache for public.order as orders (
+            select 1
+        )`,
+        result: {
+            table: {link: [
+                {word: "public"},
+                {word: "order"}
+            ]},
+            as: {word: "orders"},
+            select: {
+                columns: [{
+                    expression: {elements: [
+                        {number: "1"}
+                    ]}
+                }]
+            }
+        }
+    },
+    {
         str: `create cache for company (
             select
                 count(orders.id) as quantity
