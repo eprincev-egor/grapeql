@@ -57,11 +57,39 @@ function testGetDbColumn(test) {
     });
 }
 
+function testSyntax(className, test) {
+    it(test.str, () => {
+    
+        let str = test.str,
+            parseFuncName = "parse" + className;
+    
+        
+        let coach = new GrapeQLCoach(str);
+        let result = coach[ parseFuncName ]();
+    
+        let isEqual = !!weakDeepEqual(test.result, result);
+        if ( !isEqual ) {
+            console.log("break here");
+        }
+    
+    
+        // auto test clone and toString
+        let clone = result.clone();
+        let cloneString = clone.toString();
+        let cloneCoach = new GrapeQLCoach( cloneString );
+        let cloneResult = cloneCoach[ parseFuncName ]();
+    
+        isEqual = !!weakDeepEqual(test.result, cloneResult);
+    });
+}
+
+
 let server;
 (async function() {
     server = await GrapeQL.start(config);
 
     global.server = server;
+    global.testSyntax = testSyntax;
     global.testRequest = testRequest;
     global.testGetDbColumn = testGetDbColumn;
     global.testRemoveUnnesaryJoins = testRemoveUnnesaryJoins;

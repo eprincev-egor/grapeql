@@ -2544,4 +2544,108 @@ tests.WithQuery = [
     }
 ];
 
+tests.CreateCacheReverseExpression = [
+    {
+        str: "after change public.order set where public.order.id_order = company.id",
+        result: {
+            table: {link: [
+                {word: "public"},
+                {word: "order"}
+            ]},
+            expression: {elements: [
+                {link: [
+                    {word: "public"},
+                    {word: "order"},
+                    {word: "id_order"}
+                ]},
+                {operator: "="},
+                {link: [
+                    {word: "company"},
+                    {word: "id"}
+                ]}
+            ]}
+        }
+    }
+];
+
+tests.CreateCache = [
+    {
+        str: `create cache for company (
+            select
+                count(orders.id) as quantity
+            from orders
+            where
+                orders.id_client = company.id
+        )
+
+        after change orders set where
+            orders.id_client = company.id`,
+        result: {
+            table: {link: [
+                {word: "company"}
+            ]},
+            
+            select: {
+                columns: [
+                    {
+                        expression: {elements: [
+                            {
+                                "function": {link: [
+                                    {word: "count"}
+                                ]},
+                                "arguments": [
+                                    {
+                                        elements: [
+                                            {link: [
+                                                {word: "orders"},
+                                                {word: "id"}
+                                            ]}
+                                        ]
+                                    }
+                                ]
+                            }
+                        ]},
+                        as: {word: "quantity"}
+                    }
+                ],
+                from: [{
+                    table: {link: [
+                        {word: "orders"}
+                    ]}
+                }],
+                where: {elements: [
+                    {link: [
+                        {word: "orders"},
+                        {word: "id_client"}
+                    ]},
+                    {operator: "="},
+                    {link: [
+                        {word: "company"},
+                        {word: "id"}
+                    ]}
+                ]}
+            },
+            
+            reverse: [
+                {
+                    table: {link: [
+                        {word: "orders"}
+                    ]},
+                    expression: {elements: [
+                        {link: [
+                            {word: "orders"},
+                            {word: "id_client"}
+                        ]},
+                        {operator: "="},
+                        {link: [
+                            {word: "company"},
+                            {word: "id"}
+                        ]}
+                    ]}
+                }
+            ]
+        }
+    }
+];
+
 module.exports = tests;
