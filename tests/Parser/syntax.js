@@ -2523,6 +2523,214 @@ tests.Select = [
                 ]}}
             ]
         }
+    },
+    {
+        str: "select count(*) from company",
+        result: {
+            columns: [
+                {expression: {elements: [
+                    {
+                        "function": {link: [
+                            {word: "count"}
+                        ]},
+                        "arguments": [],
+                        isStar: true
+                    }
+                ]}}
+            ],
+            from: [
+                {table: {link: [
+                    {word: "company"}
+                ]}}
+            ]
+        }
+    },
+    {
+        str: "select count( * ) from company",
+        result: {
+            columns: [
+                {expression: {elements: [
+                    {
+                        "function": {link: [
+                            {word: "count"}
+                        ]},
+                        "arguments": [],
+                        isStar: true
+                    }
+                ]}}
+            ],
+            from: [
+                {table: {link: [
+                    {word: "company"}
+                ]}}
+            ]
+        }
+    },
+    {
+        str: "select string_agg( name order by id desc ) from company",
+        result: {
+            columns: [
+                {expression: {elements: [
+                    {
+                        "function": {link: [
+                            {word: "string_agg"}
+                        ]},
+                        "arguments": [{elements: [
+                            {link: [
+                                {word: "name"}
+                            ]}
+                        ]}],
+                        orderBy: [
+                            {
+                                expression: {elements: [
+                                    {link: [
+                                        {word: "id"}
+                                    ]}
+                                ]},
+                                vector: "desc"
+                            }
+                        ]
+                    }
+                ]}}
+            ],
+            from: [
+                {table: {link: [
+                    {word: "company"}
+                ]}}
+            ]
+        }
+    },
+    {
+        str: "select string_agg( distinct name ) from company",
+        result: {
+            columns: [
+                {expression: {elements: [
+                    {
+                        "function": {link: [
+                            {word: "string_agg"}
+                        ]},
+                        "arguments": [{elements: [
+                            {link: [
+                                {word: "name"}
+                            ]}
+                        ]}],
+                        distinct: true
+                    }
+                ]}}
+            ],
+            from: [
+                {table: {link: [
+                    {word: "company"}
+                ]}}
+            ]
+        }
+    },
+    {
+        str: "select string_agg( all name ) from company",
+        result: {
+            columns: [
+                {expression: {elements: [
+                    {
+                        "function": {link: [
+                            {word: "string_agg"}
+                        ]},
+                        "arguments": [{elements: [
+                            {link: [
+                                {word: "name"}
+                            ]}
+                        ]}],
+                        all: true
+                    }
+                ]}}
+            ],
+            from: [
+                {table: {link: [
+                    {word: "company"}
+                ]}}
+            ]
+        }
+    },
+    {
+        str: "select string_agg( name order by id desc ) filter ( where name ilike 'x%' ) from company",
+        result: {
+            columns: [
+                {expression: {elements: [
+                    {
+                        "function": {link: [
+                            {word: "string_agg"}
+                        ]},
+                        "arguments": [{elements: [
+                            {link: [
+                                {word: "name"}
+                            ]}
+                        ]}],
+                        orderBy: [
+                            {
+                                expression: {elements: [
+                                    {link: [
+                                        {word: "id"}
+                                    ]}
+                                ]},
+                                vector: "desc"
+                            }
+                        ],
+                        where: {elements: [
+                            {link: [
+                                {word: "name"}
+                            ]},
+                            {operator: "ilike"},
+                            {content: "x%"}
+                        ]}
+                    }
+                ]}}
+            ],
+            from: [
+                {table: {link: [
+                    {word: "company"}
+                ]}}
+            ]
+        }
+    },
+    {
+        str: "select string_agg( name ) within group ( order by id desc ) filter ( where name ilike 'x%' ) from company",
+        result: {
+            columns: [
+                {expression: {elements: [
+                    {
+                        "function": {link: [
+                            {word: "string_agg"}
+                        ]},
+                        "arguments": [{elements: [
+                            {link: [
+                                {word: "name"}
+                            ]}
+                        ]}],
+                        within: [
+                            {
+                                expression: {elements: [
+                                    {link: [
+                                        {word: "id"}
+                                    ]}
+                                ]},
+                                vector: "desc"
+                            }
+                        ],
+                        where: {elements: [
+                            {link: [
+                                {word: "name"}
+                            ]},
+                            {operator: "ilike"},
+                            {content: "x%"}
+                        ]}
+                    }
+                ]}}
+            ],
+            from: [
+                {table: {link: [
+                    {word: "company"}
+                ]}}
+            ]
+        }
     }
 ];
 
@@ -2683,7 +2891,7 @@ tests.CacheFor = [
             table: {link: [
                 {word: "company"}
             ]},
-            
+
             select: {
                 columns: [
                     {
@@ -2724,7 +2932,7 @@ tests.CacheFor = [
                     ]}
                 ]}
             },
-            
+
             reverse: [
                 {
                     table: {link: [
@@ -2745,24 +2953,24 @@ tests.CacheFor = [
             ]
         }
     },
-    
+
     {
         str: `cache totals for company (
             select
                 count(orders.id) as quantity,
                 string_agg(partner.name, ', ') as partners_names
             from orders
-            
+
             left join company as partner on
                 partner.id = orders.id_partner
-            
+
             where
                 orders.id_client = company.id
         )
 
         after change orders set where
             orders.id_client = company.id
-        
+
         after change company as partner set where
             company.id in (
                 select id_client
@@ -2776,7 +2984,7 @@ tests.CacheFor = [
             table: {link: [
                 {word: "company"}
             ]},
-            
+
             select: {
                 columns: [
                     {
@@ -2862,7 +3070,7 @@ tests.CacheFor = [
                     ]}
                 ]}
             },
-            
+
             reverse: [
                 {
                     table: {link: [
@@ -2903,7 +3111,7 @@ tests.CacheFor = [
                                     {word: "orders"}
                                 ]}
                             }],
-                            
+
                             where: {elements: [
                                 {link: [
                                     {word: "orders"},

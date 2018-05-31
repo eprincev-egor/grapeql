@@ -13,11 +13,85 @@ class FunctionCall extends Syntax {
         coach.expect("(");
         coach.skipSpace();
 
-        this.arguments = coach.parseComma("Expression");
-        this.arguments.map(arg => this.addChild(arg));
+        if ( coach.isWord("all") ) {
+            coach.expectWord("all");
+            coach.skipSpace();
+
+            this.all = true;
+        }
+        else if ( coach.isWord("distinct") ) {
+            coach.expectWord("distinct");
+            coach.skipSpace();
+
+            this.distinct = true;
+        }
+
+        if ( coach.is("*") ) {
+            coach.i++;
+            coach.skipSpace();
+            this.isStar = true;
+            this.arguments = [];
+        } else {
+            this.arguments = coach.parseComma("Expression");
+            this.arguments.map(arg => this.addChild(arg));
+        }
+
+        coach.skipSpace();
+
+        // aggregate_name (expression [ , ... ] [ order_by_clause ] )
+        if ( coach.isWord("order") ) {
+            this.orderBy = this.parseOrderBy(coach);
+        }
 
         coach.skipSpace();
         coach.expect(")");
+        coach.skipSpace();
+
+        if ( coach.isWord("within") ) {
+            coach.expectWord("within");
+            coach.skipSpace();
+
+            coach.expectWord("group");
+            coach.skipSpace();
+
+            coach.expect("(");
+            coach.skipSpace();
+
+            this.within = this.parseOrderBy(coach);
+
+            coach.skipSpace();
+            coach.expect(")");
+        }
+
+        coach.skipSpace();
+
+        if ( coach.isWord("filter") ) {
+            coach.expectWord("filter");
+            coach.skipSpace();
+
+            coach.expect("(");
+            coach.skipSpace();
+
+            coach.expectWord("where");
+            coach.skipSpace();
+
+            this.where = coach.parseExpression();
+
+            coach.skipSpace();
+            coach.expect(")");
+        }
+    }
+
+    parseOrderBy(coach) {
+        coach.expectWord("order");
+        coach.skipSpace();
+        coach.expectWord("by");
+        coach.skipSpace();
+
+        let orderBy = coach.parseComma("OrderByElement");
+        orderBy.map(elem => this.addChild(elem));
+
+        return orderBy;
     }
 
     is(coach) {
@@ -38,16 +112,80 @@ class FunctionCall extends Syntax {
 
     clone() {
         let clone = new FunctionCall();
+
         clone.function = this.function.clone();
         clone.addChild(this.function);
+
         clone.arguments = this.arguments.map(arg => arg.clone());
         clone.arguments.map(arg => clone.addChild(arg));
+
+        if ( this.isStar ) {
+            clone.isStar = true;
+        }
+        if ( this.all ) {
+            clone.all = true;
+        }
+        if ( this.distinct ) {
+            clone.distinct = true;
+        }
+
+        if ( this.within ) {
+            clone.within = this.within.map(item => item.clone());
+            clone.within.map(item => clone.addChild(item));
+        }
+
+        if ( this.orderBy ) {
+            clone.orderBy = this.orderBy.map(item => item.clone());
+            clone.orderBy.map(item => clone.addChild(item));
+        }
+
+        if ( this.where ) {
+            clone.where = this.where.clone();
+        }
+
         return clone;
     }
 
     toString() {
-        let args = this.arguments.map(arg => arg.toString()).join(", ");
-        return this.function.toString() + "(" + args + ")";
+        let out = "";
+
+        out += this.function.toString();
+        out += "(";
+
+        if ( this.all ) {
+            out += " all ";
+        }
+        if ( this.distinct ) {
+            out += " distinct ";
+        }
+
+        if ( this.isStar ) {
+            out += "*";
+        } else {
+            out += this.arguments.map(arg => arg.toString()).join(", ");
+        }
+
+        if ( this.orderBy ) {
+            out += " order by ";
+            out += this.orderBy.map(item => item.toString()).join(", ");
+            out += " ";
+        }
+
+        out += ")";
+
+        if ( this.within ) {
+            out += " within group ( order by ";
+            out += this.within.map(item => item.toString()).join(", ");
+            out += " ) ";
+        }
+
+        if ( this.where ) {
+            out += "filter (where ";
+            out += this.where.toString();
+            out += ")";
+        }
+
+        return out;
     }
 
     getType(params) {
