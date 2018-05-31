@@ -12,7 +12,7 @@
 		+ expression IS UNKNOWN
 		+ expression IS NOT UNKNOWN
 		- window functions
-        - agg_func() filter (where ...)
+        + agg_func() filter (where ...)
 
 # QueryBuilder:
     - where
