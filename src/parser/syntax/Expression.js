@@ -371,21 +371,21 @@ class Expression extends Syntax {
 
         return operand;
     }
-    
+
     replaceLink(replace, to) {
         if ( typeof replace == "string" ) {
             replace = new this.Coach.ObjectLink(replace);
         }
-        
+
         if ( typeof to == "string" ) {
             to = new this.Coach.ObjectLink(to);
         }
-        
+
         this.eachLink(replace, (link) => {
             link.replace(replace, to);
         });
     }
-    
+
     eachLink(link, iteration) {
         const Expression = this.Coach.Expression;
         const ObjectLink = this.Coach.ObjectLink;
@@ -442,6 +442,19 @@ class Expression extends Syntax {
                 elem.arguments.forEach(
                     arg => arg.eachLink(link, iteration)
                 );
+                if ( elem.orderBy ) {
+                    elem.orderBy.forEach(elem => {
+                        elem.expression.eachLink(link, iteration);
+                    });
+                }
+                if ( elem.within ) {
+                    elem.within.forEach(elem => {
+                        elem.expression.eachLink(link, iteration);
+                    });
+                }
+                if ( elem.where ) {
+                    elem.where.eachLink(link, iteration);
+                }
             }
 
             if ( elem instanceof Select ) {

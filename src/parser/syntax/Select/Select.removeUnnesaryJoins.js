@@ -203,9 +203,24 @@ module.exports = {
             }
 
             if ( elem instanceof FunctionCall ) {
-                return elem.arguments.some(
+                let result;
+                result = elem.arguments.some(
                     arg => this._isUsedFromLinkInExpresion(fromLink, arg)
                 );
+                if ( elem.orderBy ) {
+                    result = result || elem.orderBy.some(elem => (
+                        this._isUsedFromLinkInExpresion(fromLink, elem.expression)
+                    ));
+                }
+                if ( elem.within ) {
+                    result = result || elem.within.some(elem => (
+                        this._isUsedFromLinkInExpresion(fromLink, elem.expression)
+                    ));
+                }
+                if ( elem.where ) {
+                    result = result || this._isUsedFromLinkInExpresion(fromLink, elem.where);
+                }
+                return result;
             }
 
             if ( elem instanceof Select ) {

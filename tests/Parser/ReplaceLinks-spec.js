@@ -394,4 +394,36 @@ describe("Expression.replaceLinks", () => {
         to: "x.y.z",
         result: "x.y.z.d.e.f"
     });
+
+    testReplaceLinks({
+        expression: `(
+            select
+                string_agg( country.name order by country.code )
+                filter (where country.code is not null )
+        )`,
+        replace: "country",
+        to: "company",
+        result: `(
+            select
+                string_agg( company.name order by company.code )
+                filter (where company.code is not null )
+        )`
+    });
+
+    testReplaceLinks({
+        expression: `(
+            select
+                string_agg( country.name )
+                within group (order by country.code)
+                filter (where country.code is not null )
+        )`,
+        replace: "country",
+        to: "company",
+        result: `(
+            select
+                string_agg( company.name )
+                within group (order by company.code)
+                filter (where company.code is not null )
+        )`
+    });
 });

@@ -682,6 +682,30 @@ describe("RemoveJoins", () => {
 
         left join company as CompanyClient on
             CompanyClient.id = public.order.id_company_client
-        
+
+    `);
+
+    testRemoveUnnesaryJoins(`
+        select string_agg( company.name ) filter (where country.code is not null )
+        from company
+
+        left join country on
+            country.id = company.id_country
+    `);
+
+    testRemoveUnnesaryJoins(`
+        select string_agg( company.name order by country.code )
+        from company
+
+        left join country on
+            country.id = company.id_country
+    `);
+
+    testRemoveUnnesaryJoins(`
+        select string_agg( company.name ) within group (order by country.code)
+        from company
+
+        left join country on
+            country.id = company.id_country
     `);
 });
