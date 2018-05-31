@@ -2,6 +2,7 @@
 
 const GrapeQL = require("../src/server/GrapeQL");
 const GrapeQLCoach = require("../src/parser/GrapeQLCoach");
+const Filter = require("../src/filter/Filter");
 const config = require("./config");
 const testRequest = require("./utils/testRequest");
 const weakDeepEqual = require("./utils/weakDeepEqual");
@@ -113,12 +114,29 @@ function testSyntax(className, test) {
     });
 }
 
+function testFilter(fromFilter, sql, model) {
+    it(JSON.stringify(fromFilter) + " => `" + sql + "`", () => {
+        let parsedSql = new GrapeQLCoach(sql);
+        parsedSql.skipSpace();
+        parsedSql = parsedSql.parseExpression();
+
+        let filter = new Filter(fromFilter);
+        let filterSql = filter.toSql( model );
+        let parsedFilterSql = new GrapeQLCoach( filterSql );
+
+        parsedFilterSql.skipSpace();
+        parsedFilterSql = parsedFilterSql.parseExpression();
+
+        return !!weakDeepEqual(parsedSql, parsedFilterSql);
+    });
+}
 
 let server;
 (async function() {
     server = await GrapeQL.start(config);
 
     global.server = server;
+    global.testFilter = testFilter;
     global.testSyntax = testSyntax;
     global.testReplaceLinks = testReplaceLinks;
     global.testRequest = testRequest;

@@ -1,16 +1,16 @@
 # Syntax:
-		- isnull
-		- notnull
-		- is not distinct from
-        - is distinct from
-		- ilike
-		- similar
-		- expression IS TRUE
-		- expression IS NOT TRUE
-		- expression IS FALSE
-		- expression IS NOT FALSE
-		- expression IS UNKNOWN
-		- expression IS NOT UNKNOWN
+		+ isnull
+		+ notnull
+		+ is not distinct from
+        + is distinct from
+		+ ilike
+		+ similar
+		+ expression IS TRUE
+		+ expression IS NOT TRUE
+		+ expression IS FALSE
+		+ expression IS NOT FALSE
+		+ expression IS UNKNOWN
+		+ expression IS NOT UNKNOWN
 		- window functions
         - agg_func() filter (where ...)
 

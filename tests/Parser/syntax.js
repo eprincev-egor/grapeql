@@ -900,6 +900,52 @@ tests.Expression = [
                 }
             ]
         }
+    },
+    {
+        str: "is true",
+        result: {
+            elements: [
+                {operator: "is"},
+                {boolean: true}
+            ]
+        }
+    },
+    {
+        str: "is not true",
+        result: {
+            elements: [
+                {operator: "is not"},
+                {boolean: true}
+            ]
+        }
+    },
+    {
+        str: "is false",
+        result: {
+            elements: [
+                {operator: "is"},
+                {boolean: false}
+            ]
+        }
+    },
+    {
+        str: "is not false",
+        result: {
+            elements: [
+                {operator: "is not"},
+                {boolean: false}
+            ]
+        }
+    },
+    {
+        str: "'abc' ~ 'abc'",
+        result: {
+            elements: [
+                {content: "abc"},
+                {operator: "~"},
+                {content: "abc"}
+            ]
+        }
     }
 ];
 
@@ -1596,6 +1642,38 @@ tests.Operator = [
     {
         str: "operator( pg_catalog.+  )",
         result: {operator: "operator(pg_catalog.+)"}
+    },
+    {
+        str: "isnull some",
+        result: {operator: "isnull"}
+    },
+    {
+        str: "notnull some",
+        result: {operator: "notnull"}
+    },
+    {
+        str: "is not distinct from",
+        result: {operator: "is not distinct from"}
+    },
+    {
+        str: "is unknown",
+        result: {operator: "is unknown"}
+    },
+    {
+        str: "is not  unknown",
+        result: {operator: "is not unknown"}
+    },
+    {
+        str: "sImilar  To",
+        result: {operator: "similar to"}
+    },
+    {
+        str: "iLike",
+        result: {operator: "ilike"}
+    },
+    {
+        str: "likE",
+        result: {operator: "like"}
     }
 ];
 

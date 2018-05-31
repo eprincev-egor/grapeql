@@ -1,6 +1,15 @@
 "use strict";
 
 const Syntax = require("./Syntax");
+const CONDITION_OPERATORS = [
+    "and",
+    "or",
+    "not",
+    "isnull",
+    "notnull",
+    "like",
+    "ilike"
+];
 
 class Operator extends Syntax {
     parse(coach) {
@@ -26,36 +35,49 @@ class Operator extends Syntax {
         // check condition operators
         let index = coach.i;
         let word = coach.readWord().toLowerCase();
-        if ( word == "and" ) {
-            this.operator = "and";
+        
+        if ( CONDITION_OPERATORS.includes(word) ) {
+            this.operator = word;
         }
         
-        else if ( word == "or" ) {
-            this.operator = "or";
-        }
-        
-        else if ( word == "not" ) {
-            this.operator = "not";
-        }
-        
+        // is
+        // is not
+        // is not distinct from
+        // is not unknown
+        // is distinct from
+        // is unknown
         else if ( word == "is" ) {
-            if ( coach.is(/\s+not/i) ) {
-                coach.skipSpace();
+            this.operator = "is";
+            coach.skipSpace();
+            
+            if ( coach.isWord("not") ) {
                 coach.expectWord("not");
-                this.operator = "is not";
+                coach.skipSpace();
+                
+                this.operator += " not";
             }
             
-            else if ( coach.is(/\s+d/i) ) {
-                coach.skipSpace();
+            if ( coach.isWord("distinct") ) {
                 coach.expectWord("distinct");
                 coach.skipSpace();
+                
                 coach.expectWord("from");
-                this.operator = "is distinct from";
+                
+                this.operator += " distinct from";
             }
+            else if ( coach.isWord("unknown") ) {
+                coach.expectWord("unknown");
+                
+                this.operator += " unknown";
+            }
+        }
+        
+        // similar to
+        else if ( word == "similar" ) {
+            coach.skipSpace();
+            coach.expectWord("to");
             
-            else {
-                this.operator = "is";
-            }
+            this.operator = "similar to";
         }
         
         // another
@@ -91,7 +113,12 @@ class Operator extends Syntax {
                 coach.isWord("and") ||
                 coach.isWord("or") ||
                 coach.isWord("not") ||
-                coach.isWord("is")
+                coach.isWord("is") ||
+                coach.isWord("ilike") ||
+                coach.isWord("like") ||
+                coach.isWord("similar") ||
+                coach.isWord("notnull") ||
+                coach.isWord("isnull") 
             ) && 
             !(str[0] == "-" && str[1] == "-") && // -- comment
             !(str[0] == "/" && str[1] == "*") // /* comment

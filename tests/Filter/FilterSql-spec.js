@@ -281,7 +281,7 @@ describe("Filter building sql", () => {
             NAME: {type: "text", sql: "NAME"}
         });
 
-        testFilter( ["NAME", "contain", "_Y"], "NAME ilike '%\\_Y%'", {
+        testFilter( ["NAME", "contain", "_Y"], "NAME ilike '%\\_y%'", {
             NAME: {type: "text", sql: "NAME"}
         });
 
@@ -297,7 +297,7 @@ describe("Filter building sql", () => {
             NAME: {type: "text", sql: "NAME"}
         });
 
-        testFilter( ["NAME", "contain", "$tag1$some$tag1$"], "NAME ilike '$tag1$some$tag1$'", {
+        testFilter( ["NAME", "contain", "$tag1$some$tag1$"], "NAME ilike $tag2$%$tag1$some$tag1$%$tag2$", {
             NAME: {type: "text", sql: "NAME"}
         });
 
