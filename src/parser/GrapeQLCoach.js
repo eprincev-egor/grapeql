@@ -58,7 +58,7 @@ GrapeQLCoach.addSyntax("File", require("./syntax/File"));
 GrapeQLCoach.addSyntax("Select", require("./syntax/Select/Select"));
 GrapeQLCoach.addSyntax("WithQuery", require("./syntax/WithQuery"));
 GrapeQLCoach.addSyntax("CreateCacheReverseExpression", require("./syntax/CreateCacheReverseExpression"));
-GrapeQLCoach.addSyntax("CreateCache", require("./syntax/CreateCache"));
+GrapeQLCoach.addSyntax("CacheFor", require("./syntax/CacheFor"));
 
 GrapeQLCoach.parseEntity = function(str) {
     let coach = new GrapeQLCoach(str);

@@ -3,7 +3,7 @@
 const Syntax = require("./Syntax");
 
 /*
-create cache for company (
+cache totals for company (
     select
         count(*) as quantity
     from orders
@@ -15,12 +15,12 @@ after change orders set where
     company.id = orders.id_client
  */
 
-class CreateCache extends Syntax {
+class CacheFor extends Syntax {
     parse(coach) {
-        coach.expectWord("create");
+        coach.expectWord("cache");
         coach.skipSpace();
         
-        coach.expectWord("cache");
+        this.name = coach.parseObjectName();
         coach.skipSpace();
         
         coach.expectWord("for");
@@ -57,7 +57,10 @@ class CreateCache extends Syntax {
     }
     
     clone() {
-        let clone = new CreateCache();
+        let clone = new CacheFor();
+        
+        clone.name = this.name.clone();
+        clone.addChild(clone.name);
         
         clone.table = this.table.clone();
         clone.addChild(clone.table);
@@ -79,7 +82,10 @@ class CreateCache extends Syntax {
     toString() {
         let out = "";
         
-        out += "create cache for ";
+        out += "cache ";
+        out += this.name.toString();
+        
+        out += " for ";
         out += this.table.toString();
         
         if ( this.as ) {
@@ -100,4 +106,4 @@ class CreateCache extends Syntax {
     }
 }
 
-module.exports = CreateCache;
+module.exports = CacheFor;
