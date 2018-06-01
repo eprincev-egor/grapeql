@@ -154,10 +154,23 @@ function getDbColumn(serverOrTable, objectLink) {
     return column;
 }
 
+function getNode(file, server) {
+    for (let key in server.nodes) {
+        let node = server.nodes[ key ];
+        let leftFile = node.options.file.replace(/\.sql$/, "");
+        let rightFile = file.toString().replace(/\.sql$/, "");
+
+        if ( leftFile == rightFile ) {
+            return node;
+        }
+    }
+}
+
 module.exports = {
     PUBLIC_SCHEMA_NAME,
     objectLink2schmeTableColumn,
     objectLink2schmeTable,
     getDbTable,
-    getDbColumn
+    getDbColumn,
+    getNode
 };

@@ -1,66 +1,31 @@
 "use strict";
 
-function getNode(file, server) {
-    for (let key in server.nodes) {
-        let node = server.nodes[ key ];
-        let leftFile = node.options.file.replace(/\.sql$/, "");
-        let rightFile = file.toString().replace(/\.sql$/, "");
-
-        if ( leftFile == rightFile ) {
-            return node;
-        }
-    }
-}
+const {getNode} = require("./helpers");
 
 module.exports = {
     build({
-        //node,
+        node,
         server,
         columns,
+        where,
         offset,
         limit
-        //, where
     }) {
-        let originalSelect = this;
-        let select = originalSelect.clone();
+        let select = this.clone();
 
-        select.clearColumns();
-
-        columns.forEach(key => {
-            let keyParts = key.split(".");
-
-            let definedColumn = originalSelect.getColumnByAlias( key );
-            if ( definedColumn ) {
-                if ( definedColumn.expression.isLink() ) {
-                    let link = definedColumn.expression.getLink();
-                    let last = link.getLast();
-
-                    if ( last.strictEqualString(key) ) {
-                        select.addColumn(`${ definedColumn.expression }`);
-                        return;
-                    }
-                }
-
-                select.addColumn(`${ definedColumn.expression } as "${ key }"`);
-                return;
-            }
-
-            let columnKey = key;
-            let fromItem;
-            if ( keyParts.length > 1 ) {
-                fromItem = select.getFromItemByAlias( keyParts[0] );
-                columnKey = keyParts.slice(-1)[0];
-            } else {
-                fromItem = select.from[0];
-            }
-
-            if ( columnKey == key ) {
-                let fromSql = fromItem.getAliasSql();
-                select.addColumn(`${ fromSql }.${ columnKey }`);
-            } else {
-                select.addColumn(`${ key } as "${ key }"`);
-            }
+        select.buildColumns({
+            columns,
+            originalSelect: this
         });
+        
+        if ( where ) {
+            select.buildWhere({
+                where,
+                originalSelect: this,
+                node, 
+                server
+            });
+        }
 
         select.removeUnnesaryJoins({ server });
         select.buildFromFiles({ server });
@@ -74,6 +39,108 @@ module.exports = {
         }
 
         return select;
+    },
+    
+    buildColumns({originalSelect, columns}) {
+        this.clearColumns();
+
+        columns.forEach(key => {
+            let keyParts = key.split(".");
+
+            let definedColumn = originalSelect.getColumnByAlias( key );
+            if ( definedColumn ) {
+                if ( definedColumn.expression.isLink() ) {
+                    let link = definedColumn.expression.getLink();
+                    let last = link.getLast();
+
+                    if ( last.strictEqualString(key) ) {
+                        this.addColumn(`${ definedColumn.expression }`);
+                        return;
+                    }
+                }
+
+                this.addColumn(`${ definedColumn.expression } as "${ key }"`);
+                return;
+            }
+
+            let columnKey = key;
+            let fromItem;
+            if ( keyParts.length > 1 ) {
+                fromItem = this.getFromItemByAlias( keyParts[0] );
+                columnKey = keyParts.slice(-1)[0];
+            } else {
+                fromItem = this.from[0];
+            }
+
+            if ( columnKey == key ) {
+                let fromSql = fromItem.getAliasSql();
+                this.addColumn(`${ fromSql }.${ columnKey }`);
+            } else {
+                this.addColumn(`${ key } as "${ key }"`);
+            }
+        });
+    },
+    
+    buildColumnExpression(key) {
+        let keyParts = key.split(".");
+
+        let definedColumn = this.getColumnByAlias( key );
+        if ( definedColumn ) {
+            return definedColumn.expression.toString();
+        }
+
+        let columnKey = key;
+        let fromItem;
+        if ( keyParts.length > 1 ) {
+            fromItem = this.getFromItemByAlias( keyParts[0] );
+            columnKey = keyParts.slice(-1)[0];
+        } else {
+            fromItem = this.from[0];
+        }
+
+        if ( columnKey == key ) {
+            let fromSql = fromItem.getAliasSql();
+            return `${ fromSql }.${ columnKey }`;
+        } else {
+            return key;
+        }
+    },
+    
+    buildWhere({where, originalSelect, node, server}) {
+        let sqlModel = {};
+        let filterColumns = where.getColumns();
+        filterColumns.forEach(key => {
+            if ( key in sqlModel ) {
+                return;
+            }
+            
+            let expression = originalSelect.buildColumnExpression(key);
+            let type = originalSelect.getExpressionType({
+                expression, 
+                node, 
+                server
+            });
+            sqlModel[ key ] = {
+                sql: expression,
+                type
+            };
+        });
+        
+        let whereSql = where.toSql( sqlModel );
+        this.addWhere( whereSql );
+    },
+    
+    getExpressionType({expression, node, server}) {
+        expression = new this.Coach.Expression(expression);
+        expression.parent = this;
+        
+        let type = expression.getType({
+            node, 
+            server
+        });
+        
+        delete expression.parent;
+        return type;
     },
 
     buildFromFiles({ server }) {

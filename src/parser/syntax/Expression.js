@@ -4,9 +4,15 @@ const Syntax = require("./Syntax");
 const operatorsMap = require("./operators.map.js");
 
 class Expression extends Syntax {
-    constructor() {
+    constructor(fromString) {
         super();
         this.elements = [];
+        
+        if ( typeof fromString === "string" ) {
+            fromString = fromString.trim();
+            let coach = new this.Coach(fromString);
+            this.parse(coach);
+        }
     }
 
     parse(coach, options) {

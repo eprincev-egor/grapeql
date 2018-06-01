@@ -5,13 +5,12 @@ const {
     objectLink2schmeTable,
     objectLink2schmeTableColumn,
     getDbColumn,
-    getDbTable
+    getDbTable,
+    getNode
 } = require("./helpers");
 
 module.exports = {
-    // params.server
-    // params.node
-    getColumnSource(params, objectLink, options) {
+    getColumnSource({server, node}, objectLink, options) {
         options = options || {};
         let _childFromItem = options._childFromItem;
 
@@ -37,7 +36,7 @@ module.exports = {
             if ( column ) {
                 if ( column.expression.isLink() ) {
                     objectLink = column.expression.getLink();
-                    return this.getColumnSource(params, objectLink, { _checkColumns: false });
+                    return this.getColumnSource({server, node}, objectLink, { _checkColumns: false });
                 } else {
                     return {expression: column.expression};
                 }
@@ -53,11 +52,16 @@ module.exports = {
 
             let source;
             if ( fromItem.table ) {
-                source = this._getColumnSourceByFromItem(params, fromItem, objectLink);
+                source = this._getColumnSourceByFromItem({server, node}, fromItem, objectLink);
             }
             else if ( fromItem.select ) {
                 let subLink = objectLink.slice(-1);
-                source = fromItem.select.getColumnSource(params, subLink);
+                source = fromItem.select.getColumnSource({server, node}, subLink);
+            }
+            else if ( fromItem.file ) {
+                let subLink = objectLink.slice(-1);
+                let node = getNode(fromItem.file, server);
+                source = node.parsed.getColumnSource({server, node}, subLink);
             }
 
             if ( source ) {
@@ -66,7 +70,7 @@ module.exports = {
         });
 
         if ( sources.length === 0 ) {
-            let source = this._findSourceByLateal(params, objectLink);
+            let source = this._findSourceByLateal({server, node}, objectLink);
             if ( source ) {
                 return source;
             }
