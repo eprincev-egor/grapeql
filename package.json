@@ -8,6 +8,7 @@
   },
   "scripts": {
     "test": "mocha ./tests/**/*-spec.js --exit",
+    "test-builder": "mocha ./tests/QueryBuilder/*/*-spec.js --exit",
     "build": "webpack",
     "watch": "webpack -w",
     "sandbox": "node --inspect tests/sandbox.js",

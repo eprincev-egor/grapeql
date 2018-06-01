@@ -38,3 +38,5 @@ jobs:
       
       # run tests!
       - run: npm run test
+      # force query builder tests (in circleci 'npm run test' do not run builder tests )
+      - run: npm run test-builder
