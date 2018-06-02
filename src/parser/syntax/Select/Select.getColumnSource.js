@@ -55,13 +55,27 @@ module.exports = {
                 source = this._getColumnSourceByFromItem({server, node}, fromItem, objectLink);
             }
             else if ( fromItem.select ) {
+                let tableName = objectLink.first();
                 let subLink = objectLink.slice(-1);
-                source = fromItem.select.getColumnSource({server, node}, subLink);
+
+                if (
+                    objectLink.link.length == 1 ||
+                    fromItem.as.equal(tableName)
+                ) {
+                    source = fromItem.select.getColumnSource({server, node}, subLink);
+                }
             }
             else if ( fromItem.file ) {
+                let tableName = objectLink.first();
                 let subLink = objectLink.slice(-1);
                 let node = getNode(fromItem.file, server);
-                source = node.parsed.getColumnSource({server, node}, subLink);
+
+                if (
+                    objectLink.link.length == 1 ||
+                    fromItem.as.equal(tableName)
+                ) {
+                    source = node.parsed.getColumnSource({server, node}, subLink);
+                }
             }
 
             if ( source ) {

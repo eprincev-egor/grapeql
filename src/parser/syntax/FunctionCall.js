@@ -88,7 +88,11 @@ class FunctionCall extends Syntax {
             coach.expect("(");
             coach.skipSpace();
 
-            this.over = coach.parseWindowDefinition();
+            if ( coach.is(")") ) {
+                this.over = null;
+            } else {
+                this.over = coach.parseWindowDefinition();
+            }
 
             coach.skipSpace();
             coach.expect(")");
@@ -156,6 +160,10 @@ class FunctionCall extends Syntax {
             clone.where = this.where.clone();
         }
 
+        if ( this.over === null ) {
+            clone.over = null;
+        }
+
         if ( this.over ) {
             clone.over = this.over.clone();
         }
@@ -206,6 +214,10 @@ class FunctionCall extends Syntax {
             out += "over ( ";
             out += this.over.toString();
             out += ")";
+        }
+
+        if ( this.over === null ) {
+            out += "over()";
         }
 
         return out;

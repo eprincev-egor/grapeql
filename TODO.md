@@ -28,7 +28,7 @@
     - delete
     - insert
     + getCount
-    - indexOf
+    + indexOf
     - getUniqDays
     - $vars
     - optimize

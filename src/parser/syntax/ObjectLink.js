@@ -128,6 +128,10 @@ class ObjectLink extends Syntax {
         return clone;
     }
 
+    first() {
+        return this.link[0];
+    }
+
     containLink(objectLink) {
         if ( this.link.length < objectLink.link.length ) {
             return false;
@@ -174,10 +178,10 @@ class ObjectLink extends Syntax {
         let lastElem = this.getLast();
         return lastElem.equal( objectName );
     }
-    
+
     replace(replace, to) {
         replace = replace.link;
-        
+
         if ( to instanceof this.Coach.ObjectName ) {
             to = [to];
         } else {

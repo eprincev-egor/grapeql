@@ -56,13 +56,19 @@ TABLE [ ONLY ] table_name [ * ]
  */
 
 class Select extends Syntax {
-    constructor() {
+    constructor(fromString) {
         super();
         this.columns = [];
         this.from = [];
         this.offset = null;
         this.limit = null;
         this.fetch = null;
+
+        if ( typeof fromString === "string" ) {
+            fromString = fromString.trim();
+            let coach = new this.Coach(fromString);
+            this.parse(coach);
+        }
     }
 
     parse(coach) {

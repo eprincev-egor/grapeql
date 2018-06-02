@@ -217,6 +217,28 @@ describe("ParseDeps", () => {
     });
 
     testGetDbColumn({
+        node: `select *
+        from
+            (select 1 as id) as user_admin,
+            (select 2 as id) as user_admin2`,
+        link: "user_admin.id",
+        source: {expression: {elements: [
+            {number: "1"}
+        ]}}
+    });
+
+    testGetDbColumn({
+        node: `select *
+        from
+            (select 1 as id) as user_admin,
+            (select 2 as id) as user_admin2`,
+        link: "user_admin2.id",
+        source: {expression: {elements: [
+            {number: "2"}
+        ]}}
+    });
+
+    testGetDbColumn({
         node: `with company as (
             select *
             from test.company

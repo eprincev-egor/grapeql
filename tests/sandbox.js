@@ -4,7 +4,7 @@ const GrapeQL = require("../src/server/GrapeQL");
 const GrapeQLCoach = require("../src/parser/GrapeQLCoach");
 const Filter = require("../src/filter/Filter");
 const config = require("./config");
-const {testRequest} = require("./utils/testRequest");
+const {testRequest, testRequestCount, testRequestIndexOf} = require("./utils/testRequest");
 const weakDeepEqual = require("./utils/weakDeepEqual");
 
 global.it = function(testName, callback) {
@@ -140,6 +140,8 @@ let server;
     global.testSyntax = testSyntax;
     global.testReplaceLinks = testReplaceLinks;
     global.testRequest = testRequest;
+    global.testRequestCount = testRequestCount;
+    global.testRequestIndexOf = testRequestIndexOf;
     global.testGetDbColumn = testGetDbColumn;
     global.testRemoveUnnesaryJoins = testRemoveUnnesaryJoins;
     global.GrapeQL = GrapeQL;

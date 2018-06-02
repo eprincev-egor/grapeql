@@ -88,6 +88,9 @@ module.exports = {
 
         select.clearColumns();
 
+        if ( !row ) {
+            throw new Error("row must be are filter");
+        }
         row = new Filter(row);
         let rowColumns = row.getColumns();
 
@@ -123,6 +126,10 @@ module.exports = {
             columns: rowColumns,
             originalSelect: this
         });
+        for (let key in sqlModel) {
+            let elem = sqlModel[key];
+            elem.sql = `query."${ key }"`;
+        }
         let rowFilterSql = row.toSql(sqlModel);
 
         return new this.Coach.Select(`
