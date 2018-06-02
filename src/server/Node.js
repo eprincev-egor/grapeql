@@ -43,6 +43,22 @@ class Node {
 
         return result.rows;
     }
+
+    async getCount(request) {
+        let server = this.server;
+        let query = this.parsed.buildCount({
+            server,
+            node: this,
+            where: request.where
+        });
+        let result = await server.db.query( query.toString() );
+
+        if ( result.rows && result.rows.length ) {
+            return +result.rows[0].count || 0;
+        } else {
+            return 0;
+        }
+    }
 }
 
 module.exports = Node;
