@@ -1,7 +1,6 @@
 "use strict";
 
 const GrapeQLCoach = require("../parser/GrapeQLCoach");
-const Query = require("./Query");
 const fs = require("fs");
 const _ = require("lodash");
 
@@ -29,13 +28,18 @@ class Node {
     }
 
     async get(request) {
-        let query = new Query({
-            request,
-            server: this.server,
-            node: this
+        let server = this.server;
+        let query = this.parsed.build({
+            server,
+            node: this,
+
+            columns: request.columns,
+            where: request.where,
+            orderBy: request.orderBy,
+            offset: request.offset,
+            limit: request.limit
         });
-        console.log( query.toString() );
-        let result = await this.server.db.query( query.toString() );
+        let result = await server.db.query( query.toString() );
 
         return result.rows;
     }

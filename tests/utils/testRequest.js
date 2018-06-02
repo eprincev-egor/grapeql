@@ -1,6 +1,5 @@
 "use strict";
 
-const Query = require("../../src/server/Query");
 const GrapeQLCoach = require("../../src/parser/GrapeQLCoach");
 const weakDeepEqual = require("./weakDeepEqual");
 const assert = require("assert");
@@ -25,10 +24,16 @@ module.exports = function testRequest(test) {
             node = server.addNode("Temp", node);
         }
 
-        let query = new Query({
+        let request = test.request;
+        let query = node.parsed.build({
             server,
             node,
-            request: test.request
+
+            columns: request.columns,
+            where: request.where,
+            orderBy: request.orderBy,
+            offset: request.offset,
+            limit: request.limit
         });
 
         let sql = query.toString();

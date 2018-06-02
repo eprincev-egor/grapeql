@@ -635,20 +635,6 @@ class Select extends Syntax {
         }
     }
 
-    clearOffsets() {
-        this.offset = null;
-        this.limit = null;
-        this.fetch = null;
-    }
-
-    setLimit(limit) {
-        this.limit = limit;
-    }
-
-    setOffset(offset) {
-        this.offset = offset;
-    }
-
     addFrom(fromItem) {
         if ( typeof fromItem == "string" ) {
             let coach = new this.Coach(fromItem);

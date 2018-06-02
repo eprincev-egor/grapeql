@@ -1,6 +1,7 @@
 "use strict";
 
 const {getNode} = require("./helpers");
+const Filter = require("../../../filter/Filter");
 
 module.exports = {
     build({
@@ -115,6 +116,8 @@ module.exports = {
     },
 
     buildWhere({where, originalSelect, node, server}) {
+        where = new Filter(where);
+
         let sqlModel = {};
         let filterColumns = where.getColumns();
         filterColumns.forEach(key => {
@@ -327,6 +330,21 @@ module.exports = {
         }
         let orderByElement = new this.Coach.OrderByElement(sql);
         this.orderBy.unshift(orderByElement);
+    },
+
+    setLimit(limit) {
+        if ( limit < 0 ) {
+            throw new Error("limit must be 'all' or positive number: " + limit);
+        }
+        this.limit = limit;
+    },
+
+    setOffset(offset) {
+        if ( offset < 0 ) {
+            throw new Error("offset must by positive number: " + offset);
+        }
+
+        this.offset = offset;
     }
 };
 
