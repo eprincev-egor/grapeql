@@ -1,7 +1,7 @@
 "use strict";
 
 const {stopServer, startServer} = require("../../utils/serverHelpers");
-const testRequest = require("../../utils/testRequest");
+const {testRequest} = require("../../utils/testRequest");
 
 let server;
 
@@ -213,7 +213,7 @@ describe("SimpleJoinFile", () => {
             from public.order
 
             left join company as CompanyClient
-                left join country as "CompanyClient.country" 
+                left join country as "CompanyClient.country"
                 on "CompanyClient.country".id = CompanyClient.id_country
             on CompanyClient.id = public.order.id_company_client
 

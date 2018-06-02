@@ -1,7 +1,7 @@
 "use strict";
 
 const {stopServer, startServer} = require("../../utils/serverHelpers");
-const {testRequest} = require("../../utils/testRequest");
+const {testRequestCount} = require("../../utils/testRequest");
 
 let server;
 
@@ -14,9 +14,9 @@ after(stopServer(
     () => server
 ));
 
-describe("SimpleOrderBy", () => {
+describe("BuildCount", () => {
 
-    testRequest({
+    testRequestCount({
         server: () => server,
         nodes: {
             Company: `
@@ -24,104 +24,53 @@ describe("SimpleOrderBy", () => {
             `
         },
         node: "Company",
-        request: {
-            columns: ["id"],
-            orderBy: "id"
-        },
+        request: {},
         result: `
             select
-                company.id
+                count(*) as count
             from company
-
-            order by company.id asc
         `
     });
 
-    testRequest({
+    testRequestCount({
         server: () => server,
         nodes: {
             Company: `
                 select * from company
+                inner join country on true
             `
         },
         node: "Company",
-        request: {
-            columns: ["id"],
-            orderBy: ["id"]
-        },
+        request: {},
         result: `
             select
-                company.id
+                count(*) as count
             from company
-
-            order by company.id asc
+            inner join country on true
         `
     });
 
-    testRequest({
+    testRequestCount({
         server: () => server,
         nodes: {
             Company: `
                 select * from company
+
+                left join country on true
             `
         },
         node: "Company",
-        request: {
-            columns: ["id"],
-            orderBy: ["id", "asc"]
-        },
+        request: {},
         result: `
             select
-                company.id
+                count(*) as count
             from company
 
-            order by company.id asc
+            left join country on true
         `
     });
 
-    testRequest({
-        server: () => server,
-        nodes: {
-            Company: `
-                select * from company
-            `
-        },
-        node: "Company",
-        request: {
-            columns: ["id"],
-            orderBy: ["id", "desc"]
-        },
-        result: `
-            select
-                company.id
-            from company
-
-            order by company.id desc
-        `
-    });
-
-    testRequest({
-        server: () => server,
-        nodes: {
-            Company: `
-                select * from company
-            `
-        },
-        node: "Company",
-        request: {
-            columns: ["id"],
-            orderBy: [["id", "desc"]]
-        },
-        result: `
-            select
-                company.id
-            from company
-
-            order by company.id desc
-        `
-    });
-
-    testRequest({
+    testRequestCount({
         server: () => server,
         nodes: {
             Company: `
@@ -132,23 +81,36 @@ describe("SimpleOrderBy", () => {
             `
         },
         node: "Company",
-        request: {
-            columns: ["id"],
-            orderBy: ["country.id", "desc"]
-        },
+        request: {},
         result: `
             select
-                company.id
+                count(*) as count
             from company
-
-            left join country on
-                country.id = company.id_country
-
-            order by country.id desc
         `
     });
 
-    testRequest({
+    testRequestCount({
+        server: () => server,
+        nodes: {
+            Company: `
+                select * from company
+
+                left join country on
+                    country.id = company.id_country
+
+                order by country.code desc
+            `
+        },
+        node: "Company",
+        request: {},
+        result: `
+            select
+                count(*) as count
+            from company
+        `
+    });
+
+    testRequestCount({
         server: () => server,
         nodes: {
             Company: `
@@ -156,50 +118,49 @@ describe("SimpleOrderBy", () => {
 
                 left join ./Country as country on
                     country.id = company.id_country
+
+                order by country.code desc
             `,
             Country: `
                 select * from country
             `
         },
         node: "Company",
-        request: {
-            columns: ["id"],
-            orderBy: ["country.code", "desc"]
-        },
+        request: {},
         result: `
             select
-                company.id
+                count(*) as count
+            from company
+        `
+    });
+
+    testRequestCount({
+        server: () => server,
+        nodes: {
+            Company: `
+                select * from company
+
+                left join ./Country as country on
+                    country.id = company.id_country
+
+                where country.code is not null
+            `,
+            Country: `
+                select * from country
+            `
+        },
+        node: "Company",
+        request: {},
+        result: `
+            select
+                count(*) as count
             from company
 
             left join country on
                 country.id = company.id_country
 
-            order by country.code desc
+            where country.code is not null
         `
     });
 
-    testRequest({
-        server: () => server,
-        nodes: {
-            Company: `
-                select * from company
-                order by company.inn desc
-            `
-        },
-        node: "Company",
-        request: {
-            columns: ["id"],
-            orderBy: [["name", "desc"], ["id", "asc"]]
-        },
-        result: `
-            select
-                company.id
-            from company
-
-            order by
-                company.name desc,
-                company.id asc,
-                company.inn desc
-        `
-    });
 });

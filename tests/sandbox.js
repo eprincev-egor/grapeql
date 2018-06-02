@@ -4,7 +4,7 @@ const GrapeQL = require("../src/server/GrapeQL");
 const GrapeQLCoach = require("../src/parser/GrapeQLCoach");
 const Filter = require("../src/filter/Filter");
 const config = require("./config");
-const testRequest = require("./utils/testRequest");
+const {testRequest} = require("./utils/testRequest");
 const weakDeepEqual = require("./utils/weakDeepEqual");
 
 global.it = function(testName, callback) {
@@ -90,26 +90,26 @@ function testGetDbColumn(test) {
 
 function testSyntax(className, test) {
     it(test.str, () => {
-    
+
         let str = test.str,
             parseFuncName = "parse" + className;
-    
-        
+
+
         let coach = new GrapeQLCoach(str);
         let result = coach[ parseFuncName ]();
-    
+
         let isEqual = !!weakDeepEqual(test.result, result);
         if ( !isEqual ) {
             console.log("break here");
         }
-    
-    
+
+
         // auto test clone and toString
         let clone = result.clone();
         let cloneString = clone.toString();
         let cloneCoach = new GrapeQLCoach( cloneString );
         let cloneResult = cloneCoach[ parseFuncName ]();
-    
+
         isEqual = !!weakDeepEqual(test.result, cloneResult);
     });
 }

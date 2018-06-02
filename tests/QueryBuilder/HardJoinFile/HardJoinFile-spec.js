@@ -1,7 +1,7 @@
 "use strict";
 
 const {stopServer, startServer} = require("../../utils/serverHelpers");
-const testRequest = require("../../utils/testRequest");
+const {testRequest} = require("../../utils/testRequest");
 
 let server;
 

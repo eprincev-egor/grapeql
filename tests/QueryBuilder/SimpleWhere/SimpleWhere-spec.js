@@ -1,7 +1,7 @@
 "use strict";
 
 const {stopServer, startServer} = require("../../utils/serverHelpers");
-const testRequest = require("../../utils/testRequest");
+const {testRequest} = require("../../utils/testRequest");
 
 let server;
 
@@ -32,12 +32,12 @@ describe("SimpleWhere", () => {
             select
                 company.id
             from company
-            
+
             where
                 company.id = 1
         `
     });
-    
+
     testRequest({
         server: () => server,
         nodes: {
@@ -54,18 +54,18 @@ describe("SimpleWhere", () => {
             select
                 company.id
             from company
-            
+
             where
                 company.name = $tag1$1$tag1$
         `
     });
-    
+
     testRequest({
         server: () => server,
         nodes: {
             Company: `
                 select * from company
-                
+
                 left join country on
                     country.id = company.id_country
             `
@@ -79,21 +79,21 @@ describe("SimpleWhere", () => {
             select
                 company.id
             from company
-            
+
             left join country on
                 country.id = company.id_country
-            
+
             where
                 country.id = 1
         `
     });
-    
+
     testRequest({
         server: () => server,
         nodes: {
             Company: `
                 select * from company
-                
+
                 left join country on
                     country.id = company.id_country
             `
@@ -107,21 +107,21 @@ describe("SimpleWhere", () => {
             select
                 company.id
             from company
-            
+
             left join country on
                 country.id = company.id_country
-            
+
             where
                 country.code = $tag1$-200$tag1$
         `
     });
-    
+
     testRequest({
         server: () => server,
         nodes: {
             Company: `
                 select * from company
-                
+
                 left join ./Country as country on
                     country.id = company.id_country
             `,
@@ -138,12 +138,36 @@ describe("SimpleWhere", () => {
             select
                 company.id
             from company
-            
+
             left join country on
                 country.id = company.id_country
-            
+
             where
                 country.code = $tag1$-200$tag1$
+        `
+    });
+
+    testRequest({
+        server: () => server,
+        nodes: {
+            Company: `
+                select * from company
+                where company.id > 100 or company.inn is not null
+            `
+        },
+        node: "Company",
+        request: {
+            columns: ["id"],
+            where: ["id", "=", 1]
+        },
+        result: `
+            select
+                company.id
+            from company
+
+            where
+                (company.id > 100 or company.inn is not null) and
+                company.id = 1
         `
     });
 
