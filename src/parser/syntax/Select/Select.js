@@ -79,6 +79,7 @@ class Select extends Syntax {
         this.parseWhere(coach);
         this.parseGroupBy(coach);
         this.parseHaving(coach);
+        this.parseWindow(coach);
         this.parseOrderBy(coach);
         this.parseOffsets(coach);
         this.parseUnion(coach);
@@ -162,6 +163,22 @@ class Select extends Syntax {
 
             coach.skipSpace();
         }
+    }
+
+    parseWindow(coach) {
+        if ( !coach.isWord("window") ) {
+            return;
+        }
+
+        coach.expectWord("window");
+        coach.skipSpace();
+
+        this.window = coach.parseComma("WindowItem");
+        coach.skipSpace();
+
+        this.window.forEach(item => {
+            this.addChild(item);
+        });
     }
 
     /*
@@ -441,6 +458,11 @@ class Select extends Syntax {
             clone.addChild(clone.having);
         }
 
+        if ( this.window ) {
+            clone.window = this.window.map(item => item.clone());
+            clone.window.forEach(item => clone.addChild(item));
+        }
+
         if ( this.orderBy ) {
             clone.orderBy = this.orderBy.map(item => item.clone());
             clone.orderBy.map(item => clone.addChild(item));
@@ -522,6 +544,12 @@ class Select extends Syntax {
         if ( this.where ) {
             out += "where ";
             out += this.where.toString();
+            out += " ";
+        }
+
+        if ( this.window ) {
+            out += "window ";
+            out += this.window.map(item => item.toString()).join(", ");
             out += " ";
         }
 

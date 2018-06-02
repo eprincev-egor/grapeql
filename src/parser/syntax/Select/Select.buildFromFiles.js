@@ -77,6 +77,62 @@ module.exports = {
         return select;
     },
 
+    buildIndexOf({
+        node,
+        server,
+        orderBy,
+        row,
+        where
+    }) {
+        let select = this.clone();
+
+        select.clearColumns();
+
+        row = new Filter(row);
+        let rowColumns = row.getColumns();
+
+        select.buildColumns({
+            columns: rowColumns,
+            originalSelect: this
+        });
+
+        select.addColumn("row_number() over() as grapeql_row_index");
+
+        if ( orderBy ) {
+            select.buildOrderBy({
+                orderBy,
+                originalSelect: this
+            });
+        }
+
+        if ( where ) {
+            select.buildWhere({
+                where,
+                originalSelect: this,
+                node,
+                server
+            });
+        }
+
+        select.removeUnnesaryJoins({ server });
+        select.buildFromFiles({ server });
+
+        let sqlModel = this.buildSqlModelByColumns({
+            node,
+            server,
+            columns: rowColumns,
+            originalSelect: this
+        });
+        let rowFilterSql = row.toSql(sqlModel);
+
+        return new this.Coach.Select(`
+            select
+                query.grapeql_row_index as index
+            from (${select}) as query
+            where ${ rowFilterSql }
+        `.trim());
+    },
+
     buildColumns({originalSelect, columns}) {
         this.clearColumns();
 
@@ -145,9 +201,26 @@ module.exports = {
     buildWhere({where, originalSelect, node, server}) {
         where = new Filter(where);
 
+        let columns = where.getColumns();
+        let sqlModel = this.buildSqlModelByColumns({
+            node,
+            server,
+            columns,
+            originalSelect
+        });
+
+        let whereSql = where.toSql( sqlModel );
+        this.addWhere( whereSql );
+    },
+
+    buildSqlModelByColumns({
+        node,
+        server,
+        columns,
+        originalSelect
+    }) {
         let sqlModel = {};
-        let filterColumns = where.getColumns();
-        filterColumns.forEach(key => {
+        columns.forEach(key => {
             if ( key in sqlModel ) {
                 return;
             }
@@ -164,8 +237,7 @@ module.exports = {
             };
         });
 
-        let whereSql = where.toSql( sqlModel );
-        this.addWhere( whereSql );
+        return sqlModel;
     },
 
     buildOrderBy({orderBy, originalSelect}) {

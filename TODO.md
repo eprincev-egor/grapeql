@@ -11,7 +11,7 @@
 		+ expression IS NOT FALSE
 		+ expression IS UNKNOWN
 		+ expression IS NOT UNKNOWN
-		- window functions
+		+ window functions
         + agg_func() filter (where ...)
 
 # QueryBuilder:
@@ -27,7 +27,7 @@
     - update
     - delete
     - insert
-    - getCount
+    + getCount
     - indexOf
     - getUniqDays
     - $vars

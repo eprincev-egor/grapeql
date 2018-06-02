@@ -57,6 +57,8 @@ GrapeQLCoach.addSyntax("FilePathElement", require("./syntax/FilePathElement"));
 GrapeQLCoach.addSyntax("File", require("./syntax/File"));
 GrapeQLCoach.addSyntax("Select", require("./syntax/Select/Select"));
 GrapeQLCoach.addSyntax("WithQuery", require("./syntax/WithQuery"));
+GrapeQLCoach.addSyntax("WindowDefinition", require("./syntax/WindowDefinition"));
+GrapeQLCoach.addSyntax("WindowItem", require("./syntax/WindowItem"));
 GrapeQLCoach.addSyntax("CreateCacheReverseExpression", require("./syntax/CreateCacheReverseExpression"));
 GrapeQLCoach.addSyntax("CacheFor", require("./syntax/CacheFor"));
 

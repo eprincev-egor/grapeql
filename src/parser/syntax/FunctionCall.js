@@ -80,6 +80,19 @@ class FunctionCall extends Syntax {
             coach.skipSpace();
             coach.expect(")");
         }
+
+        if ( coach.isWord("over") ) {
+            coach.expectWord("over");
+            coach.skipSpace();
+
+            coach.expect("(");
+            coach.skipSpace();
+
+            this.over = coach.parseWindowDefinition();
+
+            coach.skipSpace();
+            coach.expect(")");
+        }
     }
 
     parseOrderBy(coach) {
@@ -143,6 +156,10 @@ class FunctionCall extends Syntax {
             clone.where = this.where.clone();
         }
 
+        if ( this.over ) {
+            clone.over = this.over.clone();
+        }
+
         return clone;
     }
 
@@ -182,6 +199,12 @@ class FunctionCall extends Syntax {
         if ( this.where ) {
             out += "filter (where ";
             out += this.where.toString();
+            out += ")";
+        }
+
+        if ( this.over ) {
+            out += "over ( ";
+            out += this.over.toString();
             out += ")";
         }
 
