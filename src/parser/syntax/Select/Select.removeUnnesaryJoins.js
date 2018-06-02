@@ -25,6 +25,7 @@ module.exports = {
             this.having && this._isUsedFromLinkInExpresion( fromLink, this.having )  ||
             this._isUsedFromLinkInGroupBy( fromLink ) ||
             this._isUsedFromLinkInOrderBy( fromLink ) ||
+            this._isUsedFromLinkInWindow( fromLink ) ||
 
             options.checkJoins && this._isUsedFromLinkInJoins( fromLink )
         );
@@ -143,6 +144,30 @@ module.exports = {
         return this.orderBy.some(elem => this._isUsedFromLinkInExpresion(fromLink, elem.expression));
     },
 
+    _isUsedFromLinkInWindow(fromLink) {
+        if ( !this.window ) {
+            return;
+        }
+
+        return this.window.some(item => {
+            let isUsed = false;
+
+            if ( item.body.orderBy ) {
+                isUsed = isUsed || item.body.orderBy.some(
+                    elem => this._isUsedFromLinkInExpresion(fromLink, elem.expression)
+                );
+            }
+
+            if ( item.body.partitionBy ) {
+                isUsed = isUsed || item.body.partitionBy.some(
+                    expression => this._isUsedFromLinkInExpresion(fromLink, expression)
+                );
+            }
+
+            return isUsed;
+        });
+    },
+
     _isUsedFromLinkInExpresion(fromLink, expression) {
         const Expression = this.Coach.Expression;
         const ObjectLink = this.Coach.ObjectLink;
@@ -219,6 +244,19 @@ module.exports = {
                 }
                 if ( elem.where ) {
                     result = result || this._isUsedFromLinkInExpresion(fromLink, elem.where);
+                }
+                if ( elem.over ) {
+                    if ( elem.over.partitionBy ) {
+                        result = result || elem.over.partitionBy.some(expression => (
+                            this._isUsedFromLinkInExpresion(fromLink, expression)
+                        ));
+                    }
+
+                    if ( elem.over.orderBy ) {
+                        result = result || elem.over.orderBy.some(elem => (
+                            this._isUsedFromLinkInExpresion(fromLink, elem.expression)
+                        ));
+                    }
                 }
                 return result;
             }

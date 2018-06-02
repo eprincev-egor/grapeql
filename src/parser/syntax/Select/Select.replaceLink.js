@@ -9,12 +9,12 @@ module.exports = {
         if ( typeof to == "string" ) {
             to = new this.Coach.ObjectLink(to);
         }
-        
+
         this.eachLink(replace, (link) => {
             link.replace(replace, to);
         });
     },
-    
+
     eachLink(link, iteration) {
         if ( typeof link == "string" ) {
             link = new this.Coach.ObjectLink(link);
@@ -40,6 +40,22 @@ module.exports = {
 
         if ( this.having ) {
             this.having.eachLink(link, iteration);
+        }
+
+        if ( this.window ) {
+            this.window.forEach(item => {
+                if ( item.body.partitionBy ) {
+                    item.body.partitionBy.forEach(expression => {
+                        expression.eachLink(link, iteration);
+                    });
+                }
+
+                if ( item.body.orderBy ) {
+                    item.body.orderBy.forEach(elem => {
+                        elem.expression.eachLink(link, iteration);
+                    });
+                }
+            });
         }
 
         if ( this.orderBy ) {

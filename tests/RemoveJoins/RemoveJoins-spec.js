@@ -708,4 +708,46 @@ describe("RemoveJoins", () => {
         left join country on
             country.id = company.id_country
     `);
+
+    testRemoveUnnesaryJoins(`
+        select
+            row_number() over (order by company.id desc, country.name desc) as index_x
+        from company
+
+        left join country on
+            country.id = company.id_country
+    `);
+
+    testRemoveUnnesaryJoins(`
+        select
+            row_number() over (partition by company.id, country.name) as index_x
+        from company
+
+        left join country on
+            country.id = company.id_country
+    `);
+
+    testRemoveUnnesaryJoins(`
+        select
+            row_number() over (test_x) as index_x
+        from company
+
+        left join country on
+            country.id = company.id_country
+
+        window
+            test_x as (order by company.id desc, country.name desc)
+    `);
+
+    testRemoveUnnesaryJoins(`
+        select
+            row_number() over (test_x) as index_x
+        from company
+
+        left join country on
+            country.id = company.id_country
+
+        window
+            test_x as (partition by company.id, country.name)
+    `);
 });

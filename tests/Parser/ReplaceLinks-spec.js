@@ -426,4 +426,76 @@ describe("Expression.replaceLinks", () => {
                 filter (where company.code is not null )
         )`
     });
+
+    testReplaceLinks({
+        expression: `(
+            select
+                row_number()
+                over (partition by country.id, country.code)
+        )`,
+        replace: "country",
+        to: "company",
+        result: `(
+            select
+                row_number()
+                over (partition by company.id, company.code)
+        )`
+    });
+
+    testReplaceLinks({
+        expression: `(
+            select
+                row_number()
+                over (order by country.id desc, country.code desc)
+        )`,
+        replace: "country",
+        to: "company",
+        result: `(
+            select
+                row_number()
+                over (order by company.id desc, company.code desc)
+        )`
+    });
+
+    testReplaceLinks({
+        expression: `(
+            select
+                row_number() over (test_x) as index_x
+            from company
+
+            window
+                test_x as (partition by country.id, country.code)
+        )`,
+        replace: "country",
+        to: "company",
+        result: `(
+            select
+                row_number() over (test_x) as index_x
+            from company
+
+            window
+                test_x as (partition by company.id, company.code)
+        )`
+    });
+
+    testReplaceLinks({
+        expression: `(
+            select
+                row_number() over (test_x) as index_x
+            from company
+
+            window
+                test_x as (order by country.id desc, country.code desc)
+        )`,
+        replace: "country",
+        to: "company",
+        result: `(
+            select
+                row_number() over (test_x) as index_x
+            from company
+
+            window
+                test_x as (order by company.id desc, company.code desc)
+        )`
+    });
 });

@@ -7,7 +7,7 @@ class Expression extends Syntax {
     constructor(fromString) {
         super();
         this.elements = [];
-        
+
         if ( typeof fromString === "string" ) {
             fromString = fromString.trim();
             let coach = new this.Coach(fromString);
@@ -460,6 +460,19 @@ class Expression extends Syntax {
                 }
                 if ( elem.where ) {
                     elem.where.eachLink(link, iteration);
+                }
+                if ( elem.over ) {
+                    if ( elem.over.partitionBy ) {
+                        elem.over.partitionBy.forEach(expression => {
+                            expression.eachLink(link, iteration);
+                        });
+                    }
+
+                    if ( elem.over.orderBy ) {
+                        elem.over.orderBy.forEach(elem => {
+                            elem.expression.eachLink(link, iteration);
+                        });
+                    }
                 }
             }
 
