@@ -663,19 +663,6 @@ class Select extends Syntax {
         return fromItem;
     }
 
-    addWhere(sql) {
-        if ( this.where ) {
-            sql = `( ${ this.where } ) and ${ sql }`;
-            this.removeChild( this.where );
-        }
-
-        let coach = new this.Coach(sql);
-        coach.skipSpace();
-
-        this.where = coach.parseExpression();
-        this.addChild(this.where);
-    }
-
     getColumnByAlias(alias) {
         return this.columns.find(column => {
             if ( column.as ) {

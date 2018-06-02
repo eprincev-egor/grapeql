@@ -56,11 +56,17 @@ class Query {
             where = new Filter( request.where );
         }
 
+        let orderBy = false;
+        if ( request.orderBy ) {
+            orderBy = request.orderBy;
+        }
+
         this.request = {
             offset,
             limit,
             columns,
-            where
+            where,
+            orderBy
         };
     }
 
@@ -72,7 +78,8 @@ class Query {
             columns: request.columns,
             limit: request.limit,
             offset: request.offset,
-            where: request.where
+            where: request.where,
+            orderBy: request.orderBy
         });
     }
 

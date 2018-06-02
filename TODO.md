@@ -16,7 +16,7 @@
 
 # QueryBuilder:
     - where
-    - orderBy
+    + orderBy
     + from File
     - file in any select (scan subqueries and withs)
     - remove joins:
@@ -46,6 +46,11 @@
     )
     on update ... set where
         ...reverse query...
+
+# extention
+    extention name for table (
+        some_column text not null
+    )
 
 # custom pg things:
     - custom types (by db)

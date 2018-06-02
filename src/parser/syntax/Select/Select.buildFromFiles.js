@@ -8,6 +8,7 @@ module.exports = {
         server,
         columns,
         where,
+        orderBy,
         offset,
         limit
     }) {
@@ -17,13 +18,20 @@ module.exports = {
             columns,
             originalSelect: this
         });
-        
+
         if ( where ) {
             select.buildWhere({
                 where,
                 originalSelect: this,
-                node, 
+                node,
                 server
+            });
+        }
+
+        if ( orderBy ) {
+            select.buildOrderBy({
+                orderBy,
+                originalSelect: this
             });
         }
 
@@ -40,7 +48,7 @@ module.exports = {
 
         return select;
     },
-    
+
     buildColumns({originalSelect, columns}) {
         this.clearColumns();
 
@@ -80,7 +88,7 @@ module.exports = {
             }
         });
     },
-    
+
     buildColumnExpression(key) {
         let keyParts = key.split(".");
 
@@ -105,7 +113,7 @@ module.exports = {
             return key;
         }
     },
-    
+
     buildWhere({where, originalSelect, node, server}) {
         let sqlModel = {};
         let filterColumns = where.getColumns();
@@ -113,11 +121,11 @@ module.exports = {
             if ( key in sqlModel ) {
                 return;
             }
-            
+
             let expression = originalSelect.buildColumnExpression(key);
             let type = originalSelect.getExpressionType({
-                expression, 
-                node, 
+                expression,
+                node,
                 server
             });
             sqlModel[ key ] = {
@@ -125,20 +133,55 @@ module.exports = {
                 type
             };
         });
-        
+
         let whereSql = where.toSql( sqlModel );
         this.addWhere( whereSql );
     },
-    
+
+    buildOrderBy({orderBy, originalSelect}) {
+        if ( typeof orderBy == "string" ) {
+            orderBy = [orderBy];
+        }
+
+        if ( !orderBy.length ) {
+            throw new Error("orderBy must be array like are ['id', 'desc'] or [['name', 'asc'], ['id', 'desc']]");
+        }
+
+        if ( typeof orderBy[0] == "string" ) {
+            orderBy = [orderBy];
+        }
+
+        for (let n = orderBy.length, i = n - 1; i >= 0; i--) {
+            let elem = orderBy[i];
+            let key = elem[0];
+            let vector = elem[1] || "asc";
+
+            if ( typeof key != "string" ) {
+                throw new Error("invalid orderBy key");
+            }
+            if ( typeof vector != "string" ) {
+                throw new Error("invalid orderBy vector");
+            }
+
+            vector = vector.toLowerCase();
+            if ( vector != "asc" && vector != "desc" ) {
+                throw new Error("invalid orderBy vector: " + vector);
+            }
+
+            let expression = originalSelect.buildColumnExpression(key);
+            this.unshiftOrderByElement(`${ expression } ${ vector }`);
+        }
+    },
+
     getExpressionType({expression, node, server}) {
         expression = new this.Coach.Expression(expression);
         expression.parent = this;
-        
+
         let type = expression.getType({
-            node, 
+            node,
             server
         });
-        
+
         delete expression.parent;
         return type;
     },
@@ -263,6 +306,27 @@ module.exports = {
         }
 
         return fromItems;
+    },
+
+    addWhere(sql) {
+        if ( this.where ) {
+            sql = `( ${ this.where } ) and ${ sql }`;
+            this.removeChild( this.where );
+        }
+
+        let coach = new this.Coach(sql);
+        coach.skipSpace();
+
+        this.where = coach.parseExpression();
+        this.addChild(this.where);
+    },
+
+    unshiftOrderByElement(sql) {
+        if ( !this.orderBy ) {
+            this.orderBy = [];
+        }
+        let orderByElement = new this.Coach.OrderByElement(sql);
+        this.orderBy.unshift(orderByElement);
     }
 };
 
