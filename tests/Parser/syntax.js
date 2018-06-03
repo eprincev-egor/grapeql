@@ -2078,6 +2078,118 @@ tests.Select = [
         }
     },
     {
+        str: `with recursive
+        	x as (select 1),
+        	y as (select 2)
+        select *
+        from x, y`,
+        result: {
+            withRecursive: true,
+            with: [
+                {
+                    name: {word: "x"},
+                    select: {
+                        columns: [
+                            {
+                                expression: {elements: [
+                                    {number: "1"}
+                                ]}
+                            }
+                        ]
+                    }
+                },
+                {
+                    name: {word: "y"},
+                    select: {
+                        columns: [
+                            {
+                                expression: {elements: [
+                                    {number: "2"}
+                                ]}
+                            }
+                        ]
+                    }
+                }
+            ],
+            columns: [
+                {
+                    expression: {elements: [
+                        {link: ["*"]}
+                    ]}
+                }
+            ],
+            from: [
+                {table: {link: [
+                    {word: "x"}
+                ]}},
+                {table: {link: [
+                    {word: "y"}
+                ]}}
+            ]
+        }
+    },
+    {
+        str: `with recursive
+        	x as (select 1),
+        	y as (select 2)
+        select ( select count(*) from x )`,
+        result: {
+            withRecursive: true,
+            with: [
+                {
+                    name: {word: "x"},
+                    select: {
+                        columns: [
+                            {
+                                expression: {elements: [
+                                    {number: "1"}
+                                ]}
+                            }
+                        ]
+                    }
+                },
+                {
+                    name: {word: "y"},
+                    select: {
+                        columns: [
+                            {
+                                expression: {elements: [
+                                    {number: "2"}
+                                ]}
+                            }
+                        ]
+                    }
+                }
+            ],
+            columns: [
+                {
+                    expression: {elements: [
+                        {
+                            columns: [
+                                {
+                                    expression: {elements: [
+                                        {
+                                            "function": {link: [
+                                                {word: "count"}
+                                            ]},
+                                            "arguments": [],
+                                            isStar: true
+                                        }
+                                    ]}
+                                }
+                            ],
+                            from: [
+                                {table: {link: [
+                                    {word: "x"}
+                                ]}}
+                            ]
+                        }
+                    ]}
+                }
+            ]
+        }
+    },
+    {
         str: "select * from company as company (id, inn)",
         result: {
             columns: [
@@ -2882,9 +2994,8 @@ tests.ToType = [
 
 tests.WithQuery = [
     {
-        str: "recursive orders as (select * from company)",
+        str: "orders as (select * from company)",
         result: {
-            recursive: true,
             name: {word: "orders"},
             select: {
                 columns: [
@@ -2905,9 +3016,8 @@ tests.WithQuery = [
         }
     },
     {
-        str: "recursive orders (id, \"name\") as (select * from company)",
+        str: "orders (id, \"name\") as (select * from company)",
         result: {
-            recursive: true,
             name: {word: "orders"},
             columns: [
                 {word: "id"},

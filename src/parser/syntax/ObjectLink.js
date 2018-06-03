@@ -217,6 +217,11 @@ class ObjectLink extends Syntax {
             this.link.unshift( to[i].clone() );
         }
     }
+
+    clear() {
+        this.children = [];
+        this.link = [];
+    }
 }
 
 module.exports = ObjectLink;

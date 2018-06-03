@@ -4,12 +4,6 @@ const Syntax = require("./Syntax");
 
 class WithQuery extends Syntax {
     parse(coach) {
-        // [ RECURSIVE ]
-        if ( coach.isWord("recursive") ) {
-            coach.expect(/recursive\s+/);
-            this.recursive = true;
-        }
-
         this.name = coach.parseObjectName();
         this.addChild(this.name);
         coach.skipSpace();
@@ -46,10 +40,6 @@ class WithQuery extends Syntax {
     clone() {
         let clone = new WithQuery();
 
-        if ( this.recursive ) {
-            clone.recursive = true;
-        }
-
         clone.name = this.name.clone();
         clone.addChild(clone.name);
 
@@ -67,10 +57,6 @@ class WithQuery extends Syntax {
 
     toString() {
         let out = "";
-
-        if ( this.recursive ) {
-            out += "recursive ";
-        }
 
         out += this.name.toString() + " ";
 

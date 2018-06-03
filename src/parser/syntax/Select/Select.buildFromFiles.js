@@ -36,7 +36,6 @@ module.exports = {
             });
         }
 
-        select.removeUnnesaryJoins({ server });
         select.buildFromFiles({ server });
 
         if ( limit != null && limit != "all" ) {
@@ -71,7 +70,6 @@ module.exports = {
             });
         }
 
-        select.removeUnnesaryJoins({ server });
         select.buildFromFiles({ server });
 
         return select;
@@ -117,7 +115,6 @@ module.exports = {
             });
         }
 
-        select.removeUnnesaryJoins({ server });
         select.buildFromFiles({ server });
 
         let sqlModel = this.buildSqlModelByColumns({
@@ -296,6 +293,9 @@ module.exports = {
     },
 
     buildFromFiles({ server }) {
+        this.removeUnnesaryJoins({ server });
+        this.removeUnnesaryWiths({ server });
+
         let fromItems = this._getFromFiles();
         if ( !fromItems.length ) {
             return;
@@ -307,7 +307,6 @@ module.exports = {
                 fromItem
             });
         });
-        this.removeUnnesaryJoins({ server });
 
         this.buildFromFiles({ server });
     },
@@ -324,6 +323,7 @@ module.exports = {
         );
 
         let node = getNode(fromItem.file, server);
+        let nodeSelect = node.parsed;
         let nodeFrom = node.parsed.from[0];
 
         let oldNodeAlias = nodeFrom.getAliasSql();
@@ -392,6 +392,40 @@ module.exports = {
 
                 nextJoin.replaceLink(oldAlias, newAlias);
             }
+        }
+
+        if ( nodeSelect.with ) {
+            if ( !this.with ) {
+                this.with = [];
+            }
+            nodeSelect.with.forEach(withQuery => {
+                withQuery = withQuery.clone();
+                let oldName = withQuery.name;
+                let newName = `"${ trimQuotes( newNodeAlias.toString() ) }.${ trimQuotes( oldName.toString() ) }"`;
+                newName = new ObjectName(newName);
+                withQuery.name = newName;
+
+                this.with.push(withQuery);
+
+                if ( nodeSelect.withRecursive ) {
+                    this.withRecursive = true;
+                }
+
+                this.eachFromItem(fromItem => {
+                    if ( !fromItem.table ) {
+                        return;
+                    }
+
+                    if ( fromItem.table.link.length != 1 ) {
+                        return;
+                    }
+
+                    if ( fromItem.table.first().equal(oldName) ) {
+                        fromItem.table.clear();
+                        fromItem.table.unshift( newName.clone() );
+                    }
+                });
+            });
         }
     },
 

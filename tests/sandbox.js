@@ -11,6 +11,35 @@ global.it = function(testName, callback) {
     callback();
 };
 
+function testRemoveUnnesaryWiths(fromSelect, toSelect) {
+    if ( !toSelect ) {
+        toSelect = fromSelect;
+    }
+
+    it(`
+            ${ fromSelect }
+            --------------------------->
+            ${ toSelect }
+    `, () => {
+
+        let coach;
+
+        coach = new GrapeQLCoach(fromSelect);
+        coach.skipSpace();
+        let parsedFromSelect = coach.parseSelect();
+
+        coach = new GrapeQLCoach(toSelect);
+        coach.skipSpace();
+        let parsedToSelect = coach.parseSelect();
+
+        parsedFromSelect.removeUnnesaryWiths({server});
+
+        let isEqual = !!weakDeepEqual(parsedFromSelect, parsedToSelect);
+
+        return isEqual;
+    });
+}
+
 function testReplaceLinks(test) {
     // test.expression + "  =>  " + test.result
     it(`
@@ -144,6 +173,8 @@ let server;
     global.testRequestIndexOf = testRequestIndexOf;
     global.testGetDbColumn = testGetDbColumn;
     global.testRemoveUnnesaryJoins = testRemoveUnnesaryJoins;
+    global.testRemoveUnnesaryWiths = testRemoveUnnesaryWiths;
+    global.weakDeepEqual = weakDeepEqual;
     global.GrapeQL = GrapeQL;
     global.GrapeQLCoach = GrapeQLCoach;
 

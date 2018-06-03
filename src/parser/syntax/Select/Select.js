@@ -3,6 +3,7 @@
 const Syntax = require("../Syntax");
 
 const removeUnnesaryJoinsMethods = require("./Select.removeUnnesaryJoins");
+const removeUnnesaryWithsMethods = require("./Select.removeUnnesaryWiths");
 const getColumnSourceMethods = require("./Select.getColumnSource");
 const buildFromFilesMethods = require("./Select.buildFromFiles");
 const replaceLinkMethods = require("./Select.replaceLink");
@@ -95,11 +96,19 @@ class Select extends Syntax {
 
     parseWith(coach) {
         if ( !coach.isWord("with") ) {
+            this.with = [];
             return;
         }
-        coach.expect(/with\s+/i);
+        coach.expectWord("with");
+        coach.skipSpace();
 
-        // [ RECURSIVE ] with_query_name [ ( column_name [, ...] ) ] AS ( select  )
+        if ( coach.isWord("recursive") ) {
+            coach.expectWord("recursive");
+            coach.skipSpace();
+            this.withRecursive = true;
+        }
+
+        // with_query_name [ ( column_name [, ...] ) ] AS ( select  )
         let queries = coach.parseComma("WithQuery");
 
         if ( !queries.length ) {
@@ -439,6 +448,9 @@ class Select extends Syntax {
         let clone = new Select();
 
         if ( this.with ) {
+            if ( this.withRecursive ) {
+                clone.withRecursive = true;
+            }
             clone.with = this.with.map(item => item.clone());
             clone.with.map(item => clone.addChild(item));
         }
@@ -531,8 +543,11 @@ class Select extends Syntax {
     toString() {
         let out = "";
 
-        if ( this.with ) {
+        if ( this.with && this.with.length ) {
             out += "with ";
+            if ( this.withRecursive ) {
+                out += "recursive ";
+            }
             out += this.with.map(item => item.toString()).join(", ");
             out += " ";
         }
@@ -763,6 +778,9 @@ for (let key in buildFromFilesMethods) {
 }
 for (let key in replaceLinkMethods) {
     Select.prototype[ key ] = replaceLinkMethods[ key ];
+}
+for (let key in removeUnnesaryWithsMethods) {
+    Select.prototype[ key ] = removeUnnesaryWithsMethods[ key ];
 }
 
 // stop keywords for alias

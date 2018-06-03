@@ -19,11 +19,15 @@
     + orderBy
     + from File
     - file in any select (scan subqueries and withs)
-    + remove joins:
-        + left join
+    + remove unnesary joins:
+        + unnesary left join
             left join
             inner join
-    - remove withs
+    - add with from file
+    - remove unnesary withs
+    - add window func from file
+    - defined columns in files
+    - test join self
     - update
     - delete
     - insert
@@ -31,6 +35,8 @@
     + indexOf
     - getUniqDays
     - $vars
+    - check double quotes in any from file
+    - fix memory leaks
     - optimize
     - validations
 
