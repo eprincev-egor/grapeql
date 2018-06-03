@@ -23,8 +23,8 @@
         + unnesary left join
             left join
             inner join
-    - add with from file
-    - remove unnesary withs
+    + add with from file
+    + remove unnesary withs
     - add window func from file
     - defined columns in files
     - test join self
