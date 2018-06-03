@@ -750,4 +750,28 @@ describe("RemoveJoins", () => {
         window
             test_x as (partition by company.id, country.name)
     `);
+
+    testRemoveUnnesaryJoins(`
+        select totals.count
+        from company
+
+        left join country on
+            country.id = company.id_country
+
+        left join lateral get_company_totals(
+            country.code
+        ) as totals on true
+
+    `);
+
+    testRemoveUnnesaryJoins(`
+        select totals.count
+        from company
+
+        left join country
+            left join lateral get_company_totals(
+                country.code
+            ) as totals on true
+        on country.id = company.id_country
+    `);
 });

@@ -1,7 +1,5 @@
 "use strict";
 
-// TODO: from lateral func( some.id )
-
 module.exports = {
 
     removeUnnesaryJoins({server}) {
@@ -94,6 +92,12 @@ module.exports = {
 
         if ( join.from.select && join.from.lateral ) {
             isUsed = isUsed || join.from.select._isUsedFromLinkBySubSelect(fromLink);
+        }
+
+        if ( join.from.functionCall && join.from.lateral ) {
+            isUsed = isUsed || join.from.functionCall.arguments.some(expression => (
+                this._isUsedFromLinkInExpresion( fromLink, expression )
+            ));
         }
 
         return isUsed;
