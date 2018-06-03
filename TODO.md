@@ -15,12 +15,12 @@
         + agg_func() filter (where ...)
 
 # QueryBuilder:
-    - where
+    + where
     + orderBy
     + from File
     - file in any select (scan subqueries and withs)
-    - remove joins:
-        - left join
+    + remove joins:
+        + left join
             left join
             inner join
     - remove withs

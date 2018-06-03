@@ -333,12 +333,12 @@ class FromItem extends Syntax {
         if ( typeof to == "string" ) {
             to = new this.Coach.ObjectLink(to);
         }
-        
+
         this.eachLink(replace, (link) => {
             link.replace(replace, to);
         });
     }
-    
+
     eachLink(link, iteration) {
         if ( this.select ) {
             this.select.eachLink(link, iteration);
@@ -369,26 +369,37 @@ class FromItem extends Syntax {
         }
     }
 
-    removeUnnesaryJoins({server, select}) {
+    removeUnnesaryJoins({
+        server, select,
+        checkRemovable = true
+    }) {
         for (let i = this.joins.length - 1; i >= 0; i--) {
             let join = this.joins[ i ];
 
-            if ( !join.isRemovable({ server }) ) {
+            if ( checkRemovable && !join.isRemovable({ server }) ) {
                 continue;
             }
 
-            join.from.removeUnnesaryJoins({ server, select });
+            let fromLink = join.from.toObjectLink();
+            let isUsedJoin = (
+                select._isHelpfullJoin(join, {checkJoins: false}) ||
+                this._isUsedFromLinkAfter({select, fromLink, i}) ||
+                join.from._isUsedChildJoins({
+                    select, fromLink,
+                    rootFrom: this, i
+                })
+            );
+
+            join.from.removeUnnesaryJoins({
+                server, select,
+                checkRemovable: isUsedJoin ? true : false
+            });
 
             if ( join.from.joins.length ) {
                 continue;
             }
 
-            if ( select._isHelpfullJoin(join, {checkJoins: false}) ) {
-                continue;
-            }
-
-            let fromLink = join.from.toObjectLink();
-            if ( this._isUsedFromLinkAfter({select, fromLink, i}) ) {
+            if ( isUsedJoin ) {
                 continue;
             }
 
@@ -409,6 +420,27 @@ class FromItem extends Syntax {
                 select,
                 fromLink,
                 i: -1
+            }) ) {
+                return true;
+            }
+        }
+    }
+
+    _isUsedChildJoins({select, fromLink, rootFrom, i}) {
+        for (let j = 0, n = this.joins.length; j < n; j++) {
+            let join = this.joins[ j ];
+
+            if ( select._isHelpfullJoin(join, {checkJoins: false}) ) {
+                return true;
+            }
+
+            if ( rootFrom._isUsedFromLinkAfter({select, fromLink, i}) ) {
+                return true;
+            }
+
+            if ( join.from._isUsedChildJoins({
+                select, fromLink,
+                rootFrom, i
             }) ) {
                 return true;
             }

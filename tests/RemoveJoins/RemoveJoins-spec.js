@@ -774,4 +774,165 @@ describe("RemoveJoins", () => {
             ) as totals on true
         on country.id = company.id_country
     `);
+
+    testRemoveUnnesaryJoins(`
+        select next_country.code
+        from company
+
+        left join country
+            inner join country as next_country
+            on next_country.id = (country.id + 1)
+        on country.id = company.id_country
+    `);
+
+    testRemoveUnnesaryJoins(`
+        select *
+        from company
+
+        left join country
+            inner join country as next_country
+            on next_country.id = (country.id + 1)
+        on country.id = company.id_country
+    `);
+
+    testRemoveUnnesaryJoins(`
+        select country.code
+        from company
+
+        left join country
+            inner join country as next_country
+            on next_country.id = (country.id + 1)
+        on country.id = company.id_country
+    `);
+
+    testRemoveUnnesaryJoins(`
+        select country.code
+        from company
+
+        left join country
+            left join country as next_country
+            on next_country.id = (country.id + 1)
+        on country.id = company.id_country
+    `, `
+        select country.code
+        from company
+
+        left join country
+        on country.id = company.id_country
+    `);
+
+    testRemoveUnnesaryJoins(`
+        select company.inn
+        from company
+
+        left join country
+            inner join country as next_country
+            on next_country.id = (country.id + 1)
+        on country.id = company.id_country
+    `, `
+        select company.inn
+        from company
+    `);
+
+    testRemoveUnnesaryJoins(`
+        select company.inn
+        from company
+
+        left join country
+            left join country as country2
+            on country2.id = (country.id + 1)
+
+            inner join country as country3
+            on country3.id = (country2.id + 1)
+        on country.id = company.id_country
+    `, `
+        select company.inn
+        from company
+    `);
+
+    testRemoveUnnesaryJoins(`
+        select country2.code
+        from company
+
+        left join country
+            left join country as country2
+            on country2.id = (country.id + 1)
+
+            inner join country as country3
+            on country3.id = (country2.id + 1)
+        on country.id = company.id_country
+    `);
+
+    testRemoveUnnesaryJoins(`
+        select country4.code
+        from company
+
+        left join country
+            left join country as country2
+            on country2.id = (country.id + 1)
+
+            inner join country as country3
+                left join country as country4
+                on country4.id = country2.id
+            on country3.id = (country2.id + 1)
+        on country.id = company.id_country
+    `);
+
+    testRemoveUnnesaryJoins(`
+        select company.id
+        from company
+
+        left join country
+            left join country as country2
+            on country2.id = (country.id + 1)
+
+            inner join country as country3
+                left join country as country4
+                on country4.id = country2.id
+            on country3.id = (country2.id + 1)
+        on country.id = company.id_country
+    `, `
+        select company.id
+        from company
+    `);
+
+    testRemoveUnnesaryJoins(`
+        select country4.code
+        from company
+
+        left join country
+            left join country as country2
+            on country2.id = (country.id + 1)
+
+            inner join country as country3
+                left join country as country4
+                on country4.id = country3.id
+            on country3.id = (country3.id + 1)
+        on country.id = company.id_country
+    `, `
+        select country4.code
+        from company
+
+        left join country
+            inner join country as country3
+                left join country as country4
+                on country4.id = country3.id
+            on country3.id = (country3.id + 1)
+        on country.id = company.id_country
+    `);
+
+    testRemoveUnnesaryJoins(`
+        select country4.code
+        from company
+
+        left join country
+            inner join country as country2
+            on country2.id = (country.id + 1)
+
+            inner join country as country3
+                left join country as country4
+                on country4.id = country3.id
+            on country3.id = (country3.id + 1)
+        on country.id = company.id_country
+    `);
 });

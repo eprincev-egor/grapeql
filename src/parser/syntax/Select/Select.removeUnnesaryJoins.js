@@ -184,7 +184,7 @@ module.exports = {
 
         return expression.elements.some(elem => {
             if ( elem instanceof Expression ) {
-                return this._isUsedFromLinkInExpresion(fromLink, expression);
+                return this._isUsedFromLinkInExpresion(fromLink, elem);
             }
 
             if ( elem instanceof ObjectLink ) {
