@@ -27,6 +27,7 @@
     + remove unnesary withs
     - add window func from file
     - defined columns in files
+    - distinct
     - test join self
     - update
     - delete

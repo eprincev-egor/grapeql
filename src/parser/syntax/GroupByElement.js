@@ -87,7 +87,15 @@ class GroupByElement extends Syntax {
                 }
             }
         });
-        elements.map(elem => this.addChild(elem));
+        elements.forEach(elem => {
+            if ( Array.isArray(elem) ) {
+                elem.forEach(elem => {
+                    this.addChild(elem);
+                });
+            } else {
+                this.addChild(elem);
+            }
+        });
         return elements;
     }
     
@@ -109,11 +117,27 @@ class GroupByElement extends Syntax {
         
         if ( this.rollup ) {
             clone.rollup = this.cloneItems( this.rollup );
-            clone.rollup.map(elem => clone.addChild(elem));
+            clone.rollup.forEach(elem => {
+                if ( Array.isArray(elem) ) {
+                    elem.forEach(elem => {
+                        clone.addChild(elem);
+                    });
+                } else {
+                    clone.addChild(elem);
+                }
+            });
         }
         else if ( this.cube ) {
             clone.cube = this.cloneItems( this.cube );
-            clone.cube.map(elem => clone.addChild(elem));
+            clone.cube.forEach(elem => {
+                if ( Array.isArray(elem) ) {
+                    elem.forEach(elem => {
+                        clone.addChild(elem);
+                    });
+                } else {
+                    clone.addChild(elem);
+                }
+            });
         }
         else if ( this.groupingSets ) {
             clone.groupingSets = this.groupingSets.map(set => set.clone());

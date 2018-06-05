@@ -34,23 +34,6 @@ class Syntax {
         }
     }
 
-    findChild(callback, context) {
-        if ( !this.children ) {
-            return;
-        }
-
-        for (let i = 0, n = this.children.length; i < n; i++) {
-            let child = this.children[i],
-                result = callback.call(context || this, child);
-
-            if ( result === false ) {
-                return false;
-            }
-
-            child.findChild(callback, context);
-        }
-    }
-
     findParent(callback, context) {
         if ( !this.parent ) {
             return;
@@ -66,9 +49,70 @@ class Syntax {
     findParentInstance(SyntaxClass) {
         return this.findParent(parent => parent instanceof SyntaxClass);
     }
+    
+    walk(iteration) {
+        if ( !this.children ) {
+            return;
+        }
+        
+        for (let i = 0, n = this.children.length; i < n; i++) {
+            let child = this.children[i];
+            
+            let wallker = new Wallker();
+            iteration(child, wallker);
+            
+            if ( !wallker.isSkipped() ) {
+                child.walk(iteration);
+            }
+        }
+    }
+    
+    replaceLink(replace, to) {
+        if ( typeof replace == "string" ) {
+            replace = new this.Coach.ObjectLink(replace);
+        }
+
+        if ( typeof to == "string" ) {
+            to = new this.Coach.ObjectLink(to);
+        }
+
+        this.walk((child, wallker) => {
+            // don't replace table name
+            // left join company on true
+            if ( 
+                child.parent instanceof this.Coach.FromItem &&
+                child == child.parent.table
+            ) {
+                return;
+            }
+            
+            // if subquery has fromitem with same link
+            // then skip it subquery
+            if ( child instanceof this.Coach.Select ) {
+                if ( child.isDefinedFromLink(replace) ) {
+                    wallker.skip();
+                }
+            }
+            
+            // finded ObjectLink, replace him
+            else if ( child instanceof this.Coach.ObjectLink ) {
+                child.replace(replace, to);
+            }
+        });
+    }
 
     toString() {
         return this.coach.str.slice(this.startIndex, this.endIndex);
+    }
+}
+
+class Wallker {
+    skip() {
+        this._skipped = true;
+    }
+    
+    isSkipped() {
+        return this._skipped;
     }
 }
 

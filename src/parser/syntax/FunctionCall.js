@@ -76,7 +76,8 @@ class FunctionCall extends Syntax {
             coach.skipSpace();
 
             this.where = coach.parseExpression();
-
+            this.addChild(this.where);
+            
             coach.skipSpace();
             coach.expect(")");
         }
@@ -92,6 +93,7 @@ class FunctionCall extends Syntax {
                 this.over = null;
             } else {
                 this.over = coach.parseWindowDefinition();
+                this.addChild(this.over);
             }
 
             coach.skipSpace();
@@ -158,6 +160,7 @@ class FunctionCall extends Syntax {
 
         if ( this.where ) {
             clone.where = this.where.clone();
+            clone.addChild(clone.where);
         }
 
         if ( this.over === null ) {
@@ -166,6 +169,7 @@ class FunctionCall extends Syntax {
 
         if ( this.over ) {
             clone.over = this.over.clone();
+            clone.addChild(clone.over);
         }
 
         return clone;

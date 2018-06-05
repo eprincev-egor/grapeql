@@ -325,43 +325,12 @@ class FromItem extends Syntax {
         }
     }
 
-    replaceLink(replace, to) {
-        if ( typeof replace == "string" ) {
-            replace = new this.Coach.ObjectLink(replace);
-        }
-
-        if ( typeof to == "string" ) {
-            to = new this.Coach.ObjectLink(to);
-        }
-
-        this.eachLink(replace, (link) => {
-            link.replace(replace, to);
-        });
-    }
-
-    eachLink(link, iteration) {
-        if ( this.select ) {
-            this.select.eachLink(link, iteration);
-        }
-        else if ( this.functionCall ) {
-            this.functionCall.arguments.forEach(arg => {
-                arg.eachLink( link, iteration );
-            });
-        }
-
-        if ( this.joins ) {
-            this.joins.forEach(join => {
-                join.eachLink( link, iteration );
-            });
-        }
-    }
-
     isDefinedFromLink(fromLink) {
         let link = this.toObjectLink();
         if ( link.equalLink( fromLink ) ) {
             return true;
         }
-
+        
         if ( this.joins ) {
             return this.joins.some(join => (
                 join.from.isDefinedFromLink(fromLink)

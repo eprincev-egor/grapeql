@@ -69,7 +69,7 @@ class ObjectLink extends Syntax {
 
     getType(params) {
         let Select = this.Coach.Select;
-        let select = this.findParent(parent => parent instanceof Select);
+        let select = this.findParentInstance(Select);
 
         if ( !select ) {
             throw new Error("ObjectLink must be inside Select");
