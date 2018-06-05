@@ -393,6 +393,24 @@ describe("RemoveJoins", () => {
             ) as some_table
         ) as some_table on true
     `);
+    
+    testRemoveUnnesaryJoins( `
+        select
+            comp_id.id
+        from (select 1 as id) as comp_id
+
+        left join company on
+            company.id = comp_id.id
+
+        left join (
+            select company.id
+        ) as some_table on true
+
+    `, `
+        select
+            comp_id.id
+        from (select 1 as id) as comp_id
+    `);
 
     testRemoveUnnesaryJoins( `
         select
