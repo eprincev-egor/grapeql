@@ -13,6 +13,7 @@
 		+ expression IS NOT UNKNOWN
 		+ window functions
         + agg_func() filter (where ...)
+        - with values
 
 # QueryBuilder:
     + where
@@ -34,6 +35,7 @@
     + getCount
     + indexOf
     - getUniqDays
+# QueryBuilder:
     - $vars
     - check double quotes in any from file
     - fix memory leaks

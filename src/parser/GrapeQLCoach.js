@@ -69,9 +69,6 @@ GrapeQLCoach.parseEntity = function(str) {
     return coach.parseSelect();
 };
 
-// need for tests
-if ( typeof window !== "undefined" ) {
-    window.GrapeQLCoach = GrapeQLCoach;
-}
+
 
 module.exports = GrapeQLCoach;
