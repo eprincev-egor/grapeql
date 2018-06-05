@@ -7,7 +7,7 @@ after change orders set where
     company.id = orders.id_client
  */
 
-class CreateCacheReverseExpression extends Syntax {
+class CacheReverseExpression extends Syntax {
     parse(coach) {
         coach.expectWord("after");
         coach.skipSpace();
@@ -42,7 +42,7 @@ class CreateCacheReverseExpression extends Syntax {
     }
     
     clone() {
-        let clone = new CreateCacheReverseExpression();
+        let clone = new CacheReverseExpression();
         
         clone.table = this.table.clone();
         clone.addChild(clone.table);
@@ -76,4 +76,4 @@ class CreateCacheReverseExpression extends Syntax {
     }
 }
 
-module.exports = CreateCacheReverseExpression;
+module.exports = CacheReverseExpression;

@@ -48,7 +48,7 @@ class CacheFor extends Syntax {
         coach.skipSpace();
         coach.expect(")");
         
-        this.reverse = coach.parseChain("CreateCacheReverseExpression");
+        this.reverse = coach.parseChain("CacheReverseExpression");
         this.reverse.map(item => this.addChild(item));
     }
     

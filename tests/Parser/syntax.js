@@ -3044,7 +3044,7 @@ tests.WithQuery = [
     }
 ];
 
-tests.CreateCacheReverseExpression = [
+tests.CacheReverseExpression = [
     {
         str: "after change public.order set where public.order.id_order = company.id",
         result: {

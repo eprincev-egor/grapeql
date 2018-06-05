@@ -59,7 +59,7 @@ GrapeQLCoach.addSyntax("Select", require("./syntax/Select/Select"));
 GrapeQLCoach.addSyntax("WithQuery", require("./syntax/WithQuery"));
 GrapeQLCoach.addSyntax("WindowDefinition", require("./syntax/WindowDefinition"));
 GrapeQLCoach.addSyntax("WindowItem", require("./syntax/WindowItem"));
-GrapeQLCoach.addSyntax("CreateCacheReverseExpression", require("./syntax/CreateCacheReverseExpression"));
+GrapeQLCoach.addSyntax("CacheReverseExpression", require("./syntax/CacheReverseExpression"));
 GrapeQLCoach.addSyntax("CacheFor", require("./syntax/CacheFor"));
 
 GrapeQLCoach.parseEntity = function(str) {
