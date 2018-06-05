@@ -58,8 +58,14 @@ module.exports = {
 
         select.clearColumns();
         select.addColumn("count(*) as count");
-
-        delete select.orderBy;
+        
+        if ( select.orderBy ) {
+            select.orderBy.forEach(elem => {
+                select.removeChild(elem);
+            });
+            delete select.orderBy;
+        }
+        
 
         if ( where ) {
             select.buildWhere({
@@ -470,6 +476,7 @@ module.exports = {
         }
         let orderByElement = new this.Coach.OrderByElement(sql);
         this.orderBy.unshift(orderByElement);
+        this.addChild(orderByElement);
     },
 
     setLimit(limit) {

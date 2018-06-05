@@ -351,7 +351,7 @@ class FromItem extends Syntax {
 
             let fromLink = join.from.toObjectLink();
             let isUsedJoin = (
-                select._isHelpfullJoin(join, {checkJoins: false}) ||
+                select.isHelpfullJoin(join, {checkJoins: false}) ||
                 this._isUsedFromLinkAfter({select, fromLink, i}) ||
                 join.from._isUsedChildJoins({
                     select, fromLink,
@@ -381,7 +381,7 @@ class FromItem extends Syntax {
         for (let n = this.joins.length; i < n; i++) {
             let nextJoin = this.joins[ i ];
 
-            if ( select._isUsedFromLinkInJoin(fromLink, nextJoin) ) {
+            if ( select.isUsedFromLink(fromLink, {startChild: nextJoin}) ) {
                 return true;
             }
 
@@ -399,7 +399,7 @@ class FromItem extends Syntax {
         for (let j = 0, n = this.joins.length; j < n; j++) {
             let join = this.joins[ j ];
 
-            if ( select._isHelpfullJoin(join, {checkJoins: false}) ) {
+            if ( select.isHelpfullJoin(join, {checkJoins: false}) ) {
                 return true;
             }
 

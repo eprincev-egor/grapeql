@@ -61,12 +61,17 @@ class Syntax {
             let wallker = new Wallker();
             iteration(child, wallker);
             
+            if ( wallker.isStopped() ) {
+                return;
+            }
+            
             if ( !wallker.isSkipped() ) {
                 child.walk(iteration);
             }
         }
     }
     
+    // called by Expression, FromItem, Select
     replaceLink(replace, to) {
         if ( typeof replace == "string" ) {
             replace = new this.Coach.ObjectLink(replace);
@@ -111,8 +116,16 @@ class Wallker {
         this._skipped = true;
     }
     
+    stop() {
+        this._stopped = true;
+    }
+    
     isSkipped() {
         return this._skipped;
+    }
+    
+    isStopped() {
+        return this._stopped;
     }
 }
 
