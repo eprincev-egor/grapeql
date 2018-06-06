@@ -133,7 +133,7 @@ describe("FromFileInSubQuery", () => {
                 select *
                 from company
                 
-                left join (select * from ./Country) as country on
+                left join lateral (select * from ./Country) as country on
                     country.id = 1
             `
         },
