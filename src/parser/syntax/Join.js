@@ -54,7 +54,7 @@ class Join extends Syntax {
             coach.expectWord("using");
             coach.skipSpace();
 
-            this.using = coach.parseComma("ColumnLink");
+            this.using = coach.parseComma("ObjectLink");
             this.using.map(elem => this.addChild(elem));
         }
         else {

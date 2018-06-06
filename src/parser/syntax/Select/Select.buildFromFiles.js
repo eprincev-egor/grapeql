@@ -58,14 +58,14 @@ module.exports = {
 
         select.clearColumns();
         select.addColumn("count(*) as count");
-        
+
         if ( select.orderBy ) {
             select.orderBy.forEach(elem => {
                 select.removeChild(elem);
             });
             delete select.orderBy;
         }
-        
+
 
         if ( where ) {
             select.buildWhere({
@@ -301,10 +301,10 @@ module.exports = {
     buildFromFiles({ server }) {
         this.removeUnnesaryJoins({ server });
         this.removeUnnesaryWiths({ server });
-        
+
         let fileItems = [];
         this.walk(child => {
-            if ( 
+            if (
                 child instanceof this.Coach.FromItem &&
                 child.file
             ) {
@@ -408,6 +408,26 @@ module.exports = {
                 nextJoin.replaceLink(oldAlias, newAlias);
             }
         }
+
+        nodeSelect.columns.forEach(column => {
+            if ( !column.as ) {
+                return;
+            }
+
+            let link = new this.Coach.ObjectLink(`${ newNodeAlias.toString() }.${ trimQuotes( column.as.toString() ) }`);
+            let expression = column.expression.clone();
+            expression.replaceLink(oldNodeAlias, newNodeAlias);
+
+            this.walk(child => {
+                if ( !(child instanceof this.Coach.ColumnLink) ) {
+                    return;
+                }
+
+                if ( child.equalLink(link) ) {
+                    child.parent.replaceElement(child, expression.clone());
+                }
+            });
+        });
 
         if ( nodeSelect.with ) {
             if ( !this.with ) {

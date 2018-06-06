@@ -28,17 +28,17 @@
     + add with from file
     + remove unnesary withs
         + with x as (..) select (with x as (..))
-    - add window func from file
-    - defined columns in files
-    - distinct
+    + defined columns in files
     - test join self
+    - add window func from file
     - update
     - delete
     - insert
+    - $vars
     + getCount
     + indexOf
+    - distinct
     - getUniqDays
-    - $vars
     - check double quotes in any from file
     - fix memory leaks
     - optimize

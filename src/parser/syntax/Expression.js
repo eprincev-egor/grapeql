@@ -172,6 +172,16 @@ class Expression extends Syntax {
         }
     }
 
+    replaceElement(element, to) {
+        let index = this.elements.indexOf(element);
+        if ( index == -1 ) {
+            return;
+        }
+
+        this.elements.splice(index, 1, to);
+        this.addChild(to);
+    }
+
     // ((( expression )))  достаем выражение из лишних скобок
     extrude(elements) {
         if ( elements.length === 1 && elements[0] instanceof Expression ) {
