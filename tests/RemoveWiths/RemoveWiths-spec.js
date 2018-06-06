@@ -324,4 +324,17 @@ describe("RemoveWiths", () => {
             test_1 as (partition by company.inn),
             test_2 as (order by (select id from x) asc)
     `);
+
+    testRemoveUnnesaryWiths( `
+        with x as (select 1)
+        select * from (
+            with x as (select 2)
+            select * from x
+        ) as test
+    `, `
+        select * from (
+            with x as (select 2)
+            select * from x
+        ) as test
+    `);
 });

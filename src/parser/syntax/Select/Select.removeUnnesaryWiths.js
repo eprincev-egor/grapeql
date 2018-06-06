@@ -40,6 +40,12 @@ module.exports = {
         let isUsed = false;
 
         this.walk((child, wallker) => {
+            if ( child instanceof this.Coach.Select ) {
+                if ( child._hasWith(withQuery.name) ) {
+                    wallker.skip();
+                }
+            }
+
             if ( child instanceof this.Coach.TableLink ) {
                 if ( child.link.length == 1 ) {
                     let tableName = child.first();
@@ -61,5 +67,11 @@ module.exports = {
         });
 
         return isUsed;
+    },
+
+    _hasWith(name) {
+        return this.with.some(
+            withQuery => withQuery.name.equal(name)
+        );
     }
 };

@@ -27,7 +27,7 @@
             inner join
     + add with from file
     + remove unnesary withs
-        - with x as (..) select (with x as (..))
+        + with x as (..) select (with x as (..))
     - add window func from file
     - defined columns in files
     - distinct
