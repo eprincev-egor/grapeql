@@ -30,6 +30,8 @@
         + with x as (..) select (with x as (..))
     + defined columns in files
     - test join self
+        - error on "inner join self file"
+        - error on "from self file"
     - add window func from file
     - update
     - delete
@@ -40,6 +42,7 @@
     - distinct
     - getUniqDays
     - check double quotes in any from file
+    - long names (64 max)
     - fix memory leaks
     - optimize
     - validations

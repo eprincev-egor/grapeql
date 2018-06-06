@@ -5,7 +5,12 @@ const weakDeepEqual = require("./weakDeepEqual");
 const assert = require("assert");
 
 function testRequest(test) {
-    it(test.result, () => {
+    let testName = test.result;
+    if ( !testName && test.error ) {
+        testName = JSON.stringify(test, null, 4);
+    }
+
+    it(testName, () => {
         let server = test.server();
 
         if ( test.nodes ) {
@@ -25,29 +30,49 @@ function testRequest(test) {
         }
 
         let request = test.request;
-        let query = node.parsed.build({
-            server,
-            node,
 
-            columns: request.columns,
-            where: request.where,
-            orderBy: request.orderBy,
-            offset: request.offset,
-            limit: request.limit
-        });
+        if ( test.error ) {
+            try {
+                node.parsed.build({
+                    server,
+                    node,
 
-        let sql = query.toString();
-        let result = GrapeQLCoach.parseEntity( sql );
+                    columns: request.columns,
+                    where: request.where,
+                    orderBy: request.orderBy,
+                    offset: request.offset,
+                    limit: request.limit
+                });
 
-        let testResult = GrapeQLCoach.parseEntity(test.result);
+                assert.ok(false, "expected error");
+            } catch(err) {
+                assert.ok(true, "expected error");
+            }
+        } else {
+            let query = node.parsed.build({
+                server,
+                node,
 
-        let isEqual = !!weakDeepEqual(testResult, result);
+                columns: request.columns,
+                where: request.where,
+                orderBy: request.orderBy,
+                offset: request.offset,
+                limit: request.limit
+            });
 
-        if ( !isEqual ) {
-            console.log( sql );
+            let sql = query.toString();
+            let result = GrapeQLCoach.parseEntity( sql );
+
+            let testResult = GrapeQLCoach.parseEntity(test.result);
+
+            let isEqual = !!weakDeepEqual(testResult, result);
+
+            if ( !isEqual ) {
+                console.log( sql );
+            }
+
+            assert.ok(isEqual);
         }
-
-        assert.ok(isEqual);
     });
 }
 
