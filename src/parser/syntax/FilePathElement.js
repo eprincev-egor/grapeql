@@ -8,12 +8,12 @@ class FilePathElement extends DoubleQuotes {
             super.parse(coach);
         }
         else {
-            this.name = coach.read(/[^\s/]+/);
+            this.name = coach.read(/[^\s/)]+/);
         }
     }
 
     is(coach) {
-        return coach.is(/[^\s/]/);
+        return coach.is(/[^\s)/]/);
     }
 
     clone() {

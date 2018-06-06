@@ -1029,6 +1029,15 @@ tests.File = [
                 {name: "company"}
             ]
         }
+    },
+    {
+        str: "./Country)",
+        result: {
+            path: [
+                {name: "."},
+                {name: "Country"}
+            ]
+        }
     }
 ];
 
