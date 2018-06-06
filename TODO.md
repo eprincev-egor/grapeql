@@ -18,6 +18,7 @@
 # QueryBuilder:
     + where
     + orderBy
+       - order by 90 in file
     + from File
     - file in any select (scan subqueries and withs)
     + remove unnesary joins:
@@ -26,6 +27,7 @@
             inner join
     + add with from file
     + remove unnesary withs
+        - with x as (..) select (with x as (..))
     - add window func from file
     - defined columns in files
     - distinct
@@ -36,7 +38,6 @@
     + getCount
     + indexOf
     - getUniqDays
-# QueryBuilder:
     - $vars
     - check double quotes in any from file
     - fix memory leaks

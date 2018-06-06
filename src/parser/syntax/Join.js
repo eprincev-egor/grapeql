@@ -54,7 +54,7 @@ class Join extends Syntax {
             coach.expectWord("using");
             coach.skipSpace();
 
-            this.using = coach.parseComma("ObjectLink");
+            this.using = coach.parseComma("ColumnLink");
             this.using.map(elem => this.addChild(elem));
         }
         else {
@@ -99,7 +99,7 @@ class Join extends Syntax {
     }
 
     isRemovable({ server }) {
-        let fromLink = this.from.toObjectLink();
+        let fromLink = this.from.toTableLink();
 
         if ( this.type == "left join" && this.from.table && this.on ) {
             let isConstraintExpression = true,

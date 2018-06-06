@@ -6,7 +6,7 @@ const Syntax = require("./Syntax");
 
 class FunctionCall extends Syntax {
     parse(coach) {
-        this.function = coach.parseObjectLink();
+        this.function = coach.parseFunctionLink();
         this.addChild(this.function);
 
         coach.skipSpace();
@@ -77,7 +77,7 @@ class FunctionCall extends Syntax {
 
             this.where = coach.parseExpression();
             this.addChild(this.where);
-            
+
             coach.skipSpace();
             coach.expect(")");
         }
@@ -118,7 +118,7 @@ class FunctionCall extends Syntax {
             result = false;
 
         try {
-            coach.parseObjectLink();
+            coach.parseFunctionLink();
             coach.skipSpace();
             result = coach.is("(");
         } catch(err) {

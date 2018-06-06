@@ -68,7 +68,7 @@ class FromItem extends Syntax {
             }
 
             this.only = isOnly;
-            this.table =  coach.parseObjectLink();
+            this.table =  coach.parseTableLink();
             this.addChild(this.table);
 
             coach.skipSpace();
@@ -258,10 +258,10 @@ class FromItem extends Syntax {
         }
     }
 
-    toObjectLink() {
-        const ObjectLink = this.Coach.ObjectLink;
+    toTableLink() {
+        const TableLink = this.Coach.TableLink;
         let sql = this.getAliasSql();
-        return new ObjectLink(sql);
+        return new TableLink(sql);
     }
 
     getDbTable(server) {
@@ -326,11 +326,11 @@ class FromItem extends Syntax {
     }
 
     isDefinedFromLink(fromLink) {
-        let link = this.toObjectLink();
+        let link = this.toTableLink();
         if ( link.equalLink( fromLink ) ) {
             return true;
         }
-        
+
         if ( this.joins ) {
             return this.joins.some(join => (
                 join.from.isDefinedFromLink(fromLink)
@@ -349,7 +349,7 @@ class FromItem extends Syntax {
                 continue;
             }
 
-            let fromLink = join.from.toObjectLink();
+            let fromLink = join.from.toTableLink();
             let isUsedJoin = (
                 select.isHelpfullJoin(join, {checkJoins: false}) ||
                 this._isUsedFromLinkAfter({select, fromLink, i}) ||

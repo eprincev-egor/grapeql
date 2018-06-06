@@ -43,7 +43,11 @@ class ObjectLink extends Syntax {
 
     clone() {
         let clone = new ObjectLink();
+        this.fillClone(clone);
+        return clone;
+    }
 
+    fillClone(clone) {
         clone.link = this.link.map(elem => {
             if ( elem == "*" ) {
                 return "*";
@@ -53,8 +57,6 @@ class ObjectLink extends Syntax {
             clone.addChild(elemClone);
             return elemClone;
         });
-
-        return clone;
     }
 
     toString() {

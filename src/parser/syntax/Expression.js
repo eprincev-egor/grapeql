@@ -31,7 +31,7 @@ class Expression extends Syntax {
         let elem, i, result;
 
         if ( options.posibleStar && coach.is("*") ) {
-            elem = coach.parseObjectLink({ posibleStar: options.posibleStar });
+            elem = coach.parseColumnLink({ posibleStar: options.posibleStar });
             this.addChild(elem);
             this.elements.push(elem);
             return;
@@ -154,8 +154,8 @@ class Expression extends Syntax {
             elem = coach.parseFunctionCall();
         }
 
-        else if ( coach.isObjectLink() ) {
-            elem = coach.parseObjectLink({ posibleStar: options.posibleStar });
+        else if ( coach.isColumnLink() ) {
+            elem = coach.parseColumnLink({ posibleStar: options.posibleStar });
         }
 
         return elem;
