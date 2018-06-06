@@ -20,7 +20,7 @@
     + orderBy
        - order by 90 in file
     + from File
-    - file in any select (scan subqueries and withs)
+    + file in any select (scan subqueries and withs)
     + remove unnesary joins:
         + unnesary left join
             left join

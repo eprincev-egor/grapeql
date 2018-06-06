@@ -177,17 +177,46 @@ class FromItem extends Syntax {
     }
 
     clear(options) {
-        delete this.file;
-        delete this.functionCall;
+        if ( this.file ) {
+            this.removeChild(this.file);
+            delete this.file;
+        }
+        
+        if ( this.functionCall ) {
+            this.removeChild(this.functionCall);
+            delete this.functionCall;
+        }
+        
         delete this.withOrdinality;
-        delete this.table;
-        delete this.select;
+        
+        if ( this.table ) {
+            this.removeChild(this.table);
+            delete this.table;
+        }
+        
+        if ( this.select ) {
+            this.removeChild(this.select);
+            delete this.select;
+        }
+        
         delete this.only;
         delete this.lateral;
-        delete this.as;
-        delete this.columns;
+        
+        if ( this.as ) {
+            this.removeChild(this.as);
+            delete this.as;
+        }
+        
+        if ( this.columns ) {
+            this.columns.forEach(column => this.removeChild(column));
+            delete this.columns;
+        }
+        
 
         if ( !options || options.joins !== false ) {
+            if ( this.joins ) {
+                this.joins.forEach(join => this.removeChild(join));
+            }
             this.joins = [];
         }
     }
@@ -371,8 +400,9 @@ class FromItem extends Syntax {
             if ( isUsedJoin ) {
                 continue;
             }
-
+            
             this.joins.splice(i, 1);
+            this.removeChild(join);
         }
     }
 

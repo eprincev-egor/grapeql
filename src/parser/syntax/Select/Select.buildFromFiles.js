@@ -301,16 +301,25 @@ module.exports = {
     buildFromFiles({ server }) {
         this.removeUnnesaryJoins({ server });
         this.removeUnnesaryWiths({ server });
-
-        let fromItems = this._getFromFiles();
-        if ( !fromItems.length ) {
+        
+        let fileItems = [];
+        this.walk(child => {
+            if ( 
+                child instanceof this.Coach.FromItem &&
+                child.file
+            ) {
+                fileItems.push( child );
+            }
+        });
+        if ( !fileItems.length ) {
             return;
         }
 
-        fromItems.forEach(fromItem => {
-            this._buildFromFile({
+        fileItems.forEach(fileItem => {
+            let select = fileItem.findParentInstance(this.Coach.Select);
+            select._buildFromFile({
                 server,
-                fromItem
+                fromItem: fileItem
             });
         });
 
@@ -433,28 +442,6 @@ module.exports = {
                 });
             });
         }
-    },
-
-    _getFromFiles() {
-        let fromItems = [];
-
-        for (let i = 0, n = this.from.length; i < n; i++) {
-            let fromItem = this.from[ i ];
-
-            if ( fromItem.file ) {
-                fromItems.push(fromItem);
-            }
-
-            fromItem.eachJoin(join => {
-                if ( !join.from.file ) {
-                    return;
-                }
-
-                fromItems.push( join.from );
-            });
-        }
-
-        return fromItems;
     },
 
     addWhere(sql) {
