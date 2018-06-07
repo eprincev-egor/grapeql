@@ -15,7 +15,7 @@ after(stopServer(
 ));
 
 describe("JoinSelfFile", () => {
-
+/*
     testRequest({
         server: () => server,
         nodes: {
@@ -58,8 +58,7 @@ describe("JoinSelfFile", () => {
             on ParentCompany.id = company.id_parent
         `
     });
-
-    /*
+*/
     testRequest({
         server: () => server,
         nodes: {
@@ -85,5 +84,31 @@ describe("JoinSelfFile", () => {
         },
         error: true
     });
-    */
+    
+    testRequest({
+        server: () => server,
+        nodes: {
+            Country: "select * from country",
+            Company: `
+                select * from company
+
+                left join ./Country on
+                    Country.id = company.id_country
+
+                left join ./Company as ParentCompany on
+                    true
+            `
+        },
+        node: "Company",
+        request: {
+            columns: [
+                "id", "inn", "Country.code",
+                "ParentCompany.id",
+                "ParentCompany.inn",
+                "ParentCompany.Country.code"
+            ]
+        },
+        error: true
+    });
+    
 });

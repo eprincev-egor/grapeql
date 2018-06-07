@@ -299,6 +299,11 @@ module.exports = {
     },
 
     buildFromFiles({ server }) {
+        checkCircularDeps({select: this, server});
+        this._buildFromFiles({ server });
+    },
+    
+    _buildFromFiles({ server }) {
         this.removeUnnesaryJoins({ server });
         this.removeUnnesaryWiths({ server });
 
@@ -323,7 +328,7 @@ module.exports = {
             });
         });
 
-        this.buildFromFiles({ server });
+        this._buildFromFiles({ server });
     },
 
     _buildFromFile({ server, fromItem }) {
@@ -504,4 +509,42 @@ module.exports = {
 
 function trimQuotes(str) {
     return str.replace(/^"|"$/g, "");
+}
+
+function checkCircularDeps({
+    select,
+    server,
+    map
+}) {
+    if ( !map ) {
+        map = [];
+    }
+    map.push(select);
+    
+    select.walk(child => {
+        if ( !(child instanceof select.Coach.Join) ) {
+            return;
+        }
+        
+        let join = child;
+        if ( !join.from.file ) {
+            return;
+        }
+        
+        if ( join.isRemovable({server}) ) {
+            return;
+        }
+        
+        let node = getNode(join.from.file, server);
+        let nodeSelect = node.parsed;
+        
+        if ( map.includes(nodeSelect) ) {
+            throw new Error("circular dependency");
+        }
+        
+        checkCircularDeps({
+            server, map,
+            select: nodeSelect
+        });
+    });
 }
