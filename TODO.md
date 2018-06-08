@@ -14,6 +14,7 @@
 		+ window functions
         + agg_func() filter (where ...)
         - with values
+        - format sql
 
 # QueryBuilder:
     + where

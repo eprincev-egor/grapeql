@@ -15,7 +15,7 @@ after(stopServer(
 ));
 
 describe("JoinSelfFile", () => {
-/*
+
     testRequest({
         server: () => server,
         nodes: {
@@ -58,7 +58,7 @@ describe("JoinSelfFile", () => {
             on ParentCompany.id = company.id_parent
         `
     });
-*/
+
     testRequest({
         server: () => server,
         nodes: {

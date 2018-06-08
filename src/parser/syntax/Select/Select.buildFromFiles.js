@@ -374,12 +374,13 @@ module.exports = {
             }
 
             join.from.as = new ObjectName(newAlias);
-
-            join.replaceLink(oldNodeAlias, newNodeAlias);
+            
             if ( oldAlias != newAlias ) {
                 join.replaceLink(oldAlias, newAlias);
                 this.replaceLink(newAliasWithoutQuotes, newAlias);
             }
+            join.replaceLink(oldNodeAlias, newNodeAlias);
+            
 
             if ( isJoin || isManyFrom ) {
                 this.replaceLink(`${ newNodeAlias.toString() }.${ trimQuotes( oldAlias ) }`, newAlias);
