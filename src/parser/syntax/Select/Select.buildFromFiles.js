@@ -520,23 +520,25 @@ function checkCircularDeps({
     if ( !map ) {
         map = [];
     }
-    map.push(select);
     
     select.walk(child => {
-        if ( !(child instanceof select.Coach.Join) ) {
+        if ( !(child instanceof select.Coach.FromItem) ) {
             return;
         }
         
-        let join = child;
-        if ( !join.from.file ) {
+        let fromItem = child;
+        if ( !fromItem.file ) {
             return;
         }
         
-        if ( join.isRemovable({server}) ) {
-            return;
+        if ( fromItem.parent instanceof select.Coach.Join ) {
+            let join = fromItem.parent;
+            if ( join.isRemovable({server}) ) {
+                return;
+            }
         }
         
-        let node = getNode(join.from.file, server);
+        let node = getNode(fromItem.file, server);
         let nodeSelect = node.parsed;
         
         if ( map.includes(nodeSelect) ) {
@@ -544,7 +546,8 @@ function checkCircularDeps({
         }
         
         checkCircularDeps({
-            server, map,
+            server, 
+            map: map.concat([select]),
             select: nodeSelect
         });
     });

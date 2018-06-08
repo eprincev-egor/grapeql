@@ -32,6 +32,7 @@ function testRequest(test) {
         let request = test.request;
 
         if ( test.error ) {
+            let hasError = false;
             try {
                 node.parsed.build({
                     server,
@@ -43,11 +44,10 @@ function testRequest(test) {
                     offset: request.offset,
                     limit: request.limit
                 });
-
-                assert.ok(false, "expected error");
             } catch(err) {
-                assert.ok(true, "expected error");
+                hasError = true;
             }
+            assert.ok(hasError, "expected error");
         } else {
             let query = node.parsed.build({
                 server,

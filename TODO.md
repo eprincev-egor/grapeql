@@ -30,9 +30,9 @@
     + remove unnesary withs
         + with x as (..) select (with x as (..))
     + defined columns in files
-    - test join self
-        - error on "inner join self file"
-        - error on "from self file"
+    + test join self
+        + error on "inner join self file"
+        + error on "from self file"
     - add window func from file
     - update
     - delete

@@ -111,4 +111,183 @@ describe("JoinSelfFile", () => {
         error: true
     });
     
+    testRequest({
+        server: () => server,
+        nodes: {
+            Company: `
+                select * from ./Company
+            `
+        },
+        node: "Company",
+        request: {
+            columns: [
+                "id"
+            ]
+        },
+        error: true
+    });
+    
+    testRequest({
+        server: () => server,
+        nodes: {
+            Company: `
+                select * from (select * from ./Company) as company
+            `
+        },
+        node: "Company",
+        request: {
+            columns: [
+                "id"
+            ]
+        },
+        error: true
+    });
+    
+    testRequest({
+        server: () => server,
+        nodes: {
+            Company: `
+                select * from (select * from company left join ./Company on true) as company
+            `
+        },
+        node: "Company",
+        request: {
+            columns: [
+                "id"
+            ]
+        },
+        error: true
+    });
+    
+    testRequest({
+        server: () => server,
+        nodes: {
+            Company: `
+                with x as (
+                    select * from ./Company
+                )
+                select * from company
+            `
+        },
+        node: "Company",
+        request: {
+            columns: [
+                "id"
+            ]
+        },
+        error: true
+    });
+    
+    testRequest({
+        server: () => server,
+        nodes: {
+            Company: `
+                with x as (
+                    select * from company as yy
+                    inner join ./Company on Company.id = yy.id
+                )
+                select * from company
+            `
+        },
+        node: "Company",
+        request: {
+            columns: [
+                "id"
+            ]
+        },
+        error: true
+    });
+    
+    testRequest({
+        server: () => server,
+        nodes: {
+            Country: `
+                with y as (
+                    select count(*)
+                    from ./Company
+                )
+                select *
+                from country
+            `,
+            Company: `
+                select * from company
+                
+                left join ./Country on
+                    true
+            `
+        },
+        node: "Company",
+        request: {
+            columns: [
+                "id"
+            ]
+        },
+        error: true
+    });
+    
+    testRequest({
+        server: () => server,
+        nodes: {
+            SomeCountry: `
+                with z as (
+                    select count(*)
+                    from ./Company
+                )
+                select *
+                from country
+            `,
+            Country: `
+                select *
+                from country
+                
+                left join ./SomeCountry on
+                    true
+            `,
+            Company: `
+                select * from company
+                
+                left join ./Country on
+                    true
+            `
+        },
+        node: "Company",
+        request: {
+            columns: [
+                "id"
+            ]
+        },
+        error: true
+    });
+    
+    
+    testRequest({
+        server: () => server,
+        nodes: {
+            Country: `
+                with y as (
+                    select count(*)
+                    from ./Company
+                )
+                select *
+                from country
+            `,
+            Company: `
+                select * from company
+                
+                left join ./Country on
+                    Country.id = company.id_country
+            `
+        },
+        node: "Company",
+        request: {
+            columns: [
+                "id"
+            ]
+        },
+        result: `
+            select company.id
+            from company
+        `
+    });
+    
 });
