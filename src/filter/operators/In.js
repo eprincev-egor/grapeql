@@ -2,6 +2,16 @@
 
 const Operator = require("./Operator");
 const _ = require("lodash");
+const {
+    isSqlNumber,
+    isLikeNumber,
+    isSqlText,
+    isLikeText,
+    isSqlDate,
+    isLikeDate,
+    wrapText,
+    wrapDate
+} = require("../../helpers");
 
 class In extends Operator {
     validateValue(value) {
@@ -40,10 +50,10 @@ class In extends Operator {
         
         let out = column.sql + " in ";
         
-        if ( Operator.isSqlNumber(column.type) ) {
+        if ( isSqlNumber(column.type) ) {
             out += "("; 
             out += elems.map(value => {
-                if ( Operator.isLikeNumber(value) ) {
+                if ( isLikeNumber(value) ) {
                     return value;
                 } else {
                     throw new Error("invalid value for number: " + value);
@@ -52,11 +62,11 @@ class In extends Operator {
             out += ")";
         }
         
-        else if ( Operator.isSqlText(column.type) ) {
+        else if ( isSqlText(column.type) ) {
             out += "(";
             out += elems.map(value => {
-                if ( Operator.isLikeText(value) ) {
-                    return Operator.wrapText( value );
+                if ( isLikeText(value) ) {
+                    return wrapText( value );
                 } else {
                     throw new Error("invalid value for text: " + value);
                 }
@@ -64,11 +74,11 @@ class In extends Operator {
             out += ")";
         }
         
-        else if ( Operator.isSqlDate(column.type) ) {
+        else if ( isSqlDate(column.type) ) {
             out += "(";
             out += elems.map(value => {
-                if ( Operator.isLikeDate(value) ) {
-                    return Operator.wrapDate( value, column.type );
+                if ( isLikeDate(value) ) {
+                    return wrapDate( value, column.type );
                 } else {
                     throw new Error("invalid value for date: " + value);
                 }

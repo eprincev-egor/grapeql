@@ -2,6 +2,10 @@
 
 const Operator = require("./Operator");
 const _ = require("lodash");
+const {
+    isLikeDate,
+    wrapDate
+} = require("../../helpers");
 
 function clientTime2unixTimestamp(value) {
     if ( value instanceof Date ) {
@@ -82,12 +86,12 @@ class InRange extends Operator {
             start = elem && elem.start;
             end = elem && elem.end;
             
-            if ( !Operator.isLikeDate(start) || !Operator.isLikeDate(end) ) {
+            if ( !isLikeDate(start) || !isLikeDate(end) ) {
                 continue;
             }
             
-            start = Operator.wrapDate( start, column.type );
-            end = Operator.wrapDate( end, column.type );
+            start = wrapDate( start, column.type );
+            end = wrapDate( end, column.type );
             
             if ( sql ) {
                 sql += " or ";

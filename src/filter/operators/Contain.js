@@ -1,6 +1,11 @@
 "use strict";
 
 const Operator = require("./Operator");
+const {
+    isSqlNumber,
+    isSqlDate,
+    wrapText
+} = require("../../helpers");
 
 class Contain extends Operator {
     validateValue(value) {
@@ -33,14 +38,14 @@ class Contain extends Operator {
         value = value.toLowerCase();
         
         value = value.replace(/([%_\\])/g, "\\$1");
-        value = Operator.wrapText( "%" + value + "%" );
+        value = wrapText( "%" + value + "%" );
         
         let columnSql = column.sql;
         
-        if ( Operator.isSqlNumber(column.type) ) {
+        if ( isSqlNumber(column.type) ) {
             columnSql = column.sql + "::text";
         }
-        else if ( Operator.isSqlDate(column.type) ) {
+        else if ( isSqlDate(column.type) ) {
             columnSql = column.sql + "::date::text";
         }
         

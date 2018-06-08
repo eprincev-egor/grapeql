@@ -2,6 +2,10 @@
 
 const Operator = require("./Operator");
 const _ = require("lodash");
+const {
+    isSqlDate,
+    wrapDate
+} = require("../../helpers");
 
 function todayStart() {
     let date = new Date();
@@ -68,7 +72,7 @@ class Is extends Operator {
             return column.sql + " is not null";
         } 
         else if ( value === "today" ) {
-            if ( !Operator.isSqlDate(column.type) ) {
+            if ( !isSqlDate(column.type) ) {
                 throw new Error("imposible check 'is today' for column type: " + column.type);
             }
             
@@ -76,15 +80,15 @@ class Is extends Operator {
             let endSql = todayEnd();
             
             startSql = new Date(startSql);
-            startSql = Operator.wrapDate(startSql, column.type);
+            startSql = wrapDate(startSql, column.type);
             
             endSql = new Date(endSql);
-            endSql = Operator.wrapDate(endSql, column.type);
+            endSql = wrapDate(endSql, column.type);
             
             return column.sql + " >= " + startSql + " and " + column.sql + " <= " + endSql;
         } 
         else if ( value === "tomorrow" ) {
-            if ( !Operator.isSqlDate(column.type) ) {
+            if ( !isSqlDate(column.type) ) {
                 throw new Error("imposible check 'is tomorrow' for column type: " + column.type);
             }
             
@@ -92,10 +96,10 @@ class Is extends Operator {
             let endSql = tomorrowEnd();
             
             startSql = new Date(startSql);
-            startSql = Operator.wrapDate(startSql, column.type);
+            startSql = wrapDate(startSql, column.type);
             
             endSql = new Date(endSql);
-            endSql = Operator.wrapDate(endSql, column.type);
+            endSql = wrapDate(endSql, column.type);
             
             return column.sql + " >= " + startSql + " and " + column.sql + " <= " + endSql;
         }

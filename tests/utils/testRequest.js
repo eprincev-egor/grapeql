@@ -167,8 +167,31 @@ function testRequestIndexOf(test) {
     });
 }
 
+function testInsert(test) {
+    it(test.result, () => {
+        let server = test.server();
+        
+        let node = test.node;
+        let name = "Tmp";
+        node = server.addNode(name, node);
+        node.options.file = "./" + name + ".sql";
+        
+        let request = test.request;
+        let query = node.parsed.buildInsert({
+            server,
+            node,
+
+            row: request.row
+        });
+        
+        assert.equal(query, test.result);
+    });
+}
+
+
 module.exports = {
     testRequest,
     testRequestCount,
-    testRequestIndexOf
+    testRequestIndexOf,
+    testInsert
 };
