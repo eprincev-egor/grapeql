@@ -81,4 +81,17 @@ describe("Insert", () => {
         },
         result: "insert into company (some_date, some_timestamp) values ('2017-12-31T21:00:00.000Z'::date, '2017-12-31T21:00:00.000Z'::timestamp without time zone)"
     });
+    
+    testInsert({
+        server: () => server,
+        node: `
+            select * from test.company
+        `,
+        request: {
+            row: {
+                is_some: true
+            }
+        },
+        result: "insert into test.company (is_some) values (true)"
+    });
 });

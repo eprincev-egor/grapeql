@@ -35,7 +35,7 @@
         + error on "from self file"
     - add window func from file
     - update
-    - delete
+    + delete
     + insert
     - $vars
     + getCount
