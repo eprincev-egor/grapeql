@@ -37,7 +37,7 @@ let isLikeNumber = function(value) {
         return false;
     }
     
-    if ( typeof value == "object") {
+    if ( typeof value == "object" ) {
         return false;
     }
     
@@ -131,6 +131,19 @@ let wrapDate = function(value, toType) {
     }
 };
 
+let isSqlBoolean = function(type) {
+    return type == "boolean";
+};
+
+let isLikeBoolean = function(value) {
+    return (
+        value === true  ||
+        value === false ||
+        value === 1     ||
+        value === 0
+    );
+};
+
 module.exports = {
     isSqlNumber,
     isLikeNumber,
@@ -139,5 +152,7 @@ module.exports = {
     isSqlDate,
     isLikeDate,
     wrapText,
-    wrapDate
+    wrapDate,
+    isSqlBoolean,
+    isLikeBoolean
 };

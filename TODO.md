@@ -36,7 +36,7 @@
     - add window func from file
     - update
     - delete
-    - insert
+    + insert
     - $vars
     + getCount
     + indexOf
@@ -49,9 +49,11 @@
     - validations
 
 # Tasks:
+	- raw
     - crud events
     - deps
     - transaction
+	- jsql
 
 # Cache Island:
     (

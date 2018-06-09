@@ -10,7 +10,9 @@ const {
     isSqlDate,
     isLikeDate,
     wrapText,
-    wrapDate
+    wrapDate,
+    isLikeBoolean,
+    isSqlBoolean
 } = require("../../../helpers");
 
 module.exports = {
@@ -217,9 +219,21 @@ module.exports = {
                     
                     else if ( isSqlDate(dbColumn.type) ) {
                         if ( isLikeDate(value) ) {
-                            values.push( wrapDate(value) );
+                            values.push( wrapDate(value, dbColumn.type) );
                         } else {
                             throw new Error("invalid value for date: " + value);
+                        }
+                    }
+                    
+                    else if ( isSqlBoolean(dbColumn.type) ) {
+                        if ( isLikeBoolean(value) ) {
+                            if ( value ) {
+                                values.push("true");
+                            } else {
+                                values.push("false");
+                            }
+                        } else {
+                            throw new Error("invalid value for boolean: " + value);
                         }
                     }
                     

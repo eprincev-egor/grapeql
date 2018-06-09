@@ -13,6 +13,8 @@ CREATE TABLE company (
   inn text NOT NULL,
   id_country integer NOT NULL DEFAULT 1,
   is_client boolean,
+  some_date date,
+  some_timestamp timestamp without time zone,
   CONSTRAINT company_pk PRIMARY KEY (id),
   CONSTRAINT company_country_fk FOREIGN KEY (id_country)
       REFERENCES public.country (id) MATCH SIMPLE
