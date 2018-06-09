@@ -54,6 +54,9 @@ describe("Insert", () => {
         result: "insert into company (name, inn, id_country, is_client) values ($tag1$Hello$tag1$, $tag1$123-4\n$tag1$, -15, true)"
     });
     
+    let testDate = new Date(2018, 0, 1);
+    let testDateIso = testDate.toISOString();
+    
     testInsert({
         server: () => server,
         node: `
@@ -61,11 +64,11 @@ describe("Insert", () => {
         `,
         request: {
             row: {
-                some_date: new Date(2018, 0, 1),
-                some_timestamp: new Date(2018, 0, 1)
+                some_date: testDate,
+                some_timestamp: testDate
             }
         },
-        result: "insert into company (some_date, some_timestamp) values ('2017-12-31T21:00:00.000Z'::date, '2017-12-31T21:00:00.000Z'::timestamp without time zone)"
+        result: `insert into company (some_date, some_timestamp) values ('${testDateIso}'::date, '${testDateIso}'::timestamp without time zone)`
     });
     
     testInsert({
@@ -75,11 +78,11 @@ describe("Insert", () => {
         `,
         request: {
             row: {
-                some_date: +new Date(2018, 0, 1),
-                some_timestamp: +new Date(2018, 0, 1)
+                some_date: +testDate,
+                some_timestamp: +testDate
             }
         },
-        result: "insert into company (some_date, some_timestamp) values ('2017-12-31T21:00:00.000Z'::date, '2017-12-31T21:00:00.000Z'::timestamp without time zone)"
+        result: `insert into company (some_date, some_timestamp) values ('${testDateIso}'::date, '${testDateIso}'::timestamp without time zone)`
     });
     
     testInsert({
