@@ -34,7 +34,7 @@ function testRequest(test) {
         if ( test.error ) {
             let hasError = false;
             try {
-                node.parsed.build({
+                node.parsed.buildSelect({
                     server,
                     node,
 
@@ -49,7 +49,7 @@ function testRequest(test) {
             }
             assert.ok(hasError, "expected error");
         } else {
-            let query = node.parsed.build({
+            let query = node.parsed.buildSelect({
                 server,
                 node,
 
@@ -170,12 +170,12 @@ function testRequestIndexOf(test) {
 function testInsert(test) {
     it(test.result, () => {
         let server = test.server();
-        
+
         let node = test.node;
         let name = "Tmp";
         node = server.addNode(name, node);
         node.options.file = "./" + name + ".sql";
-        
+
         let request = test.request;
         let query = node.parsed.buildInsert({
             server,
@@ -183,7 +183,7 @@ function testInsert(test) {
 
             row: request.row
         });
-        
+
         assert.equal(query, test.result);
     });
 }
@@ -191,12 +191,12 @@ function testInsert(test) {
 function testDelete(test) {
     it(test.result, () => {
         let server = test.server();
-        
+
         let node = test.node;
         let name = "Tmp";
         node = server.addNode(name, node);
         node.options.file = "./" + name + ".sql";
-        
+
         let request = test.request;
         let query = node.parsed.buildDelete({
             server,
@@ -205,7 +205,7 @@ function testDelete(test) {
             offset: request.offset,
             limit: request.limit
         });
-        
+
         assert.equal(query, test.result);
     });
 }

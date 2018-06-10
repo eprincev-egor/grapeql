@@ -29,7 +29,7 @@ class Node {
 
     async get(request) {
         let server = this.server;
-        let query = this.parsed.build({
+        let query = this.parsed.buildSelect({
             server,
             node: this,
 

@@ -2,10 +2,19 @@
 
 const Syntax = require("../Syntax");
 
-const removeUnnesaryJoinsMethods = require("./Select.removeUnnesaryJoins");
-const removeUnnesaryWithsMethods = require("./Select.removeUnnesaryWiths");
-const getColumnSourceMethods = require("./Select.getColumnSource");
-const buildFromFilesMethods = require("./Select.buildFromFiles");
+let methods = [
+    require("./Select.removeUnnesaryJoins"),
+    require("./Select.removeUnnesaryWiths"),
+    require("./Select.getColumnSource"),
+    require("./Select.buildFromFiles"),
+    require("./Select.buildCount"),
+    require("./Select.buildDelete"),
+    require("./Select.buildIndexOf"),
+    require("./Select.buildInsert"),
+    require("./Select.buildSelect"),
+    require("./Select.buildUpdate")
+];
+
 const {PUBLIC_SCHEMA_NAME} = require("./helpers");
 
 // https://www.postgresql.org/docs/9.5/static/sql-select.html
@@ -766,18 +775,12 @@ class Select extends Syntax {
     }
 }
 
-for (let key in removeUnnesaryJoinsMethods) {
-    Select.prototype[ key ] = removeUnnesaryJoinsMethods[ key ];
-}
-for (let key in getColumnSourceMethods) {
-    Select.prototype[ key ] = getColumnSourceMethods[ key ];
-}
-for (let key in buildFromFilesMethods) {
-    Select.prototype[ key ] = buildFromFilesMethods[ key ];
-}
-for (let key in removeUnnesaryWithsMethods) {
-    Select.prototype[ key ] = removeUnnesaryWithsMethods[ key ];
-}
+methods.forEach(methods => {
+    for (let key in methods) {
+        Select.prototype[ key ] = methods[ key ];
+    }
+});
+
 
 // stop keywords for alias
 Select.keywords = [

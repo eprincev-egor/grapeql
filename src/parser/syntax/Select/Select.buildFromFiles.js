@@ -1,486 +1,13 @@
 "use strict";
 
-const {getNode, getDbTable} = require("./helpers");
-const Filter = require("../../../filter/Filter");
-const {
-    isSqlNumber,
-    isLikeNumber,
-    isSqlText,
-    isLikeText,
-    isSqlDate,
-    isLikeDate,
-    wrapText,
-    wrapDate,
-    isLikeBoolean,
-    isSqlBoolean
-} = require("../../../helpers");
+const {getNode} = require("./helpers");
 
 module.exports = {
-    build({
-        node,
-        server,
-        columns,
-        where,
-        orderBy,
-        offset,
-        limit
-    }) {
-        let select = this.clone();
-
-        select.buildColumns({
-            columns,
-            originalSelect: this
-        });
-
-        if ( where ) {
-            select.buildWhere({
-                where,
-                originalSelect: this,
-                node,
-                server
-            });
-        }
-
-        if ( orderBy ) {
-            select.buildOrderBy({
-                orderBy,
-                originalSelect: this
-            });
-        }
-
-        select.buildFromFiles({ server });
-
-        if ( limit != null && limit != "all" ) {
-            select.setLimit(limit);
-        }
-
-        if ( offset != null && offset > 0 ) {
-            select.setOffset(offset);
-        }
-
-        return select;
-    },
-
-    buildCount({
-        node,
-        server,
-        where
-    }) {
-        let select = this.clone();
-
-        select.clearColumns();
-        select.addColumn("count(*) as count");
-
-        if ( select.orderBy ) {
-            select.orderBy.forEach(elem => {
-                select.removeChild(elem);
-            });
-            delete select.orderBy;
-        }
-
-
-        if ( where ) {
-            select.buildWhere({
-                where,
-                originalSelect: this,
-                node,
-                server
-            });
-        }
-
-        select.buildFromFiles({ server });
-
-        return select;
-    },
-
-    buildIndexOf({
-        node,
-        server,
-        orderBy,
-        row,
-        where
-    }) {
-        let select = this.clone();
-
-        select.clearColumns();
-
-        if ( !row ) {
-            throw new Error("row must be are filter");
-        }
-        row = new Filter(row);
-        let rowColumns = row.getColumns();
-
-        select.buildColumns({
-            columns: rowColumns,
-            originalSelect: this
-        });
-
-        select.addColumn("row_number() over() as grapeql_row_index");
-
-        if ( orderBy ) {
-            select.buildOrderBy({
-                orderBy,
-                originalSelect: this
-            });
-        }
-
-        if ( where ) {
-            select.buildWhere({
-                where,
-                originalSelect: this,
-                node,
-                server
-            });
-        }
-
-        select.buildFromFiles({ server });
-
-        let sqlModel = this.buildSqlModelByColumns({
-            node,
-            server,
-            columns: rowColumns,
-            originalSelect: this
-        });
-        for (let key in sqlModel) {
-            let elem = sqlModel[key];
-            elem.sql = `query."${ key }"`;
-        }
-        let rowFilterSql = row.toSql(sqlModel);
-
-        return new this.Coach.Select(`
-            select
-                query.grapeql_row_index as index
-            from (${select}) as query
-            where ${ rowFilterSql }
-        `.trim());
-    },
-    
-    buildInsert({
-        server,
-        row
-    }) {
-        if ( this.from.length > 1 ) {
-            throw new Error("can't build insert with many froms");
-        }
-        
-        let fromItem = this.from[0];
-        if ( !fromItem.table && !fromItem.file ) {
-            throw new Error("fromItem must be table or file");
-        }
-        
-        if ( fromItem.file ) {
-            let node = getNode(fromItem.file, server);
-            if ( !node ) {
-                throw new Error(`${fromItem.file.toString()} not exists`);
-            }
-            
-            return node.parsed.buildInsert({server, row});
-        }
-        
-        let dbTable = getDbTable(server, fromItem.table);
-        let sql = `insert into ${fromItem.table.toString()} `;  // schema
-        
-        let columns = [];
-        let values = [];
-        
-        row = row || {};
-        if ( Object.keys(row).length ) {
-            sql += "(";
-            
-            for (let key in row) {
-                let dbColumn = dbTable.getColumn(key);
-                
-                if ( !dbColumn ) {
-                    throw new Error(`column "${key}" in table "${ dbColumn.name }" not exists`);
-                }
-                
-                columns.push( dbColumn.name );
-                
-                let value = row[ key ];
-                if ( value == null ) {
-                    values.push("null");
-                } else {
-                    if ( isSqlNumber(dbColumn.type) ) {
-                        
-                        if ( isLikeNumber(value)  ) {
-                            values.push(value);
-                        } else {
-                            throw new Error("invalid value for number: " + value);
-                        }
-                    }
-                    
-                    else if ( isSqlText(dbColumn.type) ) {
-                        if ( isLikeText(value) ) {
-                            values.push( wrapText(value) );
-                        } else {
-                            throw new Error("invalid value for text: " + value);
-                        }
-                    }
-                    
-                    else if ( isSqlDate(dbColumn.type) ) {
-                        if ( isLikeDate(value) ) {
-                            values.push( wrapDate(value, dbColumn.type) );
-                        } else {
-                            throw new Error("invalid value for date: " + value);
-                        }
-                    }
-                    
-                    else if ( isSqlBoolean(dbColumn.type) ) {
-                        if ( isLikeBoolean(value) ) {
-                            if ( value ) {
-                                values.push("true");
-                            } else {
-                                values.push("false");
-                            }
-                        } else {
-                            throw new Error("invalid value for boolean: " + value);
-                        }
-                    }
-                    
-                    else {
-                        throw new Error(`unsoperted type "${ dbColumn.type } for insert`);
-                    }
-                }
-            }
-            
-            sql += columns.join(", ");
-            sql += ") values (";
-            sql += values.join(", ");
-            sql += ")";
-        } else {
-            sql += "default values";
-        }
-        
-        return sql;
-    },
-    
-    buildDelete({
-        server,
-        where,
-        limit,
-        offset
-    }) {
-        if ( this.from.length > 1 ) {
-            throw new Error("can't build delete with many froms");
-        }
-        
-        let fromItem = this.from[0];
-        if ( !fromItem.table && !fromItem.file ) {
-            throw new Error("fromItem must be table or file");
-        }
-        
-        if ( fromItem.file ) {
-            let node = getNode(fromItem.file, server);
-            if ( !node ) {
-                throw new Error(`${fromItem.file.toString()} not exists`);
-            }
-            
-            return node.parsed.buildDelete({
-                server, 
-                where, offset, limit
-            });
-        }
-        
-        let dbTable = getDbTable(server, fromItem.table);
-        let sql = "delete from ";
-        sql += fromItem.table.toString(); // schema
-        
-        if ( where ) {
-            where = new Filter(where);
-
-            let columns = where.getColumns();
-            let sqlModel = {};
-            columns.forEach(key => {
-                if ( !/^\w+$/.test(key) ) {
-                    throw new Error("only native columns allowed in filter");
-                }
-                
-                let dbColumn = dbTable.getColumn(key);
-                if ( !dbColumn ) {
-                    throw new Error(`column "${key}" in table "${ dbColumn.name }" not exists`);
-                }
-                
-                sqlModel[ key ] = {
-                    type: dbColumn.type,
-                    sql: key
-                };
-            });
-
-            let whereSql = where.toSql( sqlModel );
-            sql += " where " + whereSql;
-        }
-        
-        if ( offset != null && offset > 0 ) {
-            sql += " offset " + offset;
-        }
-        
-        if ( limit != null && limit != "all" ) {
-            sql += " limit " + limit;
-        }
-
-        return sql;
-    },
-
-    buildColumns({originalSelect, columns}) {
-        this.clearColumns();
-
-        columns.forEach(key => {
-            let keyParts = key.split(".");
-
-            let definedColumn = originalSelect.getColumnByAlias( key );
-            if ( definedColumn ) {
-                if ( definedColumn.expression.isLink() ) {
-                    let link = definedColumn.expression.getLink();
-                    let last = link.getLast();
-
-                    if ( last.strictEqualString(key) ) {
-                        this.addColumn(`${ definedColumn.expression }`);
-                        return;
-                    }
-                }
-
-                this.addColumn(`${ definedColumn.expression } as "${ key }"`);
-                return;
-            }
-
-            let columnKey = key;
-            let fromItem;
-            if ( keyParts.length > 1 ) {
-                fromItem = this.getFromItemByAlias( keyParts[0] );
-                columnKey = keyParts.slice(-1)[0];
-            } else {
-                fromItem = this.from[0];
-            }
-
-            if ( columnKey == key ) {
-                let fromSql = fromItem.getAliasSql();
-                this.addColumn(`${ fromSql }.${ columnKey }`);
-            } else {
-                this.addColumn(`${ key } as "${ key }"`);
-            }
-        });
-    },
-
-    buildColumnExpression(key) {
-        let keyParts = key.split(".");
-
-        let definedColumn = this.getColumnByAlias( key );
-        if ( definedColumn ) {
-            return definedColumn.expression.toString();
-        }
-
-        let columnKey = key;
-        let fromItem;
-        if ( keyParts.length > 1 ) {
-            fromItem = this.getFromItemByAlias( keyParts[0] );
-            columnKey = keyParts.slice(-1)[0];
-        } else {
-            fromItem = this.from[0];
-        }
-
-        if ( columnKey == key ) {
-            let fromSql = fromItem.getAliasSql();
-            return `${ fromSql }.${ columnKey }`;
-        } else {
-            return key;
-        }
-    },
-
-    buildWhere({where, originalSelect, node, server}) {
-        where = new Filter(where);
-
-        let columns = where.getColumns();
-        let sqlModel = this.buildSqlModelByColumns({
-            node,
-            server,
-            columns,
-            originalSelect
-        });
-
-        let whereSql = where.toSql( sqlModel );
-        this.addWhere( whereSql );
-    },
-
-    buildSqlModelByColumns({
-        node,
-        server,
-        columns,
-        originalSelect
-    }) {
-        let sqlModel = {};
-        columns.forEach(key => {
-            if ( key in sqlModel ) {
-                return;
-            }
-
-            let expression = originalSelect.buildColumnExpression(key);
-            let type = originalSelect.getExpressionType({
-                expression,
-                node,
-                server
-            });
-            sqlModel[ key ] = {
-                sql: expression,
-                type
-            };
-        });
-
-        return sqlModel;
-    },
-
-    buildOrderBy({orderBy, originalSelect}) {
-        if ( typeof orderBy == "string" ) {
-            orderBy = [orderBy];
-        }
-
-        if ( !orderBy.length ) {
-            throw new Error("orderBy must be array like are ['id', 'desc'] or [['name', 'asc'], ['id', 'desc']]");
-        }
-
-        if ( typeof orderBy[0] == "string" ) {
-            orderBy = [orderBy];
-        }
-
-        for (let n = orderBy.length, i = n - 1; i >= 0; i--) {
-            let elem = orderBy[i];
-            let key = elem[0];
-            let vector = elem[1] || "asc";
-
-            if ( typeof key != "string" ) {
-                throw new Error("invalid orderBy key");
-            }
-            if ( typeof vector != "string" ) {
-                throw new Error("invalid orderBy vector");
-            }
-
-            vector = vector.toLowerCase();
-            if ( vector != "asc" && vector != "desc" ) {
-                throw new Error("invalid orderBy vector: " + vector);
-            }
-
-            let expression = originalSelect.buildColumnExpression(key);
-            this.unshiftOrderByElement(`${ expression } ${ vector }`);
-        }
-    },
-
-    getExpressionType({expression, node, server}) {
-        expression = new this.Coach.Expression(expression);
-        expression.parent = this;
-
-        let type = expression.getType({
-            node,
-            server
-        });
-
-        delete expression.parent;
-        return type;
-    },
-
     buildFromFiles({ server }) {
         checkCircularDeps({select: this, server});
         this._buildFromFiles({ server });
     },
-    
+
     _buildFromFiles({ server }) {
         this.removeUnnesaryJoins({ server });
         this.removeUnnesaryWiths({ server });
@@ -552,13 +79,13 @@ module.exports = {
             }
 
             join.from.as = new ObjectName(newAlias);
-            
+
             if ( oldAlias != newAlias ) {
                 join.replaceLink(oldAlias, newAlias);
                 this.replaceLink(newAliasWithoutQuotes, newAlias);
             }
             join.replaceLink(oldNodeAlias, newNodeAlias);
-            
+
 
             if ( isJoin || isManyFrom ) {
                 this.replaceLink(`${ newNodeAlias.toString() }.${ trimQuotes( oldAlias ) }`, newAlias);
@@ -646,43 +173,6 @@ module.exports = {
                 });
             });
         }
-    },
-
-    addWhere(sql) {
-        if ( this.where ) {
-            sql = `( ${ this.where } ) and ${ sql }`;
-            this.removeChild( this.where );
-        }
-
-        let coach = new this.Coach(sql);
-        coach.skipSpace();
-
-        this.where = coach.parseExpression();
-        this.addChild(this.where);
-    },
-
-    unshiftOrderByElement(sql) {
-        if ( !this.orderBy ) {
-            this.orderBy = [];
-        }
-        let orderByElement = new this.Coach.OrderByElement(sql);
-        this.orderBy.unshift(orderByElement);
-        this.addChild(orderByElement);
-    },
-
-    setLimit(limit) {
-        if ( limit < 0 ) {
-            throw new Error("limit must be 'all' or positive number: " + limit);
-        }
-        this.limit = limit;
-    },
-
-    setOffset(offset) {
-        if ( offset < 0 ) {
-            throw new Error("offset must by positive number: " + offset);
-        }
-
-        this.offset = offset;
     }
 };
 
@@ -698,33 +188,33 @@ function checkCircularDeps({
     if ( !map ) {
         map = [];
     }
-    
+
     select.walk(child => {
         if ( !(child instanceof select.Coach.FromItem) ) {
             return;
         }
-        
+
         let fromItem = child;
         if ( !fromItem.file ) {
             return;
         }
-        
+
         if ( fromItem.parent instanceof select.Coach.Join ) {
             let join = fromItem.parent;
             if ( join.isRemovable({server}) ) {
                 return;
             }
         }
-        
+
         let node = getNode(fromItem.file, server);
         let nodeSelect = node.parsed;
-        
+
         if ( map.includes(nodeSelect) ) {
             throw new Error("circular dependency");
         }
-        
+
         checkCircularDeps({
-            server, 
+            server,
             map: map.concat([select]),
             select: nodeSelect
         });
