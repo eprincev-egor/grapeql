@@ -1,18 +1,7 @@
 "use strict";
 
 const {getNode, getDbTable} = require("./helpers");
-const {
-    isSqlNumber,
-    isLikeNumber,
-    isSqlText,
-    isLikeText,
-    isSqlDate,
-    isLikeDate,
-    wrapText,
-    wrapDate,
-    isLikeBoolean,
-    isSqlBoolean
-} = require("../../../helpers");
+const {value2sql} = require("../../../helpers");
 
 module.exports = {
     buildInsert({
@@ -51,56 +40,14 @@ module.exports = {
                 let dbColumn = dbTable.getColumn(key);
 
                 if ( !dbColumn ) {
-                    throw new Error(`column "${key}" in table "${ dbColumn.name }" not exists`);
+                    throw new Error(`column "${key}" in table "${ dbTable.name }" not exists`);
                 }
 
                 columns.push( dbColumn.name );
 
                 let value = row[ key ];
-                if ( value == null ) {
-                    values.push("null");
-                } else {
-                    if ( isSqlNumber(dbColumn.type) ) {
-
-                        if ( isLikeNumber(value)  ) {
-                            values.push(value);
-                        } else {
-                            throw new Error("invalid value for number: " + value);
-                        }
-                    }
-
-                    else if ( isSqlText(dbColumn.type) ) {
-                        if ( isLikeText(value) ) {
-                            values.push( wrapText(value) );
-                        } else {
-                            throw new Error("invalid value for text: " + value);
-                        }
-                    }
-
-                    else if ( isSqlDate(dbColumn.type) ) {
-                        if ( isLikeDate(value) ) {
-                            values.push( wrapDate(value, dbColumn.type) );
-                        } else {
-                            throw new Error("invalid value for date: " + value);
-                        }
-                    }
-
-                    else if ( isSqlBoolean(dbColumn.type) ) {
-                        if ( isLikeBoolean(value) ) {
-                            if ( value ) {
-                                values.push("true");
-                            } else {
-                                values.push("false");
-                            }
-                        } else {
-                            throw new Error("invalid value for boolean: " + value);
-                        }
-                    }
-
-                    else {
-                        throw new Error(`unsoperted type "${ dbColumn.type } for insert`);
-                    }
-                }
+                let sqlValue = value2sql(dbColumn.type, value);
+                values.push( sqlValue );
             }
 
             sql += columns.join(", ");

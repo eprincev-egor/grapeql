@@ -210,11 +210,33 @@ function testDelete(test) {
     });
 }
 
+function testUpdate(test) {
+    it(test.result, () => {
+        let server = test.server();
+
+        let node = test.node;
+        let name = "Tmp";
+        node = server.addNode(name, node);
+        node.options.file = "./" + name + ".sql";
+
+        let request = test.request;
+        let query = node.parsed.buildUpdate({
+            server,
+
+            set: request.set,
+            where: request.where
+        });
+
+        assert.equal(query, test.result);
+    });
+}
+
 
 module.exports = {
     testRequest,
     testRequestCount,
     testRequestIndexOf,
     testInsert,
-    testDelete
+    testDelete,
+    testUpdate
 };

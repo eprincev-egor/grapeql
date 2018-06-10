@@ -16,11 +16,11 @@ let isSqlNumber = function(type) {
     if ( numberTypes.includes(type.toLowerCase()) ) {
         return true;
     }
-    
+
     if ( /^numeric\s*\(\s*\d+\s*(\s*,\s*\d+\s*)?\)\s*$/i.test(type) ) {
         return true;
     }
-    
+
     return false;
 };
 
@@ -36,11 +36,11 @@ let isLikeNumber = function(value) {
     if ( +value !== +value ) {
         return false;
     }
-    
+
     if ( typeof value == "object" ) {
         return false;
     }
-    
+
     return true;
 };
 
@@ -54,7 +54,7 @@ let isSqlText = function(type) {
     if ( textTypes.includes(type.toLowerCase()) ) {
         return true;
     }
-    
+
     // "character varying(n)",
     // "varchar(n)",
     // "character(n)",
@@ -62,7 +62,7 @@ let isSqlText = function(type) {
     if ( /^\s*character\s+varying\s*\(\s*\d+\s*\)\s*$|^\s*varchar\s*\(\s*\d+\s*\)\s*$|^\s*character\s*\(\s*\d+\s*\)\s*$|^\s*char\s*\(\s*\d+\s*\)\s*$/i.test( type ) ) {
         return true;
     }
-    
+
     return false;
 };
 
@@ -84,7 +84,7 @@ let wrapText = function(text) {
         index++;
     }
     tag += index;
-    
+
     return `$${tag}$${ text }$${tag}$`;
 };
 
@@ -98,13 +98,13 @@ let isSqlDate = function(type) {
     if ( dateTypes.includes(type.toLowerCase()) ) {
         return true;
     }
-    
+
     // timestamp without time zone
     // timestamp with time zone
     if ( /^\s*timestamp\s+(with|without)\s+time\s+zone$/i.test(type) ) {
         return true;
     }
-    
+
     return false;
 };
 
@@ -112,12 +112,12 @@ let isLikeDate = function(value) {
     if ( value && value.toISOString ) {
         return true;
     }
-    
+
     // unix timestamp
     if ( typeof value == "number" ) {
         return true;
     }
-    
+
     return false;
 };
 
@@ -125,7 +125,7 @@ let wrapDate = function(value, toType) {
     if ( typeof value == "number" ) {
         value = new Date(value);
     }
-    
+
     if ( value && value.toISOString ) {
         return `'${ value.toISOString() }'::${ toType }`;
     }
@@ -144,6 +144,53 @@ let isLikeBoolean = function(value) {
     );
 };
 
+let value2sql = function(type, value) {
+    if ( value == null ) {
+        return "null";
+    }
+    
+    if ( isSqlNumber(type) ) {
+
+        if ( isLikeNumber(value)  ) {
+            return value;
+        } else {
+            throw new Error("invalid value for number: " + value);
+        }
+    }
+
+    else if ( isSqlText(type) ) {
+        if ( isLikeText(value) ) {
+            return wrapText(value);
+        } else {
+            throw new Error("invalid value for text: " + value);
+        }
+    }
+
+    else if ( isSqlDate(type) ) {
+        if ( isLikeDate(value) ) {
+            return wrapDate(value, type);
+        } else {
+            throw new Error("invalid value for date: " + value);
+        }
+    }
+
+    else if ( isSqlBoolean(type) ) {
+        if ( isLikeBoolean(value) ) {
+            if ( value ) {
+                return "true";
+            } else {
+                return "false";
+            }
+        } else {
+            throw new Error("invalid value for boolean: " + value);
+        }
+    }
+
+    else {
+        throw new Error(`unsoperted type "${ type }`);
+    }
+};
+
 module.exports = {
     isSqlNumber,
     isLikeNumber,
@@ -154,5 +201,6 @@ module.exports = {
     wrapText,
     wrapDate,
     isSqlBoolean,
-    isLikeBoolean
+    isLikeBoolean,
+    value2sql
 };
