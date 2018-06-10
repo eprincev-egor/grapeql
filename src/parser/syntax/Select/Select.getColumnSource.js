@@ -10,13 +10,18 @@ const {
 } = require("./helpers");
 
 module.exports = {
-    getColumnSource({server, node}, objectLink, options) {
-        options = options || {};
-        let _childFromItem = options._childFromItem;
+    getColumnSource({
+        server, node, link,
+        // options
+        checkColumns = true,
+        throwError = true,
+        childFromItem
+    }) {
+        let objectLink = link;
 
         if (
             objectLink.link.length == 1 &&
-            options._checkColumns !== false
+            checkColumns !== false
         ) {
             let column = this.columns.find(column => {
                 if ( column.as ) {
@@ -36,7 +41,11 @@ module.exports = {
             if ( column ) {
                 if ( column.expression.isLink() ) {
                     objectLink = column.expression.getLink();
-                    return this.getColumnSource({server, node}, objectLink, { _checkColumns: false });
+                    return this.getColumnSource({
+                        server, node,
+                        link: objectLink,
+                        checkColumns: false
+                    });
                 } else {
                     return {expression: column.expression};
                 }
@@ -46,7 +55,7 @@ module.exports = {
         let sources = [];
 
         this.eachFromItem(fromItem => {
-            if ( fromItem == _childFromItem ) {
+            if ( fromItem == childFromItem ) {
                 return false;
             }
 
@@ -62,7 +71,7 @@ module.exports = {
                     objectLink.link.length == 1 ||
                     fromItem.as.equal(tableName)
                 ) {
-                    source = fromItem.select.getColumnSource({server, node}, subLink);
+                    source = fromItem.select.getColumnSource({server, node, link: subLink});
                 }
             }
             else if ( fromItem.file ) {
@@ -74,7 +83,7 @@ module.exports = {
                     objectLink.link.length == 1 ||
                     fromItem.as.equal(tableName)
                 ) {
-                    source = node.parsed.getColumnSource({server, node}, subLink);
+                    source = node.parsed.getColumnSource({server, node, link: subLink});
                 }
             }
 
@@ -89,7 +98,7 @@ module.exports = {
                 return source;
             }
 
-            if ( options.throwError !== false ) {
+            if ( throwError !== false ) {
                 throw new Error(`column "${ objectLink.getLast() }" does not exist`);
             }
         }
@@ -158,7 +167,12 @@ module.exports = {
 
                 if ( fromLink.link[0].equal( withQuery.name ) ) {
                     let subLink = link.slice(-1);
-                    return withQuery.select.getColumnSource(params, subLink, {throwError: false});
+                    return withQuery.select.getColumnSource({
+                        server: params.server,
+                        node: params.node,
+                        link: subLink,
+                        throwError: false
+                    });
                 }
             }
         }
@@ -184,7 +198,12 @@ module.exports = {
         let Select = this.Coach.Select;
         let parentSelect = parentFromItem.findParentInstance(Select);
         if ( parentSelect ) {
-            return parentSelect.getColumnSource(params, objectLink, {_childFromItem: parentFromItem});
+            return parentSelect.getColumnSource({
+                server: params.server,
+                node: params.node,
+                link: objectLink,
+                childFromItem: parentFromItem
+            });
         }
     }
 };

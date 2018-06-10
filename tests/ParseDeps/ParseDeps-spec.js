@@ -24,8 +24,8 @@ function testGetDbColumn(test) {
                 let select = coach.parseSelect();
 
                 select.getColumnSource({
-                    server
-                }, link);
+                    server, link
+                });
 
                 assert.ok(false, `expected error ${ test.link } in
                          ${ test.node }`);
@@ -38,8 +38,8 @@ function testGetDbColumn(test) {
             let select = coach.parseSelect();
 
             let source = select.getColumnSource({
-                server
-            }, link);
+                server, link
+            });
 
             let testSource = test.source;
             if ( typeof testSource == "function" ) {

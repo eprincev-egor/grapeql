@@ -67,11 +67,11 @@ function testReplaceLinks(test) {
 
         let isEqual = !!weakDeepEqual(expression, expectedExpression);
         let isEqualClone = !!weakDeepEqual(cloneExpression, expectedExpression);
-        
+
         if ( !isEqual ) {
             console.log("break here");
         }
-        
+
         if ( !isEqualClone ) {
             console.log("break here");
         }
@@ -123,8 +123,9 @@ function testGetDbColumn(test) {
         let select = coach.parseSelect();
 
         select.getColumnSource({
-            server
-        }, link);
+            server,
+            link
+        });
     });
 }
 
