@@ -103,29 +103,12 @@ class Select extends Syntax {
     }
 
     parseWith(coach) {
-        if ( !coach.isWord("with") ) {
-            this.with = [];
-            return;
-        }
-        coach.expectWord("with");
-        coach.skipSpace();
-
-        if ( coach.isWord("recursive") ) {
-            coach.expectWord("recursive");
+        if ( coach.isWith() ) {
+            this.with = coach.parseWith();
+            this.addChild(this.with);
+            
             coach.skipSpace();
-            this.withRecursive = true;
         }
-
-        // with_query_name [ ( column_name [, ...] ) ] AS ( select  )
-        let queries = coach.parseComma("WithQuery");
-
-        if ( !queries.length ) {
-            coach.throwError("expected with_query");
-        }
-        queries.map(query => this.addChild(query));
-
-        this.with = queries;
-        coach.skipSpace();
     }
 
     parseFrom(coach) {
@@ -372,7 +355,7 @@ class Select extends Syntax {
     }
 
     is(coach) {
-        return coach.isWord("select") || coach.isWord("with");
+        return coach.isWord("select") || coach.isWith();
     }
 
     _validate() {
@@ -381,19 +364,6 @@ class Select extends Syntax {
 
         this.from.forEach(fromItem => {
             this._validateFromItem( fromMap, fromItem );
-        });
-
-        // validate with
-        let withMap = {};
-
-        this.with && this.with.forEach(query => {
-            let name = query.name.word || query.name.content;
-
-            if ( name in withMap ) {
-                throw new Error(`WITH query name "${ name }" specified more than once`);
-            }
-
-            withMap[ name ] = query;
         });
     }
 
@@ -456,11 +426,8 @@ class Select extends Syntax {
         let clone = new Select();
 
         if ( this.with ) {
-            if ( this.withRecursive ) {
-                clone.withRecursive = true;
-            }
-            clone.with = this.with.map(item => item.clone());
-            clone.with.map(item => clone.addChild(item));
+            clone.with = this.with.clone();
+            clone.addChild(clone.with);
         }
 
         clone.columns = this.columns.map(item => item.clone());
@@ -551,12 +518,8 @@ class Select extends Syntax {
     toString() {
         let out = "";
 
-        if ( this.with && this.with.length ) {
-            out += "with ";
-            if ( this.withRecursive ) {
-                out += "recursive ";
-            }
-            out += this.with.map(item => item.toString()).join(", ");
+        if ( this.with ) {
+            out += this.with.toString();
             out += " ";
         }
 

@@ -37,6 +37,14 @@ class ObjectName extends DoubleQuotes {
             return super.toString();
         }
     }
+    
+    toLowerCase() {
+        if ( this.word ) {
+            return this.word.toLowerCase();
+        } else {
+            return this.content;
+        }
+    }
 
     equal(anotherObject) {
         if ( this.word && anotherObject.word ) {

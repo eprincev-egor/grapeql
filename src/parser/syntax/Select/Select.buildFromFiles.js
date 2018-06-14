@@ -40,6 +40,7 @@ module.exports = {
         const ObjectName = this.Coach.ObjectName;
         const Join = this.Coach.Join;
         const Select = this.Coach.Select;
+        const With = this.Coach.With;
 
         let isJoin = fromItem.parent instanceof Join;
         let isManyFrom = (
@@ -142,19 +143,20 @@ module.exports = {
 
         if ( nodeSelect.with ) {
             if ( !this.with ) {
-                this.with = [];
+                this.with = new With();
             }
-            nodeSelect.with.forEach(withQuery => {
+            nodeSelect.with.queriesArr.forEach(withQuery => {
                 withQuery = withQuery.clone();
                 let oldName = withQuery.name;
                 let newName = `"${ trimQuotes( newNodeAlias.toString() ) }.${ trimQuotes( oldName.toString() ) }"`;
                 newName = new ObjectName(newName);
                 withQuery.name = newName;
 
-                this.with.push(withQuery);
+                this.with.queriesArr.push(withQuery);
+                this.with.queries[ newName.toLowerCase() ] = withQuery;
 
-                if ( nodeSelect.withRecursive ) {
-                    this.withRecursive = true;
+                if ( nodeSelect.with.recursive ) {
+                    this.with.recursive = true;
                 }
 
                 this.eachFromItem(fromItem => {

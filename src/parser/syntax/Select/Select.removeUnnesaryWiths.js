@@ -6,8 +6,8 @@ module.exports = {
             return;
         }
 
-        for (let n = this.with.length, i = n - 1; i >= 0; i--) {
-            let withQuery = this.with[ i ];
+        for (let n = this.with.queriesArr.length, i = n - 1; i >= 0; i--) {
+            let withQuery = this.with.queriesArr[ i ];
 
             if ( this._isUsedWith({withQuery, checkWith: false}) ) {
                 continue;
@@ -15,7 +15,7 @@ module.exports = {
 
             let isUsedInNextWiths = false;
             for (let j = i + 1; j < n; j++) {
-                let nextWithQuery = this.with[ j ];
+                let nextWithQuery = this.with.queriesArr[ j ];
 
                 isUsedInNextWiths = (
                     isUsedInNextWiths ||
@@ -31,7 +31,8 @@ module.exports = {
                 continue;
             }
 
-            this.with.splice(i, 1);
+            this.with.queriesArr.splice(i, 1);
+            delete this.with.queries[ withQuery.name.toLowerCase() ];
             n--;
         }
     },
@@ -70,7 +71,7 @@ module.exports = {
     },
 
     _hasWith(name) {
-        return this.with.some(
+        return this.with && this.with.queriesArr.some(
             withQuery => withQuery.name.equal(name)
         );
     }

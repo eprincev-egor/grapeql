@@ -158,8 +158,8 @@ module.exports = {
 
     _findByWithQuery(params, fromLink, link, _childWithQuery) {
         if ( this.with ) {
-            for (let i = 0, n = this.with.length; i < n; i++) {
-                let withQuery = this.with[ i ];
+            for (let i = 0, n = this.with.queriesArr.length; i < n; i++) {
+                let withQuery = this.with.queriesArr[ i ];
 
                 if ( withQuery == _childWithQuery ) {
                     break;
