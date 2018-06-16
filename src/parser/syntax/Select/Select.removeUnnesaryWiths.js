@@ -31,9 +31,15 @@ module.exports = {
                 continue;
             }
 
+            this.with.removeChild(withQuery);
             this.with.queriesArr.splice(i, 1);
             delete this.with.queries[ withQuery.name.toLowerCase() ];
             n--;
+        }
+
+        if ( this.with.isEmpty() ) {
+            this.removeChild(this.with);
+            delete this.with;
         }
     },
 

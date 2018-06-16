@@ -45,6 +45,7 @@
     - check double quotes in any from file
     - long names (64 max)
     - fix memory leaks
+    - out of memory
     - optimize
     - validations
 
@@ -62,6 +63,11 @@
     )
     on update ... set where
         ...reverse query...
+
+# clinet lib
+    - ws
+    - scheme
+    - any crud
 
 # extention
     extention name for table (
