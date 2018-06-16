@@ -66,6 +66,9 @@ GrapeQLCoach.addSyntax("CacheReverseExpression", require("./syntax/CacheReverseE
 GrapeQLCoach.addSyntax("CacheFor", require("./syntax/CacheFor"));
 GrapeQLCoach.addSyntax("With", require("./syntax/With"));
 GrapeQLCoach.addSyntax("Delete", require("./syntax/Delete"));
+GrapeQLCoach.addSyntax("ValueItem", require("./syntax/ValueItem"));
+GrapeQLCoach.addSyntax("ValuesRow", require("./syntax/ValuesRow"));
+GrapeQLCoach.addSyntax("Insert", require("./syntax/Insert"));
 
 GrapeQLCoach.parseEntity = function(str) {
     let coach = new GrapeQLCoach(str);

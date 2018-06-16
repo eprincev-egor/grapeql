@@ -14,10 +14,16 @@
 		+ window functions
         + agg_func() filter (where ...)
         + delete
+          - RETURNING
         - insert
+          - RETURNING
         - update
         - with values
+        - with update
+        - with insert
+        - with delete
         - format sql
+        - collate
 
 # QueryBuilder:
     + where

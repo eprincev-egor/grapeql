@@ -4260,7 +4260,26 @@ tests.Delete = [
                             }]
                         }
                     }
-                }
+                },
+                queriesArr: [
+                    {
+                        name: {word: "some_orders"},
+                        select: {
+                            columns: [{
+                                expression: {elements: [
+                                    {link: [
+                                        "*"
+                                    ]}
+                                ]}
+                            }],
+                            from: [{
+                                table: {link: [
+                                    {word: "orders"}
+                                ]}
+                            }]
+                        }
+                    }
+                ]
             },
             table: {link: [
                 {word: "companies"}
@@ -4285,6 +4304,162 @@ tests.Delete = [
                     }]
                 }}
             ]}
+        }
+    }
+];
+
+tests.ValueItem = [
+    {
+        str: "default",
+        result: {
+            default: true
+        }
+    },
+    {
+        str: "1.1",
+        result: {
+            expression: {elements: [
+                {number: "1.1"}
+            ]}
+        }
+    }
+];
+
+tests.ValuesRow = [
+    {
+        str: "(default)",
+        result: {
+            items: [{default: true}]
+        }
+    }
+];
+
+tests.Insert = [
+    {
+        str: "insert into orders default values",
+        result: {
+            table: {link: [
+                {word: "orders"}
+            ]},
+            defaultValues: true
+        }
+    },
+    {
+        str: "insert into orders as Order default values",
+        result: {
+            table: {link: [
+                {word: "orders"}
+            ]},
+            as: {word: "Order"},
+            defaultValues: true
+        }
+    },
+    {
+        str: "insert into orders values (1,2), (3, 4)",
+        result: {
+            table: {link: [
+                {word: "orders"}
+            ]},
+            values: [
+                {items: [
+                    {expression: {elements: [
+                        {number: "1"}
+                    ]}},
+                    {expression: {elements: [
+                        {number: "2"}
+                    ]}}
+                ]},
+                {items: [
+                    {expression: {elements: [
+                        {number: "3"}
+                    ]}},
+                    {expression: {elements: [
+                        {number: "4"}
+                    ]}}
+                ]}
+            ]
+        }
+    },
+    {
+        str: "insert into orders (id_country) values (default)",
+        result: {
+            table: {link: [
+                {word: "orders"}
+            ]},
+            columns: [
+                {word: "id_country"}
+            ],
+            values: [
+                {items: [
+                    {default: true}
+                ]}
+            ]
+        }
+    },
+    {
+        str: "insert into orders select 1",
+        result: {
+            table: {link: [
+                {word: "orders"}
+            ]},
+            select: {
+                columns: [
+                    {expression: {elements: [
+                        {number: "1"}
+                    ]}}
+                ]
+            }
+        }
+    },
+    {
+        str: "with x1 as (select 2) insert into orders select * from x1",
+        result: {
+            with: {
+                queries: {
+                    x1: {
+                        name: {word: "x1"},
+                        select: {
+                            columns: [{
+                                expression: {elements: [
+                                    {number: "2"}
+                                ]}
+                            }]
+                        }
+                    }
+                },
+                queriesArr: [
+                    {
+                        name: {word: "x1"},
+                        select: {
+                            columns: [{
+                                expression: {elements: [
+                                    {number: "2"}
+                                ]}
+                            }]
+                        }
+                    }
+                ]
+            },
+            table: {link: [
+                {word: "orders"}
+            ]},
+            select: {
+                columns: [
+                    {
+                        as: null,
+                        expression: {elements: [
+                            {link: [
+                                "*"
+                            ]}
+                        ]}
+                    }
+                ],
+                from: [{
+                    table: {link: [
+                        {word: "x1"}
+                    ]}
+                }]
+            }
         }
     }
 ];
