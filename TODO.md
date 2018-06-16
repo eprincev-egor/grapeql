@@ -15,9 +15,10 @@
         + agg_func() filter (where ...)
         + delete
           - RETURNING
-        - insert
+        + insert
           - RETURNING
-        - update
+          - conflict_target [ COLLATE collation ] [ opclass ]
+        + update
         - with values
         - with update
         - with insert

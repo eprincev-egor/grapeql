@@ -70,6 +70,18 @@ class OnConflict extends Syntax {
 
             coach.expectWord("set");
             coach.skipSpace();
+
+            this.updateSet = coach.parseComma("SetItem");
+            this.updateSet.forEach(setItem => this.addChild(setItem));
+            coach.skipSpace();
+
+            if ( coach.isWord("where") ) {
+                coach.expectWord("where");
+                coach.skipSpace();
+
+                this.updateWhere = coach.parseExpression();
+                this.addChild(this.updateWhere);
+            }
         }
     }
 
@@ -96,6 +108,14 @@ class OnConflict extends Syntax {
 
         if ( this.doNothing ) {
             clone.doNothing = true;
+        } else {
+            clone.updateSet = this.updateSet.map(setItem => setItem.clone());
+            clone.updateSet.forEach(setItem => this.addChild(setItem));
+
+            if ( this.updateWhere ) {
+                clone.updateWhere = this.updateWhere.clone();
+                clone.addChild(clone.updateWhere);
+            }
         }
 
         return clone;
@@ -121,6 +141,14 @@ class OnConflict extends Syntax {
 
         if ( this.doNothing ) {
             out += "do nothing";
+        } else {
+            out += "do update set ";
+            out += this.updateSet.map(setItem => setItem.toString()).join(", ");
+
+            if ( this.updateWhere ) {
+                out += " where ";
+                out += this.updateWhere.toString();
+            }
         }
 
         return out;
