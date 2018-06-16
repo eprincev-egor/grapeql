@@ -85,6 +85,12 @@ class Insert extends Syntax {
             this.select = coach.parseSelect();
             this.addChild(this.select);
         }
+
+        coach.skipSpace();
+        if ( coach.isOnConflict() ) {
+            this.onConflict = coach.parseOnConflict();
+            this.addChild(this.onConflict);
+        }
     }
 
     is(coach) {
@@ -124,6 +130,11 @@ class Insert extends Syntax {
             clone.addChild(clone.select);
         }
 
+        if ( this.onConflict ) {
+            clone.onConflict = this.onConflict.clone();
+            clone.addChild(clone.onConflict);
+        }
+
         return clone;
     }
 
@@ -159,6 +170,11 @@ class Insert extends Syntax {
         else {
             out += " ";
             out += this.select.toString();
+        }
+
+        if ( this.onConflict ) {
+            out += " ";
+            out += this.onConflict.toString();
         }
 
         return out;

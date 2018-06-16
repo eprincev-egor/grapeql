@@ -4461,6 +4461,102 @@ tests.Insert = [
                 }]
             }
         }
+    },
+    {
+        str: "insert into companies (id, name) values (1, 'Test') on conflict (id) do nothing",
+        result: {
+            table: {link: [
+                {word: "companies"}
+            ]},
+            columns: [
+                {word: "id"},
+                {word: "name"}
+            ],
+            values: [
+                {items: [
+                    {expression: {elements: [
+                        {number: "1"}
+                    ]}},
+                    {expression: {elements: [
+                        {content: "Test"}
+                    ]}}
+                ]}
+            ],
+            onConflict: {
+                target: [
+                    {column: {word: "id"}}
+                ],
+                doNothing: true
+            }
+        }
+    },
+    {
+        str: "insert into companies (id, name) values (1, 'Test') on conflict (id) where id > 0 do nothing",
+        result: {
+            table: {link: [
+                {word: "companies"}
+            ]},
+            columns: [
+                {word: "id"},
+                {word: "name"}
+            ],
+            values: [
+                {items: [
+                    {expression: {elements: [
+                        {number: "1"}
+                    ]}},
+                    {expression: {elements: [
+                        {content: "Test"}
+                    ]}}
+                ]}
+            ],
+            onConflict: {
+                target: [
+                    {column: {word: "id"}}
+                ],
+                where: {elements: [
+                    {link: [
+                        {word: "id"}
+                    ]},
+                    {operator: ">"},
+                    {number: "0"}
+                ]},
+                doNothing: true
+            }
+        }
+    },
+    {
+        str: "insert into companies (id, name) values (1, 'Test') on conflict on constraint some_constraint_name where id > 0 do nothing",
+        result: {
+            table: {link: [
+                {word: "companies"}
+            ]},
+            columns: [
+                {word: "id"},
+                {word: "name"}
+            ],
+            values: [
+                {items: [
+                    {expression: {elements: [
+                        {number: "1"}
+                    ]}},
+                    {expression: {elements: [
+                        {content: "Test"}
+                    ]}}
+                ]}
+            ],
+            onConflict: {
+                constraint: {word: "some_constraint_name"},
+                where: {elements: [
+                    {link: [
+                        {word: "id"}
+                    ]},
+                    {operator: ">"},
+                    {number: "0"}
+                ]},
+                doNothing: true
+            }
+        }
     }
 ];
 

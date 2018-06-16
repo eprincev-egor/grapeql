@@ -68,6 +68,8 @@ GrapeQLCoach.addSyntax("With", require("./syntax/With"));
 GrapeQLCoach.addSyntax("Delete", require("./syntax/Delete"));
 GrapeQLCoach.addSyntax("ValueItem", require("./syntax/ValueItem"));
 GrapeQLCoach.addSyntax("ValuesRow", require("./syntax/ValuesRow"));
+GrapeQLCoach.addSyntax("ConflictTargetItem", require("./syntax/ConflictTargetItem"));
+GrapeQLCoach.addSyntax("OnConflict", require("./syntax/OnConflict"));
 GrapeQLCoach.addSyntax("Insert", require("./syntax/Insert"));
 
 GrapeQLCoach.parseEntity = function(str) {
