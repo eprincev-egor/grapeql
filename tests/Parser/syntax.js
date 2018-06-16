@@ -414,7 +414,7 @@ tests.Expression = [
         }
     },
     {
-        str: "{user}::bigint % 4",
+        str: "$user::bigint % 4",
         result: {
             elements: [
                 {name: "user"},
@@ -3057,23 +3057,35 @@ tests.Select = [
 
 tests.SystemVariable = [
     {
-        str: "{x}",
+        str: "$x",
         result: {name: "x"}
     },
     {
-        str: "{X}",
+        str: "$X",
         result: {name: "X"}
     },
     {
-        str: "{$Any_Variable}",
+        str: "$_",
+        result: {name: "_"}
+    },
+    {
+        str: "$x1",
+        result: {name: "x1"}
+    },
+    {
+        str: "$Ёё",
+        result: {name: "Ёё"}
+    },
+    {
+        str: "$$Any_Variable",
         result: {name: "$Any_Variable"}
     },
     {
-        str: "{Привет}",
+        str: "$Привет",
         result: {name: "Привет"}
     },
     {
-        str: "{}",
+        str: "$",
         error: Error
     }
 ];
