@@ -65,6 +65,7 @@ GrapeQLCoach.addSyntax("WindowItem", require("./syntax/WindowItem"));
 GrapeQLCoach.addSyntax("CacheReverseExpression", require("./syntax/CacheReverseExpression"));
 GrapeQLCoach.addSyntax("CacheFor", require("./syntax/CacheFor"));
 GrapeQLCoach.addSyntax("With", require("./syntax/With"));
+GrapeQLCoach.addSyntax("Delete", require("./syntax/Delete"));
 
 GrapeQLCoach.parseEntity = function(str) {
     let coach = new GrapeQLCoach(str);

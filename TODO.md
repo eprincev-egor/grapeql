@@ -13,6 +13,9 @@
 		+ expression IS NOT UNKNOWN
 		+ window functions
         + agg_func() filter (where ...)
+        + delete
+        - insert
+        - update
         - with values
         - format sql
 
