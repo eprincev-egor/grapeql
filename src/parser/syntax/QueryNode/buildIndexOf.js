@@ -10,7 +10,7 @@ module.exports = {
         row,
         where
     }) {
-        let select = this.clone();
+        let select = this.select.clone();
 
         select.clearColumns();
 
@@ -20,36 +20,40 @@ module.exports = {
         row = new Filter(row);
         let rowColumns = row.getColumns();
 
-        select.buildColumns({
+        this.buildColumns({
+            select,
             columns: rowColumns,
-            originalSelect: this
+            originalSelect: this.select
         });
 
         select.addColumn("row_number() over() as grapeql_row_index");
 
         if ( orderBy ) {
-            select.buildOrderBy({
+            this.buildOrderBy({
+                select,
                 orderBy,
-                originalSelect: this
+                originalSelect: this.select
             });
         }
 
         if ( where ) {
-            select.buildWhere({
+            this.buildWhere({
+                select,
                 where,
-                originalSelect: this,
+                originalSelect: this.select,
                 node,
                 server
             });
         }
 
-        select.buildFromFiles({ server });
+        this.buildFromFiles({ server, select });
 
         let sqlModel = this.buildSqlModelByColumns({
+            select,
             node,
             server,
             columns: rowColumns,
-            originalSelect: this
+            originalSelect: this.select
         });
         for (let key in sqlModel) {
             let elem = sqlModel[key];

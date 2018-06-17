@@ -12,30 +12,33 @@ module.exports = {
         offset,
         limit
     }) {
-        let select = this.clone();
+        let select = this.select.clone();
 
-        select.buildColumns({
+        this.buildColumns({
+            select,
             columns,
-            originalSelect: this
+            originalSelect: this.select
         });
 
         if ( where ) {
-            select.buildWhere({
+            this.buildWhere({
+                select,
                 where,
-                originalSelect: this,
+                originalSelect: this.select,
                 node,
                 server
             });
         }
 
         if ( orderBy ) {
-            select.buildOrderBy({
+            this.buildOrderBy({
+                select,
                 orderBy,
-                originalSelect: this
+                originalSelect: this.select
             });
         }
 
-        select.buildFromFiles({ server });
+        this.buildFromFiles({ server, select });
 
         if ( limit != null && limit != "all" ) {
             select.setLimit(limit);
@@ -48,8 +51,8 @@ module.exports = {
         return select;
     },
 
-    buildColumns({originalSelect, columns}) {
-        this.clearColumns();
+    buildColumns({select, originalSelect, columns}) {
+        select.clearColumns();
 
         columns.forEach(key => {
             let keyParts = key.split(".");
@@ -61,37 +64,37 @@ module.exports = {
                     let last = link.getLast();
 
                     if ( last.strictEqualString(key) ) {
-                        this.addColumn(`${ definedColumn.expression }`);
+                        select.addColumn(`${ definedColumn.expression }`);
                         return;
                     }
                 }
 
-                this.addColumn(`${ definedColumn.expression } as "${ key }"`);
+                select.addColumn(`${ definedColumn.expression } as "${ key }"`);
                 return;
             }
 
             let columnKey = key;
             let fromItem;
             if ( keyParts.length > 1 ) {
-                fromItem = this.getFromItemByAlias( keyParts[0] );
+                fromItem = select.getFromItemByAlias( keyParts[0] );
                 columnKey = keyParts.slice(-1)[0];
             } else {
-                fromItem = this.from[0];
+                fromItem = select.from[0];
             }
 
             if ( columnKey == key ) {
                 let fromSql = fromItem.getAliasSql();
-                this.addColumn(`${ fromSql }.${ columnKey }`);
+                select.addColumn(`${ fromSql }.${ columnKey }`);
             } else {
-                this.addColumn(`${ key } as "${ key }"`);
+                select.addColumn(`${ key } as "${ key }"`);
             }
         });
     },
 
-    buildColumnExpression(key) {
+    buildColumnExpression({originalSelect, key}) {
         let keyParts = key.split(".");
 
-        let definedColumn = this.getColumnByAlias( key );
+        let definedColumn = originalSelect.getColumnByAlias( key );
         if ( definedColumn ) {
             return definedColumn.expression.toString();
         }
@@ -99,10 +102,10 @@ module.exports = {
         let columnKey = key;
         let fromItem;
         if ( keyParts.length > 1 ) {
-            fromItem = this.getFromItemByAlias( keyParts[0] );
+            fromItem = originalSelect.getFromItemByAlias( keyParts[0] );
             columnKey = keyParts.slice(-1)[0];
         } else {
-            fromItem = this.from[0];
+            fromItem = originalSelect.from[0];
         }
 
         if ( columnKey == key ) {
@@ -113,7 +116,11 @@ module.exports = {
         }
     },
 
-    buildWhere({where, originalSelect, node, server}) {
+    buildWhere({
+        select,
+        where, originalSelect,
+        node, server
+    }) {
         where = new Filter(where);
 
         let columns = where.getColumns();
@@ -125,7 +132,7 @@ module.exports = {
         });
 
         let whereSql = where.toSql( sqlModel );
-        this.addWhere( whereSql );
+        select.addWhere( whereSql );
     },
 
     buildSqlModelByColumns({
@@ -135,12 +142,16 @@ module.exports = {
         originalSelect
     }) {
         let sqlModel = {};
+
         columns.forEach(key => {
             if ( key in sqlModel ) {
                 return;
             }
 
-            let expression = originalSelect.buildColumnExpression(key);
+            let expression = this.buildColumnExpression({
+                key,
+                originalSelect
+            });
             let type = originalSelect.getExpressionType({
                 expression,
                 node,
@@ -155,7 +166,10 @@ module.exports = {
         return sqlModel;
     },
 
-    buildOrderBy({orderBy, originalSelect}) {
+    buildOrderBy({
+        select, orderBy,
+        originalSelect
+    }) {
         if ( typeof orderBy == "string" ) {
             orderBy = [orderBy];
         }
@@ -185,58 +199,8 @@ module.exports = {
                 throw new Error("invalid orderBy vector: " + vector);
             }
 
-            let expression = originalSelect.buildColumnExpression(key);
-            this.unshiftOrderByElement(`${ expression } ${ vector }`);
+            let expression = this.buildColumnExpression({originalSelect, key});
+            select.unshiftOrderByElement(`${ expression } ${ vector }`);
         }
-    },
-
-    getExpressionType({expression, node, server}) {
-        expression = new this.Coach.Expression(expression);
-        expression.parent = this;
-
-        let type = expression.getType({
-            node,
-            server
-        });
-
-        delete expression.parent;
-        return type;
-    },
-
-    addWhere(sql) {
-        if ( this.where ) {
-            sql = `( ${ this.where } ) and ${ sql }`;
-            this.removeChild( this.where );
-        }
-
-        let coach = new this.Coach(sql);
-        coach.skipSpace();
-
-        this.where = coach.parseExpression();
-        this.addChild(this.where);
-    },
-
-    unshiftOrderByElement(sql) {
-        if ( !this.orderBy ) {
-            this.orderBy = [];
-        }
-        let orderByElement = new this.Coach.OrderByElement(sql);
-        this.orderBy.unshift(orderByElement);
-        this.addChild(orderByElement);
-    },
-
-    setLimit(limit) {
-        if ( limit < 0 ) {
-            throw new Error("limit must be 'all' or positive number: " + limit);
-        }
-        this.limit = limit;
-    },
-
-    setOffset(offset) {
-        if ( offset < 0 ) {
-            throw new Error("offset must by positive number: " + offset);
-        }
-
-        this.offset = offset;
     }
 };

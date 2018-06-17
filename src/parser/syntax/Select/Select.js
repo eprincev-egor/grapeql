@@ -5,17 +5,10 @@ const Syntax = require("../Syntax");
 let methods = [
     require("./Select.removeUnnesaryJoins"),
     require("./Select.removeUnnesaryWiths"),
-    require("./Select.getColumnSource"),
-    require("./Select.buildFromFiles"),
-    require("./Select.buildCount"),
-    require("./Select.buildDelete"),
-    require("./Select.buildIndexOf"),
-    require("./Select.buildInsert"),
-    require("./Select.buildSelect"),
-    require("./Select.buildUpdate")
+    require("./Select.getColumnSource")
 ];
 
-const {PUBLIC_SCHEMA_NAME} = require("./helpers");
+const {PUBLIC_SCHEMA_NAME} = require("../helpers");
 
 // https://www.postgresql.org/docs/9.5/static/sql-select.html
 /*
@@ -106,7 +99,7 @@ class Select extends Syntax {
         if ( coach.isWith() ) {
             this.with = coach.parseWith();
             this.addChild(this.with);
-            
+
             coach.skipSpace();
         }
     }
@@ -735,6 +728,57 @@ class Select extends Syntax {
         //         }
         //     }
         // });
+    }
+
+
+    getExpressionType({expression, node, server}) {
+        expression = new this.Coach.Expression(expression);
+        expression.parent = this;
+
+        let type = expression.getType({
+            node,
+            server
+        });
+
+        delete expression.parent;
+        return type;
+    }
+
+    addWhere(sql) {
+        if ( this.where ) {
+            sql = `( ${ this.where } ) and ${ sql }`;
+            this.removeChild( this.where );
+        }
+
+        let coach = new this.Coach(sql);
+        coach.skipSpace();
+
+        this.where = coach.parseExpression();
+        this.addChild(this.where);
+    }
+
+    unshiftOrderByElement(sql) {
+        if ( !this.orderBy ) {
+            this.orderBy = [];
+        }
+        let orderByElement = new this.Coach.OrderByElement(sql);
+        this.orderBy.unshift(orderByElement);
+        this.addChild(orderByElement);
+    }
+
+    setLimit(limit) {
+        if ( limit < 0 ) {
+            throw new Error("limit must be 'all' or positive number: " + limit);
+        }
+        this.limit = limit;
+    }
+
+    setOffset(offset) {
+        if ( offset < 0 ) {
+            throw new Error("offset must by positive number: " + offset);
+        }
+
+        this.offset = offset;
     }
 }
 

@@ -78,13 +78,13 @@ GrapeQLCoach.addSyntax("TableConstraint", require("./syntax/TableConstraint"));
 GrapeQLCoach.addSyntax("Extention", require("./syntax/Extention"));
 GrapeQLCoach.addSyntax("VariableDefinition", require("./syntax/VariableDefinition"));
 GrapeQLCoach.addSyntax("Declare", require("./syntax/Declare"));
-GrapeQLCoach.addSyntax("QueryNode", require("./syntax/QueryNode"));
+GrapeQLCoach.addSyntax("QueryNode", require("./syntax/QueryNode/QueryNode"));
 
 GrapeQLCoach.parseEntity = function(str) {
     let coach = new GrapeQLCoach(str);
     coach.replaceComments();
     coach.skipSpace();
-    return coach.parseSelect();
+    return coach.parseQueryNode();
 };
 
 

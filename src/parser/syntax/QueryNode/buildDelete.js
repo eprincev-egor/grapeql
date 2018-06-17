@@ -1,20 +1,18 @@
 "use strict";
 
-const {getNode, getDbTable} = require("./helpers");
+const {getNode, getDbTable} = require("../helpers");
 const Filter = require("../../../filter/Filter");
 
 module.exports = {
     buildDelete({
         server,
-        where,
-        limit,
-        offset
+        where
     }) {
-        if ( this.from.length > 1 ) {
+        if ( this.select.from.length > 1 ) {
             throw new Error("can't build delete with many froms");
         }
 
-        let fromItem = this.from[0];
+        let fromItem = this.select.from[0];
         if ( !fromItem.table && !fromItem.file ) {
             throw new Error("fromItem must be table or file");
         }
@@ -27,7 +25,7 @@ module.exports = {
 
             return node.parsed.buildDelete({
                 server,
-                where, offset, limit
+                where
             });
         }
 
@@ -58,14 +56,6 @@ module.exports = {
 
             let whereSql = where.toSql( sqlModel );
             sql += " where " + whereSql;
-        }
-
-        if ( offset != null && offset > 0 ) {
-            sql += " offset " + offset;
-        }
-
-        if ( limit != null && limit != "all" ) {
-            sql += " limit " + limit;
         }
 
         return sql;

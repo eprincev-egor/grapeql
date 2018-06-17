@@ -1,6 +1,6 @@
 "use strict";
 
-const {getNode, getDbTable} = require("./helpers");
+const {getNode, getDbTable} = require("../helpers");
 const {value2sql} = require("../../../helpers");
 
 module.exports = {
@@ -8,11 +8,11 @@ module.exports = {
         server,
         row
     }) {
-        if ( this.from.length > 1 ) {
+        if ( this.select.from.length > 1 ) {
             throw new Error("can't build insert with many froms");
         }
 
-        let fromItem = this.from[0];
+        let fromItem = this.select.from[0];
         if ( !fromItem.table && !fromItem.file ) {
             throw new Error("fromItem must be table or file");
         }

@@ -18,7 +18,7 @@ const {
     objectLink2schmeTableColumn,
     getDbTable,
     getNode
-} = require("./Select/helpers");
+} = require("./helpers");
 
 class Join extends Syntax {
     parse(coach) {
@@ -102,10 +102,10 @@ class Join extends Syntax {
     isRemovable({ server }) {
         let fromLink = this.from.toTableLink();
 
-        if ( 
-            this.type == "left join" && 
-            this.on && 
-            (this.from.table || this.from.file) 
+        if (
+            this.type == "left join" &&
+            this.on &&
+            (this.from.table || this.from.file)
         ) {
             let isConstraintExpression = true,
                 constraintColumns = [],
@@ -131,11 +131,11 @@ class Join extends Syntax {
 
             if ( isConstraintExpression ) {
                 let dbTable;
-                
+
                 try {
                     if ( this.from.file ) {
                         let node = getNode(this.from.file, server);
-                        dbTable = getDbTable( server, node.parsed.from[0].table );
+                        dbTable = getDbTable( server, node.parsed.select.from[0].table );
                     } else {
                         dbTable = getDbTable( server, this.from.table );
                     }

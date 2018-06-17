@@ -1,6 +1,6 @@
 "use strict";
 
-const {getDbTable} = require("./helpers");
+const {getDbTable} = require("../helpers");
 const {value2sql} = require("../../../helpers");
 
 module.exports = {
@@ -29,7 +29,7 @@ module.exports = {
                 key = columnLink.split(".").slice(-1)[0];
             }
 
-            let fromItem = select._getFromItemByColumnKey(columnLink);
+            let fromItem = this._getFromItemByColumnKey({select, columnLink});
             let dbColumn = this._getDbColumnByColumnLink({
                 server, fromItem,
                 columnLink, key
@@ -89,16 +89,16 @@ module.exports = {
         return dbColumn;
     },
 
-    _getFromItemByColumnKey(columnLink) {
+    _getFromItemByColumnKey({select, columnLink}) {
         let base = columnLink.split(".").slice(0, -1).join(".");
         if ( !base ) {
-            return this.from[0];
+            return select.from[0];
         }
 
         let link = new this.Coach.ObjectLink(base);
         let outFromItem;
 
-        this.eachFromItem(fromItem => {
+        select.eachFromItem(fromItem => {
             let tableLink = fromItem.toTableLink();
 
             if ( tableLink.equalLink(link) ) {

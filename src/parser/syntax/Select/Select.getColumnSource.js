@@ -7,7 +7,7 @@ const {
     getDbColumn,
     getDbTable,
     getNode
-} = require("./helpers");
+} = require("../helpers");
 
 module.exports = {
     getColumnSource({
@@ -83,7 +83,7 @@ module.exports = {
                     objectLink.link.length == 1 ||
                     fromItem.as.equal(tableName)
                 ) {
-                    source = node.parsed.getColumnSource({server, node, link: subLink});
+                    source = node.parsed.select.getColumnSource({server, node, link: subLink});
                 }
             }
 

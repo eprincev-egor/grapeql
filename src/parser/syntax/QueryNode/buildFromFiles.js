@@ -1,19 +1,19 @@
 "use strict";
 
-const {getNode} = require("./helpers");
+const {getNode} = require("../helpers");
 
 module.exports = {
-    buildFromFiles({ server }) {
-        checkCircularDeps({select: this, server});
-        this._buildFromFiles({ server });
+    buildFromFiles({ server, select }) {
+        checkCircularDeps({ select: this.select, server });
+        this._buildFromFiles({ server, select });
     },
 
-    _buildFromFiles({ server }) {
-        this.removeUnnesaryJoins({ server });
-        this.removeUnnesaryWiths({ server });
+    _buildFromFiles({ server, select }) {
+        select.removeUnnesaryJoins({ server });
+        select.removeUnnesaryWiths({ server });
 
         let fileItems = [];
-        this.walk(child => {
+        select.walk(child => {
             if (
                 child instanceof this.Coach.FromItem &&
                 child.file
@@ -27,16 +27,17 @@ module.exports = {
 
         fileItems.forEach(fileItem => {
             let select = fileItem.findParentInstance(this.Coach.Select);
-            select._buildFromFile({
+            this._buildFromFile({
+                select,
                 server,
                 fromItem: fileItem
             });
         });
 
-        this._buildFromFiles({ server });
+        this._buildFromFiles({ server, select });
     },
 
-    _buildFromFile({ server, fromItem }) {
+    _buildFromFile({ select, server, fromItem }) {
         const ObjectName = this.Coach.ObjectName;
         const Join = this.Coach.Join;
         const Select = this.Coach.Select;
@@ -49,8 +50,8 @@ module.exports = {
         );
 
         let node = getNode(fromItem.file, server);
-        let nodeSelect = node.parsed;
-        let nodeFrom = node.parsed.from[0];
+        let nodeSelect = node.parsed.select;
+        let nodeFrom = nodeSelect.from[0];
 
         let oldNodeAlias = nodeFrom.getAliasSql();
         let newNodeAlias = fromItem.as || fromItem.file.toObjectName();
@@ -83,16 +84,16 @@ module.exports = {
 
             if ( oldAlias != newAlias ) {
                 join.replaceLink(oldAlias, newAlias);
-                this.replaceLink(newAliasWithoutQuotes, newAlias);
+                select.replaceLink(newAliasWithoutQuotes, newAlias);
             }
             join.replaceLink(oldNodeAlias, newNodeAlias);
 
 
             if ( isJoin || isManyFrom ) {
-                this.replaceLink(`${ newNodeAlias.toString() }.${ trimQuotes( oldAlias ) }`, newAlias);
+                select.replaceLink(`${ newNodeAlias.toString() }.${ trimQuotes( oldAlias ) }`, newAlias);
             } else {
                 if ( newAlias != oldAlias ) {
-                    this.replaceLink(`${ trimQuotes( oldAlias ) }`, newAlias);
+                    select.replaceLink(`${ trimQuotes( oldAlias ) }`, newAlias);
                 }
             }
 
@@ -130,7 +131,7 @@ module.exports = {
             let expression = column.expression.clone();
             expression.replaceLink(oldNodeAlias, newNodeAlias);
 
-            this.walk(child => {
+            select.walk(child => {
                 if ( !(child instanceof this.Coach.ColumnLink) ) {
                     return;
                 }
@@ -142,8 +143,8 @@ module.exports = {
         });
 
         if ( nodeSelect.with ) {
-            if ( !this.with ) {
-                this.with = new With();
+            if ( !select.with ) {
+                select.with = new With();
             }
             nodeSelect.with.queriesArr.forEach(withQuery => {
                 withQuery = withQuery.clone();
@@ -152,14 +153,15 @@ module.exports = {
                 newName = new ObjectName(newName);
                 withQuery.name = newName;
 
-                this.with.queriesArr.push(withQuery);
-                this.with.queries[ newName.toLowerCase() ] = withQuery;
+                select.with.queriesArr.push(withQuery);
+                select.with.queries[ newName.toLowerCase() ] = withQuery;
+                select.with.addChild(withQuery);
 
                 if ( nodeSelect.with.recursive ) {
-                    this.with.recursive = true;
+                    select.with.recursive = true;
                 }
 
-                this.eachFromItem(fromItem => {
+                select.eachFromItem(fromItem => {
                     if ( !fromItem.table ) {
                         return;
                     }
@@ -209,7 +211,7 @@ function checkCircularDeps({
         }
 
         let node = getNode(fromItem.file, server);
-        let nodeSelect = node.parsed;
+        let nodeSelect = node.parsed.select;
 
         if ( map.includes(nodeSelect) ) {
             throw new Error("circular dependency");

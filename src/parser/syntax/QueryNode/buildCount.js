@@ -6,7 +6,7 @@ module.exports = {
         server,
         where
     }) {
-        let select = this.clone();
+        let select = this.select.clone();
 
         select.clearColumns();
         select.addColumn("count(*) as count");
@@ -20,15 +20,16 @@ module.exports = {
 
 
         if ( where ) {
-            select.buildWhere({
+            this.buildWhere({
+                select,
                 where,
-                originalSelect: this,
+                originalSelect: this.select,
                 node,
                 server
             });
         }
 
-        select.buildFromFiles({ server });
+        this.buildFromFiles({ server, select });
 
         return select;
     }
