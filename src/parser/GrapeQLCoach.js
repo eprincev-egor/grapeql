@@ -73,6 +73,7 @@ GrapeQLCoach.addSyntax("OnConflict", require("./syntax/OnConflict"));
 GrapeQLCoach.addSyntax("Insert", require("./syntax/Insert"));
 GrapeQLCoach.addSyntax("SetItem", require("./syntax/SetItem"));
 GrapeQLCoach.addSyntax("Update", require("./syntax/Update"));
+GrapeQLCoach.addSyntax("ColumnDefinition", require("./syntax/ColumnDefinition"));
 
 GrapeQLCoach.parseEntity = function(str) {
     let coach = new GrapeQLCoach(str);

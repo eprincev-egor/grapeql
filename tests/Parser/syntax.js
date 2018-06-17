@@ -5195,4 +5195,195 @@ tests.Update = [
     }
 ];
 
+tests.ColumnDefinition = [
+    {
+        str: "name text",
+        result: {
+            name: {word: "name"},
+            type: {
+                type: "text"
+            }
+        }
+    },
+    {
+        str: "name text not null",
+        result: {
+            name: {word: "name"},
+            type: {
+                type: "text"
+            },
+            notNull: true
+        }
+    },
+    {
+        str: "name text unique",
+        result: {
+            name: {word: "name"},
+            type: {
+                type: "text"
+            },
+            unique: {}
+        }
+    },
+    {
+        str: "name text primary key",
+        result: {
+            name: {word: "name"},
+            type: {
+                type: "text"
+            },
+            primaryKey: {}
+        }
+    },
+    {
+        str: "name boolean not null default true",
+        result: {
+            name: {word: "name"},
+            type: {
+                type: "boolean"
+            },
+            notNull: true,
+            default: {elements: [
+                {boolean: true}
+            ]}
+        }
+    },
+    {
+        str: "name boolean default false",
+        result: {
+            name: {word: "name"},
+            type: {
+                type: "boolean"
+            },
+            default: {elements: [
+                {boolean: false}
+            ]}
+        }
+    },
+    {
+        str: "price numeric(10, 2) not null default 0 check( price>= 0)",
+        result: {
+            name: {word: "price"},
+            type: {
+                type: "numeric(10,2)"
+            },
+            notNull: true,
+            default: {elements: [
+                {number: "0"}
+            ]},
+            check: {elements: [
+                {link: [
+                    {word: "price"}
+                ]},
+                {operator: ">="},
+                {number: "0"}
+            ]}
+        }
+    },
+    {
+        str: "price numeric(10, 2) default 0 not null check( price>= 0)",
+        result: {
+            name: {word: "price"},
+            type: {
+                type: "numeric(10,2)"
+            },
+            notNull: true,
+            default: {elements: [
+                {number: "0"}
+            ]},
+            check: {elements: [
+                {link: [
+                    {word: "price"}
+                ]},
+                {operator: ">="},
+                {number: "0"}
+            ]}
+        }
+    },
+    {
+        str: "price numeric(10, 2) default 0 check( price>= 0) not null",
+        result: {
+            name: {word: "price"},
+            type: {
+                type: "numeric(10,2)"
+            },
+            notNull: true,
+            default: {elements: [
+                {number: "0"}
+            ]},
+            check: {elements: [
+                {link: [
+                    {word: "price"}
+                ]},
+                {operator: ">="},
+                {number: "0"}
+            ]}
+        }
+    },
+    {
+        str: "name text unique not deferrable initially immediate",
+        result: {
+            name: {word: "name"},
+            type: {
+                type: "text"
+            },
+            unique: {
+                deferrable: false,
+                initially: "immediate"
+            }
+        }
+    },
+    {
+        str: "name text unique not null",
+        result: {
+            name: {word: "name"},
+            type: {
+                type: "text"
+            },
+            unique: {},
+            notNull: true
+        }
+    },
+    {
+        str: "name text primary key initially deferred unique deferrable",
+        result: {
+            name: {word: "name"},
+            type: {
+                type: "text"
+            },
+            unique: {
+                deferrable: true
+            },
+            primaryKey: {
+                initially: "deferred"
+            }
+        }
+    },
+    {
+        str: "name text primary key initially deferred unique deferrable check(name ilike '%ooo%') default 'ooo'",
+        result: {
+            name: {word: "name"},
+            type: {
+                type: "text"
+            },
+            unique: {
+                deferrable: true
+            },
+            primaryKey: {
+                initially: "deferred"
+            },
+            check: {elements: [
+                {link: [
+                    {word: "name"}
+                ]},
+                {operator: "ilike"},
+                {content: "%ooo%"}
+            ]},
+            default: {elements: [
+                {content: "ooo"}
+            ]}
+        }
+    }
+];
+
 module.exports = tests;

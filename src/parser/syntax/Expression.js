@@ -70,8 +70,31 @@ class Expression extends Syntax {
             if ( result === false ) {
                 return;
             }
+            let lastOperator = this.elements.slice(-1)[0];
 
-            this.parseElements(coach, options);
+            // fix for:
+            // default 0 not null
+            if ( lastOperator.operator == "not" ) {
+                let coachPosition = lastOperator.startIndex;
+                let operatorIndex = this.elements.length - 1;
+
+                this.parseElements(coach, options);
+
+                let elem = this.elements[ operatorIndex + 1 ];
+
+                let isValidElem = !(elem instanceof this.Coach.PgNull);
+
+                if ( !isValidElem ) {
+                    coach.i = coachPosition;
+                    this.elements
+                        .splice(operatorIndex)
+                        .forEach(elem => this.removeChild(elem));
+                }
+            }
+
+            else {
+                this.parseElements(coach, options);
+            }
         }
     }
 
