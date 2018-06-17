@@ -40,6 +40,10 @@ class ColumnDefinition extends Syntax {
         this.parseElement(coach);
     }
 
+    getType() {
+        return this.type.type;
+    }
+
     parseName(coach) {
         this.name = coach.parseObjectName();
         this.addChild(this.name);

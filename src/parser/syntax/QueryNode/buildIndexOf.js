@@ -8,9 +8,15 @@ module.exports = {
         server,
         orderBy,
         row,
-        where
+        where,
+        vars
     }) {
         let select = this.select.clone();
+
+        this.buildVars({
+            select,
+            vars
+        });
 
         select.clearColumns();
 

@@ -86,6 +86,12 @@ GrapeQLCoach.parseEntity = function(str) {
     coach.skipSpace();
     return coach.parseQueryNode();
 };
+GrapeQLCoach.parseSelect = function(str) {
+    let coach = new GrapeQLCoach(str);
+    coach.replaceComments();
+    coach.skipSpace();
+    return coach.parseSelect();
+};
 
 
 

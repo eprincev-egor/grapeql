@@ -4,9 +4,15 @@ module.exports = {
     buildCount({
         node,
         server,
-        where
+        where,
+        vars
     }) {
         let select = this.select.clone();
+
+        this.buildVars({
+            select,
+            vars
+        });
 
         select.clearColumns();
         select.addColumn("count(*) as count");

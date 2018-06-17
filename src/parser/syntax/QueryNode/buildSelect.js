@@ -1,6 +1,7 @@
 "use strict";
 
 const Filter = require("../../../filter/Filter");
+const {value2sql} = require("../../../helpers");
 
 module.exports = {
     buildSelect({
@@ -10,9 +11,15 @@ module.exports = {
         where,
         orderBy,
         offset,
-        limit
+        limit,
+        vars
     }) {
         let select = this.select.clone();
+
+        this.buildVars({
+            select,
+            vars
+        });
 
         this.buildColumns({
             select,
@@ -49,6 +56,31 @@ module.exports = {
         }
 
         return select;
+    },
+
+    buildVars({ select, vars }) {
+        vars = vars || {};
+        
+        select.walk(variable => {
+            if ( !(variable instanceof this.Coach.SystemVariable) ) {
+                return;
+            }
+
+            let key = variable.toLowerCase();
+            let definition = this.declare.variables[ key ];
+            let value = vars[ "$" + key ];
+
+            if ( value == null && definition.notNull ) {
+                throw new Error(`expected not null value for variable: ${key}`);
+            }
+
+            let type = definition.getType();
+            let sqlValue = value2sql(type, value);
+            let expression = new this.Coach.Expression("" + sqlValue);
+            let element = expression.elements[0];
+
+            variable.parent.replaceElement(variable, element);
+        });
     },
 
     buildColumns({select, originalSelect, columns}) {
