@@ -49,5 +49,53 @@ module.exports = [
                 ]}
             }
         }
+    },
+    {
+        str: `select *
+        from orders
+        where
+            orders.id = 1
+        `,
+        result: {
+            select: {
+                columns: [
+                    {
+                        expression: {elements: [
+                            {link: ["*"]}
+                        ]}
+                    }
+                ],
+                from: [{
+                    table: {link: [
+                        {word: "orders"}
+                    ]}
+                }],
+                where: {elements: [
+                    {link: [
+                        {word: "orders"},
+                        {word: "id"}
+                    ]},
+                    {operator: "="},
+                    {number: "1"}
+                ]}
+            }
+        }
+    },
+    {// undefined variable
+        str: `select *
+        from orders
+        where
+            orders.id = $order_id
+        `,
+        error: Error
+    },
+    {// undefined variable
+        str: `declare $id_order bigint;
+        select *
+        from orders
+        where
+            orders.id = $order_id
+        `,
+        error: Error
     }
 ];
