@@ -35,6 +35,8 @@ class ColumnDefinition extends Syntax {
         this._parseElement(coach);
         // primary key
         this._parseElement(coach);
+        // references
+        this._parseElement(coach);
     }
 
     _parseElement(coach) {
@@ -87,6 +89,123 @@ class ColumnDefinition extends Syntax {
             coach.skipSpace();
 
             this.primaryKey = this._parseDeferrable(coach);
+        }
+
+        if ( !this.references && coach.isWord("references") ) {
+            coach.expectWord("references");
+            coach.skipSpace();
+
+            this.references = {};
+
+            this.references.table = coach.parseObjectLink();
+            this.addChild(this.references.table);
+            coach.skipSpace();
+
+            if ( coach.is("(") ) {
+                coach.expect("(");
+                coach.skipSpace();
+
+                this.references.column = coach.parseObjectName();
+                this.addChild(this.references.column);
+
+                coach.skipSpace();
+                coach.expect(")");
+                coach.skipSpace();
+            }
+
+            if ( coach.isWord("match") ) {
+                coach.expectWord("match");
+                coach.skipSpace();
+
+                if ( coach.isWord("full") ) {
+                    coach.expectWord("full");
+                    coach.skipSpace();
+
+                    this.references.match = "full";
+                }
+                else if ( coach.isWord("simple") ) {
+                    coach.expectWord("simple");
+                    coach.skipSpace();
+
+                    this.references.match = "simple";
+                }
+                else {
+                    coach.expectWord("partial");
+                    coach.skipSpace();
+
+                    this.references.match = "partial";
+                }
+            }
+
+            this._parseOnAction(coach);
+            this._parseOnAction(coach);
+
+            let deferrable = this._parseDeferrable(coach);
+            for (let key in deferrable) {
+                this.references[ key ] = deferrable[ key ];
+            }
+        }
+    }
+
+    _parseOnAction(coach) {
+        if ( !this.references.onDelete && coach.is(/on\s+delete/i) ) {
+            coach.expectWord("on");
+            coach.skipSpace();
+
+            coach.expectWord("delete");
+            coach.skipSpace();
+
+            this.references.onDelete = this._parseAction(coach);
+        }
+
+        if ( !this.references.onUpdate && coach.is(/on\s+update/i) ) {
+            coach.expectWord("on");
+            coach.skipSpace();
+
+            coach.expectWord("update");
+            coach.skipSpace();
+
+            this.references.onUpdate = this._parseAction(coach);
+        }
+    }
+
+    _parseAction(coach) {
+        if ( coach.isWord("no") ) {
+            coach.expectWord("no");
+            coach.skipSpace();
+
+            coach.expectWord("action");
+            coach.skipSpace();
+
+            return "no action";
+        }
+        else if ( coach.isWord("restrict") ) {
+            coach.expectWord("restrict");
+            coach.skipSpace();
+
+            return "restrict";
+        }
+        else if ( coach.isWord("cascade") ) {
+            coach.expectWord("cascade");
+            coach.skipSpace();
+
+            return "cascade";
+        }
+        else {
+            coach.expectWord("set");
+            coach.skipSpace();
+
+            if ( coach.isWord("null") ) {
+                coach.expectWord("null");
+                coach.skipSpace();
+
+                return "set null";
+            } else {
+                coach.expectWord("default");
+                coach.skipSpace();
+
+                return "set default";
+            }
         }
     }
 
@@ -171,6 +290,35 @@ class ColumnDefinition extends Syntax {
             clone.primaryKey = this._cloneDeferrable(this.primaryKey);
         }
 
+        if ( this.references ) {
+            clone.references = {};
+
+            clone.references.table = this.references.table.clone();
+            clone.addChild(clone.references.table);
+
+            if ( this.references.column ) {
+                clone.references.column = this.references.column.clone();
+                clone.addChild(clone.references.column);
+            }
+
+            if ( this.references.match ) {
+                clone.references.match = this.references.match;
+            }
+
+            if ( this.references.onDelete ) {
+                clone.references.onDelete = this.references.onDelete;
+            }
+
+            if ( this.references.onUpdate ) {
+                clone.references.onUpdate = this.references.onUpdate;
+            }
+
+            let deferrable = this._cloneDeferrable(this.references);
+            for (let key in deferrable) {
+                clone.references[ key ] = deferrable[ key ];
+            }
+        }
+
         return clone;
     }
 
@@ -223,7 +371,32 @@ class ColumnDefinition extends Syntax {
             out += this._deferrableToString(this.primaryKey);
         }
 
+        if ( this.references ) {
+            out += " references ";
+            out += this.references.table.toString();
 
+            if ( this.references.column ) {
+                out += " (";
+                out += this.references.column.toString();
+                out += ")";
+            }
+
+            if ( this.references.match ) {
+                out += " match " + this.references.match;
+            }
+
+            if ( this.references.onDelete ) {
+                out += " on delete ";
+                out += this.references.onDelete;
+            }
+
+            if ( this.references.onUpdate ) {
+                out += " on update ";
+                out += this.references.onUpdate;
+            }
+
+            out += this._deferrableToString(this.references);
+        }
 
         return out;
     }
