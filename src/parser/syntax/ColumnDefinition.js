@@ -20,29 +20,33 @@ const Syntax = require("./Syntax");
 
 class ColumnDefinition extends Syntax {
     parse(coach) {
-        this.name = coach.parseObjectName();
-        this.addChild(this.name);
-        coach.skipSpace();
+        this.parseName(coach);
 
         this.type = coach.parseDataType();
         coach.skipSpace();
 
 
         // not null
-        this._parseElement(coach);
+        this.parseElement(coach);
         // check
-        this._parseElement(coach);
+        this.parseElement(coach);
         // default
-        this._parseElement(coach);
+        this.parseElement(coach);
         // unique
-        this._parseElement(coach);
+        this.parseElement(coach);
         // primary key
-        this._parseElement(coach);
+        this.parseElement(coach);
         // references
-        this._parseElement(coach);
+        this.parseElement(coach);
     }
 
-    _parseElement(coach) {
+    parseName(coach) {
+        this.name = coach.parseObjectName();
+        this.addChild(this.name);
+        coach.skipSpace();
+    }
+
+    parseNotNull(coach) {
         if ( !this.notNull && coach.isWord("not") ) {
             coach.expectWord("not");
             coach.skipSpace();
@@ -52,7 +56,9 @@ class ColumnDefinition extends Syntax {
 
             this.notNull = true;
         }
+    }
 
+    parseCheck(coach) {
         if ( !this.check && coach.isWord("check") ) {
             coach.expectWord("check");
             coach.skipSpace();
@@ -68,7 +74,9 @@ class ColumnDefinition extends Syntax {
 
             coach.skipSpace();
         }
+    }
 
+    parseDefault(coach) {
         if ( !this.default && coach.isWord("default") ) {
             coach.expectWord("default");
             coach.skipSpace();
@@ -76,14 +84,18 @@ class ColumnDefinition extends Syntax {
             this.default = coach.parseExpression();
             this.addChild(this.default);
         }
+    }
 
+    parseUnique(coach) {
         if ( !this.unique && coach.isWord("unique") ) {
             coach.expectWord("unique");
             coach.skipSpace();
 
-            this.unique = this._parseDeferrable(coach);
+            this.unique = this.parseDeferrable(coach);
         }
+    }
 
+    parsePrimaryKey(coach) {
         if ( !this.primaryKey && coach.isWord("primary") ) {
             coach.expectWord("primary");
             coach.skipSpace();
@@ -91,9 +103,11 @@ class ColumnDefinition extends Syntax {
             coach.expectWord("key");
             coach.skipSpace();
 
-            this.primaryKey = this._parseDeferrable(coach);
+            this.primaryKey = this.parseDeferrable(coach);
         }
+    }
 
+    parseReferences(coach) {
         if ( !this.references && coach.isWord("references") ) {
             coach.expectWord("references");
             coach.skipSpace();
@@ -140,17 +154,26 @@ class ColumnDefinition extends Syntax {
                 }
             }
 
-            this._parseOnAction(coach);
-            this._parseOnAction(coach);
+            this.parseOnAction(coach);
+            this.parseOnAction(coach);
 
-            let deferrable = this._parseDeferrable(coach);
+            let deferrable = this.parseDeferrable(coach);
             for (let key in deferrable) {
                 this.references[ key ] = deferrable[ key ];
             }
         }
     }
 
-    _parseOnAction(coach) {
+    parseElement(coach) {
+        this.parseNotNull(coach);
+        this.parseCheck(coach);
+        this.parseDefault(coach);
+        this.parseUnique(coach);
+        this.parsePrimaryKey(coach);
+        this.parseReferences(coach);
+    }
+
+    parseOnAction(coach) {
         if ( !this.references.onDelete && coach.is(/on\s+delete/i) ) {
             coach.expectWord("on");
             coach.skipSpace();
@@ -158,7 +181,7 @@ class ColumnDefinition extends Syntax {
             coach.expectWord("delete");
             coach.skipSpace();
 
-            this.references.onDelete = this._parseAction(coach);
+            this.references.onDelete = this.parseAction(coach);
         }
 
         if ( !this.references.onUpdate && coach.is(/on\s+update/i) ) {
@@ -168,11 +191,11 @@ class ColumnDefinition extends Syntax {
             coach.expectWord("update");
             coach.skipSpace();
 
-            this.references.onUpdate = this._parseAction(coach);
+            this.references.onUpdate = this.parseAction(coach);
         }
     }
 
-    _parseAction(coach) {
+    parseAction(coach) {
         if ( coach.isWord("no") ) {
             coach.expectWord("no");
             coach.skipSpace();
@@ -212,7 +235,7 @@ class ColumnDefinition extends Syntax {
         }
     }
 
-    _parseDeferrable(coach) {
+    parseDeferrable(coach) {
         let out = {};
         let index = coach.i;
 

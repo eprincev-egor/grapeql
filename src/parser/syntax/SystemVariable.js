@@ -35,6 +35,10 @@ class SystemVariable extends Syntax {
     toString() {
         return "$" + this.name;
     }
+
+    toLowerCase() {
+        return this.name.toLowerCase();
+    }
 }
 
 module.exports = SystemVariable;

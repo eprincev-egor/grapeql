@@ -46,6 +46,8 @@ tests.SetItem = require("./syntax/SetItem");
 tests.Update = require("./syntax/Update");
 tests.ColumnDefinition = require("./syntax/ColumnDefinition");
 tests.Extention = require("./syntax/Extention");
+tests.VariableDefinition = require("./syntax/VariableDefinition");
+tests.Declare = require("./syntax/Declare");
 
 //let index = 0; // for conditional break point
 function testClass(className, tests) {
