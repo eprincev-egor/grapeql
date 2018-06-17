@@ -13,6 +13,9 @@ where column_constraint is:
     [ ON DELETE action ] [ ON UPDATE action ] }
 [ DEFERRABLE | NOT DEFERRABLE ] [ INITIALLY DEFERRED | INITIALLY IMMEDIATE ]
  */
+// TODO: index_parameters
+// TODO: collate
+
 const Syntax = require("./Syntax");
 
 class ColumnDefinition extends Syntax {

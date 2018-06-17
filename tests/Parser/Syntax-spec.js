@@ -5,14 +5,12 @@ const assert = require("assert");
 const GrapeQLCoach = require("../../src/parser/GrapeQLCoach");
 const weakDeepEqual = require("../utils/weakDeepEqual");
 
-const testsTests = require("./syntax");
-
+let tests = require("./syntax");
+tests.TableConstraint = require("./syntax/TableConstraint");
 
 //let index = 0; // for conditional break point
-function testClass(className) {
+function testClass(className, tests) {
     describe(className, () => {
-        let tests = testsTests[ className ];
-
         tests.forEach(test => {
             it(test.str, () => {
 
@@ -60,8 +58,8 @@ function testClass(className) {
     });
 }
 
-for (let className in testsTests) {
-    testClass(className);
+for (let className in tests) {
+    testClass(className, tests[ className ]);
 }
 
 

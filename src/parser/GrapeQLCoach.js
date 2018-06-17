@@ -74,6 +74,7 @@ GrapeQLCoach.addSyntax("Insert", require("./syntax/Insert"));
 GrapeQLCoach.addSyntax("SetItem", require("./syntax/SetItem"));
 GrapeQLCoach.addSyntax("Update", require("./syntax/Update"));
 GrapeQLCoach.addSyntax("ColumnDefinition", require("./syntax/ColumnDefinition"));
+GrapeQLCoach.addSyntax("TableConstraint", require("./syntax/TableConstraint"));
 
 GrapeQLCoach.parseEntity = function(str) {
     let coach = new GrapeQLCoach(str);
