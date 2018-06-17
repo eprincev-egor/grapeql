@@ -48,6 +48,7 @@ tests.ColumnDefinition = require("./syntax/ColumnDefinition");
 tests.Extention = require("./syntax/Extention");
 tests.VariableDefinition = require("./syntax/VariableDefinition");
 tests.Declare = require("./syntax/Declare");
+tests.QueryNode = require("./syntax/QueryNode");
 
 //let index = 0; // for conditional break point
 function testClass(className, tests) {
