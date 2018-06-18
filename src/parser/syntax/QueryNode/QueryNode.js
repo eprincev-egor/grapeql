@@ -9,7 +9,8 @@ let methods = [
     require("./buildIndexOf"),
     require("./buildInsert"),
     require("./buildSelect"),
-    require("./buildUpdate")
+    require("./buildUpdate"),
+    require("./buildVars")
 ];
 
 class QueryNode extends Syntax {

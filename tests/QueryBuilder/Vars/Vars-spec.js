@@ -185,5 +185,121 @@ describe("Vars", () => {
                 query."id" = 150
         `
     });
+    
+    testRequest({
+        server: () => server,
+        nodes: {
+            Company: `
+                declare $some_bool boolean default false;
+                select * from company
+                where $some_bool
+            `
+        },
+        node: "Company",
+        request: {
+            columns: ["id"]
+        },
+        result: `
+            with vars as (
+                select
+                    false as some_bool
+            )
+            
+            select
+                company.id
+            from company
+
+            where
+                (select some_bool from vars)
+        `
+    });
+    
+    testRequest({
+        server: () => server,
+        nodes: {
+            Company: `
+                declare $some_bool boolean default false;
+                
+                with vars as (
+                    select
+                        'lol' as some_bool
+                )
+                select * from company
+                
+                left join vars on true
+                
+                where $some_bool
+            `
+        },
+        node: "Company",
+        request: {
+            columns: ["id", "vars.some_bool"]
+        },
+        result: `
+            with 
+                vars as (
+                    select
+                        'lol' as some_bool
+                ),
+                vars1 as (
+                    select
+                        false as some_bool
+                )
+            
+            select
+                company.id,
+                vars.some_bool as "vars.some_bool"
+            from company
+            
+            left join vars on true
+            
+            where
+                (select some_bool from vars1)
+        `
+    });
+    
+    testRequest({
+        server: () => server,
+        nodes: {
+            Company: `
+                declare $some_bool boolean default false;
+                select * from company
+                where $some_bool
+            `
+        },
+        node: "Company",
+        request: {
+            columns: ["id"],
+            vars: {
+                $some_bool: true
+            }
+        },
+        result: `
+            select
+                company.id
+            from company
+
+            where
+                true
+        `
+    });
+    
+    testRequest({
+        server: () => server,
+        nodes: {
+            Company: `
+                declare $some_bool boolean default false;
+                select * from company
+            `
+        },
+        node: "Company",
+        request: {
+            columns: ["id"],
+            vars: {
+                $some_bool: "some"
+            }
+        },
+        error: Error
+    });
 
 });
