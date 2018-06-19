@@ -167,12 +167,47 @@ module.exports = {
 
                 if ( fromLink.link[0].equal( withQuery.name ) ) {
                     let subLink = link.slice(-1);
-                    return withQuery.select.getColumnSource({
-                        server: params.server,
-                        node: params.node,
-                        link: subLink,
-                        throwError: false
-                    });
+
+                    if ( withQuery.select ) {
+                        return withQuery.select.getColumnSource({
+                            server: params.server,
+                            node: params.node,
+                            link: subLink,
+                            throwError: false
+                        });
+                    }
+
+                    if ( withQuery.values ) {
+                        if ( !withQuery.values.length ) {
+                            return;
+                        }
+
+                        let valueRow = withQuery.values[0];
+                        if ( !valueRow.items.length ) {
+                            return;
+                        }
+
+                        if ( !withQuery.columns ) {
+                            return;
+                        }
+
+                        if ( subLink.link.length !== 1 ) {
+                            return;
+                        }
+
+                        let findName = subLink.first();
+                        let index = withQuery.columns.findIndex(name => findName.equal(name));
+                        if ( index == -1 ) {
+                            return;
+                        }
+
+                        let valueItem = valueRow.items[ index ];
+                        if ( !valueItem.expression ) {
+                            return;
+                        }
+
+                        return {expression: valueItem.expression};
+                    }
                 }
             }
         }

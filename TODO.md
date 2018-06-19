@@ -22,13 +22,13 @@
           + RETURNING
 
         + with values
-           - check removeWiths, removeJoins, ...
+           + check removeWiths, removeJoins, getColumnSource, QueryBuilder
         + with update
-           - check removeWiths, removeJoins, ...
+           + check removeWiths, removeJoins, getColumnSource, QueryBuilder
         + with insert
-          - check removeWiths, removeJoins, ...
+          + check removeWiths, removeJoins, getColumnSource, QueryBuilder
         + with delete
-          - check removeWiths, removeJoins, ...
+          + check removeWiths, removeJoins, getColumnSource, QueryBuilder
 
         - format sql
         - collate

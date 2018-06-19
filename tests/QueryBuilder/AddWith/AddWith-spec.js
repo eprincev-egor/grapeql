@@ -254,4 +254,80 @@ describe("AddWith", () => {
         `
     });
 
+    testRequest({
+        server: () => server,
+        nodes: {
+            Company: `
+                with country (id, code) as (
+                    values
+                        (1, 'ru'),
+                        (2, 'en')
+                )
+                select *
+                from company
+
+                left join country on
+                    country.id = company.id_country
+            `
+        },
+        node: "Company",
+        request: {
+            columns: ["inn", "country.code"]
+        },
+        result: `
+            with country (id, code) as (
+                values
+                    (1, 'ru'),
+                    (2, 'en')
+            )
+            select
+                company.inn,
+                country.code as "country.code"
+            from company
+
+            left join country on
+                country.id = company.id_country
+        `
+    });
+
+    testRequest({
+        server: () => server,
+        nodes: {
+            Company: `
+                with country (id, code) as (
+                    values
+                        (1, 'ru'),
+                        (2, 'en')
+                )
+                select *
+                from company
+
+                left join country on
+                    country.id = company.id_country
+            `
+        },
+        node: "Company",
+        request: {
+            columns: ["inn", "country.code"],
+            where: ["country.code", "=", "ru"]
+        },
+        result: `
+            with country (id, code) as (
+                values
+                    (1, 'ru'),
+                    (2, 'en')
+            )
+            select
+                company.inn,
+                country.code as "country.code"
+            from company
+
+            left join country on
+                country.id = company.id_country
+
+            where
+                country.code = $tag1$ru$tag1$
+        `
+    });
+
 });
