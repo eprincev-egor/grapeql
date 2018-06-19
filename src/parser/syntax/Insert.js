@@ -91,13 +91,14 @@ class Insert extends Syntax {
             this.onConflict = coach.parseOnConflict();
             this.addChild(this.onConflict);
         }
-        
+
         coach.skipSpace();
         if ( coach.isWord("returning") ) {
             coach.expectWord("returning");
             coach.skipSpace();
-            
+
             if ( coach.is("*") ) {
+                coach.expect("*");
                 this.returningAll = true;
             } else {
                 this.returning = coach.parseComma("Column");
@@ -113,10 +114,11 @@ class Insert extends Syntax {
         if ( coach.isWith() ) {
             let index = coach.i;
             coach.parseWith();
-            
+            coach.skipSpace();
+
             let isInsert = coach.isWord("insert");
             coach.i = index;
-            
+
             return isInsert;
         } else {
             return false;
@@ -160,10 +162,10 @@ class Insert extends Syntax {
             clone.onConflict = this.onConflict.clone();
             clone.addChild(clone.onConflict);
         }
-        
+
         if ( this.returningAll ) {
             clone.returningAll = true;
-        } 
+        }
         else if ( this.returning ) {
             clone.returning = this.returning.map(column => column.clone());
             clone.returning.forEach(column => clone.addChild(column));
@@ -210,10 +212,10 @@ class Insert extends Syntax {
             out += " ";
             out += this.onConflict.toString();
         }
-        
+
         if ( this.returningAll ) {
             out += " returning *";
-        } 
+        }
         else if ( this.returning ) {
             out += " returning ";
             out += this.returning.map(column => column.toString()).join(", ");

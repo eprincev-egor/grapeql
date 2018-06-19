@@ -64,13 +64,14 @@ class Update extends Syntax {
             this.where = coach.parseExpression();
             this.addChild(this.where);
         }
-        
+
         coach.skipSpace();
         if ( coach.isWord("returning") ) {
             coach.expectWord("returning");
             coach.skipSpace();
-            
+
             if ( coach.is("*") ) {
+                coach.expect("*");
                 this.returningAll = true;
             } else {
                 this.returning = coach.parseComma("Column");
@@ -80,7 +81,21 @@ class Update extends Syntax {
     }
 
     is(coach) {
-        return coach.isWord("update") || coach.isWith();
+        if ( coach.isWord("update") ) {
+            return true;
+        }
+        if ( coach.isWith() ) {
+            let index = coach.i;
+            coach.parseWith();
+            coach.skipSpace();
+
+            let isInsert = coach.isWord("update");
+            coach.i = index;
+
+            return isInsert;
+        } else {
+            return false;
+        }
     }
 
     clone() {
@@ -119,10 +134,10 @@ class Update extends Syntax {
             clone.where = this.where.clone();
             clone.addChild(clone.where);
         }
-        
+
         if ( this.returningAll ) {
             clone.returningAll = true;
-        } 
+        }
         else if ( this.returning ) {
             clone.returning = this.returning.map(column => column.clone());
             clone.returning.forEach(column => clone.addChild(column));
@@ -168,10 +183,10 @@ class Update extends Syntax {
             out += " where ";
             out += this.where.toString();
         }
-        
+
         if ( this.returningAll ) {
             out += " returning *";
-        } 
+        }
         else if ( this.returning ) {
             out += " returning ";
             out += this.returning.map(column => column.toString()).join(", ");

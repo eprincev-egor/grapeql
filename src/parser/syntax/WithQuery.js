@@ -26,22 +26,28 @@ class WithQuery extends Syntax {
 
         coach.expect("(");
         coach.skipSpace();
-        
+
         if ( coach.isWord("values") ) {
             coach.expectWord("values");
             coach.skipSpace();
-            
+
             this.values = coach.parseComma("ValuesRow");
             this.values.forEach(valueRow => this.addChild(valueRow));
-        } 
+        }
         else if ( coach.isInsert() ) {
             this.insert = coach.parseInsert();
+        }
+        else if ( coach.isUpdate() ) {
+            this.update = coach.parseUpdate();
+        }
+        else if ( coach.isDelete() ) {
+            this.delete = coach.parseDelete();
         }
         else {
             this.select = coach.parseSelect();
             this.addChild(this.select);
         }
-        
+
 
         coach.expect(")");
     }
@@ -61,14 +67,22 @@ class WithQuery extends Syntax {
             clone.columns = this.columns.map(column => column.clone());
             clone.columns.map(column => clone.addChild(column));
         }
-        
+
         if ( this.values ) {
             clone.values = this.values.map(valueRow => valueRow.clone());
             clone.values.forEach(valueRow => clone.addChild(valueRow));
-        } 
+        }
         else if ( this.insert ) {
             clone.insert = this.insert.clone();
             clone.addChild(clone.insert);
+        }
+        else if ( this.update ) {
+            clone.update = this.update.clone();
+            clone.addChild(clone.update);
+        }
+        else if ( this.delete ) {
+            clone.delete = this.delete.clone();
+            clone.addChild(clone.delete);
         }
         else {
             clone.select = this.select.clone();
@@ -92,14 +106,20 @@ class WithQuery extends Syntax {
         out += "as (";
         if ( this.values ) {
             out += " values " + this.values.map(valueRow => valueRow.toString()).join(", ");
-        } 
+        }
         else if ( this.insert ) {
             out += this.insert.toString();
+        }
+        else if ( this.update ) {
+            out += this.update.toString();
+        }
+        else if ( this.delete ) {
+            out += this.delete.toString();
         }
         else {
             out += this.select.toString();
         }
-        
+
         out += ")";
 
         return out;

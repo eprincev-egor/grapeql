@@ -20,16 +20,16 @@
           - conflict_target [ COLLATE collation ] [ opclass ]
         + update
           + RETURNING
-        
-        - with values
+
+        + with values
            - check removeWiths, removeJoins, ...
-        - with update
+        + with update
            - check removeWiths, removeJoins, ...
-        - with insert
+        + with insert
           - check removeWiths, removeJoins, ...
-        - with delete
+        + with delete
           - check removeWiths, removeJoins, ...
-        
+
         - format sql
         - collate
 
