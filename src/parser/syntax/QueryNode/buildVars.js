@@ -10,7 +10,6 @@ module.exports = {
         vars = vars || {};
         
         let sqlByKey = {};
-        let needWith = false;
         let withVars = [];
         let withName = "vars";
         
@@ -34,21 +33,43 @@ module.exports = {
             }
             
             let type = definition.getType();
+            let withValue = false;
             let sqlValue;
             
             if ( definition.default && value == null ) {
-                needWith = true;
-                withVars.push(`${ definition.default } as ${key}`);
-                
-                sqlValue = `(select ${key} from ${ withName })`;
+                withValue = definition.default.toString();
             } else {
                 sqlValue = value2sql(type, value);
+            }
+            
+            if ( definition.check ) {
+                let errorText = `variable ${ key } violates check constraint`;
+                let sqlErrorText = value2sql("text", errorText);
+                let value = withValue || sqlValue;
+                
+                let checkSql = definition.check.clone();
+                checkSql.walk(variable => {
+                    if ( !(variable instanceof this.Coach.SystemVariable) ) {
+                        return;
+                    }
+                    
+                    variable.parent.replaceElement(variable, value);
+                });
+                
+                
+                withValue = `case when ${checkSql} then ${ value } else raise_exception(${sqlErrorText}) end`;
+            }
+            
+            if ( withValue ) {
+                withVars.push(`${ withValue } as ${key}`);
+                // variable name can be reserved word
+                sqlValue = `(select ${ withName }.${key} from ${ withName })`;
             }
             
             sqlByKey[ key ] = sqlValue;
         }
         
-        if ( needWith ) {
+        if ( withVars.length ) {
             if ( !select.with ) {
                 select.with = new this.Coach.With();
                 select.addChild(select.with);
@@ -64,10 +85,7 @@ module.exports = {
             let key = variable.toLowerCase();
             let sqlValue = sqlByKey[ key ];
             
-            let expression = new this.Coach.Expression("" + sqlValue);
-            let element = expression.elements[0];
-            
-            variable.parent.replaceElement(variable, element);
+            variable.parent.replaceElement(variable, sqlValue);
         });
     }
 };

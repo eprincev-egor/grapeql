@@ -10,7 +10,8 @@ const numberTypes = [
     "smallserial",
     "serial",
     "bigserial",
-    "int"
+    "int",
+    "numeric"
 ];
 let isSqlNumber = function(type) {
     if ( numberTypes.includes(type.toLowerCase()) ) {
@@ -152,7 +153,7 @@ let value2sql = function(type, value) {
     if ( isSqlNumber(type) ) {
 
         if ( isLikeNumber(value)  ) {
-            return value;
+            return "" + value;
         } else {
             throw new Error("invalid value for number: " + value);
         }

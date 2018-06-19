@@ -202,6 +202,11 @@ class Expression extends Syntax {
         }
 
         this.elements.splice(index, 1, to);
+        
+        if ( typeof to === "string" ) {
+            to = new Expression(to);
+            to = to.elements[0];
+        }
         this.addChild(to);
     }
 

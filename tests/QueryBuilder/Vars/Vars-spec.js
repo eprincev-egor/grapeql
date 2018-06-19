@@ -210,7 +210,7 @@ describe("Vars", () => {
             from company
 
             where
-                (select some_bool from vars)
+                (select vars.some_bool from vars)
         `
     });
     
@@ -254,7 +254,7 @@ describe("Vars", () => {
             left join vars on true
             
             where
-                (select some_bool from vars1)
+                (select vars1.some_bool from vars1)
         `
     });
     
@@ -301,5 +301,147 @@ describe("Vars", () => {
         },
         error: Error
     });
+    
+    testRequest({
+        server: () => server,
+        nodes: {
+            Company: `
+                declare $price numeric check( $price > 0 );
+                select * from company
+                where
+                    company.id > $price
+            `
+        },
+        node: "Company",
+        request: {
+            columns: ["id"],
+            vars: {
+                $price: 100
+            }
+        },
+        result: `
+            with vars as (
+                select
+                    case 
+                        when 100 > 0 
+                        then  100 
+                        else raise_exception($tag1$variable price violates check constraint$tag1$) 
+                    end as price
+            )
+            
+            select
+                company.id
+            from company
 
+            where
+                company.id > (select vars.price from vars)
+        `
+    });
+    
+    testRequest({
+        server: () => server,
+        nodes: {
+            Company: `
+                declare $from text default 'ru';
+                select * from company
+                
+                inner join country on
+                    country.id = company.id_country and
+                    country.code = $from
+            `
+        },
+        node: "Company",
+        request: {
+            columns: ["id", "country.id"],
+            vars: {
+                from: undefined
+            }
+        },
+        result: `
+            with vars as (
+                select
+                    'ru' as from
+            )
+            
+            select
+                company.id,
+                country.id as "country.id"
+            from company
+            
+            inner join country on
+                country.id = company.id_country and
+                country.code = (select vars.from from vars)
+        `
+    });
+    
+    
+    testRequest({
+        server: () => server,
+        nodes: {
+            Company: `
+                declare $some numeric check( $some <> 0 ) default 0;
+                select * from company
+                where
+                    company.id > $some
+            `
+        },
+        node: "Company",
+        request: {
+            columns: ["id"]
+        },
+        result: `
+            with vars as (
+                select
+                    case 
+                        when 0 <> 0 
+                        then  0
+                        else raise_exception($tag1$variable some violates check constraint$tag1$) 
+                    end as some
+            )
+            
+            select
+                company.id
+            from company
+
+            where
+                company.id > (select vars.some from vars)
+        `
+    });
+    
+    testRequest({
+        server: () => server,
+        nodes: {
+            Company: `
+                declare $some numeric check( $some <> 0 ) default 0;
+                select * from company
+                where
+                    company.id > $some
+            `
+        },
+        node: "Company",
+        request: {
+            columns: ["id"],
+            vars: {
+                $some: "1"
+            }
+        },
+        result: `
+            with vars as (
+                select
+                    case 
+                        when 1 <> 0 
+                        then  1
+                        else raise_exception($tag1$variable some violates check constraint$tag1$) 
+                    end as some
+            )
+            
+            select
+                company.id
+            from company
+
+            where
+                company.id > (select vars.some from vars)
+        `
+    });
+    
 });

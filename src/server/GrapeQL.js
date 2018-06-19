@@ -23,6 +23,18 @@ class GrapeQL {
 
         await this.loadTables();
         await this.loadNodes();
+        await this.initSystemFunctions();
+    }
+    
+    async initSystemFunctions() {
+        await this.db.query(`
+        create or replace function raise_exception(text)
+        returns void as $$
+        begin
+          raise exception '%', $1;
+        end;
+        $$ language plpgsql;
+        `);
     }
 
     async loadTables() {

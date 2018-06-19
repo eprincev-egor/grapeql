@@ -47,7 +47,7 @@
     - update
     + delete
     + insert
-    - $vars
+    + $vars
     + getCount
     + indexOf
     - distinct
