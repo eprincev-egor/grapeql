@@ -18,11 +18,11 @@ function testRemoveUnnesaryJoins(fromSelect, toSelect) {
             --------------------------->
             ${ toSelect }
     `, () => {
-        
+
         let node;
         node = server.addNode("Country", "select * from country");
         node.options.file = "./Country.sql";
-        
+
         let coach;
 
         coach = new GrapeQLCoach(fromSelect);
@@ -397,7 +397,7 @@ describe("RemoveJoins", () => {
             ) as some_table
         ) as some_table on true
     `);
-    
+
     testRemoveUnnesaryJoins( `
         select
             comp_id.id
@@ -956,5 +956,79 @@ describe("RemoveJoins", () => {
                 on country4.id = country3.id
             on country3.id = (country3.id + 1)
         on country.id = company.id_country
+    `);
+
+    testRemoveUnnesaryJoins(`
+        select test_with_values.*
+        from company
+
+        left join country on
+            country.id = company.id_country
+
+        left join lateral (
+            with x as (
+                values ((
+                    select country.id
+                ))
+            )
+            select *
+            from x
+            limit 1
+        ) as test_with_values on true
+    `);
+
+    testRemoveUnnesaryJoins(`
+        select company.id
+        from company
+
+        left join country on
+            country.id = company.id_country
+
+        left join lateral (
+            with x as (
+                values ((
+                    select country.id
+                ))
+            )
+            select *
+            from x
+            limit 1
+        ) as test_with_values on true
+    `, `
+        select company.id
+        from company
+    `);
+
+    testRemoveUnnesaryJoins(`
+        select test_with_values.*
+        from company
+
+        left join country on
+            country.id = company.id_country
+
+        left join lateral (
+            with x as (
+                values ((
+                    select company.id
+                ))
+            )
+            select *
+            from x
+            limit 1
+        ) as test_with_values on true
+    `, `
+        select test_with_values.*
+        from company
+
+        left join lateral (
+            with x as (
+                values ((
+                    select company.id
+                ))
+            )
+            select *
+            from x
+            limit 1
+        ) as test_with_values on true
     `);
 });
