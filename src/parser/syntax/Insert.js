@@ -107,7 +107,20 @@ class Insert extends Syntax {
     }
 
     is(coach) {
-        return coach.isWord("insert") || coach.isWith();
+        if ( coach.isWord("insert") ) {
+            return true;
+        }
+        if ( coach.isWith() ) {
+            let index = coach.i;
+            coach.parseWith();
+            
+            let isInsert = coach.isWord("insert");
+            coach.i = index;
+            
+            return isInsert;
+        } else {
+            return false;
+        }
     }
 
     clone() {

@@ -26,9 +26,22 @@ class WithQuery extends Syntax {
 
         coach.expect("(");
         coach.skipSpace();
-
-        this.select = coach.parseSelect();
-        this.addChild(this.select);
+        
+        if ( coach.isWord("values") ) {
+            coach.expectWord("values");
+            coach.skipSpace();
+            
+            this.values = coach.parseComma("ValuesRow");
+            this.values.forEach(valueRow => this.addChild(valueRow));
+        } 
+        else if ( coach.isInsert() ) {
+            this.insert = coach.parseInsert();
+        }
+        else {
+            this.select = coach.parseSelect();
+            this.addChild(this.select);
+        }
+        
 
         coach.expect(")");
     }
@@ -48,9 +61,19 @@ class WithQuery extends Syntax {
             clone.columns = this.columns.map(column => column.clone());
             clone.columns.map(column => clone.addChild(column));
         }
-
-        clone.select = this.select.clone();
-        clone.addChild(clone.select);
+        
+        if ( this.values ) {
+            clone.values = this.values.map(valueRow => valueRow.clone());
+            clone.values.forEach(valueRow => clone.addChild(valueRow));
+        } 
+        else if ( this.insert ) {
+            clone.insert = this.insert.clone();
+            clone.addChild(clone.insert);
+        }
+        else {
+            clone.select = this.select.clone();
+            clone.addChild(clone.select);
+        }
 
         return clone;
     }
@@ -67,7 +90,16 @@ class WithQuery extends Syntax {
         }
 
         out += "as (";
-        out += this.select.toString();
+        if ( this.values ) {
+            out += " values " + this.values.map(valueRow => valueRow.toString()).join(", ");
+        } 
+        else if ( this.insert ) {
+            out += this.insert.toString();
+        }
+        else {
+            out += this.select.toString();
+        }
+        
         out += ")";
 
         return out;
