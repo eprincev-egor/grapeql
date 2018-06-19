@@ -81,7 +81,8 @@ module.exports = [
             }
         }
     },
-    {// undefined variable
+    // undefined variable
+    {
         str: `select *
         from orders
         where
@@ -89,13 +90,52 @@ module.exports = [
         `,
         error: Error
     },
-    {// undefined variable
+    {
         str: `declare $id_order bigint;
         select *
         from orders
         where
             orders.id = $order_id
         `,
+        error: Error
+    },
+    // insert/update/delete is not allowed
+    {
+        str: "with x as (insert into orders default values) select * from x",
+        error: Error
+    },
+    {
+        str: "select * from (with x as (insert into orders default values) select * from x)",
+        error: Error
+    },
+    {
+        str: "select (with x as (insert into orders default values) select * from x) from orders",
+        error: Error
+    },
+
+    {
+        str: "with x as (update orders set id = 1) select * from x",
+        error: Error
+    },
+    {
+        str: "select * from (update orders set id = 1) select * from x)",
+        error: Error
+    },
+    {
+        str: "select (with x as (update orders set id = 1) select * from x) from orders",
+        error: Error
+    },
+
+    {
+        str: "with x as (delete from orders) select * from x",
+        error: Error
+    },
+    {
+        str: "select * from (with x as (delete from orders) select * from x)",
+        error: Error
+    },
+    {
+        str: "select (with x as (delete from orders) select * from x) from orders",
         error: Error
     }
 ];

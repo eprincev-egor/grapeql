@@ -24,14 +24,30 @@ class QueryNode extends Syntax {
         this.select = coach.parseSelect();
         this.addChild(this.select);
 
-        this.select.walk(variable => {
-            if ( !(variable instanceof this.Coach.SystemVariable) ) {
-                return;
+        this.select.walk(child => {
+            if ( child instanceof this.Coach.SystemVariable ) {
+                let variable = child;
+
+                let key = variable.toLowerCase();
+                if ( !this.declare || !(key in this.declare.variables) ) {
+                    coach.i = variable.startIndex;
+                    coach.throwError(`undefined variable: ${key}`);
+                }
             }
 
-            let key = variable.toLowerCase();
-            if ( !this.declare || !(key in this.declare.variables) ) {
-                coach.throwError(`undefined variable: ${key}`);
+            if ( child instanceof this.Coach.Insert) {
+                coach.i = child.startIndex;
+                coach.throwError("insert is not allowed");
+            }
+
+            if ( child instanceof this.Coach.Update ) {
+                coach.i = child.startIndex;
+                coach.throwError("update is not allowed");
+            }
+
+            if ( child instanceof this.Coach.Delete ) {
+                coach.i = child.startIndex;
+                coach.throwError("delete is not allowed");
             }
         });
     }
