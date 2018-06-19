@@ -91,6 +91,19 @@ class Insert extends Syntax {
             this.onConflict = coach.parseOnConflict();
             this.addChild(this.onConflict);
         }
+        
+        coach.skipSpace();
+        if ( coach.isWord("returning") ) {
+            coach.expectWord("returning");
+            coach.skipSpace();
+            
+            if ( coach.is("*") ) {
+                this.returningAll = true;
+            } else {
+                this.returning = coach.parseComma("Column");
+                this.returning.forEach(column => this.addChild(column));
+            }
+        }
     }
 
     is(coach) {
@@ -134,6 +147,14 @@ class Insert extends Syntax {
             clone.onConflict = this.onConflict.clone();
             clone.addChild(clone.onConflict);
         }
+        
+        if ( this.returningAll ) {
+            clone.returningAll = true;
+        } 
+        else if ( this.returning ) {
+            clone.returning = this.returning.map(column => column.clone());
+            clone.returning.forEach(column => clone.addChild(column));
+        }
 
         return clone;
     }
@@ -175,6 +196,14 @@ class Insert extends Syntax {
         if ( this.onConflict ) {
             out += " ";
             out += this.onConflict.toString();
+        }
+        
+        if ( this.returningAll ) {
+            out += " returning *";
+        } 
+        else if ( this.returning ) {
+            out += " returning ";
+            out += this.returning.map(column => column.toString()).join(", ");
         }
 
         return out;

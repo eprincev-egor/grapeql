@@ -5,6 +5,7 @@
 DELETE FROM [ ONLY ] table_name [ * ] [ AS alias ]
     [ USING using_list ]
     [ WHERE condition ]
+    [ RETURNING * | output_expression [ [ AS ] output_name ] [, ...] ]
  */
 
 const Syntax = require("./Syntax");
@@ -66,6 +67,18 @@ class Delete extends Syntax {
             this.where = coach.parseExpression();
             this.addChild(this.where);
         }
+        
+        if ( coach.isWord("returning") ) {
+            coach.expectWord("returning");
+            coach.skipSpace();
+            
+            if ( coach.is("*") ) {
+                this.returningAll = true;
+            } else {
+                this.returning = coach.parseComma("Column");
+                this.returning.forEach(column => this.addChild(column));
+            }
+        }
     }
 
     is(coach) {
@@ -105,6 +118,14 @@ class Delete extends Syntax {
             clone.where = this.where.clone();
             clone.addChild(clone.where);
         }
+        
+        if ( this.returningAll ) {
+            clone.returningAll = true;
+        } 
+        else if ( this.returning ) {
+            clone.returning = this.returning.map(column => column.clone());
+            clone.returning.forEach(column => clone.addChild(column));
+        }
 
         return clone;
     }
@@ -142,6 +163,14 @@ class Delete extends Syntax {
         if ( this.where ) {
             out += " where ";
             out += this.where.toString();
+        }
+        
+        if ( this.returningAll ) {
+            out += " returning *";
+        } 
+        else if ( this.returning ) {
+            out += " returning ";
+            out += this.returning.map(column => column.toString()).join(", ");
         }
 
         return out;

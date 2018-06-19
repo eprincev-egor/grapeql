@@ -458,5 +458,147 @@ module.exports = [
                 }
             ]}
         }
+    },
+    {
+        str: "update companies set name = 'nice' returning *",
+        result: {
+            table: {link: [
+                {word: "companies"}
+            ]},
+            set: [
+                {
+                    column: {word: "name"},
+                    value: {expression: {elements: [
+                        {content: "nice"}
+                    ]}}
+                }
+            ],
+            returningAll: true
+        }
+    },
+    {
+        str: "update companies set name = 'nice' returning id, id_client",
+        result: {
+            table: {link: [
+                {word: "companies"}
+            ]},
+            set: [
+                {
+                    column: {word: "name"},
+                    value: {expression: {elements: [
+                        {content: "nice"}
+                    ]}}
+                }
+            ],
+            returning: [
+                {
+                    expression: {elements: [
+                        {link: [
+                            {word: "id"}
+                        ]}
+                    ]}
+                },
+                {expression: {elements: [
+                    {link: [
+                        {word: "id_client"}
+                    ]}
+                ]}}
+            ]
+        }
+    },
+    {
+        str: `with x1 as (select 1 as id)
+        update companies set
+            name = 'nice'
+        from orders
+        where
+            orders.id_client = companies.id and
+            orders.need_update and
+            orders.id_country = (select id from x1)
+        returning *
+        `,
+        result: {
+            with: {
+                queries: {
+                    x1: {
+                        name: {word: "x1"},
+                        select: {
+                            columns: [{
+                                expression: {elements: [
+                                    {number: "1"}
+                                ]},
+                                as: {word: "id"}
+                            }]
+                        }
+                    }
+                },
+                queriesArr: [
+                    {
+                        name: {word: "x1"},
+                        select: {
+                            columns: [{
+                                expression: {elements: [
+                                    {number: "1"}
+                                ]},
+                                as: {word: "id"}
+                            }]
+                        }
+                    }
+                ]
+            },
+            table: {link: [
+                {word: "companies"}
+            ]},
+            set: [
+                {
+                    column: {word: "name"},
+                    value: {expression: {elements: [
+                        {content: "nice"}
+                    ]}}
+                }
+            ],
+            from: [{
+                table: {link: [
+                    {word: "orders"}
+                ]}
+            }],
+            where: {elements: [
+                {link: [
+                    {word: "orders"},
+                    {word: "id_client"}
+                ]},
+                {operator: "="},
+                {link: [
+                    {word: "companies"},
+                    {word: "id"}
+                ]},
+                {operator: "and"},
+                {link: [
+                    {word: "orders"},
+                    {word: "need_update"}
+                ]},
+                {operator: "and"},
+                {link: [
+                    {word: "orders"},
+                    {word: "id_country"}
+                ]},
+                {operator: "="},
+                {
+                    columns: [
+                        {expression: {elements: [
+                            {link: [
+                                {word: "id"}
+                            ]}
+                        ]}}
+                    ],
+                    from: [{
+                        table: {link: [
+                            {word: "x1"}
+                        ]}
+                    }]
+                }
+            ]},
+            returningAll: true
+        }
     }
 ];

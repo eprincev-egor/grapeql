@@ -14,11 +14,12 @@
 		+ window functions
         + agg_func() filter (where ...)
         + delete
-          - RETURNING
+          + RETURNING
         + insert
-          - RETURNING
+          + RETURNING
           - conflict_target [ COLLATE collation ] [ opclass ]
         + update
+          + RETURNING
         - with values
         - with update
         - with insert

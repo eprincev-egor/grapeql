@@ -319,5 +319,203 @@ module.exports = [
                 ]}
             }
         }
+    },
+    {
+        str: "insert into orders default values returning *",
+        result: {
+            table: {link: [
+                {word: "orders"}
+            ]},
+            defaultValues: true,
+            returningAll: true
+        }
+    },
+    {
+        str: "insert into orders default values returning id, id_client",
+        result: {
+            table: {link: [
+                {word: "orders"}
+            ]},
+            defaultValues: true,
+            returning: [
+                {expression: {elements: [
+                    {link: [
+                        {word: "id"}
+                    ]}
+                ]}},
+                {expression: {elements: [
+                    {link: [
+                        {word: "id_client"}
+                    ]}
+                ]}}
+            ]
+        }
+    },
+    {
+        str: "insert into companies (id, name) values (1, 'Test') on conflict (id) where id > 0 do nothing returning *",
+        result: {
+            table: {link: [
+                {word: "companies"}
+            ]},
+            columns: [
+                {word: "id"},
+                {word: "name"}
+            ],
+            values: [
+                {items: [
+                    {expression: {elements: [
+                        {number: "1"}
+                    ]}},
+                    {expression: {elements: [
+                        {content: "Test"}
+                    ]}}
+                ]}
+            ],
+            onConflict: {
+                target: [
+                    {column: {word: "id"}}
+                ],
+                where: {elements: [
+                    {link: [
+                        {word: "id"}
+                    ]},
+                    {operator: ">"},
+                    {number: "0"}
+                ]},
+                doNothing: true
+            },
+            returningAll: true
+        }
+    },
+    {
+        str: "insert into companies (id, name) values (1, 'Test') on conflict (id) where id > 0 do nothing returning id+ 1 as id_1, id_client",
+        result: {
+            table: {link: [
+                {word: "companies"}
+            ]},
+            columns: [
+                {word: "id"},
+                {word: "name"}
+            ],
+            values: [
+                {items: [
+                    {expression: {elements: [
+                        {number: "1"}
+                    ]}},
+                    {expression: {elements: [
+                        {content: "Test"}
+                    ]}}
+                ]}
+            ],
+            onConflict: {
+                target: [
+                    {column: {word: "id"}}
+                ],
+                where: {elements: [
+                    {link: [
+                        {word: "id"}
+                    ]},
+                    {operator: ">"},
+                    {number: "0"}
+                ]},
+                doNothing: true
+            },
+            returning: [
+                {
+                    expression: {elements: [
+                        {link: [
+                            {word: "id"}
+                        ]},
+                        {operator: "+"},
+                        {number: "1"}
+                    ]},
+                    as: {word: "id_1"}
+                },
+                {expression: {elements: [
+                    {link: [
+                        {word: "id_client"}
+                    ]}
+                ]}}
+            ]
+        }
+    },
+    {
+        str: "insert into orders values (1,2), (3, 4) returning *",
+        result: {
+            table: {link: [
+                {word: "orders"}
+            ]},
+            values: [
+                {items: [
+                    {expression: {elements: [
+                        {number: "1"}
+                    ]}},
+                    {expression: {elements: [
+                        {number: "2"}
+                    ]}}
+                ]},
+                {items: [
+                    {expression: {elements: [
+                        {number: "3"}
+                    ]}},
+                    {expression: {elements: [
+                        {number: "4"}
+                    ]}}
+                ]}
+            ],
+            returningAll: true
+        }
+    },
+    {
+        str: "with x1 as (select 2) insert into orders select * from x1 returning *",
+        result: {
+            with: {
+                queries: {
+                    x1: {
+                        name: {word: "x1"},
+                        select: {
+                            columns: [{
+                                expression: {elements: [
+                                    {number: "2"}
+                                ]}
+                            }]
+                        }
+                    }
+                },
+                queriesArr: [
+                    {
+                        name: {word: "x1"},
+                        select: {
+                            columns: [{
+                                expression: {elements: [
+                                    {number: "2"}
+                                ]}
+                            }]
+                        }
+                    }
+                ]
+            },
+            table: {link: [
+                {word: "orders"}
+            ]},
+            select: {
+                columns: [
+                    {
+                        as: null,
+                        expression: {elements: [
+                            {link: [
+                                "*"
+                            ]}
+                        ]}
+                    }
+                ],
+                from: [{
+                    table: {link: [
+                        {word: "x1"}
+                    ]}
+                }]
+            },
+            returningAll: true
+        }
     }
 ];
