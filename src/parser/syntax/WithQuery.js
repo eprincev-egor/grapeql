@@ -48,7 +48,7 @@ class WithQuery extends Syntax {
             this.addChild(this.select);
         }
 
-
+        coach.skipSpace();
         coach.expect(")");
     }
 

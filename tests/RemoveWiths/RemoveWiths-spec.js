@@ -337,4 +337,122 @@ describe("RemoveWiths", () => {
             select * from x
         ) as test
     `);
+
+    testRemoveUnnesaryWiths(`
+        with
+            x1 as (
+                values
+                    (1, 2)
+            )
+        select *
+        from x1
+    `);
+
+    testRemoveUnnesaryWiths(`
+        with
+            x1 as (
+                values
+                    (1, 2)
+            ),
+            x2 as (
+                values
+                    (3, 4)
+            ),
+            x3 as (
+                values
+                    (5, 6)
+            )
+        select *
+        from x1
+    `, `
+        with
+            x1 as (
+                values
+                    (1, 2)
+            )
+        select *
+        from x1
+    `);
+
+    testRemoveUnnesaryWiths(`
+        with
+            x1 as (
+                values
+                    (1, 2)
+            ),
+            x2 as (
+                values
+                    (3, 4)
+            ),
+            x3 as (
+                values
+                    ((select * from x2), 6)
+            )
+        select *
+        from x1
+    `, `
+        with
+            x1 as (
+                values
+                    (1, 2)
+            )
+        select *
+        from x1
+    `);
+
+    testRemoveUnnesaryWiths(`
+        with
+            x1 as (
+                values
+                    (1, 2)
+            ),
+            x2 as (
+                values
+                    (3, 4)
+            ),
+            x3 as (
+                values
+                    ((select * from x2), 6)
+            )
+        select *
+        from x3
+    `, `
+        with
+            x2 as (
+                values
+                    (3, 4)
+            ),
+            x3 as (
+                values
+                    ((select * from x2), 6)
+            )
+        select *
+        from x3
+    `);
+
+    testRemoveUnnesaryWiths(`
+        with
+            x1 as (
+                values
+                    (1, 2)
+            ),
+            x2 as (
+                values
+                    (3, 4)
+            ),
+            x3 as (
+                values
+                    ((select * from x2), 6)
+            )
+        select *
+        from x2
+    `, `
+        with
+            x2 as (
+                values
+                    (3, 4)
+            )
+        select *
+        from x2
+    `);
 });

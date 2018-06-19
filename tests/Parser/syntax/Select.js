@@ -1159,5 +1159,58 @@ module.exports = [
                 {null: true}
             ]}
         }
+    },
+    {
+        str: `with
+            x1 as (
+                values
+                    (1, 2)
+            )
+        select *
+        from x1`,
+        result: {
+            with: {
+                queries: {
+                    x1: {
+                        name: {word: "x1"},
+                        values: [
+                            {items: [
+                                {expression: {elements: [
+                                    {number: "1"}
+                                ]}},
+                                {expression: {elements: [
+                                    {number: "2"}
+                                ]}}
+                            ]}
+                        ]
+                    }
+                },
+                queriesArr: [
+                    {
+                        name: {word: "x1"},
+                        values: [
+                            {items: [
+                                {expression: {elements: [
+                                    {number: "1"}
+                                ]}},
+                                {expression: {elements: [
+                                    {number: "2"}
+                                ]}}
+                            ]}
+                        ]
+                    }
+                ]
+            },
+            columns: [{
+                expression: {elements: [
+                    {link: ["*"]}
+                ]}
+            }],
+            from: [{
+                table: {link: [
+                    {word: "x1"}
+                ]}
+            }]
+        }
     }
 ];

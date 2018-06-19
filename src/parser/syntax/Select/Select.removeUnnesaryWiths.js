@@ -9,7 +9,13 @@ module.exports = {
         for (let n = this.with.queriesArr.length, i = n - 1; i >= 0; i--) {
             let withQuery = this.with.queriesArr[ i ];
 
-            if ( this._isUsedWith({withQuery, checkWith: false}) ) {
+            if (
+                this._hasTableLink({
+                    startChild: this,
+                    withQuery,
+                    checkWith: false
+                })
+            ) {
                 continue;
             }
 
@@ -19,7 +25,10 @@ module.exports = {
 
                 isUsedInNextWiths = (
                     isUsedInNextWiths ||
-                    nextWithQuery.select._isUsedWith({ withQuery })
+                    this._hasTableLink({
+                        startChild: nextWithQuery,
+                        withQuery 
+                    })
                 );
 
                 if ( isUsedInNextWiths ) {
@@ -43,10 +52,14 @@ module.exports = {
         }
     },
 
-    _isUsedWith({withQuery, checkWith = true}) {
-        let isUsed = false;
+    _hasTableLink({
+        startChild,
+        withQuery,
+        checkWith = true
+    }) {
+        let hasTableLink = false;
 
-        this.walk((child, wallker) => {
+        startChild.walk((child, wallker) => {
             if ( child instanceof this.Coach.Select ) {
                 if ( child._hasWith(withQuery.name) ) {
                     wallker.skip();
@@ -57,7 +70,7 @@ module.exports = {
                 if ( child.link.length == 1 ) {
                     let tableName = child.first();
                     if ( tableName.equal(withQuery.name) ) {
-                        isUsed = true;
+                        hasTableLink = true;
 
                         wallker.stop();
                     }
@@ -73,7 +86,7 @@ module.exports = {
             }
         });
 
-        return isUsed;
+        return hasTableLink;
     },
 
     _hasWith(name) {
