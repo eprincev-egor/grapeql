@@ -49,5 +49,15 @@ module.exports = [
                 }]
             }
         }
+    },
+    {
+        str: "x as (values (1), (2, 3))",
+        // VALUES lists must all be the same length
+        error: Error
+    },
+    {
+        str: "x as (values (default))",
+        // DEFAULT is not allowed in this context
+        error: Error
     }
 ];

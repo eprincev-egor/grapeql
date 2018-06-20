@@ -1,6 +1,6 @@
 "use strict";
 
-const {getNode} = require("../helpers");
+const {getNode} = require("../../../helpers");
 
 module.exports = {
     buildFromFiles({ server, select }) {

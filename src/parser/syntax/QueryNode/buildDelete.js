@@ -1,6 +1,6 @@
 "use strict";
 
-const {getNode, getDbTable} = require("../helpers");
+const {getNode, getDbTable} = require("../../../helpers");
 const Filter = require("../../../filter/Filter");
 
 module.exports = {

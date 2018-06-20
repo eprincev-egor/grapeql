@@ -517,5 +517,10 @@ module.exports = [
             },
             returningAll: true
         }
+    },
+    {
+        str: "insert into orders values (1), (2, 3)",
+        // VALUES lists must all be the same length
+        error: Error
     }
 ];

@@ -9,6 +9,7 @@ const {
     testRequestIndexOf, testUpdate
 } = require("./utils/testRequest");
 const weakDeepEqual = require("./utils/weakDeepEqual");
+const {clearDatabase} = require("./utils/serverHelpers");
 
 global.it = function(testName, callback) {
     callback();
@@ -175,6 +176,16 @@ function testFilter(fromFilter, sql, model) {
     });
 }
 
+async function testInsert(server) {
+    await clearDatabase(server.db, __dirname + "/Tasks/SimpleInsert");
+    
+    let transaction = server.transaction();
+    await transaction.query(`
+        insert into country (code) values ('ru')
+    `);
+    console.log(transaction);
+}
+
 let server;
 (async function() {
     server = await GrapeQL.start(config);
@@ -193,7 +204,9 @@ let server;
     global.weakDeepEqual = weakDeepEqual;
     global.GrapeQL = GrapeQL;
     global.GrapeQLCoach = GrapeQLCoach;
-
+    
+    global.testInsert = testInsert.bind(null, server);
+    
 })();
 
 

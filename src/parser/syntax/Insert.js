@@ -79,7 +79,16 @@ class Insert extends Syntax {
             coach.skipSpace();
 
             this.values = coach.parseComma("ValuesRow");
-            this.values.forEach(row => this.addChild(row));
+            let length = this.values[0].items.length;
+            for (let i = 0, n = this.values.length; i < n; i++) {
+                let valuesRow = this.values[ i ];
+                
+                if ( valuesRow.items.length != length ) {
+                    coach.throwError("VALUES lists must all be the same length");
+                }
+                
+                this.addChild(valuesRow);
+            }
         }
         else {
             this.select = coach.parseSelect();

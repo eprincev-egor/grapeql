@@ -18,7 +18,7 @@ const {
     objectLink2schmeTableColumn,
     getDbTable,
     getNode
-} = require("./helpers");
+} = require("../../helpers");
 
 class Join extends Syntax {
     parse(coach) {

@@ -1,7 +1,6 @@
 "use strict";
 
-const {getDbTable} = require("../helpers");
-const {value2sql} = require("../../../helpers");
+const {getDbTable, value2sql} = require("../../../helpers");
 
 module.exports = {
     buildUpdate({

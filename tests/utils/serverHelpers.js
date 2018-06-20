@@ -21,33 +21,39 @@ function startServer(dirname, callback) {
         await db.connect();
 
         // clear db before run tests
-        let result = await db.query(`
-            select schema_name
-            from information_schema.schemata
-            where schema_owner <> 'postgres'
-        `);
-
-        let clearDbSql = "";
-        result.rows.forEach(row => {
-            clearDbSql += `
-                drop schema ${ row.schema_name } cascade;
-            `;
-        });
-        clearDbSql += `
-            drop schema if exists public cascade;
-            create schema public;
-        `;
-
-        await db.query( clearDbSql );
-
-        // creating needed tables
-        let sql = fs.readFileSync( dirname + "/up.sql" );
-        await db.query( sql.toString() );
+        await clearDatabase(db, dirname);
 
         let server = await GrapeQL.start( config );
 
         callback(server);
     };
+}
+
+async function clearDatabase(db, dirname) {
+    // clear db before run tests
+    let result = await db.query(`
+        select schema_name
+        from information_schema.schemata
+        where schema_owner <> 'postgres'
+    `);
+
+    let clearDbSql = "";
+    result.rows.forEach(row => {
+        clearDbSql += `
+            drop schema ${ row.schema_name } cascade;
+        `;
+    });
+    clearDbSql += `
+        drop schema if exists public cascade;
+        create schema public;
+    `;
+
+    await db.query( clearDbSql );
+
+    // creating needed tables
+    let sql = fs.readFileSync( dirname + "/up.sql" );
+    await db.query( sql.toString() );
+
 }
 
 function stopServer(getServer) {
@@ -57,4 +63,4 @@ function stopServer(getServer) {
     };
 }
 
-module.exports = {stopServer, startServer};
+module.exports = {stopServer, startServer, clearDatabase};

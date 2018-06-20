@@ -8,7 +8,7 @@ let methods = [
     require("./Select.getColumnSource")
 ];
 
-const {PUBLIC_SCHEMA_NAME} = require("../helpers");
+const {PUBLIC_SCHEMA_NAME} = require("../../../helpers");
 
 // https://www.postgresql.org/docs/9.5/static/sql-select.html
 /*

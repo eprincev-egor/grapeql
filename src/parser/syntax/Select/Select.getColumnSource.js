@@ -7,7 +7,7 @@ const {
     getDbColumn,
     getDbTable,
     getNode
-} = require("../helpers");
+} = require("../../../helpers");
 
 module.exports = {
     getColumnSource({

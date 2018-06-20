@@ -1,7 +1,6 @@
 "use strict";
 
-const {getNode, getDbTable} = require("../helpers");
-const {value2sql} = require("../../../helpers");
+const {getNode, getDbTable, value2sql} = require("../../../helpers");
 
 module.exports = {
     buildInsert({

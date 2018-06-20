@@ -32,7 +32,22 @@ class WithQuery extends Syntax {
             coach.skipSpace();
 
             this.values = coach.parseComma("ValuesRow");
-            this.values.forEach(valueRow => this.addChild(valueRow));
+            let length = this.values[0].items.length;
+            for (let i = 0, n = this.values.length; i < n; i++) {
+                let valuesRow = this.values[ i ];
+                
+                if ( valuesRow.items.length != length ) {
+                    coach.throwError("VALUES lists must all be the same length");
+                }
+                
+                valuesRow.walk(item => {
+                    if ( item.default ) {
+                        coach.throwError("DEFAULT is not allowed in this context");
+                    }
+                });
+                
+                this.addChild(valuesRow);
+            }
         }
         else if ( coach.isInsert() ) {
             this.insert = coach.parseInsert();

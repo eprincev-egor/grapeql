@@ -4,6 +4,7 @@ const _ = require("lodash");
 const pg = require("pg");
 const fs = require("fs");
 const Node = require("./Node");
+const Transaction = require("./Transaction");
 
 const DbSchema = require("./DbObject/DbSchema");
 const DbTable = require("./DbObject/DbTable");
@@ -222,6 +223,12 @@ class GrapeQL {
 
     async stop() {
         await this.db.end();
+    }
+    
+    transaction() {
+        return new Transaction({
+            server: this
+        });
     }
 }
 
