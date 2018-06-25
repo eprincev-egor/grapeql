@@ -225,10 +225,14 @@ class GrapeQL {
         await this.db.end();
     }
     
-    transaction() {
-        return new Transaction({
+    async transaction() {
+        let transaction = new Transaction({
             server: this
         });
+        
+        await transaction.begin();
+        
+        return transaction;
     }
 }
 

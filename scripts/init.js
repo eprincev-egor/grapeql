@@ -2,7 +2,7 @@
 
 const fs = require("fs");
 
-fs.writeFileSync("./tests/config.js", `
+fs.writeFileSync("./tests/grapeql.config.js", `
 "use strict";
 
 module.exports = {

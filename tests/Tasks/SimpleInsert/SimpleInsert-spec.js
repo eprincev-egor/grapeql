@@ -19,30 +19,33 @@ describe("SimpleInsert task", () => {
     it("insert row, check id", async() => {
         await clearDatabase(server.db, __dirname);
         
-        let transaction = server.transaction();
-        let row;
+        let transaction = await server.transaction();
+        let rows;
         
-        row = await transaction.query(`
+        rows = await transaction.query(`
             insert into country default values
+            returning id
         `);
         
-        assert.ok(row.id == 1);
+        assert.ok(rows[0].id == 1);
         
-        row = await transaction.query(`
+        rows = await transaction.query(`
             insert into country default values
+            returning id
         `);
         
-        assert.ok(row.id == 2);
+        assert.ok(rows[0].id == 2);
     });
     
     it("insert row, check id", async() => {
         await clearDatabase(server.db, __dirname);
         
-        let transaction = server.transaction();
+        let transaction = await server.transaction();
         let rows;
         
         rows = await transaction.query(`
             insert into country (code) values ('ru')
+            returning id, code
         `);
         
         assert.ok( rows[0].id == 1 );
