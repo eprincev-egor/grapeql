@@ -1,23 +1,10 @@
 "use strict";
 
-const {stopServer, startServer} = require("../../utils/serverHelpers");
-const {testRequestIndexOf} = require("../../utils/testRequest");
-
-let server;
-
-before(startServer(
-    __dirname,
-    _server => {server = _server;}
-));
-
-after(stopServer(
-    () => server
-));
+const {testRequestIndexOf} = require("../../utils/init")(__dirname);
 
 describe("IndexOf", () => {
 
     testRequestIndexOf({
-        server: () => server,
         nodes: {
             Company: `
                 select * from company
@@ -46,7 +33,6 @@ describe("IndexOf", () => {
     });
 
     testRequestIndexOf({
-        server: () => server,
         nodes: {
             Company: `
                 select * from company

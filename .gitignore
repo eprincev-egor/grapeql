@@ -5,3 +5,5 @@ grapeql.config.js
 database.json
 server-dump.json
 .vscode
+coverage
+.nyc_output

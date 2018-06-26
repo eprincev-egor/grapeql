@@ -1,22 +1,9 @@
 "use strict";
 
-const {stopServer, startServer} = require("../../utils/serverHelpers");
-const {testDelete} = require("../../utils/testRequest");
-
-let server;
-
-before(startServer(
-    __dirname,
-    _server => {server = _server;}
-));
-
-after(stopServer(
-    () => server
-));
+const {testDelete} = require("../../utils/init")(__dirname);
 
 describe("Delete", () => {
     testDelete({
-        server: () => server,
         node: `
             select * from country
         `,
@@ -25,7 +12,6 @@ describe("Delete", () => {
     });
 
     testDelete({
-        server: () => server,
         node: `
             select * from country
         `,
@@ -36,7 +22,6 @@ describe("Delete", () => {
     });
 
     testDelete({
-        server: () => server,
         node: `
             select * from country
         `,
@@ -47,7 +32,6 @@ describe("Delete", () => {
     });
 
     testDelete({
-        server: () => server,
         node: `
             select * from test.company
         `,

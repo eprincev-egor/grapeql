@@ -1,23 +1,10 @@
 "use strict";
 
-const {stopServer, startServer} = require("../../utils/serverHelpers");
-const {testRequestCount} = require("../../utils/testRequest");
-
-let server;
-
-before(startServer(
-    __dirname,
-    _server => {server = _server;}
-));
-
-after(stopServer(
-    () => server
-));
+const {testRequestCount} = require("../../utils/init")(__dirname);
 
 describe("BuildCount", () => {
 
     testRequestCount({
-        server: () => server,
         nodes: {
             Company: `
                 select * from company
@@ -33,7 +20,6 @@ describe("BuildCount", () => {
     });
 
     testRequestCount({
-        server: () => server,
         nodes: {
             Company: `
                 select * from company
@@ -51,7 +37,6 @@ describe("BuildCount", () => {
     });
 
     testRequestCount({
-        server: () => server,
         nodes: {
             Company: `
                 select * from company
@@ -71,7 +56,6 @@ describe("BuildCount", () => {
     });
 
     testRequestCount({
-        server: () => server,
         nodes: {
             Company: `
                 select * from company
@@ -90,7 +74,6 @@ describe("BuildCount", () => {
     });
 
     testRequestCount({
-        server: () => server,
         nodes: {
             Company: `
                 select * from company
@@ -111,7 +94,6 @@ describe("BuildCount", () => {
     });
 
     testRequestCount({
-        server: () => server,
         nodes: {
             Company: `
                 select * from company
@@ -135,7 +117,6 @@ describe("BuildCount", () => {
     });
 
     testRequestCount({
-        server: () => server,
         nodes: {
             Company: `
                 select * from company

@@ -3,7 +3,7 @@
 const assert = require("assert");
 
 const GrapeQLCoach = require("../../src/parser/GrapeQLCoach");
-const weakDeepEqual = require("../utils/weakDeepEqual");
+const testSyntax = require("../utils/testSyntax");
 
 let tests = {};
 tests.TableConstraint = require("./syntax/TableConstraint");
@@ -50,58 +50,12 @@ tests.VariableDefinition = require("./syntax/VariableDefinition");
 tests.Declare = require("./syntax/Declare");
 tests.QueryNode = require("./syntax/QueryNode");
 
-//let index = 0; // for conditional break point
-function testClass(className, tests) {
+for (let className in tests) {
     describe(className, () => {
-        tests.forEach(test => {
-            it(test.str, () => {
-
-                let str = test.str,
-                    parseFuncName = "parse" + className;
-
-                    //index++;
-                    //console.log(index);
-
-                if ( test.err ) {
-                    try {
-                        let coach = new GrapeQLCoach(str);
-                        coach[ parseFuncName ]();
-                        assert.ok(false, "expected error: " + str);
-                    } catch(err) {
-                        assert.ok(true, "expected error: " + str);
-                    }
-                }
-
-                else if ( test.result ) {
-                    let coach = new GrapeQLCoach(str);
-                    let result = coach[ parseFuncName ]();
-
-                    let isEqual = !!weakDeepEqual(test.result, result);
-                    if ( !isEqual ) {
-                        console.log("break here");
-                    }
-
-                    assert.ok(isEqual);
-
-
-                    // auto test clone and toString
-                    let clone = result.clone();
-                    let cloneString = clone.toString();
-                    let cloneCoach = new GrapeQLCoach( cloneString );
-                    let cloneResult = cloneCoach[ parseFuncName ]();
-
-                    isEqual = !!weakDeepEqual(test.result, cloneResult);
-                    assert.ok(isEqual);
-                }
-
-            });
-
+        tests[ className ].forEach(test => {
+            testSyntax(className, test);
         });
     });
-}
-
-for (let className in tests) {
-    testClass(className, tests[ className ]);
 }
 
 

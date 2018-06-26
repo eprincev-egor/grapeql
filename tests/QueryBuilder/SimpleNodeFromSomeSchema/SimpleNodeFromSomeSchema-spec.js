@@ -1,23 +1,10 @@
 "use strict";
 
-const {stopServer, startServer} = require("../../utils/serverHelpers");
-const {testRequest} = require("../../utils/testRequest");
-
-let server;
-
-before(startServer(
-    __dirname,
-    _server => {server = _server;}
-));
-
-after(stopServer(
-    () => server
-));
+const {testRequest} = require("../../utils/init")(__dirname);
 
 describe("SimpleNodeFromSomeSchema", () => {
 
     testRequest({
-        server: () => server,
         node: "select * from public.company",
         request: {
             columns: ["inn"]
@@ -30,7 +17,6 @@ describe("SimpleNodeFromSomeSchema", () => {
     });
 
     testRequest({
-        server: () => server,
         node: "select * from public.company as company",
         request: {
             columns: ["inn"]
@@ -43,7 +29,6 @@ describe("SimpleNodeFromSomeSchema", () => {
     });
 
     testRequest({
-        server: () => server,
         node: "select * from test.company",
         request: {
             columns: ["is_some"]
@@ -56,7 +41,6 @@ describe("SimpleNodeFromSomeSchema", () => {
     });
 
     testRequest({
-        server: () => server,
         node: "select * from test.company as my_company",
         request: {
             columns: ["is_some"]

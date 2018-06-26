@@ -1,23 +1,10 @@
 "use strict";
 
-const {stopServer, startServer} = require("../../utils/serverHelpers");
-const {testRequest} = require("../../utils/testRequest");
-
-let server;
-
-before(startServer(
-    __dirname,
-    _server => {server = _server;}
-));
-
-after(stopServer(
-    () => server
-));
+const {testRequest} = require("../../utils/init")(__dirname);
 
 describe("SimpleJoinFile", () => {
 
     testRequest({
-        server: () => server,
         nodes: {
             Company: `
                 select * from company
@@ -45,7 +32,6 @@ describe("SimpleJoinFile", () => {
     });
 
     testRequest({
-        server: () => server,
         nodes: {
             Company: `
                 select * from company
@@ -79,7 +65,6 @@ describe("SimpleJoinFile", () => {
     });
 
     testRequest({
-        server: () => server,
         nodes: {
             Order: `
                 select * from public.order
@@ -113,7 +98,6 @@ describe("SimpleJoinFile", () => {
     });
 
     testRequest({
-        server: () => server,
         nodes: {
             Order: `
                 select * from public.order
@@ -147,7 +131,6 @@ describe("SimpleJoinFile", () => {
     });
 
     testRequest({
-        server: () => server,
         nodes: {
             Order: `
                 select
@@ -181,7 +164,6 @@ describe("SimpleJoinFile", () => {
     });
 
     testRequest({
-        server: () => server,
         nodes: {
             Order: `
                 select

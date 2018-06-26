@@ -1,23 +1,10 @@
 "use strict";
 
-const {stopServer, startServer} = require("../../utils/serverHelpers");
-const {testRequest} = require("../../utils/testRequest");
-
-let server;
-
-before(startServer(
-    __dirname,
-    _server => {server = _server;}
-));
-
-after(stopServer(
-    () => server
-));
+const {testRequest} = require("../../utils/init")(__dirname);
 
 describe("SimpleOrderBy", () => {
 
     testRequest({
-        server: () => server,
         nodes: {
             Company: `
                 select * from company
@@ -38,7 +25,6 @@ describe("SimpleOrderBy", () => {
     });
 
     testRequest({
-        server: () => server,
         nodes: {
             Company: `
                 select * from company
@@ -59,7 +45,6 @@ describe("SimpleOrderBy", () => {
     });
 
     testRequest({
-        server: () => server,
         nodes: {
             Company: `
                 select * from company
@@ -80,7 +65,6 @@ describe("SimpleOrderBy", () => {
     });
 
     testRequest({
-        server: () => server,
         nodes: {
             Company: `
                 select * from company
@@ -101,7 +85,6 @@ describe("SimpleOrderBy", () => {
     });
 
     testRequest({
-        server: () => server,
         nodes: {
             Company: `
                 select * from company
@@ -122,7 +105,6 @@ describe("SimpleOrderBy", () => {
     });
 
     testRequest({
-        server: () => server,
         nodes: {
             Company: `
                 select * from company
@@ -149,7 +131,6 @@ describe("SimpleOrderBy", () => {
     });
 
     testRequest({
-        server: () => server,
         nodes: {
             Company: `
                 select * from company
@@ -179,7 +160,6 @@ describe("SimpleOrderBy", () => {
     });
 
     testRequest({
-        server: () => server,
         nodes: {
             Company: `
                 select * from company

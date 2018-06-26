@@ -1,22 +1,9 @@
 "use strict";
 
-const {stopServer, startServer} = require("../../utils/serverHelpers");
-const {testRequest} = require("../../utils/testRequest");
-
-let server;
-
-before(startServer(
-    __dirname,
-    _server => {server = _server;}
-));
-
-after(stopServer(
-    () => server
-));
+const {testRequest} = require("../../utils/init")(__dirname);
 
 describe("DefinedColumnsInFile", () => {
     testRequest({
-        server: () => server,
         nodes: {
             Company: `
                 select
@@ -47,7 +34,6 @@ describe("DefinedColumnsInFile", () => {
     });
 
     testRequest({
-        server: () => server,
         nodes: {
             Country: `
                 select
@@ -105,7 +91,6 @@ describe("DefinedColumnsInFile", () => {
     });
 
     testRequest({
-        server: () => server,
         nodes: {
             Country: `
                 select

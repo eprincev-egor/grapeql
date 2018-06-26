@@ -1,140 +1,79 @@
 "use strict";
 
-const assert = require("assert");
-const GrapeQLCoach = require("../../src/parser/GrapeQLCoach");
-const weakDeepEqual = require("../utils/weakDeepEqual");
-const {stopServer, startServer} = require("../utils/serverHelpers");
-
-let server;
-
-function testGetDbColumn(test) {
-    it(`
-        find ${ test.link } in
-        ${ test.node }
-    `, () => {
-
-        let coach;
-
-        coach = new GrapeQLCoach(test.link.trim());
-        let link = coach.parseObjectLink();
-
-        if ( test.error ) {
-            try {
-                coach = new GrapeQLCoach(test.node.trim());
-                let select = coach.parseSelect();
-
-                select.getColumnSource({
-                    server, link
-                });
-
-                assert.ok(false, `expected error ${ test.link } in
-                         ${ test.node }`);
-            } catch(err) {
-                assert.ok(true, `expected error ${ test.link } in
-                         ${ test.node }`);
-            }
-        } else {
-            coach = new GrapeQLCoach(test.node.trim());
-            let select = coach.parseSelect();
-
-            let source = select.getColumnSource({
-                server, link
-            });
-
-            let testSource = test.source;
-            if ( typeof testSource == "function" ) {
-                testSource = testSource();
-            }
-
-            let isEqual = !!weakDeepEqual(testSource, source);
-
-            assert.ok(isEqual);
-        }
-    });
-}
-
+const {testGetDbColumn} = require("../utils/init")(__dirname);
 
 describe("ParseDeps", () => {
-
-    before(startServer(
-        __dirname,
-        _server => {server = _server;}
-    ));
-
-    after(stopServer(
-        () => server
-    ));
 
     testGetDbColumn({
         node: "select * from company",
         link: "company.id",
-        source: () => ({dbColumn: server.schemas.public.tables.company.columns.id})
+        source: (server) => ({dbColumn: server.schemas.public.tables.company.columns.id})
     });
 
     testGetDbColumn({
         node: "select * from company",
         link: "company.\"id\"",
-        source: () => ({dbColumn: server.schemas.public.tables.company.columns.id})
+        source: (server) => ({dbColumn: server.schemas.public.tables.company.columns.id})
     });
 
     testGetDbColumn({
         node: "select * from \"company\"",
         link: "company.id",
-        source: () => ({dbColumn: server.schemas.public.tables.company.columns.id})
+        source: (server) => ({dbColumn: server.schemas.public.tables.company.columns.id})
     });
 
     testGetDbColumn({
         node: "select * from company, country",
         link: "country.id",
-        source: () => ({dbColumn: server.schemas.public.tables.country.columns.id})
+        source: (server) => ({dbColumn: server.schemas.public.tables.country.columns.id})
     });
 
     testGetDbColumn({
         node: "select * from company as \"comp\"",
         link: "comp.id",
-        source: () => ({dbColumn: server.schemas.public.tables.company.columns.id})
+        source: (server) => ({dbColumn: server.schemas.public.tables.company.columns.id})
     });
 
     testGetDbColumn({
         node: "select * from company as \"comp\"",
         link: "\"comp\".id",
-        source: () => ({dbColumn: server.schemas.public.tables.company.columns.id})
+        source: (server) => ({dbColumn: server.schemas.public.tables.company.columns.id})
     });
 
     testGetDbColumn({
         node: "select * from public.company",
         link: "company.id",
-        source: () => ({dbColumn: server.schemas.public.tables.company.columns.id})
+        source: (server) => ({dbColumn: server.schemas.public.tables.company.columns.id})
     });
 
     testGetDbColumn({
         node: "select * from public.company",
         link: "public.company.id",
-        source: () => ({dbColumn: server.schemas.public.tables.company.columns.id})
+        source: (server) => ({dbColumn: server.schemas.public.tables.company.columns.id})
     });
 
     testGetDbColumn({
         node: "select * from company",
         link: "public.company.id",
-        source: () => ({dbColumn: server.schemas.public.tables.company.columns.id})
+        source: (server) => ({dbColumn: server.schemas.public.tables.company.columns.id})
     });
 
     testGetDbColumn({
         node: "select * from company, test.company",
         link: "public.company.id",
-        source: () => ({dbColumn: server.schemas.public.tables.company.columns.id})
+        source: (server) => ({dbColumn: server.schemas.public.tables.company.columns.id})
     });
 
     testGetDbColumn({
         node: "select * from company, test.company",
         link: "test.company.id",
-        source: () => ({dbColumn: server.schemas.test.tables.company.columns.id})
+        source: (server) => ({dbColumn: server.schemas.test.tables.company.columns.id})
     });
 
     testGetDbColumn({
         node: "select * from public.company",
         link: "id",
-        source: () => ({dbColumn: server.schemas.public.tables.company.columns.id})
+        source: (server) => ({dbColumn: server.schemas.public.tables.company.columns.id})
     });
 
     // column reference id is ambiguous
@@ -168,31 +107,31 @@ describe("ParseDeps", () => {
     testGetDbColumn({
         node: "select * from (select * from public.company) as comp",
         link: "comp.id",
-        source: () => ({dbColumn: server.schemas.public.tables.company.columns.id})
+        source: (server) => ({dbColumn: server.schemas.public.tables.company.columns.id})
     });
 
     testGetDbColumn({
         node: "select * from (select * from public.company) as comp",
         link: "id",
-        source: () => ({dbColumn: server.schemas.public.tables.company.columns.id})
+        source: (server) => ({dbColumn: server.schemas.public.tables.company.columns.id})
     });
 
     testGetDbColumn({
         node: "select * from (select * from (select * from public.company) as comp2) as comp1",
         link: "comp1.id",
-        source: () => ({dbColumn: server.schemas.public.tables.company.columns.id})
+        source: (server) => ({dbColumn: server.schemas.public.tables.company.columns.id})
     });
 
     testGetDbColumn({
         node: "select * from test.company left join (select * from (select * from public.company) as comp2) as comp1 on true",
         link: "comp1.id",
-        source: () => ({dbColumn: server.schemas.public.tables.company.columns.id})
+        source: (server) => ({dbColumn: server.schemas.public.tables.company.columns.id})
     });
 
     testGetDbColumn({
         node: "select *, company.id as id_clone from public.company",
         link: "id_clone",
-        source: () => ({dbColumn: server.schemas.public.tables.company.columns.id})
+        source: (server) => ({dbColumn: server.schemas.public.tables.company.columns.id})
     });
 
     testGetDbColumn({
@@ -247,7 +186,7 @@ describe("ParseDeps", () => {
             from company
         `,
         link: "id",
-        source: () => ({dbColumn: server.schemas.test.tables.company.columns.id})
+        source: (server) => ({dbColumn: server.schemas.test.tables.company.columns.id})
     });
 
     testGetDbColumn({
@@ -259,7 +198,7 @@ describe("ParseDeps", () => {
             from company
         `,
         link: "id",
-        source: () => ({dbColumn: server.schemas.public.tables.company.columns.id})
+        source: (server) => ({dbColumn: server.schemas.public.tables.company.columns.id})
     });
 
     testGetDbColumn({
@@ -279,7 +218,7 @@ describe("ParseDeps", () => {
             from company2
         `,
         link: "id",
-        source: () => ({dbColumn: server.schemas.test.tables.company.columns.id})
+        source: (server) => ({dbColumn: server.schemas.test.tables.company.columns.id})
     });
 
     testGetDbColumn({
@@ -309,7 +248,7 @@ describe("ParseDeps", () => {
             from company2
         `,
         link: "id",
-        source: () => ({dbColumn: server.schemas.test.tables.company.columns.id})
+        source: (server) => ({dbColumn: server.schemas.test.tables.company.columns.id})
     });
 
     testGetDbColumn({
@@ -326,7 +265,7 @@ describe("ParseDeps", () => {
             ) as lastOrder on true
         `,
         link: "company_id",
-        source: () => ({dbColumn: server.schemas.public.tables.company.columns.id})
+        source: (server) => ({dbColumn: server.schemas.public.tables.company.columns.id})
     });
 
     testGetDbColumn({
@@ -349,7 +288,7 @@ describe("ParseDeps", () => {
             ) as lastOrder on true
         `,
         link: "company_id",
-        source: () => ({dbColumn: server.schemas.test.tables.company.columns.id})
+        source: (server) => ({dbColumn: server.schemas.test.tables.company.columns.id})
     });
 
     testGetDbColumn({
@@ -378,31 +317,31 @@ describe("ParseDeps", () => {
     testGetDbColumn({
         node: "select id as id from company",
         link: "id",
-        source: () => ({dbColumn: server.schemas.public.tables.company.columns.id})
+        source: (server) => ({dbColumn: server.schemas.public.tables.company.columns.id})
     });
 
     testGetDbColumn({
         node: "select id as id from test.company",
         link: "id",
-        source: () => ({dbColumn: server.schemas.test.tables.company.columns.id})
+        source: (server) => ({dbColumn: server.schemas.test.tables.company.columns.id})
     });
 
     testGetDbColumn({
         node: "select id as id from test.Company",
         link: "id",
-        source: () => ({dbColumn: server.schemas.test.tables.company.columns.id})
+        source: (server) => ({dbColumn: server.schemas.test.tables.company.columns.id})
     });
 
     testGetDbColumn({
         node: "select id as id from Test.Company",
         link: "id",
-        source: () => ({dbColumn: server.schemas.test.tables.company.columns.id})
+        source: (server) => ({dbColumn: server.schemas.test.tables.company.columns.id})
     });
 
     testGetDbColumn({
         node: "select id as id from Test.Company",
         link: "Id",
-        source: () => ({dbColumn: server.schemas.test.tables.company.columns.id})
+        source: (server) => ({dbColumn: server.schemas.test.tables.company.columns.id})
     });
 
     testGetDbColumn({
@@ -416,7 +355,7 @@ describe("ParseDeps", () => {
             ) as some_join1 on true
         `,
         link: "id",
-        source: () => ({dbColumn: server.schemas.public.tables.order.columns.id})
+        source: (server) => ({dbColumn: server.schemas.public.tables.order.columns.id})
     });
 
     testGetDbColumn({
@@ -426,7 +365,7 @@ describe("ParseDeps", () => {
             from public, company
         `,
         link: "id",
-        source: () => ({dbColumn: server.schemas.public.tables.company.columns.id})
+        source: (server) => ({dbColumn: server.schemas.public.tables.company.columns.id})
     });
 
     testGetDbColumn({
@@ -436,7 +375,7 @@ describe("ParseDeps", () => {
             from public, company
         `,
         link: "id",
-        source: () => ({dbColumn: server.schemas.test.tables.company.columns.id})
+        source: (server) => ({dbColumn: server.schemas.test.tables.company.columns.id})
     });
 
     testGetDbColumn({

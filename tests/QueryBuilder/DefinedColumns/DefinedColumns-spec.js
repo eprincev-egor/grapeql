@@ -1,23 +1,10 @@
 "use strict";
 
-const {stopServer, startServer} = require("../../utils/serverHelpers");
-const {testRequest} = require("../../utils/testRequest");
-
-let server;
-
-before(startServer(
-    __dirname,
-    _server => {server = _server;}
-));
-
-after(stopServer(
-    () => server
-));
+const {testRequest} = require("../../utils/init")(__dirname);
 
 describe("DefinedColumns", () => {
 
     testRequest({
-        server: () => server,
         node: `
             select *,
                 company.id + 1 as id_plus_1
@@ -34,7 +21,6 @@ describe("DefinedColumns", () => {
     });
 
     testRequest({
-        server: () => server,
         node: `
             select *,
                 public.company.id
@@ -51,7 +37,6 @@ describe("DefinedColumns", () => {
     });
 
     testRequest({
-        server: () => server,
         node: `
             select *,
                 public.company.id
@@ -68,7 +53,6 @@ describe("DefinedColumns", () => {
     });
 
     testRequest({
-        server: () => server,
         node: `
             select *,
                 public.company.ID
@@ -85,7 +69,6 @@ describe("DefinedColumns", () => {
     });
 
     testRequest({
-        server: () => server,
         node: `
             select *,
                 public.company.id as "my_company.id"

@@ -1,50 +1,6 @@
 "use strict";
 
-const assert = require("assert");
-const GrapeQLCoach = require("../../src/parser/GrapeQLCoach");
-const weakDeepEqual = require("../utils/weakDeepEqual");
-const {stopServer, startServer} = require("../utils/serverHelpers");
-
-let server;
-
-
-function testRemoveUnnesaryWiths(fromSelect, toSelect) {
-    if ( !toSelect ) {
-        toSelect = fromSelect;
-    }
-
-    it(`
-            ${ fromSelect }
-            --------------------------->
-            ${ toSelect }
-    `, () => {
-
-        let coach;
-
-        coach = new GrapeQLCoach(fromSelect);
-        coach.skipSpace();
-        let parsedFromSelect = coach.parseSelect();
-
-        coach = new GrapeQLCoach(toSelect);
-        coach.skipSpace();
-        let parsedToSelect = coach.parseSelect();
-
-        parsedFromSelect.removeUnnesaryWiths({server});
-
-        let isEqual = !!weakDeepEqual(parsedFromSelect, parsedToSelect);
-
-        assert.ok(isEqual);
-    });
-}
-
-before(startServer(
-    __dirname,
-    _server => {server = _server;}
-));
-
-after(stopServer(
-    () => server
-));
+const {testRemoveUnnesaryWiths} = require("../utils/init")(__dirname);
 
 describe("RemoveWiths", () => {
 
@@ -125,31 +81,31 @@ describe("RemoveWiths", () => {
         order by (select * from y ) desc
     `);
 
-    testRemoveUnnesaryWiths( `
+    testRemoveUnnesaryWiths(`
         with x as (select 1 as id)
         select from company
         group by (select id from x)
     `);
 
-    testRemoveUnnesaryWiths( `
+    testRemoveUnnesaryWiths(`
         with x as (select 1 as id)
         select from company
         group by cube (company.id, ((select id from x), 1))
     `);
 
-    testRemoveUnnesaryWiths( `
+    testRemoveUnnesaryWiths(`
         with x as (select 1 as id)
         select from company
         group by rollup (company.id, ((select id from x), 1))
     `);
 
-    testRemoveUnnesaryWiths( `
+    testRemoveUnnesaryWiths(`
         with x as (select 1 as id)
         select from company
         group by GROUPING SETS (company.id, (select id from x))
     `);
 
-    testRemoveUnnesaryWiths( `
+    testRemoveUnnesaryWiths(`
         with x as (select 1 as id)
         select from company
         left join lateral (
@@ -158,7 +114,7 @@ describe("RemoveWiths", () => {
         ) as y on true
     `);
 
-    testRemoveUnnesaryWiths( `
+    testRemoveUnnesaryWiths(`
         with x as (select 1 as id)
         select from company
         left join (
@@ -167,7 +123,7 @@ describe("RemoveWiths", () => {
         ) as y on true
     `);
 
-    testRemoveUnnesaryWiths( `
+    testRemoveUnnesaryWiths(`
         with x as (select 1 as id)
         select from (
             select *
@@ -175,7 +131,7 @@ describe("RemoveWiths", () => {
         ) as y
     `);
 
-    testRemoveUnnesaryWiths( `
+    testRemoveUnnesaryWiths(`
         with x as (select 1 as id)
         select from test_func(
             (select *
@@ -183,7 +139,7 @@ describe("RemoveWiths", () => {
         ) as y
     `);
 
-    testRemoveUnnesaryWiths( `
+    testRemoveUnnesaryWiths(`
         with x as (select 1 as id)
         select from (
             select *
@@ -194,7 +150,7 @@ describe("RemoveWiths", () => {
         ) as a
     `);
 
-    testRemoveUnnesaryWiths( `
+    testRemoveUnnesaryWiths(`
         with x as (select 1 as id)
         select test_func(
             (select *
@@ -203,7 +159,7 @@ describe("RemoveWiths", () => {
         from company
     `);
 
-    testRemoveUnnesaryWiths( `
+    testRemoveUnnesaryWiths(`
         with x as (select 1 as id)
         select string_agg(
             company.name
@@ -212,7 +168,7 @@ describe("RemoveWiths", () => {
         from company
     `);
 
-    testRemoveUnnesaryWiths( `
+    testRemoveUnnesaryWiths(`
         with x as (select 1 as id)
         select string_agg(
             company.name
@@ -222,7 +178,7 @@ describe("RemoveWiths", () => {
         from company
     `);
 
-    testRemoveUnnesaryWiths( `
+    testRemoveUnnesaryWiths(`
         with x as (select 1 as id)
         select string_agg(
             company.name
@@ -233,7 +189,7 @@ describe("RemoveWiths", () => {
         from company
     `);
 
-    testRemoveUnnesaryWiths( `
+    testRemoveUnnesaryWiths(`
         with x as (select 1 as id)
         select row_number() over (
             order by (select id from x) desc
@@ -241,7 +197,7 @@ describe("RemoveWiths", () => {
         from company
     `);
 
-    testRemoveUnnesaryWiths( `
+    testRemoveUnnesaryWiths(`
         with x as (select 1 as id)
         select row_number() over (
             partition by (select id from x)
@@ -249,32 +205,32 @@ describe("RemoveWiths", () => {
         from company
     `);
 
-    testRemoveUnnesaryWiths( `
+    testRemoveUnnesaryWiths(`
         with x as (select 1 as id)
         select cast( (select id from x) as bigint )
     `);
 
-    testRemoveUnnesaryWiths( `
+    testRemoveUnnesaryWiths(`
         with x as (select 1 as id)
         select company.id in ((select id from x), (select id + 1 from x))
     `);
 
-    testRemoveUnnesaryWiths( `
+    testRemoveUnnesaryWiths(`
         with x as (select 1 as id)
         select company.id in (select id from x)
     `);
 
-    testRemoveUnnesaryWiths( `
+    testRemoveUnnesaryWiths(`
         with x as (select 1 as id)
         select company.id between 1 and (select id + 100 from x)
     `);
 
-    testRemoveUnnesaryWiths( `
+    testRemoveUnnesaryWiths(`
         with x as (select 1 as id)
         select company.id between (select id from x) and 500
     `);
 
-    testRemoveUnnesaryWiths( `
+    testRemoveUnnesaryWiths(`
         with x as (select 1 as id)
         select case
             when (select id from x)
@@ -282,7 +238,7 @@ describe("RemoveWiths", () => {
         end
     `);
 
-    testRemoveUnnesaryWiths( `
+    testRemoveUnnesaryWiths(`
         with x as (select 1 as id)
         select case
             when true
@@ -290,7 +246,7 @@ describe("RemoveWiths", () => {
         end
     `);
 
-    testRemoveUnnesaryWiths( `
+    testRemoveUnnesaryWiths(`
         with x as (select 1 as id)
         select case
             when true
@@ -299,7 +255,7 @@ describe("RemoveWiths", () => {
         end
     `);
 
-    testRemoveUnnesaryWiths( `
+    testRemoveUnnesaryWiths(`
         with x as (select 1 as id)
         select row_number() over (
             order by (select id from x) desc
@@ -307,7 +263,7 @@ describe("RemoveWiths", () => {
         from company
     `);
 
-    testRemoveUnnesaryWiths( `
+    testRemoveUnnesaryWiths(`
         with x as (select 1 as id)
         select row_number() over (test_2)
         from company
@@ -316,7 +272,7 @@ describe("RemoveWiths", () => {
             test_2 as (partition by (select id from x))
     `);
 
-    testRemoveUnnesaryWiths( `
+    testRemoveUnnesaryWiths(`
         with x as (select 1 as id)
         select row_number() over (test_2)
         from company
@@ -325,7 +281,7 @@ describe("RemoveWiths", () => {
             test_2 as (order by (select id from x) asc)
     `);
 
-    testRemoveUnnesaryWiths( `
+    testRemoveUnnesaryWiths(`
         with x as (select 1)
         select * from (
             with x as (select 2)

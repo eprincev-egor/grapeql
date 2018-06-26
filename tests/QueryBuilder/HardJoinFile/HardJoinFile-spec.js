@@ -1,22 +1,9 @@
 "use strict";
 
-const {stopServer, startServer} = require("../../utils/serverHelpers");
-const {testRequest} = require("../../utils/testRequest");
-
-let server;
-
-before(startServer(
-    __dirname,
-    _server => {server = _server;}
-));
-
-after(stopServer(
-    () => server
-));
+const {testRequest} = require("../../utils/init")(__dirname);
 
 describe("HardJoinFile", () => {
     testRequest({
-        server: () => server,
         nodes: {
             Country: `
                 select * from country
@@ -52,7 +39,6 @@ describe("HardJoinFile", () => {
     });
 
     testRequest({
-        server: () => server,
         nodes: {
             Country: `
                 select * from country
@@ -98,7 +84,6 @@ describe("HardJoinFile", () => {
 
 
     testRequest({
-        server: () => server,
         nodes: {
             Company: `
                 select * from company
@@ -151,7 +136,6 @@ describe("HardJoinFile", () => {
 
 
     testRequest({
-        server: () => server,
         nodes: {
             Company: `
                 select * from company
@@ -192,7 +176,6 @@ describe("HardJoinFile", () => {
     });
 
     testRequest({
-        server: () => server,
         nodes: {
             Company: `
                 select * from company
@@ -242,7 +225,6 @@ describe("HardJoinFile", () => {
     });
 
     testRequest({
-        server: () => server,
         nodes: {
             Order: `
                 select *
@@ -282,7 +264,6 @@ describe("HardJoinFile", () => {
     });
 
     testRequest({
-        server: () => server,
         nodes: {
             Order: `
                 select *

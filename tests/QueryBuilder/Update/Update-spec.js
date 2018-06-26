@@ -1,22 +1,9 @@
 "use strict";
 
-const {stopServer, startServer} = require("../../utils/serverHelpers");
-const {testUpdate} = require("../../utils/testRequest");
-
-let server;
-
-before(startServer(
-    __dirname,
-    _server => {server = _server;}
-));
-
-after(stopServer(
-    () => server
-));
+const {testUpdate} = require("../../utils/init")(__dirname);
 
 describe("Update", () => {
     testUpdate({
-        server: () => server,
         node: `
             select * from country
         `,

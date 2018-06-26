@@ -1,27 +1,14 @@
 "use strict";
 
-const {stopServer, startServer} = require("../../utils/serverHelpers");
 const {
     testRequest,
     testRequestCount,
     testRequestIndexOf
-} = require("../../utils/testRequest");
-
-let server;
-
-before(startServer(
-    __dirname,
-    _server => {server = _server;}
-));
-
-after(stopServer(
-    () => server
-));
+} = require("../../utils/init")(__dirname);
 
 describe("Vars", () => {
 
     testRequest({
-        server: () => server,
         nodes: {
             Company: `
                 declare $company_id bigint not null;
@@ -47,7 +34,6 @@ describe("Vars", () => {
     });
 
     testRequest({
-        server: () => server,
         nodes: {
             Company: `
                 declare $company_id bigint not null;
@@ -66,7 +52,6 @@ describe("Vars", () => {
     });
 
     testRequest({
-        server: () => server,
         nodes: {
             Company: `
                 declare $company_id bigint not null;
@@ -85,7 +70,6 @@ describe("Vars", () => {
     });
 
     testRequest({
-        server: () => server,
         nodes: {
             Company: `
                 declare $company_id bigint;
@@ -104,7 +88,6 @@ describe("Vars", () => {
     });
 
     testRequest({
-        server: () => server,
         nodes: {
             Company: `
                 declare $company_id bigint;
@@ -130,7 +113,6 @@ describe("Vars", () => {
     });
 
     testRequestCount({
-        server: () => server,
         nodes: {
             Company: `
                 declare $inn text;
@@ -153,7 +135,6 @@ describe("Vars", () => {
     });
 
     testRequestIndexOf({
-        server: () => server,
         nodes: {
             Company: `
                 declare $id_country integer;
@@ -185,9 +166,8 @@ describe("Vars", () => {
                 query."id" = 150
         `
     });
-    
+
     testRequest({
-        server: () => server,
         nodes: {
             Company: `
                 declare $some_bool boolean default false;
@@ -204,7 +184,7 @@ describe("Vars", () => {
                 select
                     false as some_bool
             )
-            
+
             select
                 company.id
             from company
@@ -213,21 +193,20 @@ describe("Vars", () => {
                 (select vars.some_bool from vars)
         `
     });
-    
+
     testRequest({
-        server: () => server,
         nodes: {
             Company: `
                 declare $some_bool boolean default false;
-                
+
                 with vars as (
                     select
                         'lol' as some_bool
                 )
                 select * from company
-                
+
                 left join vars on true
-                
+
                 where $some_bool
             `
         },
@@ -236,7 +215,7 @@ describe("Vars", () => {
             columns: ["id", "vars.some_bool"]
         },
         result: `
-            with 
+            with
                 vars as (
                     select
                         'lol' as some_bool
@@ -245,21 +224,20 @@ describe("Vars", () => {
                     select
                         false as some_bool
                 )
-            
+
             select
                 company.id,
                 vars.some_bool as "vars.some_bool"
             from company
-            
+
             left join vars on true
-            
+
             where
                 (select vars1.some_bool from vars1)
         `
     });
-    
+
     testRequest({
-        server: () => server,
         nodes: {
             Company: `
                 declare $some_bool boolean default false;
@@ -283,9 +261,8 @@ describe("Vars", () => {
                 true
         `
     });
-    
+
     testRequest({
-        server: () => server,
         nodes: {
             Company: `
                 declare $some_bool boolean default false;
@@ -301,9 +278,8 @@ describe("Vars", () => {
         },
         error: Error
     });
-    
+
     testRequest({
-        server: () => server,
         nodes: {
             Company: `
                 declare $price numeric check( $price > 0 );
@@ -322,13 +298,13 @@ describe("Vars", () => {
         result: `
             with vars as (
                 select
-                    case 
-                        when 100 > 0 
-                        then  100 
-                        else raise_exception($tag1$variable price violates check constraint$tag1$) 
+                    case
+                        when 100 > 0
+                        then  100
+                        else raise_exception($tag1$variable price violates check constraint$tag1$)
                     end as price
             )
-            
+
             select
                 company.id
             from company
@@ -337,14 +313,13 @@ describe("Vars", () => {
                 company.id > (select vars.price from vars)
         `
     });
-    
+
     testRequest({
-        server: () => server,
         nodes: {
             Company: `
                 declare $from text default 'ru';
                 select * from company
-                
+
                 inner join country on
                     country.id = company.id_country and
                     country.code = $from
@@ -362,21 +337,20 @@ describe("Vars", () => {
                 select
                     'ru' as from
             )
-            
+
             select
                 company.id,
                 country.id as "country.id"
             from company
-            
+
             inner join country on
                 country.id = company.id_country and
                 country.code = (select vars.from from vars)
         `
     });
-    
-    
+
+
     testRequest({
-        server: () => server,
         nodes: {
             Company: `
                 declare $some numeric check( $some <> 0 ) default 0;
@@ -392,13 +366,13 @@ describe("Vars", () => {
         result: `
             with vars as (
                 select
-                    case 
-                        when 0 <> 0 
+                    case
+                        when 0 <> 0
                         then  0
-                        else raise_exception($tag1$variable some violates check constraint$tag1$) 
+                        else raise_exception($tag1$variable some violates check constraint$tag1$)
                     end as some
             )
-            
+
             select
                 company.id
             from company
@@ -407,9 +381,8 @@ describe("Vars", () => {
                 company.id > (select vars.some from vars)
         `
     });
-    
+
     testRequest({
-        server: () => server,
         nodes: {
             Company: `
                 declare $some numeric check( $some <> 0 ) default 0;
@@ -428,13 +401,13 @@ describe("Vars", () => {
         result: `
             with vars as (
                 select
-                    case 
-                        when 1 <> 0 
+                    case
+                        when 1 <> 0
                         then  1
-                        else raise_exception($tag1$variable some violates check constraint$tag1$) 
+                        else raise_exception($tag1$variable some violates check constraint$tag1$)
                     end as some
             )
-            
+
             select
                 company.id
             from company
@@ -443,5 +416,5 @@ describe("Vars", () => {
                 company.id > (select vars.some from vars)
         `
     });
-    
+
 });

@@ -1,23 +1,10 @@
 "use strict";
 
-const {stopServer, startServer} = require("../../utils/serverHelpers");
-const {testRequest} = require("../../utils/testRequest");
-
-let server;
-
-before(startServer(
-    __dirname,
-    _server => {server = _server;}
-));
-
-after(stopServer(
-    () => server
-));
+const {testRequest} = require("../../utils/init")(__dirname);
 
 describe("JoinSelfFile", () => {
 
     testRequest({
-        server: () => server,
         nodes: {
             Country: "select * from country",
             Company: `
@@ -60,7 +47,6 @@ describe("JoinSelfFile", () => {
     });
 
     testRequest({
-        server: () => server,
         nodes: {
             Country: "select * from country",
             Company: `
@@ -84,9 +70,8 @@ describe("JoinSelfFile", () => {
         },
         error: true
     });
-    
+
     testRequest({
-        server: () => server,
         nodes: {
             Country: "select * from country",
             Company: `
@@ -110,9 +95,8 @@ describe("JoinSelfFile", () => {
         },
         error: true
     });
-    
+
     testRequest({
-        server: () => server,
         nodes: {
             Company: `
                 select * from ./Company
@@ -126,9 +110,8 @@ describe("JoinSelfFile", () => {
         },
         error: true
     });
-    
+
     testRequest({
-        server: () => server,
         nodes: {
             Company: `
                 select * from (select * from ./Company) as company
@@ -142,9 +125,8 @@ describe("JoinSelfFile", () => {
         },
         error: true
     });
-    
+
     testRequest({
-        server: () => server,
         nodes: {
             Company: `
                 select * from (select * from company left join ./Company on true) as company
@@ -158,9 +140,8 @@ describe("JoinSelfFile", () => {
         },
         error: true
     });
-    
+
     testRequest({
-        server: () => server,
         nodes: {
             Company: `
                 with x as (
@@ -177,9 +158,8 @@ describe("JoinSelfFile", () => {
         },
         error: true
     });
-    
+
     testRequest({
-        server: () => server,
         nodes: {
             Company: `
                 with x as (
@@ -197,9 +177,8 @@ describe("JoinSelfFile", () => {
         },
         error: true
     });
-    
+
     testRequest({
-        server: () => server,
         nodes: {
             Country: `
                 with y as (
@@ -211,7 +190,7 @@ describe("JoinSelfFile", () => {
             `,
             Company: `
                 select * from company
-                
+
                 left join ./Country on
                     true
             `
@@ -224,9 +203,8 @@ describe("JoinSelfFile", () => {
         },
         error: true
     });
-    
+
     testRequest({
-        server: () => server,
         nodes: {
             SomeCountry: `
                 with z as (
@@ -239,13 +217,13 @@ describe("JoinSelfFile", () => {
             Country: `
                 select *
                 from country
-                
+
                 left join ./SomeCountry on
                     true
             `,
             Company: `
                 select * from company
-                
+
                 left join ./Country on
                     true
             `
@@ -258,10 +236,9 @@ describe("JoinSelfFile", () => {
         },
         error: true
     });
-    
-    
+
+
     testRequest({
-        server: () => server,
         nodes: {
             Country: `
                 with y as (
@@ -273,7 +250,7 @@ describe("JoinSelfFile", () => {
             `,
             Company: `
                 select * from company
-                
+
                 left join ./Country on
                     Country.id = company.id_country
             `
@@ -289,5 +266,5 @@ describe("JoinSelfFile", () => {
             from company
         `
     });
-    
+
 });

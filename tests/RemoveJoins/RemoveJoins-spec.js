@@ -1,58 +1,10 @@
 "use strict";
 
-const assert = require("assert");
-const GrapeQLCoach = require("../../src/parser/GrapeQLCoach");
-const weakDeepEqual = require("../utils/weakDeepEqual");
-const {stopServer, startServer} = require("../utils/serverHelpers");
-
-let server;
-
-
-function testRemoveUnnesaryJoins(fromSelect, toSelect) {
-    if ( !toSelect ) {
-        toSelect = fromSelect;
-    }
-
-    it(`
-            ${ fromSelect }
-            --------------------------->
-            ${ toSelect }
-    `, () => {
-
-        let node;
-        node = server.addNode("Country", "select * from country");
-        node.file = "./Country.sql";
-
-        let coach;
-
-        coach = new GrapeQLCoach(fromSelect);
-        coach.skipSpace();
-        let parsedFromSelect = coach.parseSelect();
-
-        coach = new GrapeQLCoach(toSelect);
-        coach.skipSpace();
-        let parsedToSelect = coach.parseSelect();
-
-        parsedFromSelect.removeUnnesaryJoins({server});
-
-        let isEqual = !!weakDeepEqual(parsedFromSelect, parsedToSelect);
-
-        assert.ok(isEqual);
-    });
-}
-
-before(startServer(
-    __dirname,
-    _server => {server = _server;}
-));
-
-after(stopServer(
-    () => server
-));
+const {testRemoveUnnesaryJoins} = require("../utils/init")(__dirname);
 
 describe("RemoveJoins", () => {
 
-    testRemoveUnnesaryJoins( `
+    testRemoveUnnesaryJoins(`
             select from company
 
             left join country on
@@ -61,7 +13,7 @@ describe("RemoveJoins", () => {
             select from company
     `);
 
-    testRemoveUnnesaryJoins( `
+    testRemoveUnnesaryJoins(`
             select from Company
 
             left join Country on
@@ -70,7 +22,7 @@ describe("RemoveJoins", () => {
             select from Company
     `);
 
-    testRemoveUnnesaryJoins( `
+    testRemoveUnnesaryJoins(`
             select from company
 
             left join country on
@@ -80,7 +32,7 @@ describe("RemoveJoins", () => {
             select from company
     `);
 
-    testRemoveUnnesaryJoins( `
+    testRemoveUnnesaryJoins(`
             select from company
 
             left join country on
@@ -89,7 +41,7 @@ describe("RemoveJoins", () => {
             select from company
     `);
 
-    testRemoveUnnesaryJoins( `
+    testRemoveUnnesaryJoins(`
             select from company
 
             left join country on
@@ -99,7 +51,7 @@ describe("RemoveJoins", () => {
             select from company
     `);
 
-    testRemoveUnnesaryJoins( `
+    testRemoveUnnesaryJoins(`
             select from company
 
             left join country on
@@ -107,7 +59,7 @@ describe("RemoveJoins", () => {
                 true
         `);
 
-    testRemoveUnnesaryJoins( `
+    testRemoveUnnesaryJoins(`
             select from company
 
             left join country on
@@ -116,7 +68,7 @@ describe("RemoveJoins", () => {
             where country.id > 3
     `);
 
-    testRemoveUnnesaryJoins( `
+    testRemoveUnnesaryJoins(`
             select from company
 
             left join country on
@@ -127,7 +79,7 @@ describe("RemoveJoins", () => {
 
     `);
 
-    testRemoveUnnesaryJoins( `
+    testRemoveUnnesaryJoins(`
             select from public.order as orders
 
             left join company as company_client on
@@ -141,7 +93,7 @@ describe("RemoveJoins", () => {
             select from public.order as orders
     `);
 
-    testRemoveUnnesaryJoins( `
+    testRemoveUnnesaryJoins(`
             select
                 partner_link.*
             from public.order as orders
@@ -155,7 +107,7 @@ describe("RemoveJoins", () => {
 
     `);
 
-    testRemoveUnnesaryJoins( `
+    testRemoveUnnesaryJoins(`
             select
                 *
             from public.order as orders
@@ -169,7 +121,7 @@ describe("RemoveJoins", () => {
 
     `);
 
-    testRemoveUnnesaryJoins( `
+    testRemoveUnnesaryJoins(`
             select
                 (company_client.id + partner_link.id_order)
             from public.order as orders
@@ -183,7 +135,7 @@ describe("RemoveJoins", () => {
 
     `);
 
-    testRemoveUnnesaryJoins( `
+    testRemoveUnnesaryJoins(`
             select
                 (company_client.id + partner_link.id_order + some.one)
             from public.order as orders
@@ -201,7 +153,7 @@ describe("RemoveJoins", () => {
             ) as some on true
     `);
 
-    testRemoveUnnesaryJoins( `
+    testRemoveUnnesaryJoins(`
             select
                 (company_client.id + partner_link.id_order)
             from public.order as orders
@@ -230,7 +182,7 @@ describe("RemoveJoins", () => {
                 company_client.id = partner_link.id_company
     `);
 
-    testRemoveUnnesaryJoins( `
+    testRemoveUnnesaryJoins(`
             select from company
 
             left join (select * from country limit 1) as country on true
@@ -238,7 +190,7 @@ describe("RemoveJoins", () => {
             select from company
     `);
 
-    testRemoveUnnesaryJoins( `
+    testRemoveUnnesaryJoins(`
             select from company
 
             left join (select * from country limit 1) as country on true
@@ -246,7 +198,7 @@ describe("RemoveJoins", () => {
             order by country.id
     `);
 
-    testRemoveUnnesaryJoins( `
+    testRemoveUnnesaryJoins(`
             select from company
 
             left join (select * from country limit 1) as country on true
@@ -254,7 +206,7 @@ describe("RemoveJoins", () => {
             group by country.id
     `);
 
-    testRemoveUnnesaryJoins( `
+    testRemoveUnnesaryJoins(`
             select from company
 
             left join (select * from country limit 1) as country on true
@@ -262,7 +214,7 @@ describe("RemoveJoins", () => {
             group by cube (company.id, (country.id, 1))
     `);
 
-    testRemoveUnnesaryJoins( `
+    testRemoveUnnesaryJoins(`
             select from company
 
             left join (select * from country limit 1) as country on true
@@ -270,7 +222,7 @@ describe("RemoveJoins", () => {
             group by rollup (company.id, (country.id, 1))
     `);
 
-    testRemoveUnnesaryJoins( `
+    testRemoveUnnesaryJoins(`
             select from company
 
             left join (select * from country limit 1) as country on true
@@ -278,7 +230,7 @@ describe("RemoveJoins", () => {
             group by GROUPING SETS (company.id, country.code)
     `);
 
-    testRemoveUnnesaryJoins( `
+    testRemoveUnnesaryJoins(`
             select
                 cast( country.id as bigint )
             from company
@@ -286,7 +238,7 @@ describe("RemoveJoins", () => {
             left join (select * from country limit 1) as country on true
     `);
 
-    testRemoveUnnesaryJoins( `
+    testRemoveUnnesaryJoins(`
             select
                 company.id in (country.id)
             from company
@@ -294,7 +246,7 @@ describe("RemoveJoins", () => {
             left join (select * from country limit 1) as country on true
     `);
 
-    testRemoveUnnesaryJoins( `
+    testRemoveUnnesaryJoins(`
             select
                 company.id between country.id and 2
             from company
@@ -302,7 +254,7 @@ describe("RemoveJoins", () => {
             left join (select * from country limit 1) as country on true
     `);
 
-    testRemoveUnnesaryJoins( `
+    testRemoveUnnesaryJoins(`
             select
                 company.id between 1 and country.id
             from company
@@ -310,7 +262,7 @@ describe("RemoveJoins", () => {
             left join (select * from country limit 1) as country on true
     `);
 
-    testRemoveUnnesaryJoins( `
+    testRemoveUnnesaryJoins(`
             select
                 (case
                     when country.id is not null
@@ -321,7 +273,7 @@ describe("RemoveJoins", () => {
             left join (select * from country limit 1) as country on true
     `);
 
-    testRemoveUnnesaryJoins( `
+    testRemoveUnnesaryJoins(`
             select
                 (case
                     when true
@@ -333,7 +285,7 @@ describe("RemoveJoins", () => {
             left join (select * from country limit 1) as country on true
     `);
 
-    testRemoveUnnesaryJoins( `
+    testRemoveUnnesaryJoins(`
             select
                 (case
                     when true
@@ -344,7 +296,7 @@ describe("RemoveJoins", () => {
             left join (select * from country limit 1) as country on true
     `);
 
-    testRemoveUnnesaryJoins( `
+    testRemoveUnnesaryJoins(`
             select
                 coalesce(1, country.id)
             from company
@@ -352,7 +304,7 @@ describe("RemoveJoins", () => {
             left join (select * from country limit 1) as country on true
     `);
 
-    testRemoveUnnesaryJoins( `
+    testRemoveUnnesaryJoins(`
             select
                 lower(country.code)
             from company
@@ -360,7 +312,7 @@ describe("RemoveJoins", () => {
             left join (select * from country limit 1) as country on true
     `);
 
-    testRemoveUnnesaryJoins( `
+    testRemoveUnnesaryJoins(`
         select
             comp_id.id
         from (select 1 as id) as comp_id
@@ -398,7 +350,7 @@ describe("RemoveJoins", () => {
         ) as some_table on true
     `);
 
-    testRemoveUnnesaryJoins( `
+    testRemoveUnnesaryJoins(`
         select
             comp_id.id
         from (select 1 as id) as comp_id
@@ -416,7 +368,7 @@ describe("RemoveJoins", () => {
         from (select 1 as id) as comp_id
     `);
 
-    testRemoveUnnesaryJoins( `
+    testRemoveUnnesaryJoins(`
         select
             comp_id.id
         from (select 1 as id) as comp_id
@@ -442,7 +394,7 @@ describe("RemoveJoins", () => {
 
     `);
 
-    testRemoveUnnesaryJoins( `
+    testRemoveUnnesaryJoins(`
         select
             comp_id.id
         from (select 1 as id) as comp_id
@@ -474,7 +426,7 @@ describe("RemoveJoins", () => {
         from (select 1 as id) as comp_id
     `);
 
-    testRemoveUnnesaryJoins( `
+    testRemoveUnnesaryJoins(`
         select
             comp_id.id
         from (select 1 as id) as comp_id
@@ -495,7 +447,7 @@ describe("RemoveJoins", () => {
 
     `);
 
-    testRemoveUnnesaryJoins( `
+    testRemoveUnnesaryJoins(`
         select
             comp_id.id
         from (select 1 as id) as comp_id
@@ -522,7 +474,7 @@ describe("RemoveJoins", () => {
         from (select 1 as id) as comp_id
     `);
 
-    testRemoveUnnesaryJoins( `
+    testRemoveUnnesaryJoins(`
             select from company
 
             left join public.order as orders on
@@ -546,7 +498,7 @@ describe("RemoveJoins", () => {
 
     `);
 
-    testRemoveUnnesaryJoins( `
+    testRemoveUnnesaryJoins(`
         select CountryEnd.id
         from company
 
@@ -557,7 +509,7 @@ describe("RemoveJoins", () => {
             CountryEnd.id = (select country.id)
     `);
 
-    testRemoveUnnesaryJoins( `
+    testRemoveUnnesaryJoins(`
         select from company
 
         left join country on
@@ -569,7 +521,7 @@ describe("RemoveJoins", () => {
         select from company
     `);
 
-    testRemoveUnnesaryJoins( `
+    testRemoveUnnesaryJoins(`
         select CountryEnd.id
         from company
 
@@ -594,7 +546,7 @@ describe("RemoveJoins", () => {
             )
     `);
 
-    testRemoveUnnesaryJoins( `
+    testRemoveUnnesaryJoins(`
         select CountryEnd.id
         from company
 

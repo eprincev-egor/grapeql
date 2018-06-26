@@ -1,23 +1,10 @@
 "use strict";
 
-const {stopServer, startServer} = require("../../utils/serverHelpers");
-const {testRequest} = require("../../utils/testRequest");
-
-let server;
-
-before(startServer(
-    __dirname,
-    _server => {server = _server;}
-));
-
-after(stopServer(
-    () => server
-));
+const {testRequest} = require("../../utils/init")(__dirname);
 
 describe("AddWith", () => {
 
     testRequest({
-        server: () => server,
         nodes: {
             Company: `
                 select * from company
@@ -62,7 +49,6 @@ describe("AddWith", () => {
     });
 
     testRequest({
-        server: () => server,
         nodes: {
             Company: `
                 with
@@ -123,7 +109,6 @@ describe("AddWith", () => {
     });
 
     testRequest({
-        server: () => server,
         nodes: {
             Country: `
                 with nice as (
@@ -176,7 +161,6 @@ describe("AddWith", () => {
     });
 
     testRequest({
-        server: () => server,
         nodes: {
             Company: `
                 select * from company
@@ -210,7 +194,6 @@ describe("AddWith", () => {
     });
 
     testRequest({
-        server: () => server,
         nodes: {
             Company: `
                 select * from company
@@ -255,7 +238,6 @@ describe("AddWith", () => {
     });
 
     testRequest({
-        server: () => server,
         nodes: {
             Company: `
                 with country (id, code) as (
@@ -291,7 +273,6 @@ describe("AddWith", () => {
     });
 
     testRequest({
-        server: () => server,
         nodes: {
             Company: `
                 with country (id, code) as (

@@ -1,23 +1,10 @@
 "use strict";
 
-const {stopServer, startServer} = require("../../utils/serverHelpers");
-const {testRequest} = require("../../utils/testRequest");
-
-let server;
-
-before(startServer(
-    __dirname,
-    _server => {server = _server;}
-));
-
-after(stopServer(
-    () => server
-));
+const {testRequest} = require("../../utils/init")(__dirname);
 
 describe("UnnesaryJoins", () => {
 
     testRequest({
-        server: () => server,
         node: `
             select *
             from company
@@ -36,7 +23,6 @@ describe("UnnesaryJoins", () => {
     });
 
     testRequest({
-        server: () => server,
         node: `
             select *
             from company
@@ -59,7 +45,6 @@ describe("UnnesaryJoins", () => {
     });
 
     testRequest({
-        server: () => server,
         node: `
             select *
             from company

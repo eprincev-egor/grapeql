@@ -3,161 +3,25 @@
 const GrapeQL = require("../src/server/GrapeQL");
 const GrapeQLCoach = require("../src/parser/GrapeQLCoach");
 const Filter = require("../src/filter/Filter");
-const config = require("./config");
-const {
-    testRequest, testRequestCount,
-    testRequestIndexOf, testUpdate
-} = require("./utils/testRequest");
+const config = require("./grapeql.config");
+
+const testRequest = require("./utils/testRequest");
+const testRequestCount = require("./utils/testRequestCount");
+const testRequestIndexOf = require("./utils/testRequestIndexOf");
+const testUpdate = require("./utils/testUpdate");
+const testInsert = require("./utils/testInsert");
+
+const testGetDbColumn = require("./utils/testGetDbColumn");
+const testRemoveUnnesaryWiths = require("./utils/testRemoveUnnesaryWiths");
+const testRemoveUnnesaryJoins = require("./utils/testRemoveUnnesaryJoins");
+const testReplaceLinks = require("./utils/testReplaceLinks");
+const testSyntax = require("./utils/testSyntax");
+
 const weakDeepEqual = require("./utils/weakDeepEqual");
-const {clearDatabase} = require("./utils/serverHelpers");
 
 global.it = function(testName, callback) {
     callback();
 };
-
-function testRemoveUnnesaryWiths(fromSelect, toSelect) {
-    if ( !toSelect ) {
-        toSelect = fromSelect;
-    }
-
-    it(`
-            ${ fromSelect }
-            --------------------------->
-            ${ toSelect }
-    `, () => {
-
-        let coach;
-
-        coach = new GrapeQLCoach(fromSelect);
-        coach.skipSpace();
-        let parsedFromSelect = coach.parseSelect();
-
-        coach = new GrapeQLCoach(toSelect);
-        coach.skipSpace();
-        let parsedToSelect = coach.parseSelect();
-
-        parsedFromSelect.removeUnnesaryWiths({server});
-
-        let isEqual = !!weakDeepEqual(parsedFromSelect, parsedToSelect);
-
-        return isEqual;
-    });
-}
-
-function testReplaceLinks(test) {
-    // test.expression + "  =>  " + test.result
-    it(`
-        expression:
-        ${test.expression}
-        replace
-        ${test.replace}
-        to
-        ${test.to}
-    `, () => {
-
-        let coach;
-
-        coach = new GrapeQLCoach(test.expression);
-        coach.skipSpace();
-        let expression = coach.parseExpression();
-        let cloneExpression = expression.clone();
-
-        expression.replaceLink(test.replace, test.to);
-        cloneExpression.replaceLink(test.replace, test.to);
-
-        coach = new GrapeQLCoach(test.result);
-        coach.skipSpace();
-        let expectedExpression = coach.parseExpression();
-
-        let isEqual = !!weakDeepEqual(expression, expectedExpression);
-        let isEqualClone = !!weakDeepEqual(cloneExpression, expectedExpression);
-
-        if ( !isEqual ) {
-            console.log("break here");
-        }
-
-        if ( !isEqualClone ) {
-            console.log("break here");
-        }
-    });
-}
-
-function testRemoveUnnesaryJoins(fromSelect, toSelect) {
-    if ( !toSelect ) {
-        toSelect = fromSelect;
-    }
-
-    it(`
-            ${ fromSelect }
-            --------------------------->
-            ${ toSelect }
-    `, () => {
-        let node;
-        node = server.addNode("Country", "select * from country");
-        node.file = "./Country.sql";
-
-        let coach;
-
-        coach = new GrapeQLCoach(fromSelect);
-        coach.skipSpace();
-        let parsedFromSelect = coach.parseSelect();
-
-        coach = new GrapeQLCoach(toSelect);
-        coach.skipSpace();
-        let parsedToSelect = coach.parseSelect();
-
-        parsedFromSelect.removeUnnesaryJoins({server});
-
-        return weakDeepEqual(parsedFromSelect, parsedToSelect);
-    });
-}
-
-function testGetDbColumn(test) {
-    it(`
-        find ${ test.link } in
-        ${ test.node }
-    `, () => {
-
-        let coach;
-
-        coach = new GrapeQLCoach(test.link.trim());
-        let link = coach.parseObjectLink();
-
-        coach = new GrapeQLCoach(test.node.trim());
-        let select = coach.parseSelect();
-
-        select.getColumnSource({
-            server,
-            link
-        });
-    });
-}
-
-function testSyntax(className, test) {
-    it(test.str, () => {
-
-        let str = test.str,
-            parseFuncName = "parse" + className;
-
-
-        let coach = new GrapeQLCoach(str);
-        let result = coach[ parseFuncName ]();
-
-        let isEqual = !!weakDeepEqual(test.result, result);
-        if ( !isEqual ) {
-            console.log("break here");
-        }
-
-
-        // auto test clone and toString
-        let clone = result.clone();
-        let cloneString = clone.toString();
-        let cloneCoach = new GrapeQLCoach( cloneString );
-        let cloneResult = cloneCoach[ parseFuncName ]();
-
-        isEqual = !!weakDeepEqual(test.result, cloneResult);
-    });
-}
 
 function testFilter(fromFilter, sql, model) {
     it(JSON.stringify(fromFilter) + " => `" + sql + "`", () => {
@@ -176,37 +40,31 @@ function testFilter(fromFilter, sql, model) {
     });
 }
 
-async function testInsert(server) {
-    await clearDatabase(server.db, __dirname + "/Tasks/SimpleInsert");
-    
-    let transaction = server.transaction();
-    await transaction.query(`
-        insert into country (code) values ('ru')
-    `);
-    console.log(transaction);
-}
-
 let server;
 (async function() {
     server = await GrapeQL.start(config);
+    let getServer = () => server;
 
     global.server = server;
     global.testFilter = testFilter;
     global.testSyntax = testSyntax;
+
+    global.testRequest = testRequest.bind(null, getServer);
+    global.testRequestCount = testRequestCount.bind(null, getServer);
+    global.testRequestIndexOf = testRequestIndexOf.bind(null, getServer);
+    global.testRemoveUnnesaryWiths = testRemoveUnnesaryWiths.bind(null, getServer);
+    global.testUpdate = testUpdate.bind(null, getServer);
+    global.testInsert = testInsert.bind(null, server);
+
     global.testReplaceLinks = testReplaceLinks;
-    global.testRequest = testRequest;
-    global.testRequestCount = testRequestCount;
-    global.testRequestIndexOf = testRequestIndexOf;
     global.testGetDbColumn = testGetDbColumn;
-    global.testRemoveUnnesaryJoins = testRemoveUnnesaryJoins;
-    global.testRemoveUnnesaryWiths = testRemoveUnnesaryWiths;
-    global.testUpdate = testUpdate;
+    global.testRemoveUnnesaryJoins = testRemoveUnnesaryJoins.bind(null, getServer);
+
     global.weakDeepEqual = weakDeepEqual;
     global.GrapeQL = GrapeQL;
     global.GrapeQLCoach = GrapeQLCoach;
-    
-    global.testInsert = testInsert.bind(null, server);
-    
+
+
 })();
 
 
