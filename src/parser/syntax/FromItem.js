@@ -181,37 +181,37 @@ class FromItem extends Syntax {
             this.removeChild(this.file);
             delete this.file;
         }
-        
+
         if ( this.functionCall ) {
             this.removeChild(this.functionCall);
             delete this.functionCall;
         }
-        
+
         delete this.withOrdinality;
-        
+
         if ( this.table ) {
             this.removeChild(this.table);
             delete this.table;
         }
-        
+
         if ( this.select ) {
             this.removeChild(this.select);
             delete this.select;
         }
-        
+
         delete this.only;
         delete this.lateral;
-        
+
         if ( this.as ) {
             this.removeChild(this.as);
             delete this.as;
         }
-        
+
         if ( this.columns ) {
             this.columns.forEach(column => this.removeChild(column));
             delete this.columns;
         }
-        
+
 
         if ( !options || options.joins !== false ) {
             if ( this.joins ) {
@@ -301,9 +301,9 @@ class FromItem extends Syntax {
         if ( tableLink.length > 1 ) {
             let schemaObjectName = tableLink[0];
 
-            for (let schemaName in server.schemas) {
+            for (let schemaName in server.database.schemas) {
                 if ( schemaObjectName.equalString( schemaName ) ) {
-                    dbSchema = server.schemas[ schemaName ];
+                    dbSchema = server.database.schemas[ schemaName ];
                     break;
                 }
             }
@@ -400,7 +400,7 @@ class FromItem extends Syntax {
             if ( isUsedJoin ) {
                 continue;
             }
-            
+
             this.joins.splice(i, 1);
             this.removeChild(join);
         }

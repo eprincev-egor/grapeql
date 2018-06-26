@@ -151,7 +151,7 @@ let value2sql = function(type, value) {
     if ( value == null ) {
         return "null";
     }
-    
+
     if ( isSqlNumber(type) ) {
 
         if ( isLikeNumber(value)  ) {
@@ -260,23 +260,23 @@ function getDbTable(server, link) {
     let schema, table;
 
     if ( !link.schemaObject ) {
-        schema = server.schemas[ PUBLIC_SCHEMA_NAME ];
+        schema = server.database.schemas[ PUBLIC_SCHEMA_NAME ];
         if ( !schema ) {
             throw new Error(`schema ${ PUBLIC_SCHEMA_NAME } does not exist`);
         }
     }
     else if ( link.schemaObject.content ) {
         let content = link.schemaObject.content;
-        schema = server.schemas[ content ];
+        schema = server.database.schemas[ content ];
         if ( !schema ) {
             throw new Error(`schema ${ content } does not exist`);
         }
     }
     else if ( link.schemaObject.word ) {
         let word = link.schemaObject.word.toLowerCase();
-        for (let name in server.schemas ) {
+        for (let name in server.database.schemas ) {
             if ( name.toLowerCase() == word ) {
-                schema = server.schemas[ name ];
+                schema = server.database.schemas[ name ];
                 break;
             }
         }
@@ -372,7 +372,7 @@ module.exports = {
     isSqlBoolean,
     isLikeBoolean,
     value2sql,
-    
+
     PUBLIC_SCHEMA_NAME,
     objectLink2schmeTableColumn,
     objectLink2schmeTable,

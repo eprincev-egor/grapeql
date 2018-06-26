@@ -16,6 +16,7 @@ const testRemoveUnnesaryWiths = require("./utils/testRemoveUnnesaryWiths");
 const testRemoveUnnesaryJoins = require("./utils/testRemoveUnnesaryJoins");
 const testReplaceLinks = require("./utils/testReplaceLinks");
 const testSyntax = require("./utils/testSyntax");
+const testFilterToSql = require("./utils/testFilterToSql");
 
 const weakDeepEqual = require("./utils/weakDeepEqual");
 
@@ -23,30 +24,13 @@ global.it = function(testName, callback) {
     callback();
 };
 
-function testFilter(fromFilter, sql, model) {
-    it(JSON.stringify(fromFilter) + " => `" + sql + "`", () => {
-        let parsedSql = new GrapeQLCoach(sql);
-        parsedSql.skipSpace();
-        parsedSql = parsedSql.parseExpression();
-
-        let filter = new Filter(fromFilter);
-        let filterSql = filter.toSql( model );
-        let parsedFilterSql = new GrapeQLCoach( filterSql );
-
-        parsedFilterSql.skipSpace();
-        parsedFilterSql = parsedFilterSql.parseExpression();
-
-        return !!weakDeepEqual(parsedSql, parsedFilterSql);
-    });
-}
-
 let server;
 (async function() {
     server = await GrapeQL.start(config);
     let getServer = () => server;
 
     global.server = server;
-    global.testFilter = testFilter;
+    global.testFilterToSql = testFilterToSql;
     global.testSyntax = testSyntax;
 
     global.testRequest = testRequest.bind(null, getServer);
