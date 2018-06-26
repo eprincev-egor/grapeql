@@ -2,29 +2,102 @@
 
 const _ = require("lodash");
 const pg = require("pg");
+const glob = require("glob");
 const fs = require("fs");
-const Node = require("./Node");
 const Transaction = require("./Transaction");
-
-const DbSchema = require("./DbObject/DbSchema");
-const DbTable = require("./DbObject/DbTable");
-const DbColumn = require("./DbObject/DbColumn");
-const DbFunction = require("./DbObject/DbFunction");
-const DbConstraint = require("./DbObject/DbConstraint");
+const DbDatabase = require("./DbObject/DbDatabase");
+const Node = require("./Node");
 
 class GrapeQL {
     constructor(config) {
-        this.config = config;
+        this.config = this.prepareConfig(config);
+        this.nodes = {};
+    }
+    
+    prepareConfig(config) {
+        let outConfig = {};
+        
+        if ( !config ) {
+            config = "grapeql.config";
+        }
+        
+        if ( _.isString(config) ) {
+            config = require(config);
+        }
+        
+        if ( !_.isObject(config) ) {
+            throw new Error("config must are object");
+        }
+        
+        
+        // validate database config
+        outConfig.db = {};
+        if ( !_.isObject(config.db) ) {
+            throw new Error("config.db must are object");
+        }
+        outConfig.db = _.merge({
+            host: "localhost",
+            user: false,
+            password: false,
+            port: 5432,
+            database: false
+        }, config.db);
+        
+        if ( !_.isString(outConfig.db.host) ) {
+            throw new Error("config.db.host must are string");
+        }
+        if ( !_.isString(outConfig.db.user) ) {
+            throw new Error("config.db.user must are string");
+        }
+        if ( !_.isString(outConfig.db.password) ) {
+            throw new Error("config.db.password must are string");
+        }
+        if ( !_.isNumber(outConfig.db.port) ) {
+            throw new Error("config.db.port must are string");
+        }
+        if ( !_.isString(outConfig.db.database) ) {
+            throw new Error("config.db.database must are string");
+        }
+        
+        
+        // validate workdir, workfiles
+        outConfig.workdir = "./workdir";
+        if ( _.isString(config.workdir) || _.isBoolean(config.workdir) ) {
+            outConfig.workdir = config.workdir;
+        }
+        outConfig.workfiles = _.merge({
+            cache: "**/*.sql",
+            query: "**/*.sql",
+            events: "**/*.events.js"
+        }, config.workfiles);
+        
+        return outConfig;
     }
 
     async start() {
-        const db = new pg.Client( this.config.db );
-        await db.connect();
-        this.db = db;
+        this.db = await this.getSystemConnect();
 
-        await this.loadTables();
-        await this.loadNodes();
+        await this.loadDatabaseInfo();
         await this.initSystemFunctions();
+        await this.loadWorkdir();
+    }
+    
+    async getSystemConnect() {
+        let db;
+        
+        try {
+            db = new pg.Client( this.config.db );
+            await db.connect();
+        } catch(err) {
+            throw new Error("cannot connect to database");
+        }
+        
+        return db;
+    }
+    
+    async loadDatabaseInfo() {
+        this.database = new DbDatabase();
+        await this.database.load(this.db);
     }
     
     async initSystemFunctions() {
@@ -37,181 +110,43 @@ class GrapeQL {
         $$ language plpgsql;
         `);
     }
-
-    async loadTables() {
-        let res;
-
-        res = await this.db.query(`
-            select
-                pg_columns.table_schema,
-                pg_columns.table_name,
-                pg_columns.column_name,
-                pg_columns.column_default,
-                pg_columns.data_type,
-                pg_columns.is_nullable
-            from information_schema.columns as pg_columns
-
-            where
-                pg_columns.table_schema != 'pg_catalog' and
-                pg_columns.table_schema != 'information_schema'
-        `);
-
-        this.schemas = {};
-        _.each(res.rows, row => {
-            let schemaName = row.table_schema,
-                schema = this.schemas[ schemaName ];
-
-            if ( !schema ) {
-                schema = new DbSchema({ name: schemaName });
-                this.schemas[ schemaName ] = schema;
-            }
-
-            let tableName = row.table_name,
-                table = schema.getTable( tableName );
-
-            if ( !table ) {
-                table = new DbTable({
-                    name: tableName,
-                    schema: schemaName
-                });
-                schema.addTable( table );
-            }
-
-            let column = new DbColumn({
-                name: row.column_name,
-                default: row.column_default,
-                type: row.data_type,
-                nulls: row.is_nullable == "YES",
-                // for tests
-                table: tableName,
-                schema: schemaName
-            });
-
-            table.addColumn( column );
-        });
-
-        res = await this.db.query(`
-            select
-                routines.routine_name,
-                routines.routine_schema,
-                routines.data_type
-            from information_schema.routines
-        `);
-        _.each(res.rows, row => {
-            let schemaName = row.routine_schema,
-                schema = this.schemas[ schemaName ];
-
-            if ( !schema ) {
-                schema = new DbSchema({ name: schemaName });
-                this.schemas[ schemaName ] = schema;
-            }
-
-            let dbFunction = new DbFunction({
-                schema: schemaName,
-                name: row.routine_name,
-                returnType: row.data_type
-            });
-
-            schema.addFunction(dbFunction);
-        });
-
-        res = await this.db.query(`
-            select
-            	tc.constraint_type,
-            	tc.constraint_name,
-            	tc.table_schema,
-            	tc.table_name,
-            	array_agg(kc.column_name::text) as columns
-
-            from information_schema.table_constraints tc
-
-            join information_schema.key_column_usage kc on
-              kc.table_name = tc.table_name and
-              kc.table_schema = tc.table_schema and
-              kc.constraint_name = tc.constraint_name
-
-            group by tc.constraint_type,
-            	tc.constraint_name,
-            	tc.table_schema,
-            	tc.table_name
-        `);
-        _.each(res.rows, row => {
-            let schemaName = row.table_schema,
-                schema = this.schemas[ schemaName ];
-
-            if ( !schema ) {
-                schema = new DbSchema({ name: schemaName });
-                this.schemas[ schemaName ] = schema;
-            }
-
-            let tableName = row.table_name,
-                table = schema.getTable( tableName );
-
-            if ( !table ) {
-                table = new DbTable({
-                    name: tableName,
-                    schema: schemaName
-                });
-                schema.addTable( table );
-            }
-
-            let constraint = new DbConstraint({
-                name: row.constraint_name,
-                type: row.constraint_type.toLowerCase(),
-                columns: row.columns
-            });
-            table.addConstraint( constraint );
-        });
-    }
-
-    getSchema(name) {
-        if ( name in this.schemas ) {
-            return this.schemas[ name ];
-        }
-        for (let key in this.schemas) {
-            if ( key.toLowerCase() == name.toLowerCase() ) {
-                return this.schemas[ key ];
-            }
-        }
-    }
-
-    async loadNodes() {
-        if ( !this.config.nodes ) {
-            this.nodes = {};
+    
+    async loadWorkdir() {
+        if ( this.config.workdir === false ) {
             return;
         }
-
-        let nodes = {};
-        if ( _.isString(this.config.nodes) ) {
-            let files = fs.readdirSync(this.config.nodes);
-
-            files.forEach(fileName => {
-                let nodeName = fileName.replace(/\.sql$/i, "");
-                nodes[ nodeName ] = this.config.nodes + "/" + fileName;
-            });
-        }
-
-        for (let nodeName in nodes) {
-            let fileName = nodes[ nodeName ];
-
-            if ( fileName instanceof Node ) {
-                nodes[ nodeName ] = fileName;
-                continue;
+        
+        let pattern = this.config.workdir + "/" + this.config.workfiles.query;
+        let queryFiles = await getFileNames(pattern);
+        
+        let existsNames = {};
+        queryFiles.forEach(filePath => {
+            let queryName = filePath2queryName( filePath );
+            if ( queryName in existsNames ) {
+                throw new Error(`duplicate query name: ${ filePath }`);
             }
-
-            let node = new Node(fileName, this);
-            nodes[ nodeName ] = node;
-        }
-
-        this.nodes = nodes;
+            
+            let contentBuffer = fs.readFileSync(filePath);
+            let sql = contentBuffer.toString();
+            
+            this.nodes[ queryName ] = new Node({
+                sql,
+                server: this
+            });
+        });
     }
-
+    
     addNode(name, node) {
+        let file;
         if ( _.isString(node) ) {
             if ( fs.existsSync(node) ) {
+                file = node;
                 node = fs.readFileSync( node );
             }
-            node = new Node({sql: node}, this);
+            node = new Node({sql: node, server: this});
+            if ( file ) {
+                node.file = file;
+            }
             this.nodes[ name ] = node;
         }
         else if ( node instanceof Node ) {
@@ -241,5 +176,35 @@ GrapeQL.start = async function(config) {
     await server.start();
     return server;
 };
+
+async function getFileNames(globPattern) {
+    return new Promise((resolve, reject) => {
+        glob(globPattern, {}, (err, names) => {
+            if ( err ) {
+                reject(err);
+            } else {
+                resolve(names);
+            }
+        });
+    });
+}
+
+function filePath2queryName(filePath) {
+    let queryName = filePath;
+    
+    queryName = queryName.split("/");
+    queryName = queryName.slice(-1)[0];
+    
+    if ( !queryName ) {
+        throw new Error(`invalid query name: ${filePath}`);
+    }
+    
+    queryName = queryName.replace(/\.sql$/i, "");
+    if ( !queryName ) {
+        throw new Error(`invalid query name: ${filePath}`);
+    }
+    
+    return queryName;
+}
 
 module.exports = GrapeQL;

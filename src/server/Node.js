@@ -1,30 +1,12 @@
 "use strict";
 
 const GrapeQLCoach = require("../parser/GrapeQLCoach");
-const fs = require("fs");
-const _ = require("lodash");
 
 class Node {
-    constructor(options, server) {
-        if ( _.isString(options) ) {
-            options = {file: options};
-        }
-        this.options = options;
-
-        if ( options.file ) {
-            let fileBuffer = fs.readFileSync( options.file );
-            let parsed = GrapeQLCoach.parseEntity( fileBuffer.toString() );
-            this.parsed = parsed;
-        }
-        else if ( options.sql ) {
-            let parsed = GrapeQLCoach.parseEntity( options.sql );
-            this.parsed = parsed;
-        }
-        else if ( options.parsed ) {
-            this.parsed = options.parsed;
-        }
-
+    constructor({server, sql, file}) {
         this.server = server;
+        this.parsed = GrapeQLCoach.parseEntity(sql);
+        this.file = file;
     }
 
     async get(request) {

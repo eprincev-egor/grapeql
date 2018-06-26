@@ -17,7 +17,7 @@ function testRequest(test) {
             for (let name in test.nodes) {
                 let node = test.nodes[ name ];
                 node = server.addNode(name, node);
-                node.options.file = "./" + name + ".sql";
+                node.file = "./" + name + ".sql";
             }
         }
 
@@ -86,7 +86,7 @@ function testRequestCount(test) {
             for (let name in test.nodes) {
                 let node = test.nodes[ name ];
                 node = server.addNode(name, node);
-                node.options.file = "./" + name + ".sql";
+                node.file = "./" + name + ".sql";
             }
         }
 
@@ -134,7 +134,7 @@ function testRequestIndexOf(test) {
             for (let name in test.nodes) {
                 let node = test.nodes[ name ];
                 node = server.addNode(name, node);
-                node.options.file = "./" + name + ".sql";
+                node.file = "./" + name + ".sql";
             }
         }
 
@@ -178,7 +178,7 @@ function testInsert(test) {
         let node = test.node;
         let name = "Tmp";
         node = server.addNode(name, node);
-        node.options.file = "./" + name + ".sql";
+        node.file = "./" + name + ".sql";
 
         let request = test.request;
         let query = node.parsed.buildInsert({
@@ -199,7 +199,7 @@ function testDelete(test) {
         let node = test.node;
         let name = "Tmp";
         node = server.addNode(name, node);
-        node.options.file = "./" + name + ".sql";
+        node.file = "./" + name + ".sql";
 
         let request = test.request;
         let query = node.parsed.buildDelete({
@@ -221,7 +221,7 @@ function testUpdate(test) {
         let node = test.node;
         let name = "Tmp";
         node = server.addNode(name, node);
-        node.options.file = "./" + name + ".sql";
+        node.file = "./" + name + ".sql";
 
         let request = test.request;
         let query = node.parsed.buildUpdate({

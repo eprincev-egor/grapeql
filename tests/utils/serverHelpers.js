@@ -4,9 +4,10 @@ const pg = require("pg");
 const fs = require("fs");
 const GrapeQL = require("../../src/server/GrapeQL");
 const _ = require("lodash");
-let config = require("../config");
 
 function startServer(dirname, callback) {
+    let config = require("../grapeql.config");
+    
     return async() => {
 
         config = _.cloneDeep(config);

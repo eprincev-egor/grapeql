@@ -32,6 +32,7 @@
   },
   "homepage": "https://github.com/eprincev-egor/grapeql#readme",
   "dependencies": {
+    "glob": "^7.1.2",
     "lodash": "^4.17.4",
     "pg": "^7.4.1"
   },
@@ -44,7 +45,6 @@
     "babel-preset-stage-0": "^6.24.1",
     "db-migrate": "^0.10.5",
     "db-migrate-pg": "^0.3.1",
-    "glob": "^7.1.2",
     "jquery": "^3.2.1",
     "json-loader": "^0.5.7",
     "mocha": "^5.1.1",

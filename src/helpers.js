@@ -350,7 +350,7 @@ function getDbColumn(serverOrTable, objectLink) {
 function getNode(file, server) {
     for (let key in server.nodes) {
         let node = server.nodes[ key ];
-        let leftFile = node.options.file.replace(/\.sql$/, "");
+        let leftFile = node.file.replace(/\.sql$/, "");
         let rightFile = file.toString().replace(/\.sql$/, "");
 
         if ( leftFile == rightFile ) {

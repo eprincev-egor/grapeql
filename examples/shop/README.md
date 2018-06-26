@@ -1,3 +1,6 @@
+# Install
+make file grapeql.config.js 
+```js
 "use strict";
 
 module.exports = {
@@ -7,11 +10,18 @@ module.exports = {
         password: "my-awesome-password",
         port: 5432,
         database: "my-awesome-db-name"
-    },
-    workdir: "./workdir",
-    workfiles: {
-        cache: "*.sql",
-        query: "*.sql",
-        events: "*.events.js"
     }
 };
+
+```
+
+run command for migrations  
+```
+$ node install.js
+```
+
+# Run  
+run command for run server
+```
+$ node index.js
+````
