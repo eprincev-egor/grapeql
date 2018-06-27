@@ -25,7 +25,8 @@ and conflict_action is one of:
 const Syntax = require("./Syntax");
 
 class Insert extends Syntax {
-    parse(coach) {
+    parse(coach, options) {
+        options = options || {allowInsertRow: false};
         if ( coach.isWith() ) {
             this.with = coach.parseWith();
             this.addChild(this.with);
@@ -34,6 +35,15 @@ class Insert extends Syntax {
 
         coach.expectWord("insert");
         coach.skipSpace();
+        
+        if ( options.allowInsertRow ) {
+            if ( coach.isWord("row") ) {
+                coach.expectWord("row");
+                coach.skipSpace();
+                
+                this.insertRow = true;
+            }
+        }
 
         coach.expectWord("into");
         coach.skipSpace();
@@ -141,6 +151,10 @@ class Insert extends Syntax {
             clone.with = this.with.clone();
             clone.addChild(clone.with);
         }
+        
+        if ( this.insertRow ) {
+            clone.insertRow = true;
+        }
 
         clone.table = this.table.clone();
         clone.addChild(clone.table);
@@ -183,15 +197,20 @@ class Insert extends Syntax {
         return clone;
     }
 
-    toString() {
+    toString(options) {
+        options = options || {pg: false};
         let out = "";
 
         if ( this.with ) {
             out += this.with.toString();
             out += " ";
         }
-
-        out += "insert into ";
+        
+        if ( !options.pg && this.insertRow ) {
+            out += "insert row into ";
+        } else {
+            out += "insert into ";
+        }
         out += this.table.toString();
 
         if ( this.as ) {

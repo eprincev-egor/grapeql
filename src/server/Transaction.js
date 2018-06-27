@@ -26,8 +26,21 @@ class Transaction {
         let db = this.server.db;
         
         if ( command instanceof GrapeQLCoach.Insert ) {
-            let result = await db.query(sql);
-            return result.rows;
+            let commandSql = command.toString({ pg: true });
+            
+            let result = await db.query(commandSql);
+            
+            if ( command.insertRow ) {
+                if ( !result.rows || !result.rows.length ) {
+                    return null;
+                }
+                
+                if ( result.rows.length === 1 ) {
+                    return result.rows[0];
+                }
+            } else {
+                return result.rows || [];
+            }
         }
     }
 }

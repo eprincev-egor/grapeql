@@ -1212,5 +1212,52 @@ module.exports = [
                 ]}
             }]
         }
+    },
+    {
+        str: "select row * from company",
+        error: Error
+    },
+    {
+        str: "select row * from company",
+        options: {allowSelectRow: true},
+        result: {
+            selectRow: true,
+            columns: [
+                {
+                    as: null,
+                    expression: {elements: [
+                        {link: [
+                            "*"
+                        ]}
+                    ]}
+                }
+            ],
+            from: [{
+                table: {link: [
+                    {word: "company"}
+                ]}
+            }]
+        }
+    },
+    {
+        str: "select * from company",
+        options: {allowSelectRow: true},
+        result: {
+            columns: [
+                {
+                    as: null,
+                    expression: {elements: [
+                        {link: [
+                            "*"
+                        ]}
+                    ]}
+                }
+            ],
+            from: [{
+                table: {link: [
+                    {word: "company"}
+                ]}
+            }]
+        }
     }
 ];

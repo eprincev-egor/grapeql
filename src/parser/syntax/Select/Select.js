@@ -73,11 +73,21 @@ class Select extends Syntax {
         }
     }
 
-    parse(coach) {
+    parse(coach, options) {
+        options = options || {allowSelectRow: false};
         this.parseWith(coach);
 
         coach.expectWord("select");
         coach.skipSpace();
+        
+        if ( options.allowSelectRow ) {
+            if ( coach.isWord("row") ) {
+                coach.expectWord("row");
+                coach.skipSpace();
+                
+                this.selectRow = true;
+            }
+        }
 
         this.columns = coach.parseComma("Column");
         this.columns.map(column => this.addChild(column));
@@ -422,6 +432,10 @@ class Select extends Syntax {
             clone.with = this.with.clone();
             clone.addChild(clone.with);
         }
+        
+        if ( this.selectRow ) {
+            clone.selectRow = true;
+        }
 
         clone.columns = this.columns.map(item => item.clone());
         clone.columns.map(item => clone.addChild(item));
@@ -508,7 +522,8 @@ class Select extends Syntax {
         return clone;
     }
 
-    toString() {
+    toString(options) {
+        options = options || {pg: false};
         let out = "";
 
         if ( this.with ) {
@@ -517,6 +532,10 @@ class Select extends Syntax {
         }
 
         out += "select ";
+        if ( !options.pg && this.selectRow ) {
+            out += " row ";
+        }
+        
         out += this.columns.map(item => item.toString()).join(", ");
         out += " ";
 

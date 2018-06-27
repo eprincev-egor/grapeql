@@ -522,5 +522,34 @@ module.exports = [
         str: "insert into orders values (1), (2, 3)",
         // VALUES lists must all be the same length
         error: Error
+    },
+    {
+        str: "insert row into orders default values",
+        error: Error
+    },
+    {
+        str: "insert row into orders default values",
+        options: {
+            allowInsertRow: true
+        },
+        result: {
+            insertRow: true,
+            table: {link: [
+                {word: "orders"}
+            ]},
+            defaultValues: true
+        }
+    },
+    {
+        str: "insert into orders default values",
+        options: {
+            allowInsertRow: true
+        },
+        result: {
+            table: {link: [
+                {word: "orders"}
+            ]},
+            defaultValues: true
+        }
     }
 ];

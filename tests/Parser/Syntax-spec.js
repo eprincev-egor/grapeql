@@ -220,3 +220,37 @@ describe("new Syntax('some str')", () => {
         assert.equal("a.b.c.d", link.toString());
     });
 });
+
+describe("allow row", () => {
+    it("select row", () => {
+        let coach, select;
+        
+        coach = new GrapeQLCoach("select row * from orders");
+        select = coach.parseSelect({allowSelectRow: true});
+        
+        assert.ok(select.selectRow === true);
+        
+        let pgSql = select.toString({ pg: true });
+        coach = new GrapeQLCoach(pgSql);
+        
+        select = coach.parseSelect({allowSelectRow: true});
+        
+        assert.ok(select.selectRow == null);
+    });
+    
+    it("insert row into", () => {
+        let coach, insert;
+        
+        coach = new GrapeQLCoach("insert row into orders default values");
+        insert = coach.parseInsert({allowInsertRow: true});
+        
+        assert.ok(insert.insertRow === true);
+        
+        let pgSql = insert.toString({ pg: true });
+        coach = new GrapeQLCoach(pgSql);
+        
+        insert = coach.parseInsert({allowInsertRow: true});
+        
+        assert.ok(insert.insertRow == null);
+    });
+});

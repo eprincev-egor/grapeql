@@ -23,6 +23,6 @@ module.exports = [
     },
     {
         str: "char",
-        err: Error
+        error: Error
     }
 ];

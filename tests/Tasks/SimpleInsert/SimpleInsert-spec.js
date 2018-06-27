@@ -16,7 +16,7 @@ after(stopServer(
 
 describe("SimpleInsert task", () => {
     
-    it("insert row, check id", async() => {
+    it("insert default values, check id", async() => {
         await clearDatabase(server.db, __dirname);
         
         let transaction = await server.transaction();
@@ -37,7 +37,7 @@ describe("SimpleInsert task", () => {
         assert.ok(rows[0].id == 2);
     });
     
-    it("insert row, check id", async() => {
+    it("insert values, check id", async() => {
         await clearDatabase(server.db, __dirname);
         
         let transaction = await server.transaction();
@@ -50,6 +50,20 @@ describe("SimpleInsert task", () => {
         
         assert.ok( rows[0].id == 1 );
         assert.ok( rows[0].code == "ru" );
+    });
+    
+    it("insert row into, returning row", async() => {
+        await clearDatabase(server.db, __dirname);
+        
+        let transaction = await server.transaction();
+        let row;
+        
+        row = await transaction.query(`
+            insert row into country default values
+            returning id
+        `);
+        
+        assert.ok(row.id == 1);
     });
     
 });

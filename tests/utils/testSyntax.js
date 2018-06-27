@@ -13,7 +13,7 @@ function testSyntax(className, test) {
             //index++;
             //console.log(index);
 
-        if ( test.err ) {
+        if ( test.error ) {
             try {
                 let coach = new GrapeQLCoach(str);
                 coach[ parseFuncName ]();
@@ -25,7 +25,12 @@ function testSyntax(className, test) {
 
         else if ( test.result ) {
             let coach = new GrapeQLCoach(str);
-            let result = coach[ parseFuncName ]();
+            let result;
+            if ( test.options ) {
+                result = coach[ parseFuncName ](test.options);
+            } else {
+                result = coach[ parseFuncName ]();
+            }
 
             let isEqual = !!weakDeepEqual(test.result, result);
             if ( !isEqual ) {
@@ -39,10 +44,19 @@ function testSyntax(className, test) {
             let clone = result.clone();
             let cloneString = clone.toString();
             let cloneCoach = new GrapeQLCoach( cloneString );
-            let cloneResult = cloneCoach[ parseFuncName ]();
+            
+            let cloneResult;
+            if ( test.options ) {
+                cloneResult = cloneCoach[ parseFuncName ](test.options);
+            } else {
+                cloneResult = cloneCoach[ parseFuncName ]();
+            }
 
             isEqual = !!weakDeepEqual(test.result, cloneResult);
             assert.ok(isEqual);
+        }
+        else {
+            throw new Error("invalid test");
         }
 
     });

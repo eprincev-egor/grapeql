@@ -100,7 +100,7 @@ GrapeQLCoach.parseCommand = function(sql) {
     coach.skipSpace();
     
     if ( coach.isInsert() ) {
-        return coach.parseInsert();
+        return coach.parseInsert({ allowInsertRow: true });
     }
 };
 
