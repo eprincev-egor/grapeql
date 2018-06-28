@@ -290,5 +290,33 @@ module.exports = [
             as: {word: "Order"},
             returningAll: true
         }
+    },
+
+    {
+        str: "delete row from orders",
+        error: Error
+    },
+    {
+        str: "delete row from orders",
+        options: {
+            allowDeleteRow: true
+        },
+        result: {
+            deleteRow: true,
+            table: {link: [
+                {word: "orders"}
+            ]}
+        }
+    },
+    {
+        str: "delete from orders",
+        options: {
+            allowDeleteRow: true
+        },
+        result: {
+            table: {link: [
+                {word: "orders"}
+            ]}
+        }
     }
 ];

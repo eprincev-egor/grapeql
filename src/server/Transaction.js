@@ -21,19 +21,6 @@ class Transaction {
     }
     
     async query(sql, vars) {
-        let result;
-        
-        try {
-            result = await this._executeCommand(sql, vars);
-        } catch(err) {
-            await this.rollback();
-            throw err;
-        }
-        
-        return result;
-    }
-    
-    async _executeCommand(sql, vars) {
         let command = GrapeQLCoach.parseCommand(sql);
         
         // $order_id::bigint
@@ -84,12 +71,46 @@ class Transaction {
         
     }
     
-    async _executeDelete() {
-        
+    async _executeDelete(deleteCommand) {
+        let db = this.db;
+        if ( !deleteCommand.returning && !deleteCommand.returningAll ) {
+            deleteCommand.returningAll = true;
+        }
+
+        let commandSql = deleteCommand.toString({ pg: true });
+
+        let result = await db.query(commandSql);
+
+        if ( deleteCommand.deleteRow ) {
+            if ( !result.rows || !result.rows.length ) {
+                return null;
+            }
+            
+            if ( result.rows.length === 1 ) {
+                return result.rows[0];
+            }
+        } else {
+            return result.rows || [];
+        }
     }
     
-    async _executeSelect() {
+    async _executeSelect(select) {
+        let db = this.db;
+        let commandSql = select.toString({ pg: true });
+
+        let result = await db.query(commandSql);
         
+        if ( select.selectRow ) {
+            if ( !result.rows || !result.rows.length ) {
+                return null;
+            }
+
+            if ( result.rows.length === 1 ) {
+                return result.rows[0];
+            }
+        } else {
+            return result.rows || [];
+        }
     }
     
     async destroy() {

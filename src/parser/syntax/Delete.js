@@ -11,7 +11,9 @@ DELETE FROM [ ONLY ] table_name [ * ] [ AS alias ]
 const Syntax = require("./Syntax");
 
 class Delete extends Syntax {
-    parse(coach) {
+    parse(coach, options) {
+        options = options || {allowDeleteRow: false};
+
         if ( coach.isWith() ) {
             this.with = coach.parseWith();
             this.addChild(this.with);
@@ -20,6 +22,15 @@ class Delete extends Syntax {
 
         coach.expectWord("delete");
         coach.skipSpace();
+
+        if ( options.allowDeleteRow ) {
+            if ( coach.isWord("row") ) {
+                coach.expectWord("row");
+                coach.skipSpace();
+                
+                this.deleteRow = true;
+            }
+        }
 
         coach.expectWord("from");
         coach.skipSpace();
@@ -108,6 +119,10 @@ class Delete extends Syntax {
             clone.addChild(clone.with);
         }
 
+        if ( this.deleteRow ) {
+            clone.deleteRow = true;
+        }
+
         if ( this.only ) {
             clone.only = true;
         }
@@ -145,7 +160,8 @@ class Delete extends Syntax {
         return clone;
     }
 
-    toString() {
+    toString(options) {
+        options = options || {pg: false};
         let out = "";
 
         if ( this.with ) {
@@ -153,7 +169,11 @@ class Delete extends Syntax {
             out += " ";
         }
 
-        out += "delete from ";
+        if ( !options.pg && this.deleteRow ) {
+            out += "delete row from ";
+        } else {
+            out += "delete from ";
+        }
 
         if ( this.only ) {
             out += "only ";

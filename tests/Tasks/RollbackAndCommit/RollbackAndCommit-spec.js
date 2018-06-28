@@ -6,7 +6,7 @@ const GrapeQL = require("../../../src/server/GrapeQL");
 const {clearDatabase} = require("../../utils/serverHelpers");
 const config = require("../../grapeql.config");
 
-describe("RollbackOnError", () => {
+describe("RollbackAndCommit", () => {
     
     let server;
     let transaction;
@@ -50,11 +50,13 @@ describe("RollbackOnError", () => {
         
         assert.ok(row.id == 1);
         
+        // rows hidden in another connection
         result = await server.db.query("select * from country");
         assert.ok(result.rows.length === 0);
         
         await transaction.commit();
         
+        // rows visible in another connection, after commit
         result = await server.db.query("select * from country");
         assert.ok(result.rows.length === 1);
         assert.ok(result.rows[0].id === 1);
@@ -69,13 +71,15 @@ describe("RollbackOnError", () => {
         
         assert.ok(row.id == 1);
         
+        // rows hidden in another connection
         result = await server.db.query("select * from country");
         assert.ok(result.rows.length === 0);
         
         await transaction.rollback();
         
+        // rows still hidden in another connection, after rollback
         result = await server.db.query("select * from country");
         assert.ok(result.rows.length === 0);
     });
-    
+
 });
