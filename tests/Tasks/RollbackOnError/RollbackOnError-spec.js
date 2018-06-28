@@ -19,6 +19,7 @@ describe("RollbackOnError", () => {
 
         // run server
         server = await GrapeQL.start( config );
+        
         // begin transaction
         transaction = await server.transaction();
     });
@@ -29,12 +30,14 @@ describe("RollbackOnError", () => {
         }
 
         await server.stop();
+        server = null;
 
         if ( !transaction ) {
             return;
         }
 
         await transaction.destroy();
+        transaction = null;
     });
 
 
