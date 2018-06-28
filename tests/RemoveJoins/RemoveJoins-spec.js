@@ -1,8 +1,7 @@
 "use strict";
 
-const {testRemoveUnnesaryJoins} = require("../utils/init")(__dirname);
-
 describe("RemoveJoins", () => {
+    const {testRemoveUnnesaryJoins} = require("../utils/init")(__dirname);
 
     testRemoveUnnesaryJoins(`
             select from company

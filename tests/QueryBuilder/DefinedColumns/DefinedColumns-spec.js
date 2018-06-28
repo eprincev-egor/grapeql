@@ -1,8 +1,7 @@
 "use strict";
 
-const {testRequest} = require("../../utils/init")(__dirname);
-
 describe("DefinedColumns", () => {
+    const {testRequest} = require("../../utils/init")(__dirname);
 
     testRequest({
         node: `

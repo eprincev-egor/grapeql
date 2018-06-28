@@ -1,8 +1,7 @@
 "use strict";
 
-const {testRemoveUnnesaryWiths} = require("../utils/init")(__dirname);
-
 describe("RemoveWiths", () => {
+    const {testRemoveUnnesaryWiths} = require("../utils/init")(__dirname);
 
     testRemoveUnnesaryWiths(`
         with

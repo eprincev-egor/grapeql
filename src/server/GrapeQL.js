@@ -53,7 +53,7 @@ class GrapeQL {
             throw new Error("config.db.password must are string");
         }
         if ( !_.isNumber(outConfig.db.port) ) {
-            throw new Error("config.db.port must are string");
+            throw new Error("config.db.port must are number");
         }
         if ( !_.isString(outConfig.db.database) ) {
             throw new Error("config.db.database must are string");
@@ -75,7 +75,15 @@ class GrapeQL {
     }
 
     async start() {
-        this.db = await this.getSystemConnect();
+        this.pool = new pg.Pool( this.config.db );
+        
+        let db;
+        try {
+            db = await this.pool.connect();
+        } catch(err) {
+            throw new Error("cannot connect to database");
+        }
+        this.db = db;
 
         await this.loadDatabaseInfo();
         await this.initSystemFunctions();

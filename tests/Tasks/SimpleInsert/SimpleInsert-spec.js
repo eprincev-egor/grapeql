@@ -1,25 +1,46 @@
 "use strict";
 
 const assert = require("assert");
-const {stopServer, startServer, clearDatabase} = require("../../utils/serverHelpers");
-
-let server;
-
-before(startServer(
-    __dirname,
-    _server => {server = _server;}
-));
-
-after(stopServer(
-    () => server
-));
+const pg = require("pg");
+const GrapeQL = require("../../../src/server/GrapeQL");
+const {clearDatabase} = require("../../utils/serverHelpers");
+const config = require("../../grapeql.config");
 
 describe("SimpleInsert task", () => {
     
+    let server;
+    let transaction;
+
+    beforeEach(async() => {
+        // run migration
+        let db = new pg.Client(config.db);
+        await db.connect();
+        await clearDatabase(db, __dirname);
+
+        // run server
+        server = await GrapeQL.start( config );
+        // begin transaction
+        transaction = await server.transaction();
+    });
+
+    afterEach(async() => {
+        if ( !server ) {
+            return;
+        }
+
+        await server.stop();
+        server = null;
+
+        if ( !transaction ) {
+            return;
+        }
+
+        await transaction.destroy();
+        transaction = null;
+    });
+
+
     it("insert default values, check id", async() => {
-        await clearDatabase(server.db, __dirname);
-        
-        let transaction = await server.transaction();
         let rows;
         
         rows = await transaction.query(`
@@ -35,12 +56,23 @@ describe("SimpleInsert task", () => {
         `);
         
         assert.ok(rows[0].id == 2);
+
+        rows = await transaction.query(`
+            insert into country default values
+            returning *
+        `);
+        
+        assert.ok(rows[0].id == 3);
+
+        // returning all columns by default behavior
+        rows = await transaction.query(`
+            insert into country default values
+        `);
+        
+        assert.ok(rows[0].id == 4);
     });
     
     it("insert values, check id", async() => {
-        await clearDatabase(server.db, __dirname);
-        
-        let transaction = await server.transaction();
         let rows;
         
         rows = await transaction.query(`
@@ -53,9 +85,6 @@ describe("SimpleInsert task", () => {
     });
     
     it("insert row into, returning row", async() => {
-        await clearDatabase(server.db, __dirname);
-        
-        let transaction = await server.transaction();
         let row;
         
         row = await transaction.query(`

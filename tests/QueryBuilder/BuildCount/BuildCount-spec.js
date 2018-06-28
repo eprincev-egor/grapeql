@@ -1,8 +1,7 @@
 "use strict";
 
-const {testRequestCount} = require("../../utils/init")(__dirname);
-
 describe("BuildCount", () => {
+    const {testRequestCount} = require("../../utils/init")(__dirname);
 
     testRequestCount({
         nodes: {

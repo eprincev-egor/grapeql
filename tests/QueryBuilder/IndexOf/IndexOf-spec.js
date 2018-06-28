@@ -1,8 +1,7 @@
 "use strict";
 
-const {testRequestIndexOf} = require("../../utils/init")(__dirname);
-
 describe("IndexOf", () => {
+    const {testRequestIndexOf} = require("../../utils/init")(__dirname);
 
     testRequestIndexOf({
         nodes: {

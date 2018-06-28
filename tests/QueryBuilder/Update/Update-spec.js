@@ -1,8 +1,8 @@
 "use strict";
 
-const {testUpdate} = require("../../utils/init")(__dirname);
-
 describe("Update", () => {
+    const {testUpdate} = require("../../utils/init")(__dirname);
+    
     testUpdate({
         node: `
             select * from country

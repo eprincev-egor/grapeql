@@ -1,8 +1,7 @@
 "use strict";
 
-const {testGetDbColumn} = require("../utils/init")(__dirname);
-
 describe("ParseDeps", () => {
+    const {testGetDbColumn} = require("../utils/init")(__dirname);
 
     testGetDbColumn({
         node: "select * from company",

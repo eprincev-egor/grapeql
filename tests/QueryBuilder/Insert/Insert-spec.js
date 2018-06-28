@@ -1,8 +1,8 @@
 "use strict";
 
-const {testInsert} = require("../../utils/init")(__dirname);
-
 describe("Insert", () => {
+    const {testInsert} = require("../../utils/init")(__dirname);
+
     testInsert({
         node: `
             select * from country

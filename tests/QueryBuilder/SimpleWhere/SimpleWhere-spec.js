@@ -1,8 +1,7 @@
 "use strict";
 
-const {testRequest} = require("../../utils/init")(__dirname);
-
 describe("SimpleWhere", () => {
+    const {testRequest} = require("../../utils/init")(__dirname);
 
     testRequest({
         nodes: {

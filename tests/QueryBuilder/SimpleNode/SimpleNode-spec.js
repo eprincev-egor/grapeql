@@ -1,8 +1,8 @@
 "use strict";
 
-const {testRequest} = require("../../utils/init")(__dirname);
-
 describe("SimpleNode", () => {
+    const {testRequest} = require("../../utils/init")(__dirname);
+
     testRequest({
         node: "select * from company",
         request: {

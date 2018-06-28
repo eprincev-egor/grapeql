@@ -1,6 +1,6 @@
 "use strict";
 
-const {stopServer, startServer} = require("./serverHelpers");
+const {stopServer, startServer, clearDatabase} = require("./serverHelpers");
 
 const testRemoveUnnesaryJoins = require("./testRemoveUnnesaryJoins");
 const testRemoveUnnesaryWiths = require("./testRemoveUnnesaryWiths");
@@ -30,6 +30,7 @@ function init(__dirname) {
 
     return {
         getServer,
+        clearDatabase,
         testReplaceLinks,
         testRemoveUnnesaryJoins: testRemoveUnnesaryJoins.bind(null, getServer),
         testRemoveUnnesaryWiths: testRemoveUnnesaryWiths.bind(null, getServer),

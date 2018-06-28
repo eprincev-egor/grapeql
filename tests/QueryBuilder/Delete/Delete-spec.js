@@ -1,8 +1,8 @@
 "use strict";
 
-const {testDelete} = require("../../utils/init")(__dirname);
-
 describe("Delete", () => {
+    const {testDelete} = require("../../utils/init")(__dirname);
+
     testDelete({
         node: `
             select * from country

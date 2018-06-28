@@ -1,8 +1,7 @@
 "use strict";
 
-const {testRequest} = require("../../utils/init")(__dirname);
-
 describe("UnnesaryJoins", () => {
+    const {testRequest} = require("../../utils/init")(__dirname);
 
     testRequest({
         node: `

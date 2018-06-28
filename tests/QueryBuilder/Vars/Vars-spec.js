@@ -1,13 +1,13 @@
 "use strict";
 
-const {
-    testRequest,
-    testRequestCount,
-    testRequestIndexOf
-} = require("../../utils/init")(__dirname);
-
 describe("Vars", () => {
 
+    const {
+        testRequest,
+        testRequestCount,
+        testRequestIndexOf
+    } = require("../../utils/init")(__dirname);
+    
     testRequest({
         nodes: {
             Company: `
