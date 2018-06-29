@@ -6,7 +6,7 @@ const GrapeQL = require("../../../src/server/GrapeQL");
 const {clearDatabase} = require("../../utils/serverHelpers");
 const config = require("../../grapeql.config");
 
-describe("SimpleDelete transaction", () => {
+describe("SimpleUpdate transaction", () => {
     
     let server;
     let transaction;
@@ -40,51 +40,42 @@ describe("SimpleDelete transaction", () => {
     });
 
 
-    it("delete row", async() => {
-        let row, rows;
+    it("update, check returning result", async() => {
+        let rows, row;
         
-        await transaction.query(`
+        rows = await transaction.query(`
             insert into country (code) values ('ru'), ('en')
         `);
         
+        assert.ok(rows[0].id == 1);
+        assert.ok(rows[1].id == 2);
+        
+        // update row, returning object or null
         row = await transaction.query(`
-            delete row from country
-            where id = 1
-            returning id, code
+            update row country set code = 'RUS' where id = 1
         `);
-
+        
         assert.ok(row.id == 1);
-        assert.ok(row.code == "ru");
+        assert.ok(row.code == "RUS");
 
         row = await transaction.query(`
-            delete row from country
-            where id = 2
+            update row country set code = 'NOT_FOUND' where id = 3
         `);
-
-        assert.ok(row.id == 2);
-        assert.ok(row.code == "en");
-
-
-
-        rows = await transaction.query(`
-            insert into country (code) values ('ru'), ('en')
-        `);
-        rows = await transaction.query(`
-            delete from country
-        `);
-
-        assert.ok(rows.length === 2);
         
-        assert.ok(rows[0].id == 3);
-        assert.ok(rows[0].code == "ru");
+        assert.ok(row === null);
 
-        assert.ok(rows[1].id == 4);
-        assert.ok(rows[1].code == "en");
+
+        // update rows, always returning array
+        rows = await transaction.query(`
+            update country set code = 'ENG' where id = 2
+        `);
+
+        assert.ok(rows[0].id == 2);
+        assert.ok(rows[0].code == "ENG");
 
 
         rows = await transaction.query(`
-            delete from country
-            where id = 5
+            update country set code = 'NOT_FOUND' where id = 3
         `);
 
         assert.ok(rows instanceof Array);

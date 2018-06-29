@@ -6,7 +6,7 @@ const GrapeQL = require("../../../src/server/GrapeQL");
 const {clearDatabase} = require("../../utils/serverHelpers");
 const config = require("../../grapeql.config");
 
-describe("SimpleInsert task", () => {
+describe("SimpleInsert transaction", () => {
     
     let server;
     let transaction;

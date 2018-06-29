@@ -103,7 +103,7 @@ GrapeQLCoach.parseCommand = function(sql) {
         return coach.parseInsert({ allowInsertRow: true });
     }
     else if ( coach.isUpdate() ) {
-        return coach.parseUpdate();
+        return coach.parseUpdate({ allowUpdateRow: true });
     }
     else if ( coach.isDelete() ) {
         return coach.parseDelete({ allowDeleteRow: true });

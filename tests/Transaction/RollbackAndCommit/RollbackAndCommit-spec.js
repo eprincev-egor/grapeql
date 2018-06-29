@@ -6,7 +6,7 @@ const GrapeQL = require("../../../src/server/GrapeQL");
 const {clearDatabase} = require("../../utils/serverHelpers");
 const config = require("../../grapeql.config");
 
-describe("RollbackAndCommit", () => {
+describe("RollbackAndCommit transaction", () => {
     
     let server;
     let transaction;

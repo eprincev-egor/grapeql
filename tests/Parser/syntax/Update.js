@@ -600,5 +600,48 @@ module.exports = [
             ]},
             returningAll: true
         }
+    },
+    {
+        str: "update row companies set name = 'nice'",
+        error: Error
+    },
+    {
+        str: "update row companies set name = 'nice'",
+        options: {
+            allowUpdateRow: true
+        },
+        result: {
+            updateRow: true,
+            table: {link: [
+                {word: "companies"}
+            ]},
+            set: [
+                {
+                    column: {word: "name"},
+                    value: {expression: {elements: [
+                        {content: "nice"}
+                    ]}}
+                }
+            ]
+        }
+    },
+    {
+        str: "update companies set name = 'nice'",
+        options: {
+            allowUpdateRow: true
+        },
+        result: {
+            table: {link: [
+                {word: "companies"}
+            ]},
+            set: [
+                {
+                    column: {word: "name"},
+                    value: {expression: {elements: [
+                        {content: "nice"}
+                    ]}}
+                }
+            ]
+        }
     }
 ];

@@ -67,8 +67,27 @@ class Transaction {
         }
     }
     
-    async _executeUpdate() {
-        
+    async _executeUpdate(update) {
+        let db = this.db;
+        if ( !update.returning && !update.returningAll ) {
+            update.returningAll = true;
+        }
+
+        let commandSql = update.toString({ pg: true });
+
+        let result = await db.query(commandSql);
+
+        if ( update.updateRow ) {
+            if ( !result.rows || !result.rows.length ) {
+                return null;
+            }
+            
+            if ( result.rows.length === 1 ) {
+                return result.rows[0];
+            }
+        } else {
+            return result.rows || [];
+        }
     }
     
     async _executeDelete(deleteCommand) {

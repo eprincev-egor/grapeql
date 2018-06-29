@@ -3,7 +3,9 @@
 const Syntax = require("./Syntax");
 
 class Update extends Syntax {
-    parse(coach) {
+    parse(coach, options) {
+        options = options || {allowUpdateRow: false};
+
         if ( coach.isWith() ) {
             this.with = coach.parseWith();
             this.addChild(this.with);
@@ -12,6 +14,15 @@ class Update extends Syntax {
 
         coach.expectWord("update");
         coach.skipSpace();
+
+        if ( options.allowUpdateRow ) {
+            if ( coach.isWord("row") ) {
+                coach.expectWord("row");
+                coach.skipSpace();
+                
+                this.updateRow = true;
+            }
+        }
 
         if ( coach.isWord("only") ) {
             coach.expectWord("only");
@@ -106,6 +117,10 @@ class Update extends Syntax {
             clone.addChild(clone.with);
         }
 
+        if ( this.updateRow ) {
+            clone.updateRow = true;
+        }
+
         if ( this.only ) {
             clone.only = true;
         }
@@ -146,7 +161,8 @@ class Update extends Syntax {
         return clone;
     }
 
-    toString() {
+    toString(options) {
+        options = options || {pg: false};
         let out = "";
 
         if ( this.with ) {
@@ -154,7 +170,11 @@ class Update extends Syntax {
             out += " ";
         }
 
-        out += "update ";
+        if ( !options.pg && this.updateRow ) {
+            out += "update row ";
+        } else {
+            out += "update ";
+        }
 
         if ( this.only ) {
             out += "only ";
