@@ -45,7 +45,69 @@ describe("Vars", () => {
         request: {
             columns: ["id"],
             vars: {
+                company_id: 1
+            }
+        },
+        result: `
+            select
+                company.id
+            from company
+
+            where
+                id = 1
+        `
+    });
+
+    testRequest({
+        nodes: {
+            Company: `
+                declare $company_id bigint not null;
+                select * from company
+                where id = $company_id
+            `
+        },
+        node: "Company",
+        request: {
+            columns: ["id"],
+            vars: {
+                company_id: 1,
+                $company_id: 2
+            }
+        },
+        error: Error
+    });
+
+    testRequest({
+        nodes: {
+            Company: `
+                declare $company_id bigint not null;
+                select * from company
+                where id = $company_id
+            `
+        },
+        node: "Company",
+        request: {
+            columns: ["id"],
+            vars: {
                 $company_id: null
+            }
+        },
+        error: Error
+    });
+
+    testRequest({
+        nodes: {
+            Company: `
+                declare $company_id bigint not null;
+                select * from company
+                where id = $company_id
+            `
+        },
+        node: "Company",
+        request: {
+            columns: ["id"],
+            vars: {
+                company_id: null
             }
         },
         error: Error
@@ -72,6 +134,24 @@ describe("Vars", () => {
     testRequest({
         nodes: {
             Company: `
+                declare $company_id bigint not null;
+                select * from company
+                where id = $company_id
+            `
+        },
+        node: "Company",
+        request: {
+            columns: ["id"],
+            vars: {
+                company_id: undefined
+            }
+        },
+        error: Error
+    });
+
+    testRequest({
+        nodes: {
+            Company: `
                 declare $company_id bigint;
                 select * from company
                 where id = $company_id
@@ -82,6 +162,24 @@ describe("Vars", () => {
             columns: ["id"],
             vars: {
                 $company_id: "undefined"
+            }
+        },
+        error: Error
+    });
+
+    testRequest({
+        nodes: {
+            Company: `
+                declare $company_id bigint;
+                select * from company
+                where id = $company_id
+            `
+        },
+        node: "Company",
+        request: {
+            columns: ["id"],
+            vars: {
+                company_id: "undefined"
             }
         },
         error: Error

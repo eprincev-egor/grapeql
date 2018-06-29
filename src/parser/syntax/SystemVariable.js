@@ -17,6 +17,10 @@ class SystemVariable extends Syntax {
             this.name += symb;
         }
 
+        if ( /\$/.test(this.name) ) {
+            coach.throwError(`forbidden symbol $ in variable name: ${this.name}`);
+        }
+
         if ( !this.name ) {
             coach.throwError("expect variable name");
         }

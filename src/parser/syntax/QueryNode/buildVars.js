@@ -26,7 +26,17 @@ module.exports = {
         for (let key in this.declare.variables) {
             let $key = "$" + key;
             let definition = this.declare.variables[ key ];
-            let value = vars[ $key ];
+            
+            if ( $key in vars && key in vars ) {
+                throw new Error(`duplicated variable name, please only one of ${key} or ${key}`);
+            }
+
+            let value;
+            if ( $key in vars ) {
+                value = vars[ $key ];
+            } else {
+                value = vars[ key ];
+            }
 
             if ( value == null && definition.notNull ) {
                 throw new Error(`expected not null value for variable: ${key}`);

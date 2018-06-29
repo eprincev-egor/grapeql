@@ -22,8 +22,9 @@ module.exports = [
         result: {name: "Ёё"}
     },
     {
+        // forbidden symbol $ in variable name
         str: "$$Any_Variable",
-        result: {name: "$Any_Variable"}
+        error: Error
     },
     {
         str: "$Привет",
