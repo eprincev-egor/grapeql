@@ -1,5 +1,6 @@
 "use strict";
 
+const {value2sql} = require("../helpers");
 const GrapeQLCoach = require("../parser/GrapeQLCoach");
 
 class Transaction {
@@ -40,8 +41,35 @@ class Transaction {
         }
     }
     
-    _pasteVars() {
-        
+    _pasteVars(command, vars) {
+        command.walk(variable => {
+            if ( !(variable instanceof GrapeQLCoach.SystemVariable) ) {
+                return;
+            }
+
+            let expression = variable.parent;
+            let type = expression.getVariableType(variable);
+            if ( !type ) {
+                throw new Error(`expected cast for variable: ${variable}`);
+            }
+
+            let key = variable.toLowerCase();
+            let $key = "$" + key;
+            
+            if ( $key in vars && key in vars ) {
+                throw new Error(`duplicated variable name, please only one of ${key} or ${key}`);
+            }
+
+            let value;
+            if ( $key in vars ) {
+                value = vars[ $key ];
+            } else {
+                value = vars[ key ];
+            }
+            
+            let sqlValue = value2sql(type, value);
+            expression.replaceVariableWithType(variable, sqlValue);
+        });
     }
     
     async _executeInsert(insert) {

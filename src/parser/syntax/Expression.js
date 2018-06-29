@@ -201,12 +201,14 @@ class Expression extends Syntax {
             return;
         }
 
-        this.elements.splice(index, 1, to);
+        this.removeChild(element);
         
         if ( typeof to === "string" ) {
             to = new Expression(to);
             to = to.elements[0];
         }
+        
+        this.elements.splice(index, 1, to);
         this.addChild(to);
     }
 
@@ -414,6 +416,50 @@ class Expression extends Syntax {
         }
 
         return operand;
+    }
+
+    getVariableType(variable) {
+        let index = this.elements.indexOf(variable);
+        
+        if ( index == -1 ) {
+            return null;
+        }
+
+        let toType = this.elements[index + 1];
+        if ( !(toType instanceof this.Coach.ToType) ) {
+            return null;
+        }
+
+        return toType.dataType.type;
+    }
+
+    replaceVariableWithType(variable, to) {
+        let index = this.elements.indexOf(variable);
+        
+        if ( index == -1 ) {
+            return null;
+        }
+
+        let toType = this.elements[index + 1];
+        if ( !(toType instanceof this.Coach.ToType) ) {
+            return null;
+        }
+
+        if ( typeof to === "string" ) {
+            to = new Expression(to);
+            to = to.elements[0];
+        }
+
+        this.removeChild(variable);
+        this.removeChild(toType);
+        
+        if ( typeof to === "string" ) {
+            to = new Expression(to);
+            to = to.elements[0];
+        }
+
+        this.elements.splice(index, 2, to);
+        this.addChild(to);
     }
 }
 

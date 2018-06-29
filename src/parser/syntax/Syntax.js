@@ -58,6 +58,12 @@ class Syntax {
         for (let i = 0, n = this.children.length; i < n; i++) {
             let child = this.children[i];
 
+            // element can be removed from array
+            // or element can be invalid
+            if ( !(child instanceof Syntax) ) {
+                continue;
+            }
+
             let wallker = new Wallker();
             iteration(child, wallker);
 
