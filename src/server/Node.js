@@ -3,13 +3,29 @@
 const GrapeQLCoach = require("../parser/GrapeQLCoach");
 
 class Node {
-    constructor({server, sql, file}) {
+    constructor({server, sql, file, name}) {
         this.server = server;
         this.parsed = GrapeQLCoach.parseEntity(sql);
         this.file = file;
+        this.name = name;
+
+        if ( this.server.express ) {
+            this.initRoutes();
+        }
     }
 
-    async get(request) {
+    initRoutes() {
+        this.server.express.get(`/${ this.name }/select`, async(req, res) => {
+            let request = req.query;
+            let result = await this.select(request);
+
+            res.send(
+                JSON.stringify(result)
+            );
+        });
+    }
+
+    async select(request) {
         let server = this.server;
         let query = this.parsed.buildSelect({
             server,
@@ -26,7 +42,7 @@ class Node {
         return result.rows;
     }
 
-    async getCount(request) {
+    async selectCount(request) {
         let server = this.server;
         let query = this.parsed.buildCount({
             server,

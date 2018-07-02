@@ -8,10 +8,34 @@ const Transaction = require("./Transaction");
 const DbDatabase = require("./DbObject/DbDatabase");
 const Node = require("./Node");
 
+const express = require("express");
+const bodyParser = require("body-parser");
+
 class GrapeQL {
     constructor(config) {
         this.config = this.prepareConfig(config);
         this.nodes = {};
+
+
+        // key is table name with schema name over dot
+        // value is object, where
+        // key is command type (insert, update, delete)
+        // value is array of objects like are:
+        // {
+        //    trigger,
+        //    handle
+        // }
+        //  
+        // example:
+        //  {
+        //      "public.orders": {
+        //          "insert": [{
+        //              trigger: TriggerClass,
+        //              handle: async(event) => {}
+        //          }]
+        //      }
+        //  }
+        this._triggers = {};
     }
     
     prepareConfig(config) {
@@ -70,7 +94,26 @@ class GrapeQL {
             query: "**/*.sql",
             events: "**/*.events.js"
         }, config.workfiles);
+
         
+        // validate http server
+        outConfig.http = {
+            port: 80
+        };
+        if ( config.http === false ) {
+            outConfig.http = false;
+        }
+        else if ( _.isObject(config.http) ) {
+            if ( "port" in config.http ) {
+                if ( _.isNumber(config.http.port) ) {
+                    outConfig.http.port = config.http.port;
+                }
+                else {
+                    throw new Error("config.http.port must be are number");
+                }
+            }
+        }
+
         return outConfig;
     }
 
@@ -88,6 +131,7 @@ class GrapeQL {
         await this.loadDatabaseInfo();
         await this.initSystemFunctions();
         await this.loadWorkdir();
+        this.initExpress();
     }
     
     async getSystemConnect() {
@@ -138,6 +182,7 @@ class GrapeQL {
             let sql = contentBuffer.toString();
             
             this.nodes[ queryName ] = new Node({
+                name: queryName,
                 sql,
                 server: this
             });
@@ -176,6 +221,75 @@ class GrapeQL {
         await transaction.begin();
         
         return transaction;
+    }
+
+    addTrigger(TriggerClass) {
+        let trigger = new TriggerClass();
+        let events = trigger.getEvents();
+        
+        if ( !_.isObject(events) || _.isEmpty(events) ) {
+            throw new Error("events must be not empty object");
+        }
+
+        for (let key in events) {
+            let value = events[ key ];
+
+            if ( !/^(insert|update|delete):(\w+\.)?\w+$/.test(key) ) {
+                throw new Error(`invalid event name: ${key}`);
+            }
+
+            key = key.split(":");
+            let commandType = key[0];
+            let tableName = key[1];
+
+            let dbTable = this.database.findTable(tableName);
+            if ( !dbTable ) {
+                throw new Error(`table name not found: ${tableName}`);
+            }
+
+            let handle = trigger[ value ] || value;
+            if ( !_.isFunction(handle) ) {
+                throw new Error(`handle must be are function, or method name: ${value}`);
+            }
+
+            let lowerPath = dbTable.getLowerPath();
+            
+            if ( !this._triggers[lowerPath] ) {
+                this._triggers[lowerPath] = {};
+            }
+
+            if ( !this._triggers[lowerPath][commandType] ) {
+                this._triggers[lowerPath][commandType] = [];
+            }
+
+            this._triggers[lowerPath][commandType].push({
+                trigger,
+                handle: async(triggerEvent) => {
+                    await handle.call(trigger, triggerEvent);
+                }
+            });
+        }
+
+        return trigger;
+    }
+
+    _onQuery(/*commandType, result */) {
+
+    }
+
+    initExpress() {
+        if ( !this.config.http ) {
+            return;
+        }
+
+        this.express = express();
+        
+        this.express.use( bodyParser.json() );
+        this.express.use( bodyParser.urlencoded({
+            extended: true
+        }) );
+
+        this.express.listen( this.config.http.port );
     }
 }
 

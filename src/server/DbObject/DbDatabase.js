@@ -149,6 +149,27 @@ class DbDatabase {
             }
         }
     }
+
+    findTable(name) {
+        let schema = "public";
+        let table;
+
+        if ( /\./.test(name) ) {
+            name = name.split(".");
+            schema = name[0];
+            table = name[1];
+        } else {
+            table = name;
+        }
+
+        let dbSchema = this.getSchema(schema);
+        
+        if ( !dbSchema ) {
+            return;
+        }
+
+        return dbSchema.getTable(table);
+    }
 }
 
 module.exports = DbDatabase;

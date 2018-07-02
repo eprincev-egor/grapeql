@@ -27,18 +27,28 @@ class Transaction {
         // $order_id::bigint
         this._pasteVars(command, vars);
         
+        let result, commandType;
         if ( command instanceof GrapeQLCoach.Insert ) {
-            return await this._executeInsert(command);
+            commandType = "insert";
+            result = await this._executeInsert(command);
         }
         else if ( command instanceof GrapeQLCoach.Update ) {
-            return await this._executeUpdate(command);
+            commandType = "update";
+            result = await this._executeUpdate(command);
         }
         else if ( command instanceof GrapeQLCoach.Delete ) {
-            return await this._executeDelete(command);
+            commandType = "delete";
+            result = await this._executeDelete(command);
         }
         else if ( command instanceof GrapeQLCoach.Select ) {
-            return await this._executeSelect(command);
+            result = await this._executeSelect(command);
         }
+
+        if ( commandType ) {
+            this.server._onQuery(commandType, result);
+        }
+
+        return result;
     }
     
     _pasteVars(command, vars) {
