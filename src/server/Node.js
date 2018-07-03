@@ -15,13 +15,49 @@ class Node {
     }
 
     initRoutes() {
-        this.server.express.get(`/${ this.name }/select`, async(req, res) => {
-            let request = req.query;
-            let result = await this.select(request);
+        let routes = {
+            "select": this.select,
+            "selectCount": this.selectCount
+        };
 
-            res.send(
-                JSON.stringify(result)
-            );
+        for (let key in routes) {
+            let routePath = `/${this.name}/${key}`;
+            let method = routes[ key ];
+
+            this._buildGet(routePath, method);
+            this._buildPost(routePath, method);
+        }
+    }
+
+    _buildGet(routePath, method) {
+        this.server.express.get(routePath, async(req, res) => {
+            let result;
+
+            try {
+                result = await method.call(this, req.query);
+            } catch(err) {
+                result = {
+                    error: err.message
+                };
+            }
+
+            res.send(result);
+        });
+    }
+
+    _buildPost(routePath, method) {
+        this.server.express.post(routePath, async(req, res) => {
+            let result;
+
+            try {
+                result = await method.call(this, req.body);
+            } catch(err) {
+                result = {
+                    error: err.message
+                };
+            }
+
+            res.send(result);
         });
     }
 

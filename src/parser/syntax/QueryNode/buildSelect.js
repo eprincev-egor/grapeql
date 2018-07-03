@@ -13,6 +13,10 @@ module.exports = {
         limit,
         vars
     }) {
+        if ( !Array.isArray(columns) || !columns.length ) {
+            throw new Error("columns must be not empty array");
+        }
+
         let select = this.select.clone();
 
         this.buildVars({

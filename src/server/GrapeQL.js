@@ -130,8 +130,11 @@ class GrapeQL {
 
         await this.loadDatabaseInfo();
         await this.initSystemFunctions();
-        await this.loadWorkdir();
         this.initExpress();
+        
+        await this.loadWorkdir();
+
+        this.express.listen( this.config.http.port );
     }
     
     async getSystemConnect() {
@@ -288,8 +291,6 @@ class GrapeQL {
         this.express.use( bodyParser.urlencoded({
             extended: true
         }) );
-
-        this.express.listen( this.config.http.port );
     }
 }
 
