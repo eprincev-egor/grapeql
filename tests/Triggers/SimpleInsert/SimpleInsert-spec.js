@@ -31,7 +31,6 @@ describe("SimpleInsert trigger", () => {
 
 
     it("insert order and insert unit", async() => {
-        /*
         class CreateUnit {
             getEvents() {
                 return {
@@ -46,25 +45,24 @@ describe("SimpleInsert trigger", () => {
                     values
                     ($order_id::integer)
                 `, {
-                        order_id: row.id
-                    });
+                    order_id: row.id
+                });
             }
         }
 
         server.addTrigger(CreateUnit);
 
-        let orderRow = await server.query("insert into orders default values");
+        let orderRow = await server.query("insert row into orders default values");
         assert.ok(orderRow.id == 1);
 
         let unitRow = await server.query("select row * from units where id_order = $order_id::integer", {
             order_id: orderRow.id
         });
+        
         assert.ok(unitRow.id == 1);
         assert.ok(unitRow.id_order == 1);
-
-        */
        
-       assert.ok(true);
+        assert.ok(true);
     });
 
 });

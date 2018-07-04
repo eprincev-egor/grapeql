@@ -2,7 +2,6 @@
 
 const GrapeQL = require("../src/server/GrapeQL");
 const GrapeQLCoach = require("../src/parser/GrapeQLCoach");
-const Filter = require("../src/filter/Filter");
 const config = require("./grapeql.config");
 
 const testRequest = require("./utils/testRequest");

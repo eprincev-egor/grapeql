@@ -228,6 +228,14 @@ class ObjectLink extends Syntax {
         this.children = [];
         this.link = [];
     }
+
+    getDbTableLowerPath() {
+        if ( this.link.length === 1 ) {
+            return "public." + this.link[0].toLowerCase();
+        } else {
+            return this.link.map(name => name.toLowerCase()).join(".");
+        }
+    }
 }
 
 module.exports = ObjectLink;

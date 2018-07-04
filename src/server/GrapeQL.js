@@ -134,7 +134,9 @@ class GrapeQL {
         
         await this.loadWorkdir();
 
-        this.express.listen( this.config.http.port );
+        if ( this.config.http ) {
+            this.express.listen( this.config.http.port );
+        }
     }
     
     async getSystemConnect() {
@@ -276,8 +278,43 @@ class GrapeQL {
         return trigger;
     }
 
-    _onQuery(/*commandType, result */) {
+    async _callTriggers({
+        commandType, 
+        command, 
+        result,
+        transaction
+    }) {
+        if ( commandType == "select" ) {
+            return;
+        }
+        
+        let table = command.table; // Syntax ObjectLink
+        table = table.getDbTableLowerPath();
 
+        let triggers;
+
+        triggers = this._triggers[ table ];
+        if ( !triggers ) {
+            return;
+        }
+
+        triggers = triggers[ commandType ];
+        if ( !triggers || !triggers.length ) {
+            return;
+        }
+
+        if ( !_.isArray(result) ) {
+            result = [result];
+        }
+
+        result.forEach(async(row) => {
+            triggers.forEach(async(trigger) => {
+                await trigger.handle({
+                    db: transaction,
+                    row
+                });
+            });
+        });
     }
 
     initExpress() {
@@ -291,6 +328,14 @@ class GrapeQL {
         this.express.use( bodyParser.urlencoded({
             extended: true
         }) );
+    }
+
+    async query(sql, vars) {
+        let transaction = await this.transaction();
+        let result = await transaction.query(sql, vars);
+        await transaction.commit();
+        transaction.end();
+        return result;
     }
 }
 

@@ -26,6 +26,13 @@ class DbTable {
     addConstraint(constraint) {
         this.constraints[ constraint.name ] = constraint;
     }
+
+    getLowerPath() {
+        return (
+            (this.schema || "public").toLowerCase() + "." + 
+            this.name.toLowerCase()
+        );
+    }
 }
 
 module.exports = DbTable;

@@ -18,6 +18,7 @@ describe("SimpleSelect task", () => {
         await clearDatabase(db, __dirname);
 
         // run server
+        config.http = false;
         server = await GrapeQL.start( config );
         // begin transaction
         transaction = await server.transaction();

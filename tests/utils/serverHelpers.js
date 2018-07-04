@@ -24,6 +24,7 @@ function startServer(dirname, callback) {
         // clear db before run tests
         await clearDatabase(db, dirname);
 
+        config.http = false;
         let server = await GrapeQL.start( config );
 
         callback(server);

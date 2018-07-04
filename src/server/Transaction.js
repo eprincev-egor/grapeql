@@ -45,7 +45,16 @@ class Transaction {
         }
 
         if ( commandType ) {
-            this.server._onQuery(commandType, result);
+            try {
+                await this.server._callTriggers({
+                    transaction: this,
+                    commandType, command, 
+                    result
+                });
+            } catch(err) {
+                await this.rollback();
+                throw err;
+            }
         }
 
         return result;
@@ -172,6 +181,10 @@ class Transaction {
     
     async destroy() {
         await this.rollback();
+        await this.end();
+    }
+
+    async end() {
         await this.db.release();
     }
 }

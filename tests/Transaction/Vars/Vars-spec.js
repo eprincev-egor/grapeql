@@ -18,6 +18,7 @@ describe("Vars in transaction", () => {
         await clearDatabase(db, __dirname);
 
         // run server
+        config.http = false;
         server = await GrapeQL.start( config );
         // begin transaction
         transaction = await server.transaction();
@@ -47,8 +48,8 @@ describe("Vars in transaction", () => {
             insert row into country (code, population) 
             values ('ru', $population::integer)
         `, {
-                $population: 150000000
-            });
+            $population: 150000000
+        });
         
         assert.ok(row.id == 1);
         assert.ok(row.code == "ru");
@@ -60,8 +61,8 @@ describe("Vars in transaction", () => {
             insert row into country (code, population) 
             values ('ru', $population::integer)
         `, {
-                population: 150000000
-            });
+            population: 150000000
+        });
         
         assert.ok(row.id == 2);
         assert.ok(row.code == "ru");
