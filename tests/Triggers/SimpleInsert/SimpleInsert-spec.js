@@ -66,7 +66,7 @@ describe("SimpleInsert trigger", () => {
         assert.ok(true);
     });
 
-    it("insert row, and rollback on trigger error", async() => {
+    it("insert row, and wait trigger error", async() => {
         class TriggerError {
             getEvents() {
                 return {
@@ -78,7 +78,7 @@ describe("SimpleInsert trigger", () => {
                 let unitRow = row;
 
                 if ( unitRow.id >= 3 ) {
-                    throw new Error("test rollback");
+                    throw new Error("test trigger error");
                 }
             }
         }
@@ -107,7 +107,7 @@ describe("SimpleInsert trigger", () => {
             });
             assert.ok(false, "expected error");
         } catch(err) {
-            assert.equal(err.message, "test rollback");
+            assert.equal(err.message, "test trigger error");
         }
         
     });

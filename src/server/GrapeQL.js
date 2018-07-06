@@ -336,9 +336,18 @@ class GrapeQL {
 
     async query(sql, vars) {
         let transaction = await this.transaction();
-        let result = await transaction.query(sql, vars);
-        await transaction.commit();
-        transaction.end();
+        let result;
+        
+        try {
+            result = await transaction.query(sql, vars);
+            await transaction.commit();
+            transaction.end();
+        } catch(err) {
+            await transaction.rollback();
+            transaction.end();
+            throw err;
+        }
+        
         return result;
     }
 }
