@@ -52,7 +52,6 @@ class Transaction {
                     result
                 });
             } catch(err) {
-                await this.rollback();
                 throw err;
             }
         }
@@ -69,7 +68,7 @@ class Transaction {
             let expression = variable.parent;
             let type = expression.getVariableType(variable);
             if ( !type ) {
-                throw new Error(`expected cast for variable: ${variable}`);
+                throw new Error(`expected type for variable: ${variable}`);
             }
 
             let key = variable.toLowerCase();

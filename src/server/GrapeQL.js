@@ -307,14 +307,18 @@ class GrapeQL {
             result = [result];
         }
 
-        result.forEach(async(row) => {
-            triggers.forEach(async(trigger) => {
+        for (let i = 0, n = result.length; i < n; i++) {
+            let row = result[i];
+            
+            for (let j = 0, m = triggers.length; j < m; j++) {
+                let trigger = triggers[j];
+
                 await trigger.handle({
                     db: transaction,
                     row
                 });
-            });
-        });
+            }
+        }
     }
 
     initExpress() {

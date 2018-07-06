@@ -17,6 +17,7 @@ describe("SimpleInsert trigger", () => {
         await clearDatabase(db, __dirname);
 
         // run server
+        config.http = false;
         server = await GrapeQL.start( config );
     });
 
@@ -63,6 +64,52 @@ describe("SimpleInsert trigger", () => {
         assert.ok(unitRow.id_order == 1);
        
         assert.ok(true);
+    });
+
+    it("insert row, and rollback on trigger error", async() => {
+        class TriggerError {
+            getEvents() {
+                return {
+                    "insert:units": "throwError"
+                };
+            }
+            
+            throwError({row}) {
+                let unitRow = row;
+
+                if ( unitRow.id >= 3 ) {
+                    throw new Error("test rollback");
+                }
+            }
+        }
+
+        server.addTrigger(TriggerError);
+        let unitRow, orderRow;
+
+        orderRow = await server.query("insert row into orders default values");
+        assert.equal(orderRow.id, 1, "order with id 1");
+
+        unitRow = await server.query("insert row into units (id_order) values ($order_id::integer)", {
+            $order_id: orderRow.id
+        });
+        assert.equal(unitRow.id, 1, "unit with id 1");
+        assert.equal(unitRow.id_order, 1, "unit with id_order 1");
+
+        unitRow = await server.query("insert row into units (id_order) values ($order_id::integer)", {
+            $order_id: orderRow.id
+        });
+        assert.equal(unitRow.id, 2, "unit with id 2");
+        assert.equal(unitRow.id_order, 1, "unit with id_order 1");
+
+        try {
+            unitRow = await server.query("insert row into units (id_order) values ($order_id::integer)", {
+                $order_id: orderRow.id
+            });
+            assert.ok(false, "expected error");
+        } catch(err) {
+            assert.equal(err.message, "test rollback");
+        }
+        
     });
 
 });
