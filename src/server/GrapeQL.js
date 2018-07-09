@@ -312,11 +312,44 @@ class GrapeQL {
             
             for (let j = 0, m = triggers.length; j < m; j++) {
                 let trigger = triggers[j];
+                
+                if ( commandType == "update" ) {
+                    let prev = {},
+                        changes = {},
+                        newRow = {};
+                    
+                    for (let key in row) {
+                        if ( /old_/.test(key) ) {
+                            continue;
+                        }
+                        
+                        let value = row[ key ];
+                        prev[ key ] = value;
+                        newRow[ key ] = value;
 
-                await trigger.handle({
-                    db: transaction,
-                    row
-                });
+                        let oldKey = "old_" + key;
+                        if ( oldKey in row ) {
+                            let oldValue = row[ oldKey ];
+                            
+                            if ( oldValue != value ) {
+                                changes[ key ] = value;
+                                prev[ key ] = oldValue;
+                            }
+                        }
+                    }
+
+                    await trigger.handle({
+                        db: transaction,
+                        row: newRow,
+                        changes,
+                        prev
+                    });
+                } else {
+                    await trigger.handle({
+                        db: transaction,
+                        row
+                    });
+                }
             }
         }
     }
