@@ -2,11 +2,9 @@
 
 const _ = require("lodash");
 const pg = require("pg");
-const glob = require("glob");
-const fs = require("fs");
 const Transaction = require("./Transaction");
 const DbDatabase = require("./DbObject/DbDatabase");
-const Node = require("./Node");
+const QueryManager = require("./QueryManager");
 
 const express = require("express");
 const bodyParser = require("body-parser");
@@ -14,7 +12,6 @@ const bodyParser = require("body-parser");
 class GrapeQL {
     constructor(config) {
         this.config = this.prepareConfig(config);
-        this.nodes = {};
 
 
         // key is table name with schema name over dot
@@ -132,7 +129,7 @@ class GrapeQL {
         await this.initSystemFunctions();
         this.initExpress();
         
-        await this.loadWorkdir();
+        await this.initQueryManager();
 
         if ( this.config.http ) {
             this.express.listen( this.config.http.port );
@@ -168,52 +165,21 @@ class GrapeQL {
         `);
     }
     
-    async loadWorkdir() {
+    async initQueryManager() {
+        this.queryManager = new QueryManager({
+            server: this
+        });
+        
         if ( this.config.workdir === false ) {
             return;
         }
         
-        let pattern = this.config.workdir + "/" + this.config.workfiles.query;
-        let queryFiles = await getFileNames(pattern);
-        
-        let existsNames = {};
-        queryFiles.forEach(filePath => {
-            let queryName = filePath2queryName( filePath );
-            if ( queryName in existsNames ) {
-                throw new Error(`duplicate query name: ${ filePath }`);
-            }
-            
-            let contentBuffer = fs.readFileSync(filePath);
-            let sql = contentBuffer.toString();
-            
-            this.nodes[ queryName ] = new Node({
-                name: queryName,
-                sql,
-                server: this
-            });
-        });
+        await this.queryManager.addWorkdir(
+            this.config.workdir, 
+            this.config.workfiles.query
+        );
     }
     
-    addNode(name, node) {
-        let file;
-        if ( _.isString(node) ) {
-            if ( fs.existsSync(node) ) {
-                file = node;
-                node = fs.readFileSync( node );
-            }
-            node = new Node({sql: node, server: this});
-            if ( file ) {
-                node.file = file;
-            }
-            this.nodes[ name ] = node;
-        }
-        else if ( node instanceof Node ) {
-            this.nodes[ name ] = node;
-        }
-
-        return node;
-    }
-
     async stop() {
         await this.db.end();
     }
@@ -390,35 +356,5 @@ GrapeQL.start = async function(config) {
     await server.start();
     return server;
 };
-
-async function getFileNames(globPattern) {
-    return new Promise((resolve, reject) => {
-        glob(globPattern, {}, (err, names) => {
-            if ( err ) {
-                reject(err);
-            } else {
-                resolve(names);
-            }
-        });
-    });
-}
-
-function filePath2queryName(filePath) {
-    let queryName = filePath;
-    
-    queryName = queryName.split("/");
-    queryName = queryName.slice(-1)[0];
-    
-    if ( !queryName ) {
-        throw new Error(`invalid query name: ${filePath}`);
-    }
-    
-    queryName = queryName.replace(/\.sql$/i, "");
-    if ( !queryName ) {
-        throw new Error(`invalid query name: ${filePath}`);
-    }
-    
-    return queryName;
-}
 
 module.exports = GrapeQL;

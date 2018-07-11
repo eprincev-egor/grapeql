@@ -23,9 +23,10 @@ const types = [
     "\"char\"",
     "name",
     "bytea",
-    "timestamp",
+    // don't touch order ! see 'posibleTypes' checks
     "timestamp without time zone",
     "timestamp with time zone",
+    "timestamp",
     "time without time zone",
     "time with time zone",
     // ...

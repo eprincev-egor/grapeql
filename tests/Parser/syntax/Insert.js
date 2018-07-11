@@ -551,5 +551,33 @@ module.exports = [
             ]},
             defaultValues: true
         }
+    },
+    {
+        str: "insert into company (some_date, some_timestamp) values ('2017-12-31T21:00:00.000Z'::date, '2017-12-31T21:00:00.000Z'::timestamp without time zone)",
+        result: {
+            table: {link: [
+                {word: "company"}
+            ]},
+            columns: [
+                {word: "some_date"},
+                {word: "some_timestamp"}
+            ],
+            values: [
+                {items: [
+                    {expression: {elements: [
+                        {content: "2017-12-31T21:00:00.000Z"},
+                        {dataType: {
+                            type: "date"
+                        }}
+                    ]}},
+                    {expression: {elements: [
+                        {content: "2017-12-31T21:00:00.000Z"},
+                        {dataType: {
+                            type: "timestamp without time zone"
+                        }}
+                    ]}}
+                ]}
+            ]
+        }
     }
 ];

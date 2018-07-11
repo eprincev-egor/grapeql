@@ -1,7 +1,7 @@
 "use strict";
 
-// const GrapeQLCoach = require("../../src/parser/GrapeQLCoach");
-// const weakDeepEqual = require("./weakDeepEqual");
+const GrapeQLCoach = require("../../src/parser/GrapeQLCoach");
+const weakDeepEqual = require("./weakDeepEqual");
 const assert = require("assert");
 
 
@@ -9,18 +9,29 @@ function testInsert(getServer, test) {
     it(test.result, () => {
         let server = getServer();
 
-        let node = test.node;
         let name = "Tmp";
-        node = server.addNode(name, node);
-        node.file = "./" + name + ".sql";
+        server.queryManager.clear();
+        server.queryManager.addFile(name, test.node);
 
         let request = test.request;
-        let query = node.parsed.buildInsert({
-            server,
-            node,
+        let query = server.queryManager.buildInsert({
+            node: name,
 
             row: request.row
         });
+
+        let sql = query.toString();
+        let result = GrapeQLCoach.parseInsert( sql );
+
+        let testResult = GrapeQLCoach.parseInsert(test.result);
+
+        let isEqual = !!weakDeepEqual(testResult, result);
+
+        if ( !isEqual ) {
+            console.log( sql );
+        }
+
+        assert.ok(isEqual);
 
         assert.equal(query, test.result);
     });

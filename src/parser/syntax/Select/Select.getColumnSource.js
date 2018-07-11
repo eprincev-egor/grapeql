@@ -5,8 +5,7 @@ const {
     objectLink2schmeTable,
     objectLink2schmeTableColumn,
     getDbColumn,
-    getDbTable,
-    getNode
+    getDbTable
 } = require("../../../helpers");
 
 module.exports = {
@@ -77,13 +76,13 @@ module.exports = {
             else if ( fromItem.file ) {
                 let tableName = objectLink.first();
                 let subLink = objectLink.slice(-1);
-                let node = getNode(fromItem.file, server);
+                let queryNode = server.queryManager.getQueryNodeByFile(fromItem.file, server);
 
                 if (
                     objectLink.link.length == 1 ||
                     fromItem.as.equal(tableName)
                 ) {
-                    source = node.parsed.select.getColumnSource({server, node, link: subLink});
+                    source = queryNode.select.getColumnSource({server, node, link: subLink});
                 }
             }
 

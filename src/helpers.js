@@ -347,18 +347,6 @@ function getDbColumn(serverOrTable, objectLink) {
     return column;
 }
 
-function getNode(file, server) {
-    for (let key in server.nodes) {
-        let node = server.nodes[ key ];
-        let leftFile = node.file.replace(/\.sql$/, "");
-        let rightFile = file.toString().replace(/\.sql$/, "");
-
-        if ( leftFile == rightFile ) {
-            return node;
-        }
-    }
-}
-
 
 module.exports = {
     isSqlNumber,
@@ -377,6 +365,5 @@ module.exports = {
     objectLink2schmeTableColumn,
     objectLink2schmeTable,
     getDbTable,
-    getDbColumn,
-    getNode
+    getDbColumn
 };

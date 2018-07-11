@@ -12,21 +12,20 @@ function testRequest(getServer, test) {
 
     it(testName, () => {
         let server = getServer();
-
+        server.queryManager.clear();
+        
         if ( test.nodes ) {
             for (let name in test.nodes) {
                 let node = test.nodes[ name ];
-                node = server.addNode(name, node);
-                node.file = "./" + name + ".sql";
+                server.queryManager.addFile(name, node);
             }
         }
 
         let node = test.node;
 
-        if ( /^\w+$/.test(node) ) {
-            node = server.nodes[ node ];
-        } else {
-            node = server.addNode("Temp", node);
+        if ( !/^\w+$/.test(node) ) {
+            server.queryManager.addFile("Temp", node);
+            node = "Temp";
         }
 
         let request = test.request;
@@ -34,7 +33,7 @@ function testRequest(getServer, test) {
         if ( test.error ) {
             let hasError = false;
             try {
-                node.parsed.buildSelect({
+                server.queryManager.buildSelect({
                     server,
                     node,
 
@@ -50,7 +49,7 @@ function testRequest(getServer, test) {
             }
             assert.ok(hasError, "expected error");
         } else {
-            let query = node.parsed.buildSelect({
+            let query = server.queryManager.buildSelect({
                 server,
                 node,
 

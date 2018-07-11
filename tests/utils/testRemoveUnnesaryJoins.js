@@ -16,9 +16,8 @@ function testRemoveUnnesaryJoins(getServer, fromSelect, toSelect) {
     `, () => {
         let server = getServer();
 
-        let node;
-        node = server.addNode("Country", "select * from country");
-        node.file = "./Country.sql";
+        server.queryManager.clear();
+        server.queryManager.addFile("Country", "select * from country");
 
         let coach;
 

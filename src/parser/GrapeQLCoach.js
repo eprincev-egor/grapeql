@@ -94,6 +94,27 @@ GrapeQLCoach.parseSelect = function(str) {
     return coach.parseSelect();
 };
 
+GrapeQLCoach.parseInsert = function(str) {
+    let coach = new GrapeQLCoach(str);
+    coach.replaceComments();
+    coach.skipSpace();
+    return coach.parseInsert();
+};
+
+GrapeQLCoach.parseUpdate = function(str) {
+    let coach = new GrapeQLCoach(str);
+    coach.replaceComments();
+    coach.skipSpace();
+    return coach.parseUpdate();
+};
+
+GrapeQLCoach.parseDelete = function(str) {
+    let coach = new GrapeQLCoach(str);
+    coach.replaceComments();
+    coach.skipSpace();
+    return coach.parseDelete();
+};
+
 GrapeQLCoach.parseCommand = function(sql) {
     let coach = new GrapeQLCoach(sql);
     coach.replaceComments();

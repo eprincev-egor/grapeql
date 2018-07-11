@@ -16,8 +16,7 @@ where
 const Syntax = require("./Syntax");
 const {
     objectLink2schmeTableColumn,
-    getDbTable,
-    getNode
+    getDbTable
 } = require("../../helpers");
 
 class Join extends Syntax {
@@ -134,8 +133,8 @@ class Join extends Syntax {
 
                 try {
                     if ( this.from.file ) {
-                        let node = getNode(this.from.file, server);
-                        dbTable = getDbTable( server, node.parsed.select.from[0].table );
+                        let queryNode = server.queryManager.getQueryNodeByFile(this.from.file);
+                        dbTable = getDbTable( server, queryNode.select.from[0].table );
                     } else {
                         dbTable = getDbTable( server, this.from.table );
                     }

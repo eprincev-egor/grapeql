@@ -1,6 +1,6 @@
 "use strict";
 
-const {getNode, getDbTable, value2sql} = require("../../../helpers");
+const {getDbTable, value2sql} = require("../../../helpers");
 
 module.exports = {
     buildInsert({
@@ -17,12 +17,12 @@ module.exports = {
         }
 
         if ( fromItem.file ) {
-            let node = getNode(fromItem.file, server);
-            if ( !node ) {
+            let queryNode = server.queryManager.getQueryNodeByFile(fromItem.file);
+            if ( !queryNode ) {
                 throw new Error(`${fromItem.file.toString()} not exists`);
             }
 
-            return node.parsed.buildInsert({server, row});
+            return queryNode.buildInsert({server, row});
         }
 
         let dbTable = getDbTable(server, fromItem.table);

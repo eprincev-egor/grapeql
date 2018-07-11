@@ -1,6 +1,6 @@
 "use strict";
 
-const {getNode, getDbTable} = require("../../../helpers");
+const {getDbTable} = require("../../../helpers");
 const Filter = require("../../../filter/Filter");
 
 module.exports = {
@@ -18,12 +18,12 @@ module.exports = {
         }
 
         if ( fromItem.file ) {
-            let node = getNode(fromItem.file, server);
-            if ( !node ) {
+            let queryNode = server.queryManager.getQueryNodeByFile(fromItem.file);
+            if ( !queryNode ) {
                 throw new Error(`${fromItem.file.toString()} not exists`);
             }
 
-            return node.parsed.buildDelete({
+            return queryNode.buildDelete({
                 server,
                 where
             });

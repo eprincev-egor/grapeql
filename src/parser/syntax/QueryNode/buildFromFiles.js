@@ -1,7 +1,5 @@
 "use strict";
 
-const {getNode} = require("../../../helpers");
-
 module.exports = {
     buildFromFiles({ server, select }) {
         checkCircularDeps({ select: this.select, server });
@@ -49,8 +47,8 @@ module.exports = {
             fromItem.parent.from.length > 1
         );
 
-        let node = getNode(fromItem.file, server);
-        let nodeSelect = node.parsed.select;
+        let queryNode = server.queryManager.getQueryNodeByFile(fromItem.file);
+        let nodeSelect = queryNode.select;
         let nodeFrom = nodeSelect.from[0];
 
         let oldNodeAlias = nodeFrom.getAliasSql();
@@ -209,9 +207,8 @@ function checkCircularDeps({
                 return;
             }
         }
-
-        let node = getNode(fromItem.file, server);
-        let nodeSelect = node.parsed.select;
+        let queryNode = server.queryManager.getQueryNodeByFile(fromItem.file);
+        let nodeSelect = queryNode.select;
 
         if ( map.includes(nodeSelect) ) {
             throw new Error("circular dependency");
