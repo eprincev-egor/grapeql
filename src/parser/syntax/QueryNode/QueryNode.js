@@ -2,17 +2,6 @@
 
 const Syntax = require("../Syntax");
 
-let methods = [
-    require("./buildFromFiles"),
-    require("./buildCount"),
-    require("./buildDelete"),
-    require("./buildIndexOf"),
-    require("./buildInsert"),
-    require("./buildSelect"),
-    require("./buildUpdate"),
-    require("./buildVars")
-];
-
 class QueryNode extends Syntax {
     parse(coach) {
         if ( coach.isDeclare() ) {
@@ -83,11 +72,5 @@ class QueryNode extends Syntax {
         return out;
     }
 }
-
-methods.forEach(methods => {
-    for (let key in methods) {
-        QueryNode.prototype[ key ] = methods[ key ];
-    }
-});
 
 module.exports = QueryNode;

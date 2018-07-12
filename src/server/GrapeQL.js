@@ -4,7 +4,7 @@ const _ = require("lodash");
 const pg = require("pg");
 const Transaction = require("./Transaction");
 const DbDatabase = require("./DbObject/DbDatabase");
-const QueryManager = require("./QueryManager");
+const QueryManager = require("./QueryManager/QueryManager");
 
 const express = require("express");
 const bodyParser = require("body-parser");

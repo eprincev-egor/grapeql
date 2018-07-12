@@ -1,8 +1,15 @@
 "use strict";
 
-const GrapeQLCoach = require("../parser/GrapeQLCoach");
+const GrapeQLCoach = require("../../parser/GrapeQLCoach");
 const fs = require("fs");
 const glob = require("glob");
+
+const buildDelete = require("./buildDelete");
+const buildInsert = require("./buildInsert");
+const buildUpdate = require("./buildUpdate");
+const buildSelect = require("./buildSelect");
+const buildCount = require("./buildCount");
+const buildIndexOf = require("./buildIndexOf");
 
 class QueryManager {
     constructor({ server }) {
@@ -81,69 +88,69 @@ class QueryManager {
     }
 
     buildDelete(request) {
-        request = Object.assign({
-            server: this.server
-        }, request);
-
         let queryName = request.node;
         let node = this.nodes[ queryName ];
 
-        return node.query.buildDelete(request);
+        return buildDelete({
+            queryManager: this, 
+            queryNode: node.query, 
+            request
+        });
     }
 
     buildInsert(request) {
-        request = Object.assign({
-            server: this.server
-        }, request);
-
         let queryName = request.node;
         let node = this.nodes[ queryName ];
 
-        return node.query.buildInsert(request);
+        return buildInsert({
+            queryManager: this, 
+            queryNode: node.query, 
+            request
+        });
     }
 
     buildSelect(request) {
-        request = Object.assign({
-            server: this.server
-        }, request);
-
         let queryName = request.node;
         let node = this.nodes[ queryName ];
 
-        return node.query.buildSelect(request);
+        return buildSelect({
+            queryManager: this, 
+            queryNode: node.query, 
+            request
+        });
     }
 
     buildIndexOf(request) {
-        request = Object.assign({
-            server: this.server
-        }, request);
-
         let queryName = request.node;
         let node = this.nodes[ queryName ];
 
-        return node.query.buildIndexOf(request);
+        return buildIndexOf({
+            queryManager: this, 
+            queryNode: node.query, 
+            request
+        });
     }
 
     buildCount(request) {
-        request = Object.assign({
-            server: this.server
-        }, request);
-
         let queryName = request.node;
         let node = this.nodes[ queryName ];
 
-        return node.query.buildCount(request);
+        return buildCount({
+            queryManager: this, 
+            queryNode: node.query, 
+            request
+        });
     }
 
     buildUpdate(request) {
-        request = Object.assign({
-            server: this.server
-        }, request);
-
         let queryName = request.node;
         let node = this.nodes[ queryName ];
 
-        return node.query.buildUpdate(request);
+        return buildUpdate({
+            queryManager: this, 
+            queryNode: node.query, 
+            request
+        });
     }
 
     getQueryNodeByFile(file) {
