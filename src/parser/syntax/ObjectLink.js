@@ -4,14 +4,14 @@ const Syntax = require("./Syntax");
 
 class ObjectLink extends Syntax {
     parse(coach, options) {
-        options = options || {posibleStar: false};
+        options = options || {availableStar: false};
         this.link = [];
 
         this.parseLink(coach, options);
     }
 
     parseLink(coach, options) {
-        if ( options.posibleStar && coach.is("*") ) {
+        if ( options.availableStar && coach.is("*") ) {
             this.link.push( "*" );
             coach.i++;
         } else {
