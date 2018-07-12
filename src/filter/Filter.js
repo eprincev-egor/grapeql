@@ -14,19 +14,19 @@
  * }
  *
  * example as Array 2
- * [["NAME", "contain", "рога"], "and", ["NAME_SMALL", "contain", "копыта"]]
+ * [["NAME", "contain", "foo"], "and", ["NAME_SMALL", "contain", "bar"]]
  *
  * example as Object 2
  * {
  *   x: {
  *     key: "NAME",
  *     type: "contain",
- *     value: "рога"
+ *     value: "foo"
  *   },
  *   y: {
  *     key: "NAME_SMALL",
  *     type: "contain",
- *     value: "копыта"
+ *     value: "bar"
  *   }
  * }
  *
@@ -102,7 +102,7 @@
  *          "is"            check on null or on not null or date in today, tomorrow
  *          "in"            check left operand in right operand array
  *          "inRange"
- *          "noRows"        imposible filter, every check return false
+ *          "noRows"        impossible filter, every check return false
  *
  * AnyValue:
  *    can be one of:
@@ -324,8 +324,8 @@ class Filter {
 
             if ( type == "equal" ) {
                 if ( condition.value == null ) {
-                    // старые фильтры в этой ситуации не добавляют условие для поиска
-                    // а новые автоматом ставят is null
+                    // old filters in this case don't adding condition for search
+                    // but new filters do it automatically
                     element = [[column, "is", "null"], "or", [column, "is", "not null"]];
                 } else {
                     element = [column, "=", condition.value];
@@ -349,12 +349,11 @@ class Filter {
             }
 
             // !!!!!   WARNING !!!!!
-            // brainfuck
+            // 
             else if ( type == "composite" ) {
                 if ( condition.noRows ) {
                     // !!!!!   WARNING !!!!!
-                    // иногда нужен фильтр, который всегда будет отсеивать все модели.
-                    // Запрос таким фильтром ненадо отправлять на сервер, поэтому нужно его пометить
+                    // sometimes need filter for empty result
                     this.noRows = true;
                     return [];
                 }
@@ -469,12 +468,12 @@ class Filter {
     }
 
     _combine(filter, binaryConditionOperator) {
-        // filter может быть массивом или объектом или экземпляром filter,
-        // в любом случае это ссылочный тип данных.
-        // в дальнейшем (remove) мы будем его использовать в качестве идентификатора условия
+        // filter is array or object,
+        // anyway, filter it reference type.
+        // In next time (remove) we will use him as id
         let source = filter;
 
-        // конструктор filter3 ждет json структуру
+        // constructor filter3 awaiting object or array
         if ( !(filter instanceof Filter) ) {
             filter = new Filter(filter);
         }
@@ -482,7 +481,7 @@ class Filter {
 
         let newFilter;
         if ( this.isEmpty() ) {
-            newFilter = [filter]; // квадратные скобки нужны @see empty tests
+            newFilter = [filter]; // square brackets need for: @see empty tests
         } else {
             newFilter = [
                 // current filter
@@ -493,13 +492,12 @@ class Filter {
                 filter
             ];
         }
-
-        // создаем новый фильтр, т.к. хотим ЯВное изменение фильтра курсора
-        // назовем это "иммутабельность"
+        
+        // making new filter because we do not wont silent changes by reference
         newFilter = new Filter(newFilter);
         newFilter._source = source;
 
-        // для удаления нужно знать полный путь "комбинирования" фильтров
+        // keep parent link for correctly remove filter from tree
         newFilter._parent = this;
         newFilter._combineOperator = binaryConditionOperator;
 
@@ -540,7 +538,7 @@ class Filter {
         return this.condition.hasColumn( column );
     }
 
-    // обходим все объекты ConditionElement
+    // walk in tree for all  ConditionElement
     each(iterator, context) {
         if ( !_.isFunction(iterator) ) {
             return;

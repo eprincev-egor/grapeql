@@ -12,7 +12,7 @@ function buildDelete({
     let server = queryManager.server;
 
     if ( queryNode.select.from.length > 1 ) {
-        throw new Error("can't build delete with many froms");
+        throw new Error("can't build delete with many sources");
     }
 
     let fromItem = queryNode.select.from[0];

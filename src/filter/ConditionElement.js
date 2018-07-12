@@ -64,7 +64,7 @@ class ConditionElement {
 
     compile2json() {
         if ( this.noRows ) {
-            // битлджус
+            // beetleJuice
             return ["noRows", "noRows", "noRows"];
         }
 
