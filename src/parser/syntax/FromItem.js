@@ -367,7 +367,7 @@ class FromItem extends Syntax {
         }
     }
 
-    removeUnnesaryJoins({
+    removeUnnecessaryJoins({
         server, select,
         checkRemovable = true
     }) {
@@ -388,7 +388,7 @@ class FromItem extends Syntax {
                 })
             );
 
-            join.from.removeUnnesaryJoins({
+            join.from.removeUnnecessaryJoins({
                 server, select,
                 checkRemovable: isUsedJoin ? true : false
             });

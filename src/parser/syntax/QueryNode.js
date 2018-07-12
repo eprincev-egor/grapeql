@@ -1,6 +1,6 @@
 "use strict";
 
-const Syntax = require("../Syntax");
+const Syntax = require("./Syntax");
 
 class QueryNode extends Syntax {
     parse(coach) {

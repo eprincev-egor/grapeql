@@ -12,8 +12,8 @@ function buildFromFiles({
     queryManager, 
     select 
 }) {
-    select.removeUnnesaryJoins({ server: queryManager.server });
-    select.removeUnnesaryWiths({ server: queryManager.server });
+    select.removeUnnecessaryJoins({ server: queryManager.server });
+    select.removeUnnecessaryWithes({ server: queryManager.server });
 
     let fileItems = [];
     select.walk(child => {

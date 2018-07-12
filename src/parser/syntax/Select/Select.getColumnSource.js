@@ -2,8 +2,8 @@
 
 const {
     PUBLIC_SCHEMA_NAME,
-    objectLink2schmeTable,
-    objectLink2schmeTableColumn,
+    objectLink2schemaTable,
+    objectLink2schemaTableColumn,
     getDbColumn,
     getDbTable
 } = require("../../../helpers");
@@ -92,7 +92,7 @@ module.exports = {
         });
 
         if ( sources.length === 0 ) {
-            let source = this._findSourceByLateal({server, node}, objectLink);
+            let source = this._findSourceByLateral({server, node}, objectLink);
             if ( source ) {
                 return source;
             }
@@ -109,8 +109,8 @@ module.exports = {
     },
 
     _getColumnSourceByFromItem(params, fromItem, objectLink) {
-        let from = objectLink2schmeTable(fromItem.table);
-        let link = objectLink2schmeTableColumn( objectLink );
+        let from = objectLink2schemaTable(fromItem.table);
+        let link = objectLink2schemaTableColumn( objectLink );
 
         if ( link.schema ) {
             let fromSchema = from.schemaObject;
@@ -221,7 +221,7 @@ module.exports = {
         }
     },
 
-    _findSourceByLateal(params, objectLink) {
+    _findSourceByLateral(params, objectLink) {
         let FromItem = this.Coach.FromItem;
         let parentFromItem = this.findParentInstance(FromItem);
 

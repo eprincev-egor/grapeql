@@ -195,7 +195,7 @@ let value2sql = function(type, value) {
 };
 
 
-function objectLink2schmeTable(objectLink) {
+function objectLink2schemaTable(objectLink) {
     let schema = objectLink.link[0];
     let table = objectLink.link[1];
 
@@ -217,7 +217,7 @@ function objectLink2schmeTable(objectLink) {
     return {table, schema, tableObject, schemaObject};
 }
 
-function objectLink2schmeTableColumn(objectLink) {
+function objectLink2schemaTableColumn(objectLink) {
     let schema = objectLink.link[0];
     let table = objectLink.link[1];
     let column = objectLink.link[2];
@@ -251,7 +251,7 @@ function objectLink2schmeTableColumn(objectLink) {
 }
 
 function getDbTable(server, link) {
-    link = objectLink2schmeTable( link );
+    link = objectLink2schemaTable( link );
 
     if ( !link.tableObject ) {
         throw new Error("invalid link");
@@ -309,7 +309,7 @@ function getDbTable(server, link) {
 }
 
 function getDbColumn(serverOrTable, objectLink) {
-    let link = objectLink2schmeTableColumn( objectLink );
+    let link = objectLink2schemaTableColumn( objectLink );
 
     if ( !link.columnObject ) {
         throw new Error("invalid link");
@@ -362,8 +362,8 @@ module.exports = {
     value2sql,
 
     PUBLIC_SCHEMA_NAME,
-    objectLink2schmeTableColumn,
-    objectLink2schmeTable,
+    objectLink2schemaTableColumn,
+    objectLink2schemaTable,
     getDbTable,
     getDbColumn
 };

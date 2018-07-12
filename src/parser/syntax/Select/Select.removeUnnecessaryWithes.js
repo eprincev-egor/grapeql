@@ -1,7 +1,7 @@
 "use strict";
 
 module.exports = {
-    removeUnnesaryWiths() {
+    removeUnnecessaryWithes() {
         if ( !this.with ) {
             return;
         }
@@ -19,24 +19,24 @@ module.exports = {
                 continue;
             }
 
-            let isUsedInNextWiths = false;
+            let isUsedInNextWithes = false;
             for (let j = i + 1; j < n; j++) {
                 let nextWithQuery = this.with.queriesArr[ j ];
 
-                isUsedInNextWiths = (
-                    isUsedInNextWiths ||
+                isUsedInNextWithes = (
+                    isUsedInNextWithes ||
                     this._hasTableLink({
                         startChild: nextWithQuery,
                         withQuery 
                     })
                 );
 
-                if ( isUsedInNextWiths ) {
+                if ( isUsedInNextWithes ) {
                     break;
                 }
             }
 
-            if ( isUsedInNextWiths ) {
+            if ( isUsedInNextWithes ) {
                 continue;
             }
 
@@ -59,10 +59,10 @@ module.exports = {
     }) {
         let hasTableLink = false;
 
-        startChild.walk((child, wallker) => {
+        startChild.walk((child, walker) => {
             if ( child instanceof this.Coach.Select ) {
                 if ( child._hasWith(withQuery.name) ) {
-                    wallker.skip();
+                    walker.skip();
                 }
             }
 
@@ -72,7 +72,7 @@ module.exports = {
                     if ( tableName.equal(withQuery.name) ) {
                         hasTableLink = true;
 
-                        wallker.stop();
+                        walker.stop();
                     }
                 }
             }
@@ -80,7 +80,7 @@ module.exports = {
                 if ( checkWith === false ) {
                     let select = child.findParentInstance(this.Coach.Select);
                     if ( select == this ) {
-                        wallker.skip();
+                        walker.skip();
                     }
                 }
             }

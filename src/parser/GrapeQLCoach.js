@@ -78,7 +78,7 @@ GrapeQLCoach.addSyntax("TableConstraint", require("./syntax/TableConstraint"));
 GrapeQLCoach.addSyntax("Extension", require("./syntax/Extension"));
 GrapeQLCoach.addSyntax("VariableDefinition", require("./syntax/VariableDefinition"));
 GrapeQLCoach.addSyntax("Declare", require("./syntax/Declare"));
-GrapeQLCoach.addSyntax("QueryNode", require("./syntax/QueryNode/QueryNode"));
+GrapeQLCoach.addSyntax("QueryNode", require("./syntax/QueryNode"));
 
 GrapeQLCoach.parseEntity = function(str) {
     let coach = new GrapeQLCoach(str);

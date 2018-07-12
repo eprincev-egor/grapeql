@@ -2,10 +2,10 @@
 
 module.exports = {
 
-    removeUnnesaryJoins({server}) {
+    removeUnnecessaryJoins({server}) {
         for (let i = 0, n = this.from.length; i < n; i++) {
             let fromItem = this.from[i];
-            fromItem.removeUnnesaryJoins({ server, select: this });
+            fromItem.removeUnnecessaryJoins({ server, select: this });
         }
     },
 
