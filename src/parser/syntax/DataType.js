@@ -104,17 +104,17 @@ class DataType extends Syntax {
         
         let index = coach.i;
         let word = coach.readWord().toLowerCase();
-        let posibleTypes = firstWords[ word ];
+        let availableTypes = firstWords[ word ];
         
-        if ( !posibleTypes ) {
+        if ( !availableTypes ) {
             coach.i = index;
             coach.throwError("unknown data type: " + word);
         }
         
         coach.i = index;
-        for (let i = 0, n = posibleTypes.length; i < n; i++) {
-            let posibleType = posibleTypes[ i ],
-                regExp = regExps[ posibleType ];
+        for (let i = 0, n = availableTypes.length; i < n; i++) {
+            let availableType = availableTypes[ i ],
+                regExp = regExps[ availableType ];
             
             if ( coach.is(regExp) ) {
                 this.type = regExp.exec( coach.str.slice(coach.i) )[0];

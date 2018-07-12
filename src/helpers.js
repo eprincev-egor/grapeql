@@ -190,7 +190,7 @@ let value2sql = function(type, value) {
     }
 
     else {
-        throw new Error(`unsoperted type "${ type }`);
+        throw new Error(`unrecognized type "${ type }`);
     }
 };
 

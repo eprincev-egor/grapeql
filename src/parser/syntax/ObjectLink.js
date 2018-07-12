@@ -106,9 +106,9 @@ class ObjectLink extends Syntax {
 
         let elem = this.link.shift();
 
-        let index = this.childern.indexOf(elem);
+        let index = this.children.indexOf(elem);
         if ( index != -1 ) {
-            this.childern.splice(index, 1);
+            this.children.splice(index, 1);
         }
 
         return elem;

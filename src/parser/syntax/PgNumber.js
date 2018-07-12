@@ -50,10 +50,10 @@ class PgNumber extends Syntax {
     readDigits(coach) {
         let digits = "";
         for (; coach.i < coach.n; coach.i++) {
-            let symb = coach.str[ coach.i ];
+            let symbol = coach.str[ coach.i ];
             
-            if ( /\d/.test(symb) ) {
-                digits += symb;
+            if ( /\d/.test(symbol) ) {
+                digits += symbol;
             } else {
                 break;
             }

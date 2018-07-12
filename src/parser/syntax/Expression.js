@@ -212,7 +212,7 @@ class Expression extends Syntax {
         this.addChild(to);
     }
 
-    // ((( expression )))  достаем выражение из лишних скобок
+    // ((( expression )))  strip unnecessary brackets
     extrude(elements) {
         if ( elements.length === 1 && elements[0] instanceof Expression ) {
             return this.extrude( elements[0].elements );

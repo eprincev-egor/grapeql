@@ -64,14 +64,14 @@ class Syntax {
                 continue;
             }
 
-            let wallker = new Wallker();
-            iteration(child, wallker);
+            let walker = new Walker();
+            iteration(child, walker);
 
-            if ( wallker.isStopped() ) {
+            if ( walker.isStopped() ) {
                 return;
             }
 
-            if ( !wallker.isSkipped() ) {
+            if ( !walker.isSkipped() ) {
                 child.walk(iteration);
             }
         }
@@ -87,16 +87,16 @@ class Syntax {
             to = new this.Coach.ObjectLink(to);
         }
 
-        this.walk((child, wallker) => {
+        this.walk((child, walker) => {
             // if subquery has fromitem with same link
             // then skip it subquery
             if ( child instanceof this.Coach.Select ) {
                 if ( child.isDefinedFromLink(replace) ) {
-                    wallker.skip();
+                    walker.skip();
                 }
             }
 
-            // finded ObjectLink, replace him
+            // found ObjectLink, replace him
             else if ( child instanceof this.Coach.ColumnLink ) {
                 child.replace(replace, to);
             }
@@ -108,7 +108,7 @@ class Syntax {
     }
 }
 
-class Wallker {
+class Walker {
     skip() {
         this._skipped = true;
     }

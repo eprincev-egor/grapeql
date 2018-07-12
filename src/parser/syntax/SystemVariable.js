@@ -8,13 +8,13 @@ class SystemVariable extends Syntax {
 
         this.name = "";
         for (; coach.i < coach.n; coach.i++) {
-            let symb = coach.str[ coach.i ];
+            let symbol = coach.str[ coach.i ];
 
-            if ( !/[\wА-ЯЁа-яё\d_$]/i.test(symb) ) {
+            if ( !/[\wА-ЯЁа-яё\d_$]/i.test(symbol) ) {
                 break;
             }
 
-            this.name += symb;
+            this.name += symbol;
         }
 
         if ( /\$/.test(this.name) ) {
