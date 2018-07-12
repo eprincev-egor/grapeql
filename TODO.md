@@ -87,8 +87,8 @@
     - scheme
     - any crud
 
-# extention
-    extention name for table (
+# extension
+    extension name for table (
         some_column text not null
     )
 

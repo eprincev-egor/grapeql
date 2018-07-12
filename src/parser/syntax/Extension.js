@@ -1,17 +1,17 @@
 "use strict";
 /*
-extention name for table (
-    extention_item [, ...]
+extension name for table (
+    extension_item [, ...]
 )
-where extention_item is:
+where extension_item is:
     column_definition |
     table_constraint
  */
 const Syntax = require("./Syntax");
 
-class Extention extends Syntax {
+class Extension extends Syntax {
     parse(coach) {
-        coach.expectWord("extention");
+        coach.expectWord("extension");
         coach.skipSpace();
         
         this.name = coach.parseObjectName();
@@ -67,11 +67,11 @@ class Extention extends Syntax {
     }
     
     is(coach) {
-        return coach.isWord("extention");
+        return coach.isWord("extension");
     }
     
     clone() {
-        let clone = new Extention();
+        let clone = new Extension();
         
         clone.name = this.name.clone();
         clone.addChild(this.name);
@@ -102,7 +102,7 @@ class Extention extends Syntax {
     }
     
     toString() {
-        let out = "extention ";
+        let out = "extension ";
         out += this.name.toString();
         
         out += " for ";
@@ -117,4 +117,4 @@ class Extention extends Syntax {
     }
 }
 
-module.exports = Extention;
+module.exports = Extension;

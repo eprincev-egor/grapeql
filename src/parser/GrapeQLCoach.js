@@ -75,7 +75,7 @@ GrapeQLCoach.addSyntax("SetItem", require("./syntax/SetItem"));
 GrapeQLCoach.addSyntax("Update", require("./syntax/Update"));
 GrapeQLCoach.addSyntax("ColumnDefinition", require("./syntax/ColumnDefinition"));
 GrapeQLCoach.addSyntax("TableConstraint", require("./syntax/TableConstraint"));
-GrapeQLCoach.addSyntax("Extention", require("./syntax/Extention"));
+GrapeQLCoach.addSyntax("Extension", require("./syntax/Extension"));
 GrapeQLCoach.addSyntax("VariableDefinition", require("./syntax/VariableDefinition"));
 GrapeQLCoach.addSyntax("Declare", require("./syntax/Declare"));
 GrapeQLCoach.addSyntax("QueryNode", require("./syntax/QueryNode/QueryNode"));
