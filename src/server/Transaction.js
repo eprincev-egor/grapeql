@@ -89,16 +89,23 @@ class Transaction {
             expression.replaceVariableWithType(variable, sqlValue);
         });
     }
+
+    async _query(sql) {
+        try {
+            return await this.db.query(sql);
+        } catch(dbError) {
+            // redefine stack
+            throw new Error( dbError.message );
+        }
+    }
     
     async _executeInsert(insert) {
-        let db = this.db;
         if ( !insert.returning && !insert.returningAll ) {
             insert.returningAll = true;
         }
         
         let commandSql = insert.toString({ pg: true });
-        
-        let result = await db.query(commandSql);
+        let result = await this._query(commandSql);
         
         if ( insert.insertRow ) {
             if ( !result.rows || !result.rows.length ) {
@@ -114,8 +121,6 @@ class Transaction {
     }
     
     async _executeUpdate(update) {
-        let db = this.db;
-
         let tableName = update.table.getDbTableLowerPath();
         let dbTable = this.server.database.findTable(tableName);
         if ( !dbTable ) {
@@ -189,7 +194,7 @@ class Transaction {
 
         let commandSql = update.toString({ pg: true });
 
-        let result = await db.query(commandSql);
+        let result = await this._query(commandSql);
 
         if ( update.updateRow ) {
             if ( !result.rows || !result.rows.length ) {
@@ -205,14 +210,13 @@ class Transaction {
     }
     
     async _executeDelete(deleteCommand) {
-        let db = this.db;
         if ( !deleteCommand.returning && !deleteCommand.returningAll ) {
             deleteCommand.returningAll = true;
         }
 
         let commandSql = deleteCommand.toString({ pg: true });
 
-        let result = await db.query(commandSql);
+        let result = await this._query(commandSql);
 
         if ( deleteCommand.deleteRow ) {
             if ( !result.rows || !result.rows.length ) {
@@ -228,10 +232,9 @@ class Transaction {
     }
     
     async _executeSelect(select) {
-        let db = this.db;
         let commandSql = select.toString({ pg: true });
 
-        let result = await db.query(commandSql);
+        let result = await this._query(commandSql);
         
         if ( select.selectRow ) {
             if ( !result.rows || !result.rows.length ) {
