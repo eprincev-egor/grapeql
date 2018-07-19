@@ -32,6 +32,7 @@
 
         - format sql
         - collate
+        - test walk (deep walk)
 
 # QueryBuilder:
     + where
@@ -82,13 +83,13 @@
     on update ... set where
         ...reverse query...
 
-# clinet lib
+# client lib
     - ws
     - scheme
     - any crud
 
-# extention
-    extention name for table (
+# extension
+    extension name for table (
         some_column text not null
     )
 
