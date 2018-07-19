@@ -21,14 +21,14 @@ class PgString extends Syntax {
         }
 
         let withEscape = false,
-            withUEsacape = false;
+            withUEscape = false;
 
         if ( coach.is(/e/i) ) {
             withEscape = true;
             coach.i++;
         }
         else if ( coach.is(/u&/i) ) {
-            withUEsacape = true;
+            withUEscape = true;
             coach.i += 2;
         }
 
@@ -36,7 +36,7 @@ class PgString extends Syntax {
 
         let escape = "\\";
         if ( coach.is(/\s*uescape/i) ) {
-            if ( !withUEsacape ) {
+            if ( !withUEscape ) {
                 coach.throwError("unexpected uescape, use u& before double quotes  ");
             }
 
@@ -54,12 +54,12 @@ class PgString extends Syntax {
             coach.expect("'");
         }
 
-        if ( withUEsacape ) {
+        if ( withUEscape ) {
             for (let i = 0, n = content.length; i < n; i++) {
-                let symb = content[i],
+                let symbol = content[i],
                     length;
 
-                if ( symb == escape ) {
+                if ( symbol == escape ) {
                     let expr;
                     if ( content[i + 1] == "+" ) {
                         length = 8;
@@ -92,9 +92,9 @@ class PgString extends Syntax {
 
         let content = "";
         for (; coach.i < coach.n; coach.i++) {
-            let symb = coach.str[ coach.i ];
+            let symbol = coach.str[ coach.i ];
 
-            if ( symb == "$" ) {
+            if ( symbol == "$" ) {
                 let close = coach.str.slice( coach.i, coach.i + tag.length + 2 );
 
                 if ( close == "$" + tag + "$" ) {
@@ -103,7 +103,7 @@ class PgString extends Syntax {
                 }
             }
 
-            content += symb;
+            content += symbol;
         }
 
         this.content = content;
@@ -138,15 +138,15 @@ class PgString extends Syntax {
         let content = "";
 
         for (; coach.i < coach.n; coach.i++) {
-            let symb = coach.str[ coach.i ];
+            let symbol = coach.str[ coach.i ];
 
-            if ( symb == "\\" && withEscape ) {
+            if ( symbol == "\\" && withEscape ) {
                 content += this.readEscape(coach);
                 coach.i--;
                 continue;
             }
 
-            if ( symb == "'" ) {
+            if ( symbol == "'" ) {
                 if ( coach.str[ coach.i + 1 ] == "'" ) {
                     content += "'";
                     coach.i++;
@@ -157,7 +157,7 @@ class PgString extends Syntax {
                 break;
             }
 
-            content += symb;
+            content += symbol;
         }
 
         if ( coach.is(/(\s*[\n\r]+\s*)+'/) ) {
@@ -170,20 +170,20 @@ class PgString extends Syntax {
 
     readEscape(coach) {
         coach.i++;
-        let symb = coach.str[ coach.i ];
+        let symbol = coach.str[ coach.i ];
 
         if (
-            symb == "\\" ||
-            symb == "b" ||
-            symb == "f" ||
-            symb == "n" ||
-            symb == "r" ||
-            symb == "t"
+            symbol == "\\" ||
+            symbol == "b" ||
+            symbol == "f" ||
+            symbol == "n" ||
+            symbol == "r" ||
+            symbol == "t"
         ) {
             coach.i++;
-            return eval("'\\" + symb + "'");
+            return eval("'\\" + symbol + "'");
         }
-        else if ( symb == "x" ) {
+        else if ( symbol == "x" ) {
             let h1 = coach.str[ coach.i + 1 ];
             let h2 = coach.str[ coach.i + 2 ];
 
@@ -193,47 +193,47 @@ class PgString extends Syntax {
 
             if ( /[\dabcdef]/.test(h2) ) {
                 coach.i += 2;
-                symb = h1 + h2;
+                symbol = h1 + h2;
             } else {
                 coach.i++;
-                symb = h1;
+                symbol = h1;
             }
 
-            symb = coach.parseUnicode(symb);
-            return symb;
+            symbol = coach.parseUnicode(symbol);
+            return symbol;
         }
-        else if ( symb == "u" ) {
-            symb = coach.str.slice(coach.i + 1, coach.i + 5);
-            symb = coach.parseUnicode(symb);
+        else if ( symbol == "u" ) {
+            symbol = coach.str.slice(coach.i + 1, coach.i + 5);
+            symbol = coach.parseUnicode(symbol);
             coach.i += 5;
-            return symb;
+            return symbol;
         }
-        else if ( symb == "U" ) {
-            symb = coach.str.slice(coach.i + 1, coach.i + 7);
-            symb = coach.parseUnicode(symb);
+        else if ( symbol == "U" ) {
+            symbol = coach.str.slice(coach.i + 1, coach.i + 7);
+            symbol = coach.parseUnicode(symbol);
             coach.i += 7;
-            return symb;
+            return symbol;
         }
-        else if ( /[01234567]/.test(symb) ) {
+        else if ( /[01234567]/.test(symbol) ) {
             coach.i++;
 
             if ( /[01234567]/.test(coach.str[ coach.i ]) ) {
-                symb += coach.str[ coach.i ];
+                symbol += coach.str[ coach.i ];
                 coach.i++;
             }
             if ( /[01234567]/.test(coach.str[ coach.i ]) ) {
-                symb += coach.str[ coach.i ];
+                symbol += coach.str[ coach.i ];
                 coach.i++;
             }
 
-            symb = parseInt( symb, 8 );
-            symb = symb.toString(16);
-            symb = coach.parseUnicode(symb);
+            symbol = parseInt( symbol, 8 );
+            symbol = symbol.toString(16);
+            symbol = coach.parseUnicode(symbol);
 
-            return symb;
+            return symbol;
         }
 
-        return symb;
+        return symbol;
     }
 
     is(coach, str) {

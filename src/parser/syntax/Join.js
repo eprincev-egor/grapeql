@@ -15,7 +15,7 @@ where
 
 const Syntax = require("./Syntax");
 const {
-    objectLink2schmeTableColumn,
+    objectLink2schemaTableColumn,
     getDbTable
 } = require("../../helpers");
 
@@ -25,7 +25,7 @@ class Join extends Syntax {
 
         let type = coach.expect(/(((left|right|full)\s+(outer\s+)?)|(inner\s+)?|cross\s+)join\s+/i, "expected join keyword");
         type = type.toLowerCase()
-            // normolize spaces
+            // remove unnecessary spaces
             .replace(/\s+/g, " ")
             .trim();
 
@@ -184,13 +184,13 @@ function pushConstraintColumns(elems, fromLink, constraintColumns) {
     let link;
     if ( elems[0].link ) {
         if ( elems[0].containLink( fromLink ) ) {
-            link = objectLink2schmeTableColumn( elems[0] );
+            link = objectLink2schemaTableColumn( elems[0] );
             constraintColumns.push(link.column);
         }
     }
     if ( elems[2].link ) {
         if ( elems[2].containLink( fromLink ) ) {
-            link = objectLink2schmeTableColumn( elems[2] );
+            link = objectLink2schemaTableColumn( elems[2] );
             constraintColumns.push(link.column);
         }
     }

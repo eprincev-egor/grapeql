@@ -4,7 +4,7 @@ const Syntax = require("./Syntax");
 
 class Column extends Syntax {
     parse(coach) {
-        this.expression = coach.parseExpression({ posibleStar: true });
+        this.expression = coach.parseExpression({ availableStar: true });
         this.addChild(this.expression);
         this.as = null;
 

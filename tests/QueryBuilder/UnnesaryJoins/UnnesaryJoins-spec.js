@@ -1,6 +1,6 @@
 "use strict";
 
-describe("UnnesaryJoins", () => {
+describe("Unnecessary Joins", () => {
     const {testRequest} = require("../../utils/init")(__dirname);
 
     testRequest({

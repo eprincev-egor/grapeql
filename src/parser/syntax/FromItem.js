@@ -367,7 +367,7 @@ class FromItem extends Syntax {
         }
     }
 
-    removeUnnesaryJoins({
+    removeUnnecessaryJoins({
         server, select,
         checkRemovable = true
     }) {
@@ -380,7 +380,7 @@ class FromItem extends Syntax {
 
             let fromLink = join.from.toTableLink();
             let isUsedJoin = (
-                select.isHelpfullJoin(join, {checkJoins: false}) ||
+                select.isHelpfulJoin(join, {checkJoins: false}) ||
                 this._isUsedFromLinkAfter({select, fromLink, i}) ||
                 join.from._isUsedChildJoins({
                     select, fromLink,
@@ -388,7 +388,7 @@ class FromItem extends Syntax {
                 })
             );
 
-            join.from.removeUnnesaryJoins({
+            join.from.removeUnnecessaryJoins({
                 server, select,
                 checkRemovable: isUsedJoin ? true : false
             });
@@ -429,7 +429,7 @@ class FromItem extends Syntax {
         for (let j = 0, n = this.joins.length; j < n; j++) {
             let join = this.joins[ j ];
 
-            if ( select.isHelpfullJoin(join, {checkJoins: false}) ) {
+            if ( select.isHelpfulJoin(join, {checkJoins: false}) ) {
                 return true;
             }
 

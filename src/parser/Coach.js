@@ -20,9 +20,9 @@ class Coach {
 
     skipSpace() {
         for (; this.i < this.n; this.i++) {
-            let symb = this.str[ this.i ];
+            let symbol = this.str[ this.i ];
 
-            if ( !/\s/.test(symb) ) {
+            if ( !/\s/.test(symbol) ) {
                 break;
             }
         }
@@ -80,13 +80,13 @@ class Coach {
         let word = "";
 
         for (; this.i < this.n; this.i++) {
-            let symb = this.str[ this.i ];
+            let symbol = this.str[ this.i ];
 
-            if ( /[^\w]/.test(symb) ) {
+            if ( /[^\w]/.test(symbol) ) {
                 break;
             }
 
-            word += symb;
+            word += symbol;
         }
 
         return word;
@@ -131,7 +131,7 @@ class Coach {
         return currentWord.toLowerCase() == word;
     }
 
-    // проверяем строку (от текущего места) на регулярное выражение
+    // test string (from current place) on regExp
     is(regExp) {
         let str = this.str.slice(this.i);
 
@@ -201,7 +201,7 @@ class Coach {
         return elements;
     }
 
-    // parsing chain of syntax objects splitted by space symbols
+    // parsing chain of syntax objects separated by space symbols
     // first argument SyntaxName is string: "Expression" or "ObjectLink" or any SyntaxName,
     // first symbol must be in upper case
     // or object like are:

@@ -11,7 +11,7 @@ class UnaryCondition {
         if ( this._literal === "not" || this._literal == "!" ) {
             return "!(" + this.condition.compile2js() + ")";
         } else {
-            throw new Error("imposible UnaryCondition: " + this.literal);
+            throw new Error("impossible UnaryCondition: " + this.literal);
         }
     }
 

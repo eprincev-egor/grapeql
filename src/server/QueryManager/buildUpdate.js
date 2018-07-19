@@ -80,7 +80,7 @@ function _getDbColumnByColumnLink({
     columnLink, key
 }) {
     if ( !fromItem.table ) {
-        throw new Error(`imposible build update for key: ${columnLink}`);
+        throw new Error(`impossible build update for key: ${columnLink}`);
     }
 
     let dbTable = getDbTable(queryManager.server, fromItem.table);

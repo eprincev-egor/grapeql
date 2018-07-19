@@ -12,13 +12,13 @@ class Comment extends Syntax {
             this.isLine = true;
             
             for (; coach.i < coach.n; coach.i++) {
-                let symb = coach.str[ coach.i ];
+                let symbol = coach.str[ coach.i ];
                 
-                if ( /[\n\r]/.test(symb) ) {
+                if ( /[\n\r]/.test(symbol) ) {
                     break;
                 }
                 
-                content += symb;
+                content += symbol;
             }
         } else {
             coach.expect("/*");
@@ -26,14 +26,14 @@ class Comment extends Syntax {
             this.isMulti = true;
             
             for (; coach.i < coach.n; coach.i++) {
-                let symb = coach.str[ coach.i ];
+                let symbol = coach.str[ coach.i ];
                 
-                if ( symb == "*" && coach.str[ coach.i + 1 ] == "/" ) {
+                if ( symbol == "*" && coach.str[ coach.i + 1 ] == "/" ) {
                     coach.i += 2;
                     break;
                 }
                 
-                content += symb;
+                content += symbol;
             }
         }
         

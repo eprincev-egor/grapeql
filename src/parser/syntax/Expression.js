@@ -16,7 +16,7 @@ class Expression extends Syntax {
     }
 
     parse(coach, options) {
-        options = options || {posibleStar: false, excludeOperators: false};
+        options = options || {availableStar: false, excludeOperators: false};
 
         this.parseElements( coach, options );
         this.elements = this.extrude(this.elements);
@@ -30,8 +30,8 @@ class Expression extends Syntax {
     parseElements(coach, options) {
         let elem, i, result;
 
-        if ( options.posibleStar && coach.is("*") ) {
-            elem = coach.parseColumnLink({ posibleStar: options.posibleStar });
+        if ( options.availableStar && coach.is("*") ) {
+            elem = coach.parseColumnLink({ availableStar: options.availableStar });
             this.addChild(elem);
             this.elements.push(elem);
             return;
@@ -178,7 +178,7 @@ class Expression extends Syntax {
         }
 
         else if ( coach.isColumnLink() ) {
-            elem = coach.parseColumnLink({ posibleStar: options.posibleStar });
+            elem = coach.parseColumnLink({ availableStar: options.availableStar });
         }
 
         return elem;
@@ -212,7 +212,7 @@ class Expression extends Syntax {
         this.addChild(to);
     }
 
-    // ((( expression )))  достаем выражение из лишних скобок
+    // ((( expression )))  strip unnecessary brackets
     extrude(elements) {
         if ( elements.length === 1 && elements[0] instanceof Expression ) {
             return this.extrude( elements[0].elements );

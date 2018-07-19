@@ -2,8 +2,8 @@
 
 const {stopServer, startServer, clearDatabase} = require("./serverHelpers");
 
-const testRemoveUnnesaryJoins = require("./testRemoveUnnesaryJoins");
-const testRemoveUnnesaryWiths = require("./testRemoveUnnesaryWiths");
+const testRemoveUnnecessaryJoins = require("./testRemoveUnnecessaryJoins");
+const testRemoveUnnecessaryWithes = require("./testRemoveUnnecessaryWithes");
 const testGetDbColumn = require("./testGetDbColumn");
 const testReplaceLinks = require("./testReplaceLinks");
 
@@ -32,8 +32,8 @@ function init(__dirname) {
         getServer,
         clearDatabase,
         testReplaceLinks,
-        testRemoveUnnesaryJoins: testRemoveUnnesaryJoins.bind(null, getServer),
-        testRemoveUnnesaryWiths: testRemoveUnnesaryWiths.bind(null, getServer),
+        testRemoveUnnecessaryJoins: testRemoveUnnecessaryJoins.bind(null, getServer),
+        testRemoveUnnecessaryWithes: testRemoveUnnecessaryWithes.bind(null, getServer),
         testRequest: testRequest.bind(null, getServer),
         testRequestCount: testRequestCount.bind(null, getServer),
         testRequestIndexOf: testRequestIndexOf.bind(null, getServer),

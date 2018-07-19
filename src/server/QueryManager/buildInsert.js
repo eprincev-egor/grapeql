@@ -12,7 +12,7 @@ function buildInsert({
 
 
     if ( queryNode.select.from.length > 1 ) {
-        throw new Error("can't build insert with many froms");
+        throw new Error("can't build insert with many sources");
     }
 
     let fromItem = queryNode.select.from[0];

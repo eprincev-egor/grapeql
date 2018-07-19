@@ -1,9 +1,9 @@
 "use strict";
 
 describe("RemoveWiths", () => {
-    const {testRemoveUnnesaryWiths} = require("../utils/init")(__dirname);
-
-    testRemoveUnnesaryWiths(`
+    const {testRemoveUnnecessaryWithes} = require("../utils/init")(__dirname);
+    
+    testRemoveUnnecessaryWithes(`
         with
             x1 as (
                 select 1
@@ -12,7 +12,7 @@ describe("RemoveWiths", () => {
         from x1
     `);
 
-    testRemoveUnnesaryWiths(`
+    testRemoveUnnecessaryWithes(`
         with
             x1 as (
                 select 1
@@ -24,7 +24,7 @@ describe("RemoveWiths", () => {
         from company
     `);
 
-    testRemoveUnnesaryWiths(`
+    testRemoveUnnecessaryWithes(`
         with
             x1 as (
                 select 1
@@ -40,7 +40,7 @@ describe("RemoveWiths", () => {
         from company
     `);
 
-    testRemoveUnnesaryWiths(`
+    testRemoveUnnecessaryWithes(`
         with
             x1 as (
                 select 1
@@ -54,7 +54,7 @@ describe("RemoveWiths", () => {
         left join x2 on true
     `);
 
-    testRemoveUnnesaryWiths(`
+    testRemoveUnnecessaryWithes(`
         with recursive
         	x as (select 1),
         	y as (select 2)
@@ -65,7 +65,7 @@ describe("RemoveWiths", () => {
         select ( select count(*) from x )
     `);
 
-    testRemoveUnnesaryWiths(`
+    testRemoveUnnecessaryWithes(`
         with recursive
         	x as (select 1),
         	y as (select 2)
@@ -80,31 +80,31 @@ describe("RemoveWiths", () => {
         order by (select * from y ) desc
     `);
 
-    testRemoveUnnesaryWiths(`
+    testRemoveUnnecessaryWithes(`
         with x as (select 1 as id)
         select from company
         group by (select id from x)
     `);
 
-    testRemoveUnnesaryWiths(`
+    testRemoveUnnecessaryWithes(`
         with x as (select 1 as id)
         select from company
         group by cube (company.id, ((select id from x), 1))
     `);
 
-    testRemoveUnnesaryWiths(`
+    testRemoveUnnecessaryWithes(`
         with x as (select 1 as id)
         select from company
         group by rollup (company.id, ((select id from x), 1))
     `);
 
-    testRemoveUnnesaryWiths(`
+    testRemoveUnnecessaryWithes(`
         with x as (select 1 as id)
         select from company
         group by GROUPING SETS (company.id, (select id from x))
     `);
 
-    testRemoveUnnesaryWiths(`
+    testRemoveUnnecessaryWithes(`
         with x as (select 1 as id)
         select from company
         left join lateral (
@@ -113,7 +113,7 @@ describe("RemoveWiths", () => {
         ) as y on true
     `);
 
-    testRemoveUnnesaryWiths(`
+    testRemoveUnnecessaryWithes(`
         with x as (select 1 as id)
         select from company
         left join (
@@ -122,7 +122,7 @@ describe("RemoveWiths", () => {
         ) as y on true
     `);
 
-    testRemoveUnnesaryWiths(`
+    testRemoveUnnecessaryWithes(`
         with x as (select 1 as id)
         select from (
             select *
@@ -130,7 +130,7 @@ describe("RemoveWiths", () => {
         ) as y
     `);
 
-    testRemoveUnnesaryWiths(`
+    testRemoveUnnecessaryWithes(`
         with x as (select 1 as id)
         select from test_func(
             (select *
@@ -138,7 +138,7 @@ describe("RemoveWiths", () => {
         ) as y
     `);
 
-    testRemoveUnnesaryWiths(`
+    testRemoveUnnecessaryWithes(`
         with x as (select 1 as id)
         select from (
             select *
@@ -149,7 +149,7 @@ describe("RemoveWiths", () => {
         ) as a
     `);
 
-    testRemoveUnnesaryWiths(`
+    testRemoveUnnecessaryWithes(`
         with x as (select 1 as id)
         select test_func(
             (select *
@@ -158,7 +158,7 @@ describe("RemoveWiths", () => {
         from company
     `);
 
-    testRemoveUnnesaryWiths(`
+    testRemoveUnnecessaryWithes(`
         with x as (select 1 as id)
         select string_agg(
             company.name
@@ -167,7 +167,7 @@ describe("RemoveWiths", () => {
         from company
     `);
 
-    testRemoveUnnesaryWiths(`
+    testRemoveUnnecessaryWithes(`
         with x as (select 1 as id)
         select string_agg(
             company.name
@@ -177,7 +177,7 @@ describe("RemoveWiths", () => {
         from company
     `);
 
-    testRemoveUnnesaryWiths(`
+    testRemoveUnnecessaryWithes(`
         with x as (select 1 as id)
         select string_agg(
             company.name
@@ -188,7 +188,7 @@ describe("RemoveWiths", () => {
         from company
     `);
 
-    testRemoveUnnesaryWiths(`
+    testRemoveUnnecessaryWithes(`
         with x as (select 1 as id)
         select row_number() over (
             order by (select id from x) desc
@@ -196,7 +196,7 @@ describe("RemoveWiths", () => {
         from company
     `);
 
-    testRemoveUnnesaryWiths(`
+    testRemoveUnnecessaryWithes(`
         with x as (select 1 as id)
         select row_number() over (
             partition by (select id from x)
@@ -204,32 +204,32 @@ describe("RemoveWiths", () => {
         from company
     `);
 
-    testRemoveUnnesaryWiths(`
+    testRemoveUnnecessaryWithes(`
         with x as (select 1 as id)
         select cast( (select id from x) as bigint )
     `);
 
-    testRemoveUnnesaryWiths(`
+    testRemoveUnnecessaryWithes(`
         with x as (select 1 as id)
         select company.id in ((select id from x), (select id + 1 from x))
     `);
 
-    testRemoveUnnesaryWiths(`
+    testRemoveUnnecessaryWithes(`
         with x as (select 1 as id)
         select company.id in (select id from x)
     `);
 
-    testRemoveUnnesaryWiths(`
+    testRemoveUnnecessaryWithes(`
         with x as (select 1 as id)
         select company.id between 1 and (select id + 100 from x)
     `);
 
-    testRemoveUnnesaryWiths(`
+    testRemoveUnnecessaryWithes(`
         with x as (select 1 as id)
         select company.id between (select id from x) and 500
     `);
 
-    testRemoveUnnesaryWiths(`
+    testRemoveUnnecessaryWithes(`
         with x as (select 1 as id)
         select case
             when (select id from x)
@@ -237,7 +237,7 @@ describe("RemoveWiths", () => {
         end
     `);
 
-    testRemoveUnnesaryWiths(`
+    testRemoveUnnecessaryWithes(`
         with x as (select 1 as id)
         select case
             when true
@@ -245,7 +245,7 @@ describe("RemoveWiths", () => {
         end
     `);
 
-    testRemoveUnnesaryWiths(`
+    testRemoveUnnecessaryWithes(`
         with x as (select 1 as id)
         select case
             when true
@@ -254,7 +254,7 @@ describe("RemoveWiths", () => {
         end
     `);
 
-    testRemoveUnnesaryWiths(`
+    testRemoveUnnecessaryWithes(`
         with x as (select 1 as id)
         select row_number() over (
             order by (select id from x) desc
@@ -262,7 +262,7 @@ describe("RemoveWiths", () => {
         from company
     `);
 
-    testRemoveUnnesaryWiths(`
+    testRemoveUnnecessaryWithes(`
         with x as (select 1 as id)
         select row_number() over (test_2)
         from company
@@ -271,7 +271,7 @@ describe("RemoveWiths", () => {
             test_2 as (partition by (select id from x))
     `);
 
-    testRemoveUnnesaryWiths(`
+    testRemoveUnnecessaryWithes(`
         with x as (select 1 as id)
         select row_number() over (test_2)
         from company
@@ -280,7 +280,7 @@ describe("RemoveWiths", () => {
             test_2 as (order by (select id from x) asc)
     `);
 
-    testRemoveUnnesaryWiths(`
+    testRemoveUnnecessaryWithes(`
         with x as (select 1)
         select * from (
             with x as (select 2)
@@ -293,7 +293,7 @@ describe("RemoveWiths", () => {
         ) as test
     `);
 
-    testRemoveUnnesaryWiths(`
+    testRemoveUnnecessaryWithes(`
         with
             x1 as (
                 values
@@ -303,7 +303,7 @@ describe("RemoveWiths", () => {
         from x1
     `);
 
-    testRemoveUnnesaryWiths(`
+    testRemoveUnnecessaryWithes(`
         with
             x1 as (
                 values
@@ -329,7 +329,7 @@ describe("RemoveWiths", () => {
         from x1
     `);
 
-    testRemoveUnnesaryWiths(`
+    testRemoveUnnecessaryWithes(`
         with
             x1 as (
                 values
@@ -355,7 +355,7 @@ describe("RemoveWiths", () => {
         from x1
     `);
 
-    testRemoveUnnesaryWiths(`
+    testRemoveUnnecessaryWithes(`
         with
             x1 as (
                 values
@@ -385,7 +385,7 @@ describe("RemoveWiths", () => {
         from x3
     `);
 
-    testRemoveUnnesaryWiths(`
+    testRemoveUnnecessaryWithes(`
         with
             x1 as (
                 values

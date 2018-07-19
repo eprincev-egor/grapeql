@@ -58,7 +58,7 @@ class Is extends Operator {
             return left + " >= " + tomorrowStart() + " && " + left + " <= " + tomorrowEnd();
         }
         else {
-            throw new Error("imposible check: " + right);
+            throw new Error("impossible check: " + right);
         }
     }
     
@@ -73,7 +73,7 @@ class Is extends Operator {
         } 
         else if ( value === "today" ) {
             if ( !isSqlDate(column.type) ) {
-                throw new Error("imposible check 'is today' for column type: " + column.type);
+                throw new Error("impossible check 'is today' for column type: " + column.type);
             }
             
             let startSql = todayStart();
@@ -89,7 +89,7 @@ class Is extends Operator {
         } 
         else if ( value === "tomorrow" ) {
             if ( !isSqlDate(column.type) ) {
-                throw new Error("imposible check 'is tomorrow' for column type: " + column.type);
+                throw new Error("impossible check 'is tomorrow' for column type: " + column.type);
             }
             
             let startSql = tomorrowStart();

@@ -5,20 +5,20 @@ const Syntax = require("./Syntax");
 class DoubleQuotes extends Syntax {
     parse(coach) {
         let content = "",
-            withUEsacape = false;
+            withUEscape = false;
 
         if ( coach.is("\"") ) {
             coach.i++;
         } else {
             coach.expectWord("u");
             coach.expect("&\"");
-            withUEsacape = true;
+            withUEscape = true;
         }
 
         for (; coach.i < coach.n; coach.i++) {
-            let symb = coach.str[coach.i];
+            let symbol = coach.str[coach.i];
 
-            if ( symb == "\"" ) {
+            if ( symbol == "\"" ) {
                 if ( coach.str[coach.i + 1] == "\"" ) {
                     coach.i++;
                     content += "\"";
@@ -28,12 +28,12 @@ class DoubleQuotes extends Syntax {
                 break;
             }
 
-            content += symb;
+            content += symbol;
         }
 
         let escape = "\\";
         if ( coach.is(/\s*uescape/i) ) {
-            if ( !withUEsacape ) {
+            if ( !withUEscape ) {
                 coach.throwError("unexpected uescape, use u& before double quotes  ");
             }
 
@@ -53,15 +53,15 @@ class DoubleQuotes extends Syntax {
             this.isCustomUescape = true;
         }
 
-        if ( withUEsacape ) {
+        if ( withUEscape ) {
             this.escape = escape;
             this.contentBeforeEscape = content;
 
             for (let i = 0, n = content.length; i < n; i++) {
-                let symb = content[i],
+                let symbol = content[i],
                     length;
 
-                if ( symb == escape ) {
+                if ( symbol == escape ) {
                     let expr;
                     if ( content[i + 1] == "+" ) {
                         length = 8;

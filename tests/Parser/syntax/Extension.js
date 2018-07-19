@@ -2,7 +2,7 @@
 
 module.exports = [
     {
-        str: "extention test for orders (sale_Sum numeric(10 ,2))",
+        str: "extension test for orders (sale_Sum numeric(10 ,2))",
         result: {
             name: {word: "test"},
             table: {link: [
@@ -24,7 +24,7 @@ module.exports = [
         }
     },
     {
-        str: `extention test for orders (
+        str: `extension test for orders (
             name text,
             unique (name)
         )`,
@@ -57,7 +57,7 @@ module.exports = [
         }
     },
     {
-        str: `extention test for orders (
+        str: `extension test for orders (
             name text,
             unique (name),
             name2 text
@@ -99,7 +99,7 @@ module.exports = [
         }
     },
     {
-        str: "extention test for orders (x text, x text)",
+        str: "extension test for orders (x text, x text)",
         error: Error
     }
 ];

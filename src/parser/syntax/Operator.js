@@ -85,20 +85,20 @@ class Operator extends Syntax {
             coach.i = index;
             
             for (; coach.i < coach.n; coach.i++) {
-                let symb = coach.str[ coach.i ];
+                let symbol = coach.str[ coach.i ];
                 
                 // -+ must be as two operators
-                if ( symb == "-" ) {
+                if ( symbol == "-" ) {
                     operator = "-";
                     coach.i++;
                     break;
                 }
                 
-                if ( !/[+\-*/%~=<>!&|^]/.test(symb) ) {
+                if ( !/[+\-*/%~=<>!&|^]/.test(symbol) ) {
                     break;
                 }
                 
-                operator += symb;
+                operator += symbol;
             }
             
             this.operator = operator;

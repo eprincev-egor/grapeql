@@ -4,7 +4,7 @@ const assert = require("assert");
 const GrapeQLCoach = require("../../src/parser/GrapeQLCoach");
 const weakDeepEqual = require("../utils/weakDeepEqual");
 
-function testRemoveUnnesaryJoins(getServer, fromSelect, toSelect) {
+function testRemoveUnnecessaryWithes(getServer, fromSelect, toSelect) {
     if ( !toSelect ) {
         toSelect = fromSelect;
     }
@@ -15,10 +15,6 @@ function testRemoveUnnesaryJoins(getServer, fromSelect, toSelect) {
             ${ toSelect }
     `, () => {
         let server = getServer();
-
-        server.queryManager.clear();
-        server.queryManager.addFile("Country", "select * from country");
-
         let coach;
 
         coach = new GrapeQLCoach(fromSelect);
@@ -29,7 +25,7 @@ function testRemoveUnnesaryJoins(getServer, fromSelect, toSelect) {
         coach.skipSpace();
         let parsedToSelect = coach.parseSelect();
 
-        parsedFromSelect.removeUnnesaryJoins({server});
+        parsedFromSelect.removeUnnecessaryWithes({server});
 
         let isEqual = !!weakDeepEqual(parsedFromSelect, parsedToSelect);
 
@@ -37,4 +33,4 @@ function testRemoveUnnesaryJoins(getServer, fromSelect, toSelect) {
     });
 }
 
-module.exports = testRemoveUnnesaryJoins;
+module.exports = testRemoveUnnecessaryWithes;

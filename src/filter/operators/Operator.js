@@ -23,7 +23,7 @@ class Operator {
 
     validateLiteral(anyValue) {
         return (
-            // null or undfeind
+            // null or undefined
             anyValue == null ||
 
             // value must be
@@ -62,7 +62,7 @@ Operator.addLiteral = function(literal, ChildOperator) {
         literal = literal.toLowerCase().trim();
         
         if ( literal in Operator.byLiteral ) {
-            throw new Error( "dublicate literal: " + literal );
+            throw new Error( "duplicate literal: " + literal );
         }
         
         Operator.byLiteral[ literal ] = ChildOperator;
@@ -98,7 +98,7 @@ Operator.toSql = function(column, sqlOperator, value) {
     }
     
     else {
-        throw new Error(`unsoperted type "${ column.type } for operator ${ sqlOperator }"`);
+        throw new Error(`unrecognized type "${ column.type } for operator ${ sqlOperator }"`);
     }
 };
 
