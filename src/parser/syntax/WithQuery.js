@@ -51,12 +51,15 @@ class WithQuery extends Syntax {
         }
         else if ( coach.isInsert() ) {
             this.insert = coach.parseInsert();
+            this.addChild(this.insert);
         }
         else if ( coach.isUpdate() ) {
             this.update = coach.parseUpdate();
+            this.addChild(this.update);
         }
         else if ( coach.isDelete() ) {
             this.delete = coach.parseDelete();
+            this.addChild(this.delete);
         }
         else {
             this.select = coach.parseSelect();
