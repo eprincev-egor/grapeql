@@ -30,10 +30,6 @@ describe("SimpleUpdate trigger", () => {
         server = null;
     });
 
-    it("in work", () => {
-        assert.ok(true);
-    });
-
     it("update unit.id_order, set order.units_count", async() => {
         class UpdateUnitsCount {
             getEvents() {
