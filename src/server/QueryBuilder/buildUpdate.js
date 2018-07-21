@@ -5,7 +5,7 @@ const ObjectLink = require("../../parser/syntax/ObjectLink");
 const buildSelect = require("./buildSelect");
 
 function buildUpdate({
-    queryManager, 
+    queryBuilder, 
     queryNode, 
     request
 }) {
@@ -14,7 +14,7 @@ function buildUpdate({
 
     let columns = Object.keys(set);
     let select = buildSelect({
-        queryManager, 
+        queryBuilder, 
         queryNode,
         request: {
             columns,
@@ -35,7 +35,7 @@ function buildUpdate({
 
         let fromItem = _getFromItemByColumnKey({select, columnLink});
         let dbColumn = _getDbColumnByColumnLink({
-            queryManager, fromItem,
+            queryBuilder, fromItem,
             columnLink, key
         });
 
@@ -76,14 +76,14 @@ function buildUpdate({
 }
 
 function _getDbColumnByColumnLink({
-    queryManager, fromItem,
+    queryBuilder, fromItem,
     columnLink, key
 }) {
     if ( !fromItem.table ) {
         throw new Error(`impossible build update for key: ${columnLink}`);
     }
 
-    let dbTable = getDbTable(queryManager.server, fromItem.table);
+    let dbTable = getDbTable(queryBuilder.server, fromItem.table);
     let dbColumn = dbTable.getColumn(key);
 
     if ( !dbColumn ) {

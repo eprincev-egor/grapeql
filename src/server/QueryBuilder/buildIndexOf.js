@@ -10,7 +10,7 @@ const buildFromFiles = require("./buildFromFiles");
 const buildSqlModelByColumns = require("./buildSqlModelByColumns");
 
 function buildIndexOf({
-    queryManager, 
+    queryBuilder, 
     queryNode, 
     request
 }) {
@@ -59,12 +59,12 @@ function buildIndexOf({
             where,
             originalSelect: queryNode.select,
             queryNode,
-            queryManager
+            queryBuilder
         });
     }
 
     buildFromFiles({
-        queryManager,
+        queryBuilder,
         queryNode,
         select 
     });
@@ -72,7 +72,7 @@ function buildIndexOf({
     let sqlModel = buildSqlModelByColumns({
         select,
         queryNode,
-        queryManager,
+        queryBuilder,
         columns: rowColumns,
         originalSelect: queryNode.select
     });

@@ -4,12 +4,12 @@ const {getDbTable} = require("../../helpers");
 const Filter = require("../../filter/Filter");
 
 function buildDelete({
-    queryManager, 
+    queryBuilder, 
     queryNode, 
     request
 }) {
     let where = request.where;
-    let server = queryManager.server;
+    let server = queryBuilder.server;
 
     if ( queryNode.select.from.length > 1 ) {
         throw new Error("can't build delete with many sources");
@@ -21,13 +21,13 @@ function buildDelete({
     }
 
     if ( fromItem.file ) {
-        queryNode = queryManager.getQueryNodeByFile(fromItem.file);
+        queryNode = queryBuilder.getQueryNodeByFile(fromItem.file);
         if ( !queryNode ) {
             throw new Error(`${fromItem.file.toString()} not exists`);
         }
 
         return buildDelete({
-            queryManager, 
+            queryBuilder, 
             queryNode, 
             request
         });

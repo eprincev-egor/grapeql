@@ -12,19 +12,19 @@ function testRequest(getServer, test) {
 
     it(testName, () => {
         let server = getServer();
-        server.queryManager.clear();
+        server.queryBuilder.clear();
         
         if ( test.nodes ) {
             for (let name in test.nodes) {
                 let node = test.nodes[ name ];
-                server.queryManager.addFile(name, node);
+                server.queryBuilder.addFile(name, node);
             }
         }
 
         let node = test.node;
 
         if ( !/^\w+$/.test(node) ) {
-            server.queryManager.addFile("Temp", node);
+            server.queryBuilder.addFile("Temp", node);
             node = "Temp";
         }
 
@@ -33,7 +33,7 @@ function testRequest(getServer, test) {
         if ( test.error ) {
             let hasError = false;
             try {
-                server.queryManager.buildSelect({
+                server.queryBuilder.buildSelect({
                     server,
                     node,
 
@@ -49,7 +49,7 @@ function testRequest(getServer, test) {
             }
             assert.ok(hasError, "expected error");
         } else {
-            let query = server.queryManager.buildSelect({
+            let query = server.queryBuilder.buildSelect({
                 server,
                 node,
 

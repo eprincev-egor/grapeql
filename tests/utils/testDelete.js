@@ -9,11 +9,11 @@ function testDelete(getServer, test) {
         let server = getServer();
 
         let name = "Tmp";
-        server.queryManager.clear();
-        server.queryManager.addFile(name, test.node);
+        server.queryBuilder.clear();
+        server.queryBuilder.addFile(name, test.node);
 
         let request = test.request;
-        let query = server.queryManager.buildDelete({
+        let query = server.queryBuilder.buildDelete({
             node: name,
 
             where: request.where,

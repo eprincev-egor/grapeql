@@ -3,7 +3,7 @@
 const buildColumnExpression = require("./buildColumnExpression");
 
 function buildSqlModelByColumns({
-    queryManager,
+    queryBuilder,
     queryNode,
     columns,
     originalSelect
@@ -23,7 +23,7 @@ function buildSqlModelByColumns({
         let type = originalSelect.getExpressionType({
             expression,
             node: queryNode,
-            server: queryManager.server
+            server: queryBuilder.server
         });
 
         sqlModel[ key ] = {

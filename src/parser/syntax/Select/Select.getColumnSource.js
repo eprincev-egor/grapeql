@@ -76,7 +76,7 @@ module.exports = {
             else if ( fromItem.file ) {
                 let tableName = objectLink.first();
                 let subLink = objectLink.slice(-1);
-                let queryNode = server.queryManager.getQueryNodeByFile(fromItem.file, server);
+                let queryNode = server.queryBuilder.getQueryNodeByFile(fromItem.file, server);
 
                 if (
                     objectLink.link.length == 1 ||

@@ -6,14 +6,14 @@ const buildSqlModelByColumns = require("./buildSqlModelByColumns");
 function buildWhere({
     select,
     where, originalSelect,
-    queryManager,
+    queryBuilder,
     queryNode
 }) {
     where = new Filter(where);
 
     let columns = where.getColumns();
     let sqlModel = buildSqlModelByColumns({
-        queryManager,
+        queryBuilder,
         queryNode,
         columns,
         originalSelect

@@ -7,7 +7,7 @@ const buildFromFiles = require("./buildFromFiles");
 const buildColumns = require("./buildColumns");
 
 function buildSelect({
-    queryManager,
+    queryBuilder,
     queryNode,
     request
 }) {
@@ -42,7 +42,7 @@ function buildSelect({
             select,
             where,
             originalSelect: queryNode.select,
-            queryManager,
+            queryBuilder,
             queryNode
         });
     }
@@ -55,7 +55,7 @@ function buildSelect({
         });
     }
 
-    buildFromFiles({ queryManager, queryNode, select });
+    buildFromFiles({ queryBuilder, queryNode, select });
 
     if ( limit != null && limit != "all" ) {
         select.setLimit(limit);

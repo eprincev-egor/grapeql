@@ -133,7 +133,7 @@ class Join extends Syntax {
 
                 try {
                     if ( this.from.file ) {
-                        let queryNode = server.queryManager.getQueryNodeByFile(this.from.file);
+                        let queryNode = server.queryBuilder.getQueryNodeByFile(this.from.file);
                         dbTable = getDbTable( server, queryNode.select.from[0].table );
                     } else {
                         dbTable = getDbTable( server, this.from.table );

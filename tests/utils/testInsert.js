@@ -10,11 +10,11 @@ function testInsert(getServer, test) {
         let server = getServer();
 
         let name = "Tmp";
-        server.queryManager.clear();
-        server.queryManager.addFile(name, test.node);
+        server.queryBuilder.clear();
+        server.queryBuilder.addFile(name, test.node);
 
         let request = test.request;
-        let query = server.queryManager.buildInsert({
+        let query = server.queryBuilder.buildInsert({
             node: name,
 
             row: request.row

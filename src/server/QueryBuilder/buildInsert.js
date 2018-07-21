@@ -4,7 +4,7 @@ const {getDbTable, value2sql} = require("../../helpers");
 
 
 function buildInsert({
-    queryManager, 
+    queryBuilder, 
     queryNode, 
     request
 }) {
@@ -21,19 +21,19 @@ function buildInsert({
     }
 
     if ( fromItem.file ) {
-        queryNode = queryManager.getQueryNodeByFile(fromItem.file);
+        queryNode = queryBuilder.getQueryNodeByFile(fromItem.file);
         if ( !queryNode ) {
             throw new Error(`${fromItem.file.toString()} not exists`);
         }
 
         return buildInsert({
-            queryManager, 
+            queryBuilder, 
             queryNode, 
             request
         });
     }
 
-    let dbTable = getDbTable(queryManager.server, fromItem.table);
+    let dbTable = getDbTable(queryBuilder.server, fromItem.table);
     let sql = `insert into ${fromItem.table.toString()} `;  // schema
 
     let columns = [];

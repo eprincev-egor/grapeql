@@ -5,7 +5,7 @@ const buildWhere = require("./buildWhere");
 const buildFromFiles = require("./buildFromFiles");
 
 function buildCount({
-    queryManager, 
+    queryBuilder,
     queryNode, 
     request
 }) {
@@ -37,12 +37,12 @@ function buildCount({
             where,
             originalSelect: queryNode.select,
             queryNode,
-            queryManager
+            queryBuilder
         });
     }
 
     buildFromFiles({ 
-        queryManager, 
+        queryBuilder, 
         select,
         queryNode
     });

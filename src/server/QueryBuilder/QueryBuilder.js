@@ -11,7 +11,7 @@ const buildSelect = require("./buildSelect");
 const buildCount = require("./buildCount");
 const buildIndexOf = require("./buildIndexOf");
 
-class QueryManager {
+class QueryBuilder {
     constructor({ server }) {
         this.server = server;
         
@@ -92,7 +92,7 @@ class QueryManager {
         let node = this.nodes[ queryName ];
 
         return buildDelete({
-            queryManager: this, 
+            queryBuilder: this, 
             queryNode: node.query, 
             request
         });
@@ -103,7 +103,7 @@ class QueryManager {
         let node = this.nodes[ queryName ];
 
         return buildInsert({
-            queryManager: this, 
+            queryBuilder: this, 
             queryNode: node.query, 
             request
         });
@@ -114,7 +114,7 @@ class QueryManager {
         let node = this.nodes[ queryName ];
 
         return buildSelect({
-            queryManager: this, 
+            queryBuilder: this, 
             queryNode: node.query, 
             request
         });
@@ -125,7 +125,7 @@ class QueryManager {
         let node = this.nodes[ queryName ];
 
         return buildIndexOf({
-            queryManager: this, 
+            queryBuilder: this, 
             queryNode: node.query, 
             request
         });
@@ -136,7 +136,7 @@ class QueryManager {
         let node = this.nodes[ queryName ];
 
         return buildCount({
-            queryManager: this, 
+            queryBuilder: this, 
             queryNode: node.query, 
             request
         });
@@ -147,7 +147,7 @@ class QueryManager {
         let node = this.nodes[ queryName ];
 
         return buildUpdate({
-            queryManager: this, 
+            queryBuilder: this, 
             queryNode: node.query, 
             request
         });
@@ -196,4 +196,4 @@ async function getFileNames(globPattern) {
     });
 }
 
-module.exports = QueryManager;
+module.exports = QueryBuilder;

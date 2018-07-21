@@ -7,24 +7,24 @@ const assert = require("assert");
 function testRequestCount(getServer,test) {
     it(test.result, () => {
         let server = getServer();
-        server.queryManager.clear();
+        server.queryBuilder.clear();
 
         if ( test.nodes ) {
             for (let name in test.nodes) {
                 let node = test.nodes[ name ];
-                server.queryManager.addFile(name, node);
+                server.queryBuilder.addFile(name, node);
             }
         }
 
         let node = test.node;
 
         if ( !/^\w+$/.test(node) ) {
-            server.queryManager.addFile("Temp", node);
+            server.queryBuilder.addFile("Temp", node);
             node = "Temp";
         }
 
         let request = test.request;
-        let query = server.queryManager.buildCount({
+        let query = server.queryBuilder.buildCount({
             server,
             node,
 

@@ -9,11 +9,11 @@ const ColumnLink = require("../../parser/syntax/ColumnLink");
 const With = require("../../parser/syntax/With");
 
 function buildFromFiles({ 
-    queryManager, 
+    queryBuilder, 
     select 
 }) {
-    select.removeUnnecessaryJoins({ server: queryManager.server });
-    select.removeUnnecessaryWithes({ server: queryManager.server });
+    select.removeUnnecessaryJoins({ server: queryBuilder.server });
+    select.removeUnnecessaryWithes({ server: queryBuilder.server });
 
     let fileItems = [];
     select.walk(child => {
@@ -32,22 +32,22 @@ function buildFromFiles({
         let select = fileItem.findParentInstance(Select);
         buildFromFile({
             select,
-            queryManager,
+            queryBuilder,
             fromItem: fileItem
         });
     });
 
-    buildFromFiles({ queryManager, select });
+    buildFromFiles({ queryBuilder, select });
 }
 
-function buildFromFile({ select, queryManager, fromItem }) {
+function buildFromFile({ select, queryBuilder, fromItem }) {
     let isJoin = fromItem.parent instanceof Join;
     let isManyFrom = (
         fromItem.parent instanceof Select &&
             fromItem.parent.from.length > 1
     );
 
-    let queryNode = queryManager.getQueryNodeByFile(fromItem.file);
+    let queryNode = queryBuilder.getQueryNodeByFile(fromItem.file);
     let nodeSelect = queryNode.select;
     let nodeFrom = nodeSelect.from[0];
 
@@ -183,7 +183,7 @@ function trimQuotes(str) {
 
 function checkCircularDeps({
     queryNode,
-    queryManager,
+    queryBuilder,
     map
 }) {
     if ( !map ) {
@@ -204,13 +204,13 @@ function checkCircularDeps({
             let join = fromItem.parent;
             if ( 
                 join.isRemovable({
-                    server: queryManager.server
+                    server: queryBuilder.server
                 }) 
             ) {
                 return;
             }
         }
-        let newQueryNode = queryManager.getQueryNodeByFile(fromItem.file);
+        let newQueryNode = queryBuilder.getQueryNodeByFile(fromItem.file);
         let nodeSelect = newQueryNode.select;
 
         if ( map.includes(nodeSelect) ) {
@@ -218,7 +218,7 @@ function checkCircularDeps({
         }
 
         checkCircularDeps({
-            queryManager,
+            queryBuilder,
             queryNode: newQueryNode,
             map: map.concat([nodeSelect]),
             select: nodeSelect
@@ -227,17 +227,17 @@ function checkCircularDeps({
 }
 
 module.exports = function mainBuildFromFiles({ 
-    queryManager,
+    queryBuilder,
     queryNode,
     select
 }) {
     checkCircularDeps({ 
         queryNode,
-        queryManager
+        queryBuilder
     });
 
     buildFromFiles({ 
-        queryManager,
+        queryBuilder,
         select 
     });
 };

@@ -4,7 +4,7 @@ const _ = require("lodash");
 const pg = require("pg");
 const Transaction = require("./Transaction");
 const DbDatabase = require("./DbObject/DbDatabase");
-const QueryManager = require("./QueryManager/QueryManager");
+const QueryBuilder = require("./QueryBuilder/QueryBuilder");
 
 const express = require("express");
 const bodyParser = require("body-parser");
@@ -129,7 +129,7 @@ class GrapeQL {
         await this.initSystemFunctions();
         this.initExpress();
         
-        await this.initQueryManager();
+        await this.initQueryBuilder();
 
         if ( this.config.http ) {
             this.express.listen( this.config.http.port );
@@ -152,8 +152,8 @@ class GrapeQL {
         `);
     }
     
-    async initQueryManager() {
-        this.queryManager = new QueryManager({
+    async initQueryBuilder() {
+        this.queryBuilder = new QueryBuilder({
             server: this
         });
         
@@ -161,7 +161,7 @@ class GrapeQL {
             return;
         }
         
-        await this.queryManager.addWorkdir(
+        await this.queryBuilder.addWorkdir(
             this.config.workdir, 
             this.config.workfiles.query
         );

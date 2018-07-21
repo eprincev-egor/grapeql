@@ -16,8 +16,8 @@ function testRemoveUnnecessaryJoins(getServer, fromSelect, toSelect) {
     `, () => {
         let server = getServer();
 
-        server.queryManager.clear();
-        server.queryManager.addFile("Country", "select * from country");
+        server.queryBuilder.clear();
+        server.queryBuilder.addFile("Country", "select * from country");
 
         let coach;
 
