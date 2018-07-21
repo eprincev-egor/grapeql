@@ -36,7 +36,7 @@ describe("Vars in transaction", () => {
             return;
         }
 
-        await transaction.destroy();
+        await transaction.end();
         transaction = null;
     });
 
@@ -48,8 +48,8 @@ describe("Vars in transaction", () => {
             insert row into country (code, population) 
             values ('ru', $population::integer)
         `, {
-            $population: 150000000
-        });
+                $population: 150000000
+            });
         
         assert.ok(row.id == 1);
         assert.ok(row.code == "ru");
@@ -61,8 +61,8 @@ describe("Vars in transaction", () => {
             insert row into country (code, population) 
             values ('ru', $population::integer)
         `, {
-            population: 150000000
-        });
+                population: 150000000
+            });
         
         assert.ok(row.id == 2);
         assert.ok(row.code == "ru");

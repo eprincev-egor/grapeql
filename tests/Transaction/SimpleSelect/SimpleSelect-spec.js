@@ -36,7 +36,7 @@ describe("SimpleSelect task", () => {
             return;
         }
 
-        await transaction.destroy();
+        await transaction.end();
         transaction = null;
     });
 

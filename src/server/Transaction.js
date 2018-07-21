@@ -249,13 +249,8 @@ class Transaction {
         }
     }
     
-    async destroy() {
-        await this.rollback();
-        await this.end();
-    }
-
     async end() {
-        await this.db.release();
+        await this.db.end();
     }
 }
 

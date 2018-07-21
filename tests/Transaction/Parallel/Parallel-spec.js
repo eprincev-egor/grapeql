@@ -37,7 +37,7 @@ describe("Parallel transaction", () => {
 
         if ( transaction1 ) {
             try {
-                await transaction1.destroy();
+                await transaction1.end();
             } catch(err) {
                 console.log(err);
             }
@@ -47,7 +47,7 @@ describe("Parallel transaction", () => {
         
         if ( transaction2 ) {
             try {
-                await transaction2.destroy();
+                await transaction2.end();
             } catch(err) {
                 console.log(err);
             }

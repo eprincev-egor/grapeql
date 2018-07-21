@@ -136,19 +136,6 @@ class GrapeQL {
         }
     }
     
-    async getSystemConnect() {
-        let db;
-        
-        try {
-            db = new pg.Client( this.config.db );
-            await db.connect();
-        } catch(err) {
-            throw new Error("cannot connect to database");
-        }
-        
-        return db;
-    }
-    
     async loadDatabaseInfo() {
         this.database = new DbDatabase();
         await this.database.load(this.db);

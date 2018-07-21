@@ -36,7 +36,7 @@ describe("SimpleUpdate transaction", () => {
             return;
         }
 
-        await transaction.destroy();
+        await transaction.end();
         transaction = null;
     });
 
