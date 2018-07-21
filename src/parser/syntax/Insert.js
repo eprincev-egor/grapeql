@@ -26,7 +26,7 @@ const Syntax = require("./Syntax");
 
 class Insert extends Syntax {
     parse(coach, options) {
-        options = options || {allowInsertRow: false};
+        options = options || {allowReturningObject: false};
         if ( coach.isWith() ) {
             this.with = coach.parseWith();
             this.addChild(this.with);
@@ -36,12 +36,12 @@ class Insert extends Syntax {
         coach.expectWord("insert");
         coach.skipSpace();
         
-        if ( options.allowInsertRow ) {
+        if ( options.allowReturningObject ) {
             if ( coach.isWord("row") ) {
                 coach.expectWord("row");
                 coach.skipSpace();
                 
-                this.insertRow = true;
+                this.returningObject = true;
             }
         }
 
@@ -152,8 +152,8 @@ class Insert extends Syntax {
             clone.addChild(clone.with);
         }
         
-        if ( this.insertRow ) {
-            clone.insertRow = true;
+        if ( this.returningObject ) {
+            clone.returningObject = true;
         }
 
         clone.table = this.table.clone();
@@ -206,7 +206,7 @@ class Insert extends Syntax {
             out += " ";
         }
         
-        if ( !options.pg && this.insertRow ) {
+        if ( !options.pg && this.returningObject ) {
             out += "insert row into ";
         } else {
             out += "insert into ";

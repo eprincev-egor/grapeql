@@ -121,16 +121,16 @@ GrapeQLCoach.parseCommand = function(sql) {
     coach.skipSpace();
     
     if ( coach.isInsert() ) {
-        return coach.parseInsert({ allowInsertRow: true });
+        return coach.parseInsert({ allowReturningObject: true });
     }
     else if ( coach.isUpdate() ) {
-        return coach.parseUpdate({ allowUpdateRow: true });
+        return coach.parseUpdate({ allowReturningObject: true });
     }
     else if ( coach.isDelete() ) {
-        return coach.parseDelete({ allowDeleteRow: true });
+        return coach.parseDelete({ allowReturningObject: true });
     }
     else if ( coach.isSelect() ) {
-        return coach.parseSelect({ allowSelectRow: true });
+        return coach.parseSelect({ allowReturningObject: true });
     }
     else {
         throw new Error(`unrecognized command ${sql}`);

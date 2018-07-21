@@ -67,7 +67,7 @@ describe("SimpleUpdate trigger", () => {
             }
         }
 
-        server.addTrigger(UpdateUnitsCount);
+        server.triggers.create(UpdateUnitsCount);
 
         let orderRow1 = await server.query("insert row into orders (units_count) values (1)");
         assert.equal(orderRow1.id, 1);

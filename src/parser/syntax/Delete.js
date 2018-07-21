@@ -12,7 +12,7 @@ const Syntax = require("./Syntax");
 
 class Delete extends Syntax {
     parse(coach, options) {
-        options = options || {allowDeleteRow: false};
+        options = options || {allowReturningObject: false};
 
         if ( coach.isWith() ) {
             this.with = coach.parseWith();
@@ -23,12 +23,12 @@ class Delete extends Syntax {
         coach.expectWord("delete");
         coach.skipSpace();
 
-        if ( options.allowDeleteRow ) {
+        if ( options.allowReturningObject ) {
             if ( coach.isWord("row") ) {
                 coach.expectWord("row");
                 coach.skipSpace();
-                
-                this.deleteRow = true;
+                 
+                this.returningObject = true;
             }
         }
 
@@ -119,8 +119,8 @@ class Delete extends Syntax {
             clone.addChild(clone.with);
         }
 
-        if ( this.deleteRow ) {
-            clone.deleteRow = true;
+        if ( this.returningObject ) {
+            clone.returningObject = true;
         }
 
         if ( this.only ) {
@@ -169,7 +169,7 @@ class Delete extends Syntax {
             out += " ";
         }
 
-        if ( !options.pg && this.deleteRow ) {
+        if ( !options.pg && this.returningObject ) {
             out += "delete row from ";
         } else {
             out += "delete from ";

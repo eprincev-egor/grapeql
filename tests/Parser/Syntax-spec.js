@@ -226,31 +226,31 @@ describe("allow row", () => {
         let coach, select;
         
         coach = new GrapeQLCoach("select row * from orders");
-        select = coach.parseSelect({allowSelectRow: true});
+        select = coach.parseSelect({allowReturningObject: true});
         
-        assert.ok(select.selectRow === true);
+        assert.ok(select.returningObject === true);
         
         let pgSql = select.toString({ pg: true });
         coach = new GrapeQLCoach(pgSql);
         
-        select = coach.parseSelect({allowSelectRow: true});
+        select = coach.parseSelect({allowReturningObject: true});
         
-        assert.ok(select.selectRow == null);
+        assert.ok(select.returningObject == null);
     });
     
     it("insert row into", () => {
         let coach, insert;
         
         coach = new GrapeQLCoach("insert row into orders default values");
-        insert = coach.parseInsert({allowInsertRow: true});
+        insert = coach.parseInsert({allowReturningObject: true});
         
-        assert.ok(insert.insertRow === true);
+        assert.ok(insert.returningObject === true);
         
         let pgSql = insert.toString({ pg: true });
         coach = new GrapeQLCoach(pgSql);
         
-        insert = coach.parseInsert({allowInsertRow: true});
+        insert = coach.parseInsert({allowReturningObject: true});
         
-        assert.ok(insert.insertRow == null);
+        assert.ok(insert.returningObject == null);
     });
 });

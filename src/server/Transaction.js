@@ -1,8 +1,5 @@
 "use strict";
 
-const {value2sql} = require("../helpers");
-const GrapeQLCoach = require("../parser/GrapeQLCoach");
-
 class Transaction {
     constructor({ server }) {
         this.server = server;
@@ -22,230 +19,28 @@ class Transaction {
     }
     
     async query(sql, vars) {
-        let command = GrapeQLCoach.parseCommand(sql);
+        // parse sql and build vars
+        let query = this.server.queryBuilder.buildQuery(sql, vars);
         
-        // $order_id::bigint
-        this._pasteVars(command, vars);
-        
-        let result, commandType;
-        if ( command instanceof GrapeQLCoach.Insert ) {
-            commandType = "insert";
-            result = await this._executeInsert(command);
-        }
-        else if ( command instanceof GrapeQLCoach.Update ) {
-            commandType = "update";
-            result = await this._executeUpdate(command);
-        }
-        else if ( command instanceof GrapeQLCoach.Delete ) {
-            commandType = "delete";
-            result = await this._executeDelete(command);
-        }
-        else if ( command instanceof GrapeQLCoach.Select ) {
-            result = await this._executeSelect(command);
-        }
-
-        if ( commandType ) {
-            try {
-                await this.server._callTriggers({
-                    transaction: this,
-                    commandType, command, 
-                    result
-                });
-            } catch(err) {
-                throw err;
-            }
-        }
+        // run query and call triggers
+        let result = await this.server.triggers.executeQuery({
+            transaction: this,
+            query
+        });
 
         return result;
     }
     
-    _pasteVars(command, vars) {
-        command.walk(variable => {
-            if ( !(variable instanceof GrapeQLCoach.SystemVariable) ) {
-                return;
-            }
+    // called by TriggerManager
+    // just redefine callstack
+    async _executeQuery(query) {
+        let sql = query.toString({ pg: true });
 
-            let expression = variable.parent;
-            let type = expression.getVariableType(variable);
-            if ( !type ) {
-                throw new Error(`expected type for variable: ${variable}`);
-            }
-
-            let key = variable.toLowerCase();
-            let $key = "$" + key;
-            
-            if ( $key in vars && key in vars ) {
-                throw new Error(`duplicated variable name, please only one of ${key} or ${key}`);
-            }
-
-            let value;
-            if ( $key in vars ) {
-                value = vars[ $key ];
-            } else {
-                value = vars[ key ];
-            }
-            
-            let sqlValue = value2sql(type, value);
-            expression.replaceVariableWithType(variable, sqlValue);
-        });
-    }
-
-    async _query(sql) {
         try {
             return await this.db.query(sql);
         } catch(dbError) {
             // redefine stack
             throw new Error( dbError.message );
-        }
-    }
-    
-    async _executeInsert(insert) {
-        if ( !insert.returning && !insert.returningAll ) {
-            insert.returningAll = true;
-        }
-        
-        let commandSql = insert.toString({ pg: true });
-        let result = await this._query(commandSql);
-        
-        if ( insert.insertRow ) {
-            if ( !result.rows || !result.rows.length ) {
-                return null;
-            }
-            
-            if ( result.rows.length === 1 ) {
-                return result.rows[0];
-            }
-        } else {
-            return result.rows || [];
-        }
-    }
-    
-    async _executeUpdate(update) {
-        let tableName = update.table.getDbTableLowerPath();
-        let dbTable = this.server.database.findTable(tableName);
-        if ( !dbTable ) {
-            throw new Error(`table name not found: ${tableName}`);
-        }
-
-        let mainConstraint;
-        for (let key in dbTable.constraints) {
-            let constraint = dbTable.constraints[ key ];
-            
-            if ( constraint.type == "primary key" ) {
-                mainConstraint = constraint;
-            }
-            
-            if ( constraint.type == "unique" ) {
-                if ( !mainConstraint ) {
-                    mainConstraint = constraint;
-                }
-            }
-        }
-
-        if ( !mainConstraint ) {
-            throw new Error(`expected primary key or unique constraint for table: ${tableName}`);
-        }
-
-        let updatedColumns = [];
-        update.set.forEach(setItem => {
-            if ( setItem.column ) {
-                updatedColumns.push(
-                    setItem.column.toLowerCase()
-                );
-            } else {
-                setItem.columns.forEach(column => {
-                    updatedColumns.push(
-                        column.toLowerCase()
-                    );
-                });
-            }
-        });
-
-        let whereSql = update.where ? update.where.toString({pg: true}) : "";
-        let columnsSql = updatedColumns.slice();
-        mainConstraint.columns.forEach(column => {
-            if ( !updatedColumns.includes(column) ) {
-                columnsSql.push(column);
-            }
-        });
-
-        columnsSql = columnsSql.map(column => `${column} as old_${column}`);
-
-        update.from = [new GrapeQLCoach.FromItem(`(
-            select ${columnsSql}
-            from ${tableName}
-            where
-                ${whereSql}
-        ) as old_values`)];
-
-        
-        let tableNameOrAlias = update.as ? update.toLowerCase() : tableName;
-        
-        let constraintSql = [];
-        mainConstraint.columns.forEach(column => {
-            constraintSql.push(`old_values.old_${column} = ${tableNameOrAlias}.${column}`);
-        });
-
-        constraintSql = constraintSql.join(" and ");
-
-        update.where = new GrapeQLCoach.Expression(constraintSql);
-
-        update.returningAll = true;
-
-        let commandSql = update.toString({ pg: true });
-
-        let result = await this._query(commandSql);
-
-        if ( update.updateRow ) {
-            if ( !result.rows || !result.rows.length ) {
-                return null;
-            }
-            
-            if ( result.rows.length === 1 ) {
-                return result.rows[0];
-            }
-        } else {
-            return result.rows || [];
-        }
-    }
-    
-    async _executeDelete(deleteCommand) {
-        if ( !deleteCommand.returning && !deleteCommand.returningAll ) {
-            deleteCommand.returningAll = true;
-        }
-
-        let commandSql = deleteCommand.toString({ pg: true });
-
-        let result = await this._query(commandSql);
-
-        if ( deleteCommand.deleteRow ) {
-            if ( !result.rows || !result.rows.length ) {
-                return null;
-            }
-            
-            if ( result.rows.length === 1 ) {
-                return result.rows[0];
-            }
-        } else {
-            return result.rows || [];
-        }
-    }
-    
-    async _executeSelect(select) {
-        let commandSql = select.toString({ pg: true });
-
-        let result = await this._query(commandSql);
-        
-        if ( select.selectRow ) {
-            if ( !result.rows || !result.rows.length ) {
-                return null;
-            }
-
-            if ( result.rows.length === 1 ) {
-                return result.rows[0];
-            }
-        } else {
-            return result.rows || [];
         }
     }
     

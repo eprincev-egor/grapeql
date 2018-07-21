@@ -74,18 +74,18 @@ class Select extends Syntax {
     }
 
     parse(coach, options) {
-        options = options || {allowSelectRow: false};
+        options = options || {allowReturningObject: false};
         this.parseWith(coach);
 
         coach.expectWord("select");
         coach.skipSpace();
         
-        if ( options.allowSelectRow ) {
+        if ( options.allowReturningObject ) {
             if ( coach.isWord("row") ) {
                 coach.expectWord("row");
                 coach.skipSpace();
                 
-                this.selectRow = true;
+                this.returningObject = true;
             }
         }
 
@@ -433,8 +433,8 @@ class Select extends Syntax {
             clone.addChild(clone.with);
         }
         
-        if ( this.selectRow ) {
-            clone.selectRow = true;
+        if ( this.returningObject ) {
+            clone.returningObject = true;
         }
 
         clone.columns = this.columns.map(item => item.clone());
@@ -532,7 +532,7 @@ class Select extends Syntax {
         }
 
         out += "select ";
-        if ( !options.pg && this.selectRow ) {
+        if ( !options.pg && this.returningObject ) {
             out += " row ";
         }
         

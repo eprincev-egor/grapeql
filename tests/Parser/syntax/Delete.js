@@ -299,10 +299,10 @@ module.exports = [
     {
         str: "delete row from orders",
         options: {
-            allowDeleteRow: true
+            allowReturningObject: true
         },
         result: {
-            deleteRow: true,
+            returningObject: true,
             table: {link: [
                 {word: "orders"}
             ]}
@@ -311,7 +311,7 @@ module.exports = [
     {
         str: "delete from orders",
         options: {
-            allowDeleteRow: true
+            allowReturningObject: true
         },
         result: {
             table: {link: [

@@ -608,10 +608,10 @@ module.exports = [
     {
         str: "update row companies set name = 'nice'",
         options: {
-            allowUpdateRow: true
+            allowReturningObject: true
         },
         result: {
-            updateRow: true,
+            returningObject: true,
             table: {link: [
                 {word: "companies"}
             ]},
@@ -628,7 +628,7 @@ module.exports = [
     {
         str: "update companies set name = 'nice'",
         options: {
-            allowUpdateRow: true
+            allowReturningObject: true
         },
         result: {
             table: {link: [

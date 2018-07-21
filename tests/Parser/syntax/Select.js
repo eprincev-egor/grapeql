@@ -1219,9 +1219,9 @@ module.exports = [
     },
     {
         str: "select row * from company",
-        options: {allowSelectRow: true},
+        options: {allowReturningObject: true},
         result: {
-            selectRow: true,
+            returningObject: true,
             columns: [
                 {
                     as: null,
@@ -1241,7 +1241,7 @@ module.exports = [
     },
     {
         str: "select * from company",
-        options: {allowSelectRow: true},
+        options: {allowReturningObject: true},
         result: {
             columns: [
                 {

@@ -10,6 +10,8 @@ const buildUpdate = require("./buildUpdate");
 const buildSelect = require("./buildSelect");
 const buildCount = require("./buildCount");
 const buildIndexOf = require("./buildIndexOf");
+const buildQueryVars = require("./buildQueryVars");
+const buildUpdateOldValues = require("./buildUpdateOldValues");
 
 class QueryBuilder {
     constructor({ server }) {
@@ -153,6 +155,22 @@ class QueryBuilder {
         });
     }
 
+    buildQuery(sql, vars) {
+        let query = GrapeQLCoach.parseCommand(sql);
+        
+        // $order_id::bigint => 1
+        buildQueryVars(query, vars);
+
+        return query;
+    }
+
+    buildUpdateOldValues(updateQuery) {
+        buildUpdateOldValues({
+            update: updateQuery,
+            queryBuilder: this
+        });
+    }
+
     getQueryNodeByFile(file) {
         for (let key in this.nodes) {
             let node = this.nodes[ key ];
@@ -162,6 +180,25 @@ class QueryBuilder {
             if ( leftFile == rightFile ) {
                 return node.query;
             }
+        }
+    }
+
+    getQueryTableName(query) {
+        return query.table.getDbTableLowerPath();
+    }
+
+    getQueryCommandType(query) {
+        if ( query instanceof GrapeQLCoach.Select ) {
+            return "select";
+        }
+        if ( query instanceof GrapeQLCoach.Insert ) {
+            return "insert";
+        }
+        if ( query instanceof GrapeQLCoach.Delete ) {
+            return "delete";
+        }
+        if ( query instanceof GrapeQLCoach.Update ) {
+            return "update";
         }
     }
 }
