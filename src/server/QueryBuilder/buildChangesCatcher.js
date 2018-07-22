@@ -58,6 +58,25 @@ function buildChangesCatcher({
                     from ${withItem.name} as tmp_row
                 `);
             }
+
+            else if ( withItem.delete ) {
+                withItem.delete.returningAll = true;
+
+                let table = queryBuilder.getQueryTableName(withItem.delete);
+
+                query.with.setWithQuery("tmp" + index, `
+                    insert into changes (
+                        table_name,
+                        command,
+                        result
+                    )
+                    select
+                        '${ table }',
+                        'delete',
+                        row_to_json( tmp_row )::text
+                    from ${withItem.name} as tmp_row
+                `);
+            }
         });
 
         afterSql = `
