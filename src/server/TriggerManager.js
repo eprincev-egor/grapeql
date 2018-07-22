@@ -121,91 +121,28 @@ class TriggerManager {
         }
     }
 
-    async executeQuery({transaction, query}) {
-        if ( !query.returning && !query.returningAll ) {
-            query.returningAll = true;
+    async callByChanges({
+        transaction,
+        changesStack
+    }) {
+        for (let i = 0, n = changesStack.length; i < n; i++) {
+            let {
+                type, 
+                table, 
+                row, 
+                prev, 
+                changes
+            } = changesStack[i];
+
+            await this.call({
+                transaction,
+                type,
+                table,
+                row,
+                prev,
+                changes
+            });
         }
-
-        let type = this.server.queryBuilder.getQueryCommandType(query);
-
-        if ( type == "update" ) {
-            this.server.queryBuilder.buildUpdateOldValues(query);
-        }
-
-        let result = await transaction._executeQuery(query);
-        
-        if ( query.returningObject ) {
-            if ( !result.rows || !result.rows.length ) {
-                result = null;
-            }
-
-            else if ( result.rows.length === 1 ) {
-                result = result.rows[0];
-            }
-        } else {
-            result = result.rows || [];
-        }
-
-        if (
-            result && 
-            (
-                type == "insert" ||
-                type == "update" ||
-                type == "delete"
-            )
-        ) {
-            let rows = _.isArray(result) ? result : [result];
-            // public.orders
-            let table = this.server.queryBuilder.getQueryTableName(query);
-
-            for (let i = 0, n = rows.length; i < n; i++) {
-                let row = rows[i];
-
-                if ( type == "update" ) {
-                    let prev = {},
-                        changes = {},
-                        newRow = {};
-                    
-                    for (let key in row) {
-                        if ( /old_/.test(key) ) {
-                            continue;
-                        }
-                        
-                        let value = row[ key ];
-                        prev[ key ] = value;
-                        newRow[ key ] = value;
-
-                        let oldKey = "old_" + key;
-                        if ( oldKey in row ) {
-                            let oldValue = row[ oldKey ];
-                            
-                            if ( oldValue != value ) {
-                                changes[ key ] = value;
-                                prev[ key ] = oldValue;
-                            }
-                        }
-                    }
-
-                    await this.call({
-                        transaction,
-                        type,
-                        table,
-                        row: newRow,
-                        changes,
-                        prev
-                    });
-                } else {
-                    await this.call({
-                        transaction,
-                        type,
-                        table,
-                        row
-                    });
-                }
-            }
-        }
-
-        return result;
     }
 }
 

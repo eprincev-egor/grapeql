@@ -22,16 +22,32 @@ class Transaction {
         // parse sql and build vars
         let query = this.server.queryBuilder.buildQuery(sql, vars);
         
-        // run query and call triggers
-        let result = await this.server.triggers.executeQuery({
+        // run sql and get all changes (insert/update/delete)
+        let {result, changesStack} = await this.runAndCatchChanges(query);
+
+        // call triggers
+        await this.server.triggers.callByChanges({
             transaction: this,
-            query
+            changesStack
         });
 
         return result;
     }
+
+    async runAndCatchChanges(query) {
+        // transform query for catching changes
+        let catcher = this.server.queryBuilder.buildChangesCatcher(query);
+        // pg can return array of results
+        let pgResult = await this._executeQuery(query);
+        // get out result and all changes
+        let {result, changesStack} = catcher.prepareResult(pgResult);
+        
+        return {
+            changesStack,
+            result
+        };
+    }
     
-    // called by TriggerManager
     // just redefine callstack
     async _executeQuery(query) {
         let sql = query.toString({ pg: true });

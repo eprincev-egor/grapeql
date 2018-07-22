@@ -11,7 +11,7 @@ const buildSelect = require("./buildSelect");
 const buildCount = require("./buildCount");
 const buildIndexOf = require("./buildIndexOf");
 const buildQueryVars = require("./buildQueryVars");
-const buildUpdateOldValues = require("./buildUpdateOldValues");
+const buildChangesCatcher = require("./buildChangesCatcher");
 
 class QueryBuilder {
     constructor({ server }) {
@@ -164,9 +164,9 @@ class QueryBuilder {
         return query;
     }
 
-    buildUpdateOldValues(updateQuery) {
-        buildUpdateOldValues({
-            update: updateQuery,
+    buildChangesCatcher(query) {
+        return buildChangesCatcher({
+            query,
             queryBuilder: this
         });
     }
