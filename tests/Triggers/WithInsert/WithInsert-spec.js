@@ -41,7 +41,7 @@ describe("WithInsert trigger", () => {
             async onInsert({db, row}) {
                 let orderId = row.id_order;
 
-                db.query(`
+                await db.query(`
                     update orders set 
                         units_names = (
                             select string_agg( name, ';' order by name )

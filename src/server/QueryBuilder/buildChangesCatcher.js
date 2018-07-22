@@ -77,6 +77,28 @@ function buildChangesCatcher({
                     from ${withItem.name} as tmp_row
                 `);
             }
+
+            else if ( withItem.update ) {
+                buildUpdateOldValues({
+                    update: withItem.update, 
+                    queryBuilder
+                });
+
+                let table = queryBuilder.getQueryTableName(withItem.update);
+
+                query.with.setWithQuery("tmp" + index, `
+                    insert into changes (
+                        table_name,
+                        command,
+                        result
+                    )
+                    select
+                        '${ table }',
+                        'update',
+                        row_to_json( tmp_row )::text
+                    from ${withItem.name} as tmp_row
+                `);
+            }
         });
 
         afterSql = `
@@ -276,7 +298,8 @@ function buildUpdateOldValues({update, queryBuilder}) {
         }
     });
 
-    let whereSql = update.where ? update.where.toString({pg: true}) : "";
+    let whereSql = update.where ? update.where.toString({pg: true}) : false;
+
     let columnsSql = updatedColumns.slice();
     mainConstraint.columns.forEach(column => {
         if ( !updatedColumns.includes(column) ) {
@@ -286,12 +309,19 @@ function buildUpdateOldValues({update, queryBuilder}) {
 
     columnsSql = columnsSql.map(column => `${column} as old_${column}`);
 
-    update.from = [new FromItem(`(
-        select ${columnsSql}
-        from ${tableName}
-        where
-            ${whereSql}
-    ) as old_values`)];
+    if ( whereSql ) {
+        update.from = [new FromItem(`(
+            select ${columnsSql}
+            from ${tableName}
+            where
+                ${whereSql}
+        ) as old_values`)];
+    } else {
+        update.from = [new FromItem(`(
+            select ${columnsSql}
+            from ${tableName}
+        ) as old_values`)];
+    }
 
     
     let tableNameOrAlias = update.as ? update.toLowerCase() : tableName;

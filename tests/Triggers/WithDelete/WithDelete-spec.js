@@ -41,7 +41,7 @@ describe("WithDelete trigger", () => {
             async onDelete({db, row}) {
                 let orderId = row.id_order;
 
-                db.query(`
+                await db.query(`
                     update orders set 
                         units_count = units_count - 1
                     where 
