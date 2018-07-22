@@ -43,13 +43,11 @@ describe("WithInsert trigger", () => {
 
                 db.query(`
                     update orders set 
-                    units_names = (
-                            select string_agg( name, ';' )
+                        units_names = (
+                            select string_agg( name, ';' order by name )
                             from units
                             where
                                 id_order = orders.id
-                            
-                            order by name
                         ) 
                     where 
                         id = $order_id::integer
@@ -92,7 +90,8 @@ describe("WithInsert trigger", () => {
         assert.equal(row.inserted_ids.join(","), "1,2");
         
         orderRow = await server.query(`
-            select units_names 
+            select row 
+                units_names 
             from orders 
             where id = $order_id::integer
         `, {

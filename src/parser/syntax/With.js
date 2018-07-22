@@ -94,8 +94,8 @@ class With extends Syntax {
         return sql;
     }
     
-    setWithQuery(name, selectSql) {
-        let withQuery = new this.Coach.WithQuery(`${name} as (${ selectSql })`);
+    setWithQuery(name, sql) {
+        let withQuery = new this.Coach.WithQuery(`${name} as (${ sql })`);
         let key = withQuery.name.toLowerCase();
         
         this.queriesArr.push(withQuery);

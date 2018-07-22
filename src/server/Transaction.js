@@ -36,11 +36,12 @@ class Transaction {
 
     async runAndCatchChanges(query) {
         // transform query for catching changes
-        let catcher = this.server.queryBuilder.buildChangesCatcher(query);
+        let {prepareResult, sql} = this.server.queryBuilder.buildChangesCatcher(query);
+
         // pg can return array of results
-        let pgResult = await this._executeQuery(query);
+        let pgResult = await this._executeSql(sql);
         // get out result and all changes
-        let {result, changesStack} = catcher.prepareResult(pgResult);
+        let {result, changesStack} = prepareResult(pgResult);
         
         return {
             changesStack,
@@ -49,9 +50,7 @@ class Transaction {
     }
     
     // just redefine callstack
-    async _executeQuery(query) {
-        let sql = query.toString({ pg: true });
-
+    async _executeSql(sql) {
         try {
             return await this.db.query(sql);
         } catch(dbError) {
