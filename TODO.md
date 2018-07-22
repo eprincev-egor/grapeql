@@ -70,6 +70,11 @@
 # Tasks:
 	- raw
     - crud events
+        + with insert
+        + with update
+        + with delete
+        - on conflict do ...
+        - constraints cascade delete and set null
     - deps
     - transaction
 	- jsql
