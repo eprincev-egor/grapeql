@@ -30,11 +30,13 @@ function buildChangesCatcher({
     if ( needTempTable(query) ) {
         hasTempTable = true;
 
+        // integer need for save events order 
         beforeSql = `
             create temp table changes (
                 table_name text,
                 command text,
-                result text
+                result text,
+                with_query_index integer
             );
         `;
 
@@ -49,14 +51,17 @@ function buildChangesCatcher({
                     insert into changes (
                         table_name,
                         command,
-                        result
+                        result,
+                        with_query_index
                     )
                     select
                         '${ table }',
                         'insert',
-                        row_to_json( tmp_row )::text
+                        row_to_json( tmp_row )::text,
+                        ${index}
                     from ${withItem.name} as tmp_row
                 `);
+                index++;
             }
 
             else if ( withItem.delete ) {
@@ -68,14 +73,17 @@ function buildChangesCatcher({
                     insert into changes (
                         table_name,
                         command,
-                        result
+                        result,
+                        with_query_index
                     )
                     select
                         '${ table }',
                         'delete',
-                        row_to_json( tmp_row )::text
+                        row_to_json( tmp_row )::text,
+                        ${index}
                     from ${withItem.name} as tmp_row
                 `);
+                index++;
             }
 
             else if ( withItem.update ) {
@@ -90,21 +98,25 @@ function buildChangesCatcher({
                     insert into changes (
                         table_name,
                         command,
-                        result
+                        result,
+                        with_query_index
                     )
                     select
                         '${ table }',
                         'update',
-                        row_to_json( tmp_row )::text
+                        row_to_json( tmp_row )::text,
+                        ${index}
                     from ${withItem.name} as tmp_row
                 `);
+                index++;
             }
         });
 
         afterSql = `
             ;
             select *
-            from changes;
+            from changes
+            order by with_query_index;
         `;
     }
 
@@ -169,6 +181,20 @@ function prepareResult({
     }
 
     let changesStack = [];
+    
+    // inserted rows in with query, must be first in changes stack
+    if ( selectChangesResult ) {
+        selectChangesResult.rows.forEach(row => {
+            let type = row.command;
+            let table = row.table_name;
+            let result = row.result;
+
+            row = JSON.parse(result);
+            let changes = row2changes(type, table, row);
+
+            changesStack.push(changes);
+        });
+    }
 
     if ( ["insert", "update", "delete"].includes(type) ) {
         // public.orders
@@ -182,19 +208,6 @@ function prepareResult({
         });
     }
     
-
-    if ( selectChangesResult ) {
-        selectChangesResult.rows.forEach(row => {
-            let type = row.command;
-            let table = row.table_name;
-            let result = row.result;
-
-            row = JSON.parse(result);
-            let changes = row2changes(type, table, row);
-
-            changesStack.push(changes);
-        });
-    }
 
     return {
         result,
