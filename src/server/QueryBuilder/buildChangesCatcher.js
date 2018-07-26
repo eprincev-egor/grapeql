@@ -87,6 +87,8 @@ function buildChangesCatcher({
             }
 
             else if ( withItem.update ) {
+                withItem.update.returningAll = true;
+
                 buildUpdateOldValues({
                     update: withItem.update, 
                     queryBuilder
