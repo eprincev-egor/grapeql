@@ -116,11 +116,24 @@ class Insert extends Syntax {
             coach.expectWord("returning");
             coach.skipSpace();
 
-            if ( coach.is("*") ) {
-                coach.expect("*");
+            let returning = coach.parseComma("Column");
+            let returningAll = false;
+
+            if ( returning.length == 1 ) {
+                if ( returning[0].expression.elements.length == 1 ) {
+                    let link = returning[0].expression.elements[0];
+
+                    if ( link.link.length == 1 ) {
+                        if ( link.link[0] == "*" ) {
+                            returningAll = true;
+                        }
+                    }
+                }
+            }
+            if ( returningAll ) {
                 this.returningAll = true;
             } else {
-                this.returning = coach.parseComma("Column");
+                this.returning = returning;
                 this.returning.forEach(column => this.addChild(column));
             }
         }

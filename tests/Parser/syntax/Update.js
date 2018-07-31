@@ -507,6 +507,36 @@ module.exports = [
         }
     },
     {
+        str: "update companies set name = 'nice' returning *, id",
+        result: {
+            table: {link: [
+                {word: "companies"}
+            ]},
+            set: [
+                {
+                    column: {word: "name"},
+                    value: {expression: {elements: [
+                        {content: "nice"}
+                    ]}}
+                }
+            ],
+            returning: [
+                {
+                    expression: {elements: [
+                        {link: [
+                            "*"
+                        ]}
+                    ]}
+                },
+                {expression: {elements: [
+                    {link: [
+                        {word: "id"}
+                    ]}
+                ]}}
+            ]
+        }
+    },
+    {
         str: `with x1 as (select 1 as id)
         update companies set
             name = 'nice'
