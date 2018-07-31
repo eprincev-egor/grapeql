@@ -559,6 +559,34 @@ module.exports = [
         }
     },
     {
+        // $ is reserved symbol for returning alias
+        str: "insert into orders returning 1 as \"$\"",
+        error: Error
+    },
+    {
+        // $ is reserved symbol for returning alias
+        str: "insert into orders returning orders.\"$some\"",
+        error: Error
+    },
+    {
+        str: "insert into orders default values returning 1 as \"x$\"",
+        result: {
+            table: {link: [
+                {word: "orders"}
+            ]},
+            defaultValues: true,
+            returning: [
+                {
+                    expression: {elements: [
+                        {number: "1"}
+                    ]},
+                    as: {content: "x$"}
+                }
+            ]
+        }
+    },
+
+    {
         str: "insert into orders values (1), (2, 3)",
         // VALUES lists must all be the same length
         error: Error

@@ -330,6 +330,32 @@ module.exports = [
             ]
         }
     },
+    {
+        // $ is reserved symbol for returning alias
+        str: "delete from orders returning 1 as \"$\"",
+        error: Error
+    },
+    {
+        // $ is reserved symbol for returning alias
+        str: "delete from orders returning orders.\"$some\"",
+        error: Error
+    },
+    {
+        str: "delete from orders returning 1 as \"x$\"",
+        result: {
+            table: {link: [
+                {word: "orders"}
+            ]},
+            returning: [
+                {
+                    expression: {elements: [
+                        {number: "1"}
+                    ]},
+                    as: {content: "x$"}
+                }
+            ]
+        }
+    },
 
     {
         str: "delete row from orders",

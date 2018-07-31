@@ -60,6 +60,20 @@ class Column extends Syntax {
 
         return out;
     }
+
+    getLowerAlias() {
+        if ( this.as ) {
+            return this.as.toLowerCase();
+        }
+
+        if ( this.expression.isLink() ) {
+            let link = this.expression.getLink();
+            let name = link.getLast();
+            return name.toLowerCase();
+        }
+
+        return null;
+    }
 }
 
 module.exports = Column;

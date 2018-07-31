@@ -558,6 +558,40 @@ module.exports = [
         }
     },
     {
+        // $ is reserved symbol for returning alias
+        str: "update orders set id = 1 returning 1 as \"$\"",
+        error: Error
+    },
+    {
+        // $ is reserved symbol for returning alias
+        str: "update orders set id = 1 returning orders.\"$some\"",
+        error: Error
+    },
+    {
+        str: "update orders set id = 1 returning 1 as \"x$\"",
+        result: {
+            table: {link: [
+                {word: "orders"}
+            ]},
+            set: [
+                {
+                    column: {word: "id"},
+                    value: {expression: {elements: [
+                        {number: "1"}
+                    ]}}
+                }
+            ],
+            returning: [
+                {
+                    expression: {elements: [
+                        {number: "1"}
+                    ]},
+                    as: {content: "x$"}
+                }
+            ]
+        }
+    },
+    {
         str: `with x1 as (select 1 as id)
         update companies set
             name = 'nice'

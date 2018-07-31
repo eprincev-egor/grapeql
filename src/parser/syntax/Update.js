@@ -99,6 +99,16 @@ class Update extends Syntax {
                     }
                 }
             }
+            returning.forEach(column => {
+                let alias = column.getLowerAlias();
+                if ( !alias ) {
+                    return;
+                }
+
+                if ( alias[0] == "$" ) {
+                    throw new Error("$ is reserved symbol for returning alias");
+                }
+            });
             
             if ( returningAll ) {
                 this.returningAll = true;
