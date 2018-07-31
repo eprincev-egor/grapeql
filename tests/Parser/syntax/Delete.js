@@ -314,6 +314,22 @@ module.exports = [
             ]
         }
     },
+    {
+        str: "delete from only orders * as Order returning 1",
+        result: {
+            star: true,
+            only: true,
+            table: {link: [
+                {word: "orders"}
+            ]},
+            as: {word: "Order"},
+            returning: [
+                {expression: {elements: [
+                    {number: "1"}
+                ]}}
+            ]
+        }
+    },
 
     {
         str: "delete row from orders",

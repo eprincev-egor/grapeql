@@ -121,15 +121,20 @@ class Insert extends Syntax {
 
             if ( returning.length == 1 ) {
                 if ( returning[0].expression.elements.length == 1 ) {
-                    let link = returning[0].expression.elements[0];
+                    let elem = returning[0].expression.elements[0];
 
-                    if ( link.link.length == 1 ) {
-                        if ( link.link[0] == "*" ) {
-                            returningAll = true;
+                    if ( elem.link ) {
+                        let link = elem.link;
+
+                        if ( link.length == 1 ) {
+                            if ( link[0] == "*" ) {
+                                returningAll = true;
+                            }
                         }
                     }
                 }
             }
+            
             if ( returningAll ) {
                 this.returningAll = true;
             } else {

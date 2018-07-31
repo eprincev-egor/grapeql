@@ -378,6 +378,20 @@ module.exports = [
         }
     },
     {
+        str: "insert into orders default values returning 1",
+        result: {
+            table: {link: [
+                {word: "orders"}
+            ]},
+            defaultValues: true,
+            returning: [
+                {expression: {elements: [
+                    {number: "1"}
+                ]}}
+            ]
+        }
+    },
+    {
         str: "insert into companies (id, name) values (1, 'Test') on conflict (id) where id > 0 do nothing returning *",
         result: {
             table: {link: [
