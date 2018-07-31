@@ -35,33 +35,29 @@ function buildChangesCatcher({
             create temp table changes (
                 table_name text,
                 command text,
-                result text,
-                with_query_index integer
+                result text
             );
         `;
 
-        let index = 0;
+        let withQueries = [];
         query.with.queriesArr.forEach(withItem => {
             if ( withItem.insert ) {
                 withItem.insert.returningAll = true;
 
                 let table = queryBuilder.getQueryTableName(withItem.insert);
 
-                query.with.setWithQuery("tmp" + index, `
+                withQueries.push(`
                     insert into changes (
                         table_name,
                         command,
-                        result,
-                        with_query_index
+                        result
                     )
                     select
                         '${ table }',
                         'insert',
-                        row_to_json( tmp_row )::text,
-                        ${index}
+                        row_to_json( tmp_row )::text
                     from ${withItem.name} as tmp_row
                 `);
-                index++;
             }
 
             else if ( withItem.delete ) {
@@ -69,21 +65,18 @@ function buildChangesCatcher({
 
                 let table = queryBuilder.getQueryTableName(withItem.delete);
 
-                query.with.setWithQuery("tmp" + index, `
+                withQueries.push(`
                     insert into changes (
                         table_name,
                         command,
-                        result,
-                        with_query_index
+                        result
                     )
                     select
                         '${ table }',
                         'delete',
-                        row_to_json( tmp_row )::text,
-                        ${index}
+                        row_to_json( tmp_row )::text
                     from ${withItem.name} as tmp_row
                 `);
-                index++;
             }
 
             else if ( withItem.update ) {
@@ -96,29 +89,31 @@ function buildChangesCatcher({
 
                 let table = queryBuilder.getQueryTableName(withItem.update);
 
-                query.with.setWithQuery("tmp" + index, `
+                withQueries.push(`
                     insert into changes (
                         table_name,
                         command,
-                        result,
-                        with_query_index
+                        result
                     )
                     select
                         '${ table }',
                         'update',
-                        row_to_json( tmp_row )::text,
-                        ${index}
+                        row_to_json( tmp_row )::text
                     from ${withItem.name} as tmp_row
                 `);
-                index++;
             }
         });
+
+        // postgres executing with queries in reverse order
+        for (let i = withQueries.length - 1; i >= 0; i--) {
+            let sql = withQueries[i];
+            query.with.setWithQuery("tmp" + i, sql);
+        }
 
         afterSql = `
             ;
             select *
-            from changes
-            order by with_query_index;
+            from changes;
         `;
     }
 

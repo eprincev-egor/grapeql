@@ -363,99 +363,201 @@ describe("WithAllCommands trigger", () => {
         assert.equal(triggersCalls[4].changes.name, "test 2");
         assert.equal(triggersCalls[5].changes.name, "test 3");
     });
-/*
+
     it("with (update...), (update...) update", async() => {
         let triggersCalls = [];
 
-        class TestUpdate {
+        class TestAllCommands {
             getEvents() {
                 return {
-                    "update:units": "onUpdate"
+                    "insert:units": "onInsert",
+                    "update:units": "onUpdate",
+                    "delete:units": "onDelete"
                 };
+            }
+
+            async onInsert({row}) {
+                triggersCalls.push({
+                    type: "insert",
+                    row
+                });
             }
 
             async onUpdate({row, prev, changes}) {
                 triggersCalls.push({
+                    type: "update",
                     row, prev, changes
                 });
             }
-        }
 
-        server.triggers.create(TestUpdate);
+            async onDelete({row}) {
+                triggersCalls.push({
+                    type: "delete",
+                    row
+                });
+            }
+        }
 
         await server.query(`
             insert into units 
                 (name)
             values
-                ('a'),
-                ('b'),
-                ('c')
+                ('1'),
+                ('2'),
+                ('3'),
+
+                ('x'),
+                ('y'),
+                ('z')
         `);
-        
-        await server.query(`
+
+        server.triggers.create(TestAllCommands);
+
+        let result = await server.query(`
             with
-                updated_1 as (
-                    update units set
-                        name = 'test 1 ' || name
-                    returning id
+                inserted as (
+                    insert into units 
+                        (name)
+                    values
+                        ('a'),
+                        ('b'),
+                        ('c')
+                    returning name
                 ),
 
-                updated_2 as (
+                updated as (
                     update units set
-                        name = 'test 2 ' || name
-                    where
-                        units.id in (select id from updated_1)
-                    returning id
+                        name = name || ':updated'
+                    where name in ('1', '2', '3')
+                    returning name
+                ),
+
+                deleted as (
+                    delete from units
+                    where name in ('x', 'y', 'z')
+                    returning name
                 )
             
-            update units set
-                name = 'test 3 ' || name
-            where
-                units.id in (select id from updated_2)
+            select name
+            from inserted
+
+            union all
+
+            select name
+            from updated
+
+            union all
+
+            select name
+            from deleted
         `);
 
-        assert.equal(triggersCalls.length, 9);
+        assert.deepEqual(triggersCalls, [
+            // insert
+            {
+                type: "insert",
+                row: {
+                    id: 7,
+                    name: "a"
+                }
+            },
+            {
+                type: "insert",
+                row: {
+                    id: 8,
+                    name: "b"
+                }
+            },
+            {
+                type: "insert",
+                row: {
+                    id: 9,
+                    name: "c"
+                }
+            },
+
+            // update
+            {
+                type: "update",
+                row: {
+                    id: 1,
+                    name: "1:updated"
+                },
+                changes: {
+                    name: "1:updated"
+                },
+                prev: {
+                    id: 1,
+                    name: "1"
+                }
+            },
+            {
+                type: "update",
+                row: {
+                    id: 2,
+                    name: "2:updated"
+                },
+                changes: {
+                    name: "2:updated"
+                },
+                prev: {
+                    id: 2,
+                    name: "2"
+                }
+            },
+            {
+                type: "update",
+                row: {
+                    id: 3,
+                    name: "3:updated"
+                },
+                changes: {
+                    name: "3:updated"
+                },
+                prev: {
+                    id: 3,
+                    name: "3"
+                }
+            },
+            // delete
+            {
+                type: "delete",
+                row: {
+                    id: 4,
+                    name: "x"
+                }
+            },
+            {
+                type: "delete",
+                row: {
+                    id: 5,
+                    name: "y"
+                }
+            },
+            {
+                type: "delete",
+                row: {
+                    id: 6,
+                    name: "z"
+                }
+            }
+        ]);
         
-        // updated rows in with query, must be first in changes stack
-        
-        // updated_1
-        assert.equal(triggersCalls[0].prev.name, "a");
-        assert.equal(triggersCalls[1].prev.name, "b");
-        assert.equal(triggersCalls[2].prev.name, "c");
 
-        assert.equal(triggersCalls[0].row.name, "test 1 a");
-        assert.equal(triggersCalls[1].row.name, "test 1 b");
-        assert.equal(triggersCalls[2].row.name, "test 1 c");
-
-        assert.equal(triggersCalls[0].changes.name, "test 1 a");
-        assert.equal(triggersCalls[1].changes.name, "test 2 a");
-        assert.equal(triggersCalls[2].changes.name, "test 3 a");
-        
-        // updated_2
-        assert.equal(triggersCalls[3].prev.name, "test 1 a");
-        assert.equal(triggersCalls[4].prev.name, "test 1 b");
-        assert.equal(triggersCalls[5].prev.name, "test 1 c");
-
-        assert.equal(triggersCalls[3].row.name, "test 2 a");
-        assert.equal(triggersCalls[4].row.name, "test 2 b");
-        assert.equal(triggersCalls[5].row.name, "test 2 c");
-
-        assert.equal(triggersCalls[3].changes.name, "test 2 a");
-        assert.equal(triggersCalls[4].changes.name, "test 2 b");
-        assert.equal(triggersCalls[5].changes.name, "test 2 c");
-
-        // main update
-        assert.equal(triggersCalls[6].prev.name, "test 2 a");
-        assert.equal(triggersCalls[7].prev.name, "test 2 b");
-        assert.equal(triggersCalls[8].prev.name, "test 2 c");
-
-        assert.equal(triggersCalls[6].row.name, "test 3 a");
-        assert.equal(triggersCalls[7].row.name, "test 3 b");
-        assert.equal(triggersCalls[8].row.name, "test 3 c");
-
-        assert.equal(triggersCalls[6].changes.name, "test 3 a");
-        assert.equal(triggersCalls[7].changes.name, "test 3 b");
-        assert.equal(triggersCalls[8].changes.name, "test 3 c");
+        assert.deepEqual(result, [
+            // inserted
+            {name: "a"},
+            {name: "b"},
+            {name: "c"},
+            // updated
+            {name: "1:updated"},
+            {name: "2:updated"},
+            {name: "3:updated"},
+            // deleted
+            {name: "x"},
+            {name: "y"},
+            {name: "z"}
+        ]);
     });
-*/
+
 });
