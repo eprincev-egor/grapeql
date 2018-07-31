@@ -4,25 +4,18 @@ const _ = require("lodash");
 
 const FromItem = require("../../parser/syntax/FromItem");
 const Expression = require("../../parser/syntax/Expression");
+const Column = require("../../parser/syntax/Column");
 
 
 function buildChangesCatcher({
     query, 
     queryBuilder
 }) {
-    if ( !query.returning && !query.returningAll ) {
-        query.returningAll = true;
-    }
-    
     let type = queryBuilder.getQueryCommandType(query);
 
-    if ( type == "update" ) {
-        buildUpdateOldValues({
-            update: query, 
-            queryBuilder
-        });
-    }
+    buildReturning({query, queryBuilder});
 
+    
     let beforeSql = "";
     let afterSql = "";
     let hasTempTable = false;
@@ -42,7 +35,10 @@ function buildChangesCatcher({
         let withQueries = [];
         query.with.queriesArr.forEach(withItem => {
             if ( withItem.insert ) {
-                withItem.insert.returningAll = true;
+                buildReturning({
+                    query: withItem.insert, 
+                    queryBuilder
+                });
 
                 let table = queryBuilder.getQueryTableName(withItem.insert);
 
@@ -61,7 +57,10 @@ function buildChangesCatcher({
             }
 
             else if ( withItem.delete ) {
-                withItem.delete.returningAll = true;
+                buildReturning({
+                    query: withItem.delete, 
+                    queryBuilder
+                });
 
                 let table = queryBuilder.getQueryTableName(withItem.delete);
 
@@ -80,10 +79,8 @@ function buildChangesCatcher({
             }
 
             else if ( withItem.update ) {
-                withItem.update.returningAll = true;
-
-                buildUpdateOldValues({
-                    update: withItem.update, 
+                buildReturning({
+                    query: withItem.update, 
                     queryBuilder
                 });
 
@@ -172,7 +169,7 @@ function prepareResult({
         !selectChangesResult
     ) {
         return {
-            result,
+            result: removeSystemKeys(result),
             changesStack: []
         };
     }
@@ -193,7 +190,8 @@ function prepareResult({
         });
     }
 
-    if ( ["insert", "update", "delete"].includes(type) ) {
+    // insert/update/delete
+    if ( type != "select" ) {
         // public.orders
         let table = queryBuilder.getQueryTableName(query);
 
@@ -207,9 +205,20 @@ function prepareResult({
     
 
     return {
-        result,
+        result: removeSystemKeys(result),
         changesStack
     };
+}
+
+function removeSystemKeys(result) {
+    (_.isArray(result) ? result : [result]).forEach(row => {
+        for (let key in row) {
+            if ( key[0] == "$" ) {
+                delete row[ key ];
+            }
+        }
+    });
+    return result;
 }
 
 function row2changes(type, table, row) {
@@ -218,12 +227,28 @@ function row2changes(type, table, row) {
     }
 
     if ( type == "update" ) {
+        let $row = {};
+        let has$ = false;
+        for (let $key in row) {
+            if ( /^\$old\$/.test($key) ) {
+                $row[ $key ] = row[ $key ];
+            }
+            else if ( $key[0] == "$" ) {
+                let key = $key.slice(1);
+                $row[ key ] = row[ $key ];
+                has$ = true;
+            }
+        }
+        if ( has$ ) {
+            row = $row;
+        }
+
         let prev = {},
             changes = {},
             newRow = {};
         
         for (let key in row) {
-            if ( /old_/.test(key) ) {
+            if ( /^\$old\$/.test(key) ) {
                 continue;
             }
             
@@ -231,7 +256,7 @@ function row2changes(type, table, row) {
             prev[ key ] = value;
             newRow[ key ] = value;
 
-            let oldKey = "old_" + key;
+            let oldKey = "$old$" + key;
             if ( oldKey in row ) {
                 let oldValue = row[ oldKey ];
                 
@@ -250,11 +275,29 @@ function row2changes(type, table, row) {
             prev
         };
     } else {
-        return {
-            type,
-            table,
-            row
-        };
+        let $row = {};
+        let has$ = false;
+        for (let $key in row) {
+            if ( $key[0] == "$" ) {
+                let key = $key.slice(1);
+                $row[ key ] = row[ $key ];
+                has$ = true;
+            }
+        }
+
+        if ( has$ ) {
+            return {
+                type,
+                table,
+                row: $row
+            };
+        } else {
+            return {
+                type,
+                table,
+                row
+            };
+        }
     }
 }
 
@@ -317,7 +360,15 @@ function buildUpdateOldValues({update, queryBuilder}) {
         }
     });
 
-    columnsSql = columnsSql.map(column => `${column} as old_${column}`);
+    let returning = [];
+    columnsSql = columnsSql.map(column => {
+        let alias = `"$old$${column}"`;
+
+        let returningColumn = new Column(`old_values.${alias}`);
+        returning.push(returningColumn);
+
+        return `${column} as ${alias}`;
+    });
 
     if ( whereSql ) {
         update.from = [new FromItem(`(
@@ -338,12 +389,54 @@ function buildUpdateOldValues({update, queryBuilder}) {
     
     let constraintSql = [];
     mainConstraint.columns.forEach(column => {
-        constraintSql.push(`old_values.old_${column} = ${tableNameOrAlias}.${column}`);
+        constraintSql.push(`old_values."$old$${column}" = ${tableNameOrAlias}.${column}`);
     });
 
     constraintSql = constraintSql.join(" and ");
 
     update.where = new Expression(constraintSql);
+
+    return returning;
+}
+
+function buildReturning({query, queryBuilder}) {
+    let type = queryBuilder.getQueryCommandType(query);
+
+    if ( type == "select" ) {
+        return;
+    }
+    
+    let oldValuesReturning;
+    if ( type == "update" ) {
+        oldValuesReturning = buildUpdateOldValues({
+            update: query, 
+            queryBuilder
+        });
+    }
+    
+    if ( !query.returning ) {
+        if ( !query.returningAll ) {
+            query.returningAll = true;
+        }
+        return;
+    }
+    
+    let tableName = queryBuilder.getQueryTableName(query);
+    let dbTable = queryBuilder.server.database.findTable(tableName);
+
+    for (let key in dbTable.columns) {
+        let syntaxColumn = new Column(`${ tableName }.${ key } as "$${ key }"`);
+
+        query.returning.push(syntaxColumn);
+        query.addChild(syntaxColumn);
+    }
+
+    if ( oldValuesReturning ) {
+        oldValuesReturning.forEach(syntaxColumn => {
+            query.returning.push(syntaxColumn);
+            query.addChild(syntaxColumn);
+        });
+    }
 }
 
 module.exports = buildChangesCatcher;

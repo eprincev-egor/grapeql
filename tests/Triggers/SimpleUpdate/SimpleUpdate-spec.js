@@ -50,8 +50,8 @@ describe("SimpleUpdate trigger", () => {
                         where
                             id = $order_id::integer
                     `, {
-                        $order_id: prev.id_order
-                    });
+                            $order_id: prev.id_order
+                        });
                 }
                 
                 if ( changes.id_order ) {
@@ -61,8 +61,8 @@ describe("SimpleUpdate trigger", () => {
                         where
                             id = $order_id::integer
                     `, {
-                        $order_id: changes.id_order
-                    });
+                            $order_id: changes.id_order
+                        });
                 }
             }
         }

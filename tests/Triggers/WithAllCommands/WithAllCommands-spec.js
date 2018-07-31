@@ -364,7 +364,7 @@ describe("WithAllCommands trigger", () => {
         assert.equal(triggersCalls[5].changes.name, "test 3");
     });
 
-    it("with (update...), (update...) update", async() => {
+    it("with (insert...), (update...), (delete...) select...", async() => {
         let triggersCalls = [];
 
         class TestAllCommands {

@@ -46,8 +46,8 @@ describe("SimpleInsert trigger", () => {
                     values
                     ($order_id::integer)
                 `, {
-                    order_id: row.id
-                });
+                        order_id: row.id
+                    });
             }
         }
 
