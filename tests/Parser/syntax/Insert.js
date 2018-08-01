@@ -559,12 +559,17 @@ module.exports = [
         }
     },
     {
-        // $ is reserved symbol for returning alias
+        // $ is reserved symbol for alias
+        str: "insert into orders as \"$orders\"",
+        error: Error
+    },
+    {
+        // $ is reserved symbol for alias
         str: "insert into orders returning 1 as \"$\"",
         error: Error
     },
     {
-        // $ is reserved symbol for returning alias
+        // $ is reserved symbol for alias
         str: "insert into orders returning orders.\"$some\"",
         error: Error
     },

@@ -331,12 +331,17 @@ module.exports = [
         }
     },
     {
-        // $ is reserved symbol for returning alias
+        // $ is reserved symbol for alias
+        str: "delete from orders as \"$orders\"",
+        error: Error
+    },
+    {
+        // $ is reserved symbol for alias
         str: "delete from orders returning 1 as \"$\"",
         error: Error
     },
     {
-        // $ is reserved symbol for returning alias
+        // $ is reserved symbol for alias
         str: "delete from orders returning orders.\"$some\"",
         error: Error
     },

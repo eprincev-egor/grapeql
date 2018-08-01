@@ -364,7 +364,7 @@ function buildUpdateOldValues({update, queryBuilder}) {
     columnsSql = columnsSql.map(column => {
         let alias = `"$old$${column}"`;
 
-        let returningColumn = new Column(`old_values.${alias}`);
+        let returningColumn = new Column(`"$old_values".${alias}`);
         returning.push(returningColumn);
 
         return `${column} as ${alias}`;
@@ -376,20 +376,20 @@ function buildUpdateOldValues({update, queryBuilder}) {
             from ${tableName}
             where
                 ${whereSql}
-        ) as old_values`)];
+        ) as "$old_values"`)];
     } else {
         update.from = [new FromItem(`(
             select ${columnsSql}
             from ${tableName}
-        ) as old_values`)];
+        ) as "$old_values"`)];
     }
 
     
-    let tableNameOrAlias = update.as ? update.toLowerCase() : tableName;
+    let tableNameOrAlias = update.as ? update.as.toLowerCase() : tableName;
     
     let constraintSql = [];
     mainConstraint.columns.forEach(column => {
-        constraintSql.push(`old_values."$old$${column}" = ${tableNameOrAlias}.${column}`);
+        constraintSql.push(`"$old_values"."$old$${column}" = ${tableNameOrAlias}.${column}`);
     });
 
     constraintSql = constraintSql.join(" and ");
@@ -422,10 +422,12 @@ function buildReturning({query, queryBuilder}) {
     }
     
     let tableName = queryBuilder.getQueryTableName(query);
+    let tableNameOrAlias = query.as ? query.as.toLowerCase() : tableName;
+
     let dbTable = queryBuilder.server.database.findTable(tableName);
 
     for (let key in dbTable.columns) {
-        let syntaxColumn = new Column(`${ tableName }.${ key } as "$${ key }"`);
+        let syntaxColumn = new Column(`${ tableNameOrAlias }.${ key } as "$${ key }"`);
 
         query.returning.push(syntaxColumn);
         query.addChild(syntaxColumn);

@@ -98,4 +98,57 @@ describe("SimpleUpdate trigger", () => {
         assert.ok(true);
     });
 
+    it("update units as old_values", async() => {
+        let triggersCalls = [];
+
+        class TestUpdate {
+            getEvents() {
+                return {
+                    "update:units": "onUpdate"
+                };
+            }
+
+            onUpdate({row}) {
+                triggersCalls.push(row);
+            }
+        }
+
+        server.triggers.create(TestUpdate);
+
+        let order = await server.query(`
+            insert row into orders
+            default values
+        `);
+
+        await server.query(`
+            insert into units
+                (id_order)
+            values
+                ($order_id::integer)
+        `, {
+                order_id: order.id
+            });
+        
+        let unit = await server.query(`
+            update row units as old_values set 
+                doc_number = 'nice'
+            returning 
+                old_values.doc_number, 
+                id
+        `);
+
+        assert.deepEqual(unit, {
+            doc_number: "nice",
+            id: 1
+        });
+
+        assert.deepEqual(triggersCalls, [
+            {
+                id: 1,
+                id_order: 1,
+                doc_number: "nice"
+            }
+        ]);
+    });
+
 });

@@ -6,6 +6,7 @@ CREATE TABLE orders (
 
 CREATE TABLE units (
   id serial primary key,
-  id_order integer NOT NULL REFERENCES orders
+  id_order integer NOT NULL REFERENCES orders,
+  doc_number text
 );
 

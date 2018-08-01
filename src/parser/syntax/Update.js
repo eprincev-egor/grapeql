@@ -46,10 +46,16 @@ class Update extends Syntax {
             coach.expectWord("as");
             coach.skipSpace();
 
+            let i = coach.i;
             this.as = coach.parseObjectName();
             this.addChild(this.as);
 
             coach.skipSpace();
+
+            if ( this.as.toLowerCase()[0] == "$" ) {
+                coach.i = i;
+                coach.throwError("$ is reserved symbol for alias");
+            }
         }
 
         coach.expectWord("set");
@@ -81,6 +87,7 @@ class Update extends Syntax {
             coach.expectWord("returning");
             coach.skipSpace();
 
+            let i = coach.i;
             let returning = coach.parseComma("Column");
             let returningAll = false;
 
@@ -106,7 +113,8 @@ class Update extends Syntax {
                 }
 
                 if ( alias[0] == "$" ) {
-                    throw new Error("$ is reserved symbol for returning alias");
+                    coach.i = i;
+                    coach.throwError("$ is reserved symbol for alias");
                 }
             });
             
