@@ -556,5 +556,91 @@ module.exports = [
                 {content: "abc"}
             ]
         }
+    },
+    {
+        str: "array[]",
+        result: {
+            elements: [
+                {items: []}
+            ]
+        }
+    },
+    {
+        str: "array[1]",
+        result: {
+            elements: [
+                {items: [
+                    {
+                        elements: [
+                            {number: "1"}
+                        ]
+                    }
+                ]}
+            ]
+        }
+    },
+    {
+        str: "array[true, false]",
+        result: {
+            elements: [
+                {items: [
+                    {
+                        elements: [
+                            {boolean: true}
+                        ]
+                    },
+                    {
+                        elements: [
+                            {boolean: false}
+                        ]
+                    }
+                ]}
+            ]
+        }
+    },
+    {
+        str: "array[1]::bigint[]",
+        result: {
+            elements: [
+                {items: [
+                    {
+                        elements: [
+                            {number: "1"}
+                        ]
+                    }
+                ]},
+                {dataType: {type: "bigint[]"}}
+            ]
+        }
+    },
+    {
+        str: "array[null]::bigint[]",
+        result: {
+            elements: [
+                {items: [
+                    {
+                        elements: [
+                            {null: true}
+                        ]
+                    }
+                ]},
+                {dataType: {type: "bigint[]"}}
+            ]
+        }
+    },
+    {
+        str: "array[null]::numeric(10, 2)[]",
+        result: {
+            elements: [
+                {items: [
+                    {
+                        elements: [
+                            {null: true}
+                        ]
+                    }
+                ]},
+                {dataType: {type: "numeric(10,2)[]"}}
+            ]
+        }
     }
 ];
