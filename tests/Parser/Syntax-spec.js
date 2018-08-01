@@ -49,6 +49,7 @@ tests.Extension = require("./syntax/Extension");
 tests.VariableDefinition = require("./syntax/VariableDefinition");
 tests.Declare = require("./syntax/Declare");
 tests.QueryNode = require("./syntax/QueryNode");
+tests.PgArray = require("./syntax/PgArray");
 
 for (let className in tests) {
     describe(className, () => {

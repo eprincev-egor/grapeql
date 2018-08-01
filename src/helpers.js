@@ -147,6 +147,14 @@ let isLikeBoolean = function(value) {
     );
 };
 
+let isSqlArray = function(type) {
+    return /\[\s*\]$/.test(type);
+};
+
+let getElementType = function(type) {
+    return type.replace(/\[\s*\]$/, "");
+};
+
 let value2sql = function(type, value) {
     if ( value == null ) {
         return "null";
@@ -187,6 +195,17 @@ let value2sql = function(type, value) {
         } else {
             throw new Error("invalid value for boolean: " + value);
         }
+    }
+
+    else if ( isSqlArray(type) ) {
+        if ( !Array.isArray(value) ) {
+            throw new Error("invalid value for array: " + value);
+        }
+
+        let elementType = getElementType( type );
+        let elements = value.map(value => value2sql(elementType, value));
+        
+        return `ARRAY[ ${elements.join(", ")} ]::${ type }`;
     }
 
     else {

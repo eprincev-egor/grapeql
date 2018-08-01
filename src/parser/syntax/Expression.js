@@ -177,6 +177,10 @@ class Expression extends Syntax {
             elem = coach.parseFunctionCall();
         }
 
+        else if ( coach.isPgArray() ) {
+            elem = coach.parsePgArray();
+        }
+
         else if ( coach.isColumnLink() ) {
             elem = coach.parseColumnLink({ availableStar: options.availableStar });
         }

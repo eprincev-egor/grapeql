@@ -79,6 +79,7 @@ GrapeQLCoach.addSyntax("Extension", require("./syntax/Extension"));
 GrapeQLCoach.addSyntax("VariableDefinition", require("./syntax/VariableDefinition"));
 GrapeQLCoach.addSyntax("Declare", require("./syntax/Declare"));
 GrapeQLCoach.addSyntax("QueryNode", require("./syntax/QueryNode"));
+GrapeQLCoach.addSyntax("PgArray", require("./syntax/PgArray"));
 
 GrapeQLCoach.parseEntity = function(str) {
     let coach = new GrapeQLCoach(str);
