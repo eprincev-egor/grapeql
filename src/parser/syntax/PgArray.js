@@ -14,7 +14,7 @@ class PgArray extends Syntax {
             this.items = coach.parseComma("Expression");
             this.items.forEach(item => this.addChild(item));
         } else {
-            this.items =[];
+            this.items = [];
         }
 
         coach.skipSpace();

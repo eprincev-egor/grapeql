@@ -2,8 +2,6 @@
 
 const _ = require("lodash");
 
-const FromItem = require("../../parser/syntax/FromItem");
-const Expression = require("../../parser/syntax/Expression");
 const Column = require("../../parser/syntax/Column");
 
 
@@ -226,44 +224,41 @@ function row2changes(type, table, row) {
         return;
     }
 
-    if ( type == "update" ) {
-        let $row = {};
-        let has$ = false;
-        for (let $key in row) {
-            if ( /^\$old\$/.test($key) ) {
-                $row[ $key ] = row[ $key ];
-            }
-            else if ( $key[0] == "$" ) {
-                let key = $key.slice(1);
-                $row[ key ] = row[ $key ];
-                has$ = true;
-            }
+    let $row = {};
+    let has$ = false;
+    for (let $key in row) {
+        if ( $key == "$$old_values" ) {
+            $row[ $key ] = row[ $key ];
         }
-        if ( has$ ) {
-            row = $row;
+        else if ( $key[0] == "$" ) {
+            let key = $key.slice(1);
+            $row[ key ] = row[ $key ];
+            has$ = true;
         }
+    }
+    if ( has$ ) {
+        row = $row;
+    }
 
-        let prev = {},
+    if ( type == "update" ) {
+        let old = row.$$old_values,
+            prev = {},
             changes = {},
             newRow = {};
         
         for (let key in row) {
-            if ( /^\$old\$/.test(key) ) {
-                continue;
+            if ( key != "$$old_values" ) {
+                prev[ key ] = newRow[ key ] = row[ key ];
             }
-            
-            let value = row[ key ];
-            prev[ key ] = value;
-            newRow[ key ] = value;
+        }
 
-            let oldKey = "$old$" + key;
-            if ( oldKey in row ) {
-                let oldValue = row[ oldKey ];
-                
-                if ( oldValue != value ) {
-                    changes[ key ] = value;
-                    prev[ key ] = oldValue;
-                }
+        for (let key in old) {
+            let newValue = row[ key ];
+            let oldValue = old[ key ];
+
+            if ( newValue != oldValue ) {
+                changes[ key ] = newValue;
+                prev[ key ] = oldValue;
             }
         }
 
@@ -275,29 +270,11 @@ function row2changes(type, table, row) {
             prev
         };
     } else {
-        let $row = {};
-        let has$ = false;
-        for (let $key in row) {
-            if ( $key[0] == "$" ) {
-                let key = $key.slice(1);
-                $row[ key ] = row[ $key ];
-                has$ = true;
-            }
-        }
-
-        if ( has$ ) {
-            return {
-                type,
-                table,
-                row: $row
-            };
-        } else {
-            return {
-                type,
-                table,
-                row
-            };
-        }
+        return {
+            type,
+            table,
+            row
+        };
     }
 }
 
@@ -311,6 +288,7 @@ function needTempTable(query) {
 
 function buildUpdateOldValues({update, queryBuilder}) {
     let tableName = queryBuilder.getQueryTableName(update);
+    let tableNameOrAlias = update.as ? update.as.toLowerCase() : tableName;
 
     let dbTable = queryBuilder.server.database.findTable(tableName);
     if ( !dbTable ) {
@@ -351,52 +329,30 @@ function buildUpdateOldValues({update, queryBuilder}) {
         }
     });
 
-    let whereSql = update.where ? update.where.toString({pg: true}) : false;
+    let columnsSql = updatedColumns.map(column => `'${ column }', ${ column }`).join(",");
 
-    let columnsSql = updatedColumns.slice();
+    let whereSql = [];
     mainConstraint.columns.forEach(column => {
-        if ( !updatedColumns.includes(column) ) {
-            columnsSql.push(column);
-        }
+        whereSql.push(`"$old_values".${column} = ${tableNameOrAlias}.${column}`);
     });
-
-    let returning = [];
-    columnsSql = columnsSql.map(column => {
-        let alias = `"$old$${column}"`;
-
-        let returningColumn = new Column(`"$old_values".${alias}`);
-        returning.push(returningColumn);
-
-        return `${column} as ${alias}`;
-    });
-
-    if ( whereSql ) {
-        update.from = [new FromItem(`(
-            select ${columnsSql}
-            from ${tableName}
-            where
-                ${whereSql}
-        ) as "$old_values"`)];
-    } else {
-        update.from = [new FromItem(`(
-            select ${columnsSql}
-            from ${tableName}
-        ) as "$old_values"`)];
+    whereSql = whereSql.join(" and ");
+    
+    if ( update.returningAll || !update.returning ) {
+        delete update.returningAll;
+        update.returning = [new Column("*")];
     }
-
     
-    let tableNameOrAlias = update.as ? update.as.toLowerCase() : tableName;
-    
-    let constraintSql = [];
-    mainConstraint.columns.forEach(column => {
-        constraintSql.push(`"$old_values"."$old$${column}" = ${tableNameOrAlias}.${column}`);
-    });
-
-    constraintSql = constraintSql.join(" and ");
-
-    update.where = new Expression(constraintSql);
-
-    return returning;
+    update.returning.push(new Column(`
+        (
+            select
+                json_build_object(
+                    ${ columnsSql }
+                )
+            from ${ tableName } as "$old_values"
+            where
+                ${ whereSql }
+        ) as "$$old_values"
+    `));
 }
 
 function buildReturning({query, queryBuilder}) {
@@ -406,9 +362,8 @@ function buildReturning({query, queryBuilder}) {
         return;
     }
     
-    let oldValuesReturning;
     if ( type == "update" ) {
-        oldValuesReturning = buildUpdateOldValues({
+        buildUpdateOldValues({
             update: query, 
             queryBuilder
         });
@@ -431,13 +386,6 @@ function buildReturning({query, queryBuilder}) {
 
         query.returning.push(syntaxColumn);
         query.addChild(syntaxColumn);
-    }
-
-    if ( oldValuesReturning ) {
-        oldValuesReturning.forEach(syntaxColumn => {
-            query.returning.push(syntaxColumn);
-            query.addChild(syntaxColumn);
-        });
     }
 }
 
