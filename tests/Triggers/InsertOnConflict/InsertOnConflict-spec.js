@@ -290,4 +290,94 @@ describe("InsertOnConflict trigger", () => {
         ]);
     });
 
+    it("with insert on conflict", async() => {
+        let triggersCalls = [];
+
+        class Trigger {
+            getEvents() {
+                return {
+                    "insert:units": "onInsert",
+                    "update:units": "onUpdate"
+                };
+            }
+
+            async onInsert({row, type}) {
+                triggersCalls.push({
+                    type,
+                    row
+                });
+            }
+
+            async onUpdate({row, type, prev, changes}) {
+                triggersCalls.push({
+                    type,
+                    row,
+                    prev,
+                    changes
+                });
+            }
+        }
+
+        server.triggers.create(Trigger);
+
+        await server.query(`
+            insert into units
+                (id_order, name)
+            values
+                (1, 'X');
+        `);
+
+        triggersCalls = [];
+        let row = await server.query(`
+            with
+                inserted as (
+                    insert into units
+                        (id, id_order, name)
+                    values
+                        (1, 1, 'Y'),
+                        (2, 1, 'Z')
+                    
+                    on conflict (id)
+                    do update set
+                        name = excluded.name
+                    
+                    returning name
+                )
+            select row
+                string_agg( name, ', ' ) as names
+            from inserted
+        `);
+
+        assert.deepEqual(row, {
+            names: "Y, Z"
+        });
+    
+        assert.deepEqual(triggersCalls, [
+            {
+                type: "update",
+                row: {
+                    id: 1,
+                    id_order: 1,
+                    name: "Y"
+                },
+                prev: {
+                    id: 1,
+                    id_order: 1,
+                    name: "X"
+                },
+                changes: {
+                    name: "Y"
+                }
+            },
+            {
+                type: "insert",
+                row: {
+                    id: 2,
+                    id_order: 1,
+                    name: "Z"
+                }
+            }
+        ]);
+
+    });
 });
