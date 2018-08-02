@@ -107,6 +107,7 @@ class TriggerManager {
             
             if ( type == "update" ) {
                 await trigger.handle({
+                    type,
                     db: transaction,
                     row: row,
                     changes,
@@ -114,6 +115,7 @@ class TriggerManager {
                 });
             } else {
                 await trigger.handle({
+                    type,
                     db: transaction,
                     row
                 });

@@ -227,7 +227,7 @@ function row2changes(type, table, row) {
     let $row = {};
     let has$ = false;
     for (let $key in row) {
-        if ( $key == "$$old_values" ) {
+        if ( $key == "$$old_values" || $key == "$$xmax" ) {
             $row[ $key ] = row[ $key ];
         }
         else if ( $key[0] == "$" ) {
@@ -241,41 +241,67 @@ function row2changes(type, table, row) {
     }
 
     if ( type == "update" ) {
-        let old = row.$$old_values,
-            prev = {},
-            changes = {},
-            newRow = {};
-        
-        for (let key in row) {
-            if ( key != "$$old_values" ) {
-                prev[ key ] = newRow[ key ] = row[ key ];
-            }
-        }
-
-        for (let key in old) {
-            let newValue = row[ key ];
-            let oldValue = old[ key ];
-
-            if ( newValue != oldValue ) {
-                changes[ key ] = newValue;
-                prev[ key ] = oldValue;
-            }
-        }
-
-        return {
-            type,
-            table,
-            row: newRow,
-            changes,
-            prev
-        };
+        return getUpdateChanges({
+            row,
+            table
+        });
     } else {
-        return {
-            type,
-            table,
-            row
-        };
+        if ( "$$xmax" in row ) {
+            let xmax = row.$$xmax;
+            delete row.$$xmax;
+            
+            if ( xmax == "0" ) {
+                delete row.$$old_values;
+                return {
+                    type,
+                    table,
+                    row
+                };
+            } else {
+                return getUpdateChanges({
+                    row,
+                    table
+                });
+            }
+        } else {
+            return {
+                type,
+                table,
+                row
+            };
+        }
     }
+}
+
+function getUpdateChanges({table, row}) {
+    let old = row.$$old_values,
+        prev = {},
+        changes = {},
+        newRow = {};
+
+    for (let key in row) {
+        if ( key != "$$old_values" && key != "$$xmax" ) {
+            prev[ key ] = newRow[ key ] = row[ key ];
+        }
+    }
+
+    for (let key in old) {
+        let newValue = row[ key ];
+        let oldValue = old[ key ];
+
+        if ( newValue != oldValue ) {
+            changes[ key ] = newValue;
+            prev[ key ] = oldValue;
+        }
+    }
+
+    return {
+        type: "update",
+        table,
+        row: newRow,
+        changes,
+        prev
+    };
 }
 
 function needTempTable(query) {
@@ -286,9 +312,9 @@ function needTempTable(query) {
     return query.with.queriesArr.some(withItem => withItem.update || withItem.insert || withItem.delete);
 }
 
-function buildUpdateOldValues({update, queryBuilder}) {
-    let tableName = queryBuilder.getQueryTableName(update);
-    let tableNameOrAlias = update.as ? update.as.toLowerCase() : tableName;
+function buildUpdateOldValues({query, queryBuilder}) {
+    let tableName = queryBuilder.getQueryTableName(query);
+    let tableNameOrAlias = query.as ? query.as.toLowerCase() : tableName;
 
     let dbTable = queryBuilder.server.database.findTable(tableName);
     if ( !dbTable ) {
@@ -315,7 +341,13 @@ function buildUpdateOldValues({update, queryBuilder}) {
     }
 
     let updatedColumns = [];
-    update.set.forEach(setItem => {
+    let isInsert = !!query.onConflict;
+
+    let setItems = isInsert ? 
+        query.onConflict.updateSet :
+        query.set;
+
+    setItems.forEach(setItem => {
         if ( setItem.column ) {
             updatedColumns.push(
                 setItem.column.toLowerCase()
@@ -337,11 +369,11 @@ function buildUpdateOldValues({update, queryBuilder}) {
     });
     whereSql = whereSql.join(" and ");
     
-    if ( !update.returning ) {
-        update.returning = [new Column("*")];
+    if ( !query.returning ) {
+        query.returning = [new Column("*")];
     }
     
-    update.returning.push(new Column(`
+    query.returning.push(new Column(`
         (
             select
                 json_build_object(
@@ -354,6 +386,18 @@ function buildUpdateOldValues({update, queryBuilder}) {
     `));
 }
 
+function buildInsertOnConflict({query, queryBuilder}) {
+    if ( !query.returning ) {
+        query.returning = [];
+    }
+    query.returning.push(new Column("xmax as \"$$xmax\""));
+
+    buildUpdateOldValues({
+        query, 
+        queryBuilder
+    });
+}
+
 function buildReturning({query, queryBuilder}) {
     let type = queryBuilder.getQueryCommandType(query);
 
@@ -361,15 +405,24 @@ function buildReturning({query, queryBuilder}) {
         return;
     }
     
+    if ( !query.returning ) {
+        query.returning = [new Column("*")];
+    }
+    
     if ( type == "update" ) {
         buildUpdateOldValues({
-            update: query, 
+            query, 
             queryBuilder
         });
     }
 
-    if ( !query.returning ) {
-        query.returning = [new Column("*")];
+    if ( type == "insert" ) {
+        if ( query.onConflict && query.onConflict.updateSet ) {
+            buildInsertOnConflict({
+                query, 
+                queryBuilder
+            });
+        }
     }
     
     let tableName = queryBuilder.getQueryTableName(query);
