@@ -11,6 +11,13 @@ DELETE FROM [ ONLY ] table_name [ * ] [ AS alias ]
 const ChangeCommand = require("./ChangeCommand");
 
 class Delete extends ChangeCommand {
+    constructor(fromString) {
+        super();
+        // need for ChangesCatcher
+        this.commandType = "delete";
+        this.fromString(fromString);
+    }
+
     parse(coach, options) {
         options = options || {allowReturningObject: false};
 

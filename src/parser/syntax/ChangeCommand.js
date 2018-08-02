@@ -1,6 +1,7 @@
 "use strict";
 
 const Syntax = require("./Syntax");
+const Column = require("./Column");
 
 // Class helper
 class ChangeCommand extends Syntax {
@@ -47,6 +48,17 @@ class ChangeCommand extends Syntax {
         }
 
         return out;
+    }
+
+    addReturning(sql) {
+        if ( !this.returning ) {
+            this.returning = [];
+        }
+        
+        let column = new Column(sql);
+        this.addChild(column);
+        
+        this.returning.push(column);
     }
 }
 

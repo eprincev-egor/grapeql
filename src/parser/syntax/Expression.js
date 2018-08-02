@@ -8,11 +8,7 @@ class Expression extends Syntax {
         super();
         this.elements = [];
 
-        if ( typeof fromString === "string" ) {
-            fromString = fromString.trim();
-            let coach = new this.Coach(fromString);
-            this.parse(coach);
-        }
+        this.fromString(fromString);
     }
 
     parse(coach, options) {

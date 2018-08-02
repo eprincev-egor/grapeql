@@ -3,6 +3,13 @@
 const ChangeCommand = require("./ChangeCommand");
 
 class Update extends ChangeCommand {
+    constructor(fromString) {
+        super();
+        // need for ChangesCatcher
+        this.commandType = "update";
+        this.fromString(fromString);
+    }
+
     parse(coach, options) {
         options = options || {allowReturningObject: false};
 

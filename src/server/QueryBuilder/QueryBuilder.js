@@ -11,7 +11,7 @@ const buildSelect = require("./buildSelect");
 const buildCount = require("./buildCount");
 const buildIndexOf = require("./buildIndexOf");
 const buildQueryVars = require("./buildQueryVars");
-const buildChangesCatcher = require("./buildChangesCatcher");
+const ChangesCatcher = require("./ChangesCatcher");
 
 class QueryBuilder {
     constructor({ server }) {
@@ -164,11 +164,8 @@ class QueryBuilder {
         return query;
     }
 
-    buildChangesCatcher(query) {
-        return buildChangesCatcher({
-            query,
-            queryBuilder: this
-        });
+    createChangesCatcher() {
+        return new ChangesCatcher( this );
     }
 
     getQueryNodeByFile(file) {

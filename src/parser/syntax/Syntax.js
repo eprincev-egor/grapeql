@@ -14,6 +14,14 @@ class Syntax {
         }
     }
 
+    fromString(fromString) {
+        if ( typeof fromString === "string" ) {
+            fromString = fromString.trim();
+            let coach = new this.Coach(fromString);
+            this.parse(coach);
+        }
+    }
+
     addChild(child) {
         if ( !this.children ) {
             this.children = [];

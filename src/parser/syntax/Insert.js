@@ -25,6 +25,13 @@ and conflict_action is one of:
 const ChangeCommand = require("./ChangeCommand");
 
 class Insert extends ChangeCommand {
+    constructor(fromString) {
+        super();
+        // need for ChangesCatcher
+        this.commandType = "insert";
+        this.fromString(fromString);
+    }
+
     parse(coach, options) {
         options = options || {allowReturningObject: false};
         if ( coach.isWith() ) {
