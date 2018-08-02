@@ -337,8 +337,7 @@ function buildUpdateOldValues({update, queryBuilder}) {
     });
     whereSql = whereSql.join(" and ");
     
-    if ( update.returningAll || !update.returning ) {
-        delete update.returningAll;
+    if ( !update.returning ) {
         update.returning = [new Column("*")];
     }
     
@@ -368,12 +367,9 @@ function buildReturning({query, queryBuilder}) {
             queryBuilder
         });
     }
-    
+
     if ( !query.returning ) {
-        if ( !query.returningAll ) {
-            query.returningAll = true;
-        }
-        return;
+        query.returning = [new Column("*")];
     }
     
     let tableName = queryBuilder.getQueryTableName(query);

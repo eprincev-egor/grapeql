@@ -1,8 +1,8 @@
 "use strict";
 
-const Syntax = require("./Syntax");
+const ChangeCommand = require("./ChangeCommand");
 
-class Update extends Syntax {
+class Update extends ChangeCommand {
     parse(coach, options) {
         options = options || {allowReturningObject: false};
 
@@ -82,49 +82,7 @@ class Update extends Syntax {
             this.addChild(this.where);
         }
 
-        coach.skipSpace();
-        if ( coach.isWord("returning") ) {
-            coach.expectWord("returning");
-            coach.skipSpace();
-
-            let i = coach.i;
-            let returning = coach.parseComma("Column");
-            let returningAll = false;
-
-            if ( returning.length == 1 ) {
-                if ( returning[0].expression.elements.length == 1 ) {
-                    let elem = returning[0].expression.elements[0];
-
-                    if ( elem.link ) {
-                        let link = elem.link;
-
-                        if ( link.length == 1 ) {
-                            if ( link[0] == "*" ) {
-                                returningAll = true;
-                            }
-                        }
-                    }
-                }
-            }
-            returning.forEach(column => {
-                let alias = column.getLowerAlias();
-                if ( !alias ) {
-                    return;
-                }
-
-                if ( alias[0] == "$" ) {
-                    coach.i = i;
-                    coach.throwError("$ is reserved symbol for alias");
-                }
-            });
-            
-            if ( returningAll ) {
-                this.returningAll = true;
-            } else {
-                this.returning = returning;
-                this.returning.forEach(column => this.addChild(column));
-            }
-        }
+        this.parseReturning(coach);
     }
 
     is(coach) {
@@ -186,13 +144,7 @@ class Update extends Syntax {
             clone.addChild(clone.where);
         }
 
-        if ( this.returningAll ) {
-            clone.returningAll = true;
-        }
-        else if ( this.returning ) {
-            clone.returning = this.returning.map(column => column.clone());
-            clone.returning.forEach(column => clone.addChild(column));
-        }
+        this.cloneReturning(clone);
 
         return clone;
     }
@@ -240,13 +192,7 @@ class Update extends Syntax {
             out += this.where.toString();
         }
 
-        if ( this.returningAll ) {
-            out += " returning *";
-        }
-        else if ( this.returning ) {
-            out += " returning ";
-            out += this.returning.map(column => column.toString()).join(", ");
-        }
+        out += this.toStringReturning();
 
         return out;
     }

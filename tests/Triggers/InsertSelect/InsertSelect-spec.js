@@ -31,7 +31,7 @@ describe("InsertSelect trigger", () => {
     });
 
 
-    it("delete units on delete order", async() => {
+    it("clone units from order A to order B", async() => {
         let triggersCalls = [];
 
         class TestInsert {

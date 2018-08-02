@@ -327,7 +327,13 @@ module.exports = [
                 {word: "orders"}
             ]},
             defaultValues: true,
-            returningAll: true
+            returning: [
+                {expression: {elements: [
+                    {link: [
+                        "*"
+                    ]}
+                ]}}
+            ]
         }
     },
     {
@@ -424,7 +430,13 @@ module.exports = [
                 ]},
                 doNothing: true
             },
-            returningAll: true
+            returning: [
+                {expression: {elements: [
+                    {link: [
+                        "*"
+                    ]}
+                ]}}
+            ]
         }
     },
     {
@@ -503,7 +515,13 @@ module.exports = [
                     ]}}
                 ]}
             ],
-            returningAll: true
+            returning: [
+                {expression: {elements: [
+                    {link: [
+                        "*"
+                    ]}
+                ]}}
+            ]
         }
     },
     {
@@ -555,7 +573,13 @@ module.exports = [
                     ]}
                 }]
             },
-            returningAll: true
+            returning: [
+                {expression: {elements: [
+                    {link: [
+                        "*"
+                    ]}
+                ]}}
+            ]
         }
     },
     {

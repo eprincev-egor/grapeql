@@ -473,7 +473,13 @@ module.exports = [
                     ]}}
                 }
             ],
-            returningAll: true
+            returning: [
+                {expression: {elements: [
+                    {link: [
+                        "*"
+                    ]}
+                ]}}
+            ]
         }
     },
     {
@@ -688,7 +694,13 @@ module.exports = [
                     }]
                 }
             ]},
-            returningAll: true
+            returning: [
+                {expression: {elements: [
+                    {link: [
+                        "*"
+                    ]}
+                ]}}
+            ]
         }
     },
     {

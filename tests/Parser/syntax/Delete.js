@@ -166,7 +166,13 @@ module.exports = [
             table: {link: [
                 {word: "orders"}
             ]},
-            returningAll: true
+            returning: [
+                {expression: {elements: [
+                    {link: [
+                        "*"
+                    ]}
+                ]}}
+            ]
         }
     },
     {
@@ -178,7 +184,13 @@ module.exports = [
             where: {elements: [
                 {boolean: true}
             ]},
-            returningAll: true
+            returning: [
+                {expression: {elements: [
+                    {link: [
+                        "*"
+                    ]}
+                ]}}
+            ]
         }
     },
     {
@@ -259,7 +271,13 @@ module.exports = [
             table: {link: [
                 {word: "orders"}
             ]},
-            returningAll: true
+            returning: [
+                {expression: {elements: [
+                    {link: [
+                        "*"
+                    ]}
+                ]}}
+            ]
         }
     },
     {
@@ -276,7 +294,13 @@ module.exports = [
                 ]}
             }],
             
-            returningAll: true
+            returning: [
+                {expression: {elements: [
+                    {link: [
+                        "*"
+                    ]}
+                ]}}
+            ]
         }
     },
     {
@@ -288,7 +312,13 @@ module.exports = [
                 {word: "orders"}
             ]},
             as: {word: "Order"},
-            returningAll: true
+            returning: [
+                {expression: {elements: [
+                    {link: [
+                        "*"
+                    ]}
+                ]}}
+            ]
         }
     },
     {
