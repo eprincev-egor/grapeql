@@ -1,11 +1,6 @@
 drop schema if exists gql_system;
 create schema gql_system;
 
--- need for TID
-create table gql_system.tmp (
-    id serial primary key
-);
-
 create table gql_system.log_changes (
     id serial primary key,
     -- transaction id

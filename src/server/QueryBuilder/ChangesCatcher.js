@@ -1,9 +1,8 @@
 "use strict";
 
 class ChangesCatcher {
-    constructor(queryBuilder, tid) {
+    constructor(queryBuilder) {
         this.queryBuilder = queryBuilder;
-        this.tid = tid;
     }
 
     build(query) {
@@ -19,12 +18,14 @@ class ChangesCatcher {
 
         let sql = query.toString({ pg: true });
 
+        // after every command we deleted logs
+        // and every command work in transaction.
+        // parallel transactions can't see neighbor changes
         sql += `
             ;
             delete from gql_system.log_changes
-            where tid = '${ this.tid }'
             returning tg_op, table_name, data
-        `;
+            `;
 
         return sql;
     }

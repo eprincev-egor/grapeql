@@ -164,8 +164,8 @@ class QueryBuilder {
         return query;
     }
 
-    createChangesCatcher(tid) {
-        return new ChangesCatcher( this, tid );
+    createChangesCatcher() {
+        return new ChangesCatcher( this );
     }
 
     getQueryNodeByFile(file) {
