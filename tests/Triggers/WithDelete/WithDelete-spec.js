@@ -52,7 +52,7 @@ describe("WithDelete trigger", () => {
             }
         }
 
-        server.triggers.create(TestWithDelete);
+        await server.triggers.create(TestWithDelete);
         
         let orderRow = await server.query("insert row into orders (units_count) values (1)");
         assert.equal(orderRow.id, 1);

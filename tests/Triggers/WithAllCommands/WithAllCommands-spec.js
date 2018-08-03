@@ -45,7 +45,7 @@ describe("WithAllCommands trigger", () => {
             }
         }
 
-        server.triggers.create(TestInsert);
+        await server.triggers.create(TestInsert);
         
         await server.query(`
             with
@@ -67,17 +67,32 @@ describe("WithAllCommands trigger", () => {
             from inserted
         `);
 
-        assert.equal(triggersCalls.length, 6);
-        
-        // inserted rows in with query, must be first in changes stack
-        assert.equal(triggersCalls[0].name, "A");
-        assert.equal(triggersCalls[1].name, "B");
-        assert.equal(triggersCalls[2].name, "C");
-    
-        assert.equal(triggersCalls[3].name, "Clone A");
-        assert.equal(triggersCalls[4].name, "Clone B");
-        assert.equal(triggersCalls[5].name, "Clone C");
-
+        assert.deepEqual(triggersCalls, [
+            {
+                id: 1,
+                name: "A"
+            },
+            {
+                id: 2,
+                name: "Clone A"
+            },
+            {
+                id: 3,
+                name: "B"
+            },
+            {
+                id: 4,
+                name: "Clone B"
+            },
+            {
+                id: 5,
+                name: "C"
+            },
+            {
+                id: 6,
+                name: "Clone C"
+            }
+        ]);
     });
 
     it("with (insert...), (insert...) insert", async() => {
@@ -95,7 +110,7 @@ describe("WithAllCommands trigger", () => {
             }
         }
 
-        server.triggers.create(TestInsert);
+        await server.triggers.create(TestInsert);
         
         await server.query(`
             with
@@ -126,31 +141,68 @@ describe("WithAllCommands trigger", () => {
             from inserted_1, inserted_2
         `);
 
-        assert.equal(triggersCalls.length, 15);
-        
-        // inserted rows in with query, must be first in changes stack
-        
-        // inserted_1
-        assert.equal(triggersCalls[0].name, "A");
-        assert.equal(triggersCalls[1].name, "B");
-        assert.equal(triggersCalls[2].name, "C");
-        
-        // inserted_2
-        assert.equal(triggersCalls[3].name, "1");
-        assert.equal(triggersCalls[4].name, "2");
-        assert.equal(triggersCalls[5].name, "3");
-        
-        // main insert
-        assert.equal(triggersCalls[6].name,  "A:1");
-        assert.equal(triggersCalls[7].name,  "A:2");
-        assert.equal(triggersCalls[8].name,  "A:3");
-        assert.equal(triggersCalls[9].name,  "B:1");
-        assert.equal(triggersCalls[10].name, "B:2");
-        assert.equal(triggersCalls[11].name, "B:3");
-        assert.equal(triggersCalls[12].name, "C:1");
-        assert.equal(triggersCalls[13].name, "C:2");
-        assert.equal(triggersCalls[14].name, "C:3");
-
+        assert.deepEqual(triggersCalls, [
+            {
+                id: 1,
+                name: "A"
+            },
+            {
+                id: 2,
+                name: "1"
+            },
+            {
+                id: 3,
+                name: "A:1"
+            },
+            {
+                id: 4,
+                name: "2"
+            },
+            {
+                id: 5,
+                name: "A:2"
+            },
+            {
+                id: 6,
+                name: "3"
+            },
+            {
+                id: 7,
+                name: "A:3"
+            },
+            {
+                id: 8,
+                name: "B"
+            },
+            {
+                id: 9,
+                name: "B:1"
+            },
+            {
+                id: 10,
+                name: "B:2"
+            },
+            {
+                id: 11,
+                name: "B:3"
+            },
+            {
+                id: 12,
+                name: "C"
+            },
+            {
+                id: 13,
+                name: "C:1"
+            },
+            {
+                id: 14,
+                name: "C:2"
+            },
+            {
+                id: 15,
+                name: "C:3"
+            }
+        ]);
     });
 
     it("with (delete...) delete", async() => {
@@ -168,7 +220,7 @@ describe("WithAllCommands trigger", () => {
             }
         }
 
-        server.triggers.create(TestDelete);
+        await server.triggers.create(TestDelete);
 
         await server.query(`
             insert into units 
@@ -225,7 +277,7 @@ describe("WithAllCommands trigger", () => {
             }
         }
 
-        server.triggers.create(TestDelete);
+        await server.triggers.create(TestDelete);
 
         await server.query(`
             insert into units 
@@ -302,7 +354,7 @@ describe("WithAllCommands trigger", () => {
             }
         }
 
-        server.triggers.create(TestUpdate);
+        await server.triggers.create(TestUpdate);
 
         await server.query(`
             insert into units 
@@ -411,7 +463,7 @@ describe("WithAllCommands trigger", () => {
                 ('z')
         `);
 
-        server.triggers.create(TestAllCommands);
+        await server.triggers.create(TestAllCommands);
 
         let result = await server.query(`
             with

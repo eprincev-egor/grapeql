@@ -48,7 +48,7 @@ describe("SimpleDelete trigger", () => {
             }
         }
 
-        server.triggers.create(DeleteUnits);
+        await server.triggers.create(DeleteUnits);
 
         let orderRow, unitRow,
             unitRows;
@@ -100,7 +100,7 @@ describe("SimpleDelete trigger", () => {
             }
         }
 
-        server.triggers.create(TriggerError);
+        await server.triggers.create(TriggerError);
 
         let orderRow;
         

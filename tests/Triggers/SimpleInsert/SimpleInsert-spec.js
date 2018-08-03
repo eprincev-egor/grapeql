@@ -51,7 +51,7 @@ describe("SimpleInsert trigger", () => {
             }
         }
 
-        server.triggers.create(CreateUnit);
+        await server.triggers.create(CreateUnit);
 
         let orderRow = await server.query("insert row into orders default values");
         assert.ok(orderRow.id == 1);
@@ -83,7 +83,7 @@ describe("SimpleInsert trigger", () => {
             }
         }
 
-        server.triggers.create(TriggerError);
+        await server.triggers.create(TriggerError);
         let unitRow, orderRow;
 
         orderRow = await server.query("insert row into orders default values");

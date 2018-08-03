@@ -27,10 +27,11 @@ class TriggerManager {
         this._triggers = {};
     }
 
-    create(TriggerClass) {
+    async create(TriggerClass) {
         let trigger = new TriggerClass();
         let events = trigger.getEvents();
-        
+        let db = this.server.db;
+
         if ( !_.isObject(events) || _.isEmpty(events) ) {
             throw new Error("events must be not empty object");
         }
@@ -72,6 +73,16 @@ class TriggerManager {
                     await handle.call(trigger, triggerEvent);
                 }
             });
+
+            await db.query(`
+                DROP TRIGGER if exists zzzz_log_changes ON ${ lowerPath };
+                
+                CREATE TRIGGER zzzz_log_changes
+                AFTER INSERT OR UPDATE OR DELETE
+                ON ${ lowerPath }
+                FOR EACH ROW
+                EXECUTE PROCEDURE gql_system.log_changes();            
+            `);
         }
 
         return trigger;

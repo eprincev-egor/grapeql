@@ -68,7 +68,7 @@ function buildVars({ queryNode, select, vars }) {
             });
                 
                 
-            withValue = `case when ${checkSql} then ${ value } else raise_exception(${sqlErrorText}) end`;
+            withValue = `case when ${checkSql} then ${ value } else gql_system.raise_exception(${sqlErrorText}) end`;
         }
             
         if ( withValue ) {

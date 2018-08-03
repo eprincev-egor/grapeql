@@ -8,6 +8,14 @@ class Transaction {
     async begin() {
         this.db = await this.server.pool.connect();
         await this.db.query("begin");
+
+        let result = await this.db.query(`
+            insert into gql_system.tmp default values;
+            delete from gql_system.tmp
+            returning xmax
+        `);
+
+        this.tid = result[1].rows[0].xmax;
     }
     
     async commit() {
@@ -36,7 +44,7 @@ class Transaction {
 
     async runAndCatchChanges(query) {
         let queryBuilder = this.server.queryBuilder;
-        let catcher = queryBuilder.createChangesCatcher();
+        let catcher = queryBuilder.createChangesCatcher( this.tid );
         
         // transform query for catching changes
         let sql = catcher.build(query);

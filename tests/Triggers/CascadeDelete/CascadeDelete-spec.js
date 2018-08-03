@@ -6,7 +6,7 @@ const GrapeQL = require("../../../src/server/GrapeQL");
 const {clearDatabase} = require("../../utils/serverHelpers");
 const config = require("../../grapeql.config");
 
-describe("InsertSelect trigger", () => {
+describe("CascadeDelete trigger", () => {
     
     let server;
 
@@ -31,45 +31,48 @@ describe("InsertSelect trigger", () => {
     });
 
 
-    it("clone units from order A to order B", async() => {
+    it("delete row and check trigger on cascade delete", async() => {
         let triggersCalls = [];
-
-        class TestInsert {
+        class CascadeDeleteTest {
             getEvents() {
                 return {
-                    "insert:units": "onInsert"
+                    "delete:tree": "onDelete"
                 };
             }
 
-            async onInsert({row}) {
+            async onDelete({row}) {
                 triggersCalls.push(row);
             }
         }
 
-        await server.triggers.create(TestInsert);
+        await server.triggers.create(CascadeDeleteTest);
 
-        let rows = await server.query(`
-            insert into units
-                (id_order, name)
-            select
-                2,
-                units.name
-            from units
-            where 
-                id_order = 1
-        `);
-
-        assert.deepEqual(rows, [
-            {id: 4, id_order: 2, name: "red"},
-            {id: 5, id_order: 2, name: "green"},
-            {id: 6, id_order: 2, name: "blue"}
-        ]);
+        let row = await server.query("delete row from tree where name = 'root'");
+        
+        assert.deepEqual(row, {
+            id: 1,
+            id_parent: null,
+            name: "root"
+        });
 
         assert.deepEqual(triggersCalls, [
-            {id: 4, id_order: 2, name: "red"},
-            {id: 5, id_order: 2, name: "green"},
-            {id: 6, id_order: 2, name: "blue"}
+            {
+                id: 1,
+                id_parent: null,
+                name: "root"
+            },
+            {
+                id: 2,
+                id_parent: 1,
+                name: "root/child 1"
+            },
+            {
+                id: 3,
+                id_parent: 1,
+                name: "root/child 2"
+            }
         ]);
+
     });
 
 });

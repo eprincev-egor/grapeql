@@ -399,7 +399,7 @@ describe("Vars", () => {
                     case
                         when 100 > 0
                         then  100
-                        else raise_exception($tag1$variable price violates check constraint$tag1$)
+                        else gql_system.raise_exception($tag1$variable price violates check constraint$tag1$)
                     end as price
             )
 
@@ -467,7 +467,7 @@ describe("Vars", () => {
                     case
                         when 0 <> 0
                         then  0
-                        else raise_exception($tag1$variable some violates check constraint$tag1$)
+                        else gql_system.raise_exception($tag1$variable some violates check constraint$tag1$)
                     end as some
             )
 
@@ -502,7 +502,7 @@ describe("Vars", () => {
                     case
                         when 1 <> 0
                         then  1
-                        else raise_exception($tag1$variable some violates check constraint$tag1$)
+                        else gql_system.raise_exception($tag1$variable some violates check constraint$tag1$)
                     end as some
             )
 

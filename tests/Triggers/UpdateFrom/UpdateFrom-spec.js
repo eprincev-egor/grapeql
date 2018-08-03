@@ -45,7 +45,7 @@ describe("UpdateFrom trigger", () => {
             }
         }
 
-        server.triggers.create(TestUpdate);
+        await server.triggers.create(TestUpdate);
 
         let order = await server.query(`
             insert row into orders
@@ -175,7 +175,7 @@ describe("UpdateFrom trigger", () => {
             }
         }
         
-        server.triggers.create(TestUpdate);
+        await server.triggers.create(TestUpdate);
 
         await server.query(`
             update contracts set

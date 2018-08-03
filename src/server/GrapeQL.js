@@ -106,7 +106,6 @@ class GrapeQL {
         this.db = db;
 
         await this.loadDatabaseInfo();
-        await this.initSystemFunctions();
         this.initExpress();
         this.initTriggerManager();
         
@@ -120,17 +119,6 @@ class GrapeQL {
     async loadDatabaseInfo() {
         this.database = new DbDatabase();
         await this.database.load(this.db);
-    }
-    
-    async initSystemFunctions() {
-        await this.db.query(`
-        create or replace function raise_exception(text)
-        returns void as $$
-        begin
-          raise exception '%', $1;
-        end;
-        $$ language plpgsql;
-        `);
     }
     
     async initQueryBuilder() {

@@ -57,7 +57,7 @@ describe("WithInsert trigger", () => {
             }
         }
 
-        server.triggers.create(TestWithInsert);
+        await server.triggers.create(TestWithInsert);
         
         let orderRow = await server.query("insert row into orders default values");
         assert.equal(orderRow.id, 1);

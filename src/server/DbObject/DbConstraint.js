@@ -1,10 +1,23 @@
 "use strict";
 
 class DbConstraint {
-    constructor(params) {
-        this.name = params.name;
-        this.type = params.type;
-        this.columns = params.columns;
+    constructor({
+        name, 
+        type, 
+        columns,
+        // fk info
+        onUpdate,
+        onDelete,
+        referenceTable,
+        referenceColumns
+    }) {
+        this.name = name;
+        this.type = type;
+        this.columns = columns;
+        this.onUpdate = onUpdate;
+        this.onDelete = onDelete;
+        this.referenceTable = referenceTable;
+        this.referenceColumns = referenceColumns;
     }
 }
 

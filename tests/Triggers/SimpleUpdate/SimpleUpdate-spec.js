@@ -67,7 +67,7 @@ describe("SimpleUpdate trigger", () => {
             }
         }
 
-        server.triggers.create(UpdateUnitsCount);
+        await server.triggers.create(UpdateUnitsCount);
 
         let orderRow1 = await server.query("insert row into orders (units_count) values (1)");
         assert.equal(orderRow1.id, 1);
@@ -113,7 +113,7 @@ describe("SimpleUpdate trigger", () => {
             }
         }
 
-        server.triggers.create(TestUpdate);
+        await server.triggers.create(TestUpdate);
 
         let order = await server.query(`
             insert row into orders

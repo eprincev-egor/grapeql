@@ -59,7 +59,7 @@ describe("InsertOnConflict trigger", () => {
             }
         }
 
-        server.triggers.create(Trigger);
+        await server.triggers.create(Trigger);
         let rows;
 
         rows = await server.query(`
@@ -158,7 +158,7 @@ describe("InsertOnConflict trigger", () => {
             }
         }
 
-        server.triggers.create(Trigger);
+        await server.triggers.create(Trigger);
 
         await server.query(`
             insert into units
@@ -226,12 +226,27 @@ describe("InsertOnConflict trigger", () => {
         });
 
         assert.deepEqual(triggersCalls, [
-            // delete
             {
                 type: "delete",
                 row: {
                     id: 1,
-                    id_order: 1,
+                    name: "red",
+                    id_order: 1
+                }
+            },
+            {
+                type: "update",
+                row: {
+                    id: 4,
+                    name: "red",
+                    id_order: 2
+                },
+                prev: {
+                    id: 4,
+                    name: "test",
+                    id_order: 2
+                },
+                changes: {
                     name: "red"
                 }
             },
@@ -239,52 +254,32 @@ describe("InsertOnConflict trigger", () => {
                 type: "delete",
                 row: {
                     id: 2,
-                    id_order: 1,
-                    name: "green"
+                    name: "green",
+                    id_order: 1
+                }
+            },
+            {
+                type: "insert",
+                row: {
+                    id: 5,
+                    name: "green",
+                    id_order: 2
                 }
             },
             {
                 type: "delete",
                 row: {
                     id: 3,
-                    id_order: 1,
-                    name: "blue"
-                }
-            },
-
-            // update
-            {
-                type: "update",
-                prev: {
-                    id: 4,
-                    id_order: 2,
-                    name: "test"
-                },
-                changes: {
-                    name: "red"
-                },
-                row: {
-                    id: 4,
-                    id_order: 2,
-                    name: "red"
-                }
-            },
-
-            // insert
-            {
-                type: "insert",
-                row: {
-                    id: 5,
-                    id_order: 2,
-                    name: "green"
+                    name: "blue",
+                    id_order: 1
                 }
             },
             {
                 type: "insert",
                 row: {
                     id: 6,
-                    id_order: 2,
-                    name: "blue"
+                    name: "blue",
+                    id_order: 2
                 }
             }
         ]);
@@ -318,7 +313,7 @@ describe("InsertOnConflict trigger", () => {
             }
         }
 
-        server.triggers.create(Trigger);
+        await server.triggers.create(Trigger);
 
         await server.query(`
             insert into units

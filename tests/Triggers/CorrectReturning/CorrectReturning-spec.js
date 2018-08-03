@@ -46,7 +46,7 @@ describe("CorrectReturning", () => {
             }
         }
 
-        server.triggers.create(UpCounter);
+        await server.triggers.create(UpCounter);
         let row;
 
         // test counter

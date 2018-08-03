@@ -1,6 +1,8 @@
 "use strict";
 
 const _ = require("lodash");
+const fs = require("fs");
+const gql_system = fs.readFileSync(__dirname + "/gql_system.sql").toString();
 
 const DbSchema = require("./DbSchema");
 const DbTable = require("./DbTable");
@@ -91,24 +93,42 @@ class DbDatabase {
         });
 
         res = await db.query(`
+        select
+            tc.constraint_type,
+            tc.constraint_name,
+            tc.table_schema,
+            tc.table_name,
+            rc.update_rule,
+            rc.delete_rule,
+            (
+                select
+                    array_agg(kc.column_name::text)
+                from information_schema.key_column_usage as kc
+                where
+                    kc.table_name = tc.table_name and
+                    kc.table_schema = tc.table_schema and
+                    kc.constraint_name = tc.constraint_name
+            ) as columns,
+            fk_info.columns as reference_columns,
+            fk_info.table_name as reference_table
+        from information_schema.table_constraints as tc
+
+        left join information_schema.referential_constraints as rc on
+            rc.constraint_schema = tc.constraint_schema and
+            rc.constraint_name = tc.constraint_name
+        
+        left join lateral (
             select
-            	tc.constraint_type,
-            	tc.constraint_name,
-            	tc.table_schema,
-            	tc.table_name,
-            	array_agg(kc.column_name::text) as columns
+                ( array_agg( distinct ccu.table_name::text ) )[1] as table_name,
+                array_agg( ccu.column_name::text ) as columns
+            from information_schema.constraint_column_usage as ccu
+            where
+                ccu.constraint_name = rc.constraint_name and
+                ccu.constraint_schema = rc.constraint_schema
+        ) as fk_info on true
 
-            from information_schema.table_constraints tc
-
-            join information_schema.key_column_usage kc on
-              kc.table_name = tc.table_name and
-              kc.table_schema = tc.table_schema and
-              kc.constraint_name = tc.constraint_name
-
-            group by tc.constraint_type,
-            	tc.constraint_name,
-            	tc.table_schema,
-            	tc.table_name
+        where
+            tc.constraint_type in ('FOREIGN KEY', 'UNIQUE', 'PRIMARY KEY')
         `);
         _.each(res.rows, row => {
             let schemaName = row.table_schema,
@@ -133,10 +153,26 @@ class DbDatabase {
             let constraint = new DbConstraint({
                 name: row.constraint_name,
                 type: row.constraint_type.toLowerCase(),
-                columns: row.columns
+                columns: row.columns,
+                
+                // fk info
+                onUpdate: row.update_rule ? 
+                    row.update_rule.toLowerCase() : 
+                    null,
+                onDelete: row.delete_rule ? 
+                    row.delete_rule.toLowerCase() : 
+                    null,
+                referenceTable: row.reference_table,
+                referenceColumns: row.reference_columns
             });
             table.addConstraint( constraint );
         });
+
+        await this.createSystemThings(db);
+    }
+
+    async createSystemThings(db) {
+        await db.query( gql_system );
     }
 
     getSchema(name) {
@@ -169,6 +205,22 @@ class DbDatabase {
         }
 
         return dbSchema.getTable(table);
+    }
+
+    eachConstraint(iteration) {
+        for (let key in this.schemas) {
+            let schema = this.schemas[ key ];
+
+            for (let key in schema.tables) {
+                let table = schema.tables[key];
+
+                for (let key in table.constraints) {
+                    let constraint = table.constraints[key];
+
+                    iteration( constraint, table, schema );
+                }
+            }
+        }
     }
 }
 
