@@ -83,4 +83,29 @@ describe("RollbackAndCommit transaction", () => {
         assert.ok(result.rows.length === 0);
     });
 
+    it("working with transaction after rollback", async() => {
+        let row, result;
+        
+        row = await transaction.query(`
+            insert row into country default values
+        `);
+        
+        assert.ok(row.id == 1);
+        
+        // rows hidden in another connection
+        result = await server.db.query("select * from country");
+        assert.ok(result.rows.length === 0);
+        
+        await transaction.rollback();
+        
+        // rows still hidden in another connection, after rollback
+        result = await server.db.query("select * from country");
+        assert.ok(result.rows.length === 0);
+
+        // we can run query, after rollback
+        result =  await transaction.query("insert row into country default values");
+        assert.ok(result.id == 2);
+
+    });
+
 });

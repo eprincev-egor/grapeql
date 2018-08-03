@@ -17,7 +17,7 @@ class Transaction {
     }
     
     async rollback() {
-        await this.db.query("rollback");
+        await this.db.query("rollback; begin");
     }
 
     async query(sql, vars) {
