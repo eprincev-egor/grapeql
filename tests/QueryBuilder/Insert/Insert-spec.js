@@ -1,5 +1,16 @@
 "use strict";
 
+function date2sql(value, toType) {
+    if ( typeof value != "number" ) {
+        value = Date.parse(value);
+    }
+    // value is unix timestamp number
+
+    if ( value || value === 0 ) {
+        return `to_timestamp(${ Math.floor(value / 1000) })::${ toType }`;
+    }
+}
+
 describe("Insert", () => {
     const {testInsert} = require("../../utils/init")(__dirname);
 
@@ -40,7 +51,6 @@ describe("Insert", () => {
     });
 
     let testDate = new Date(2018, 0, 1);
-    let testDateIso = testDate.toISOString();
 
     testInsert({
         node: `
@@ -52,7 +62,7 @@ describe("Insert", () => {
                 some_timestamp: testDate
             }
         },
-        result: `insert into company (some_date, some_timestamp) values ('${testDateIso}'::date, '${testDateIso}'::timestamp without time zone)`
+        result: `insert into company (some_date, some_timestamp) values (${date2sql( testDate, "date" )}, ${date2sql( testDate, "timestamp without time zone" )})`
     });
 
     testInsert({
@@ -65,7 +75,7 @@ describe("Insert", () => {
                 some_timestamp: +testDate
             }
         },
-        result: `insert into company (some_date, some_timestamp) values ('${testDateIso}'::date, '${testDateIso}'::timestamp without time zone)`
+        result: `insert into company (some_date, some_timestamp) values (${date2sql( testDate, "date" )}, ${date2sql( testDate, "timestamp without time zone" )})`
     });
 
     testInsert({

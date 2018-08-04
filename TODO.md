@@ -68,17 +68,17 @@
     - validations
 
 # Tasks:
-	- raw
-    - crud events
+	+ raw
+    + crud events
         + with insert
         + with update
         + with delete
-        - on conflict do ...
-        - constraints cascade delete and set null
+        + on conflict do ...
+        + constraints cascade delete and set null
     - deps
-    - transaction
+    + transaction
 	- jsql
-    - show correct call stack on error
+    + show correct call stack on error
 
 # Cache Island:
     (

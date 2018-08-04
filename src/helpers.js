@@ -112,12 +112,24 @@ let isSqlDate = function(type) {
 };
 
 let isLikeDate = function(value) {
-    if ( value && value.toISOString ) {
-        return true;
-    }
+    if ( value || value === 0 ) {
+        // unix timestamp
+        if ( typeof value == "number" ) {
+            return true;
+        }
 
-    // unix timestamp
-    if ( typeof value == "number" ) {
+        // Date
+        if ( value.toISOString ) {
+            return true;
+        }
+
+        // "10.10.2015"
+        value = Date.parse(value);
+        
+        if ( value !== value ) {// NaN
+            return false;
+        }
+
         return true;
     }
 
@@ -125,12 +137,13 @@ let isLikeDate = function(value) {
 };
 
 let wrapDate = function(value, toType) {
-    if ( typeof value == "number" ) {
-        value = new Date(value);
+    if ( typeof value != "number" ) {
+        value = Date.parse(value);
     }
+    // value is unix timestamp number
 
-    if ( value && value.toISOString ) {
-        return `'${ value.toISOString() }'::${ toType }`;
+    if ( value || value === 0 ) {
+        return `to_timestamp(${ Math.floor(value / 1000) })::${ toType }`;
     }
 };
 

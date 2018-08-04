@@ -22,6 +22,16 @@ function tomorrowEnd() {
     return +new Date(date.getFullYear(), date.getMonth(), date.getDate() + 1, 23, 59, 59, 999);
 }
 
+function date2sql(value, toType) {
+    if ( typeof value != "number" ) {
+        value = Date.parse(value);
+    }
+    // value is unix timestamp number
+
+    if ( value || value === 0 ) {
+        return `to_timestamp(${ Math.floor(value / 1000) })::${ toType }`;
+    }
+}
 
 describe("Filter building sql", () => {
 
@@ -60,14 +70,14 @@ describe("Filter building sql", () => {
 
             let date = new Date();
 
-            testFilterToSql( ["SOME_DATE", operator, date], `SOME_DATE ${sqlOperator} '${date.toISOString()}'::date`, {
+            testFilterToSql( ["SOME_DATE", operator, date], `SOME_DATE ${sqlOperator} ${date2sql(date, "date")}`, {
                 SOME_DATE: {
                     type: "date",
                     sql: "SOME_DATE"
                 }
             });
 
-            testFilterToSql( ["SOME_TIMESTAMP", operator, date], `SOME_TIMESTAMP ${sqlOperator} '${date.toISOString()}'::timestamp with time zone`, {
+            testFilterToSql( ["SOME_TIMESTAMP", operator, date], `SOME_TIMESTAMP ${sqlOperator} ${date2sql(date, "timestamp with time zone")}`, {
                 SOME_TIMESTAMP: {
                     type: "timestamp with time zone",
                     sql: "SOME_TIMESTAMP"
@@ -228,8 +238,8 @@ describe("Filter building sql", () => {
         startSql = new Date(startSql);
         endSql = new Date(endSql);
 
-        startSql = "'" + startSql.toISOString() + "'::timestamp with time zone";
-        endSql = "'" + endSql.toISOString() + "'::timestamp with time zone";
+        startSql = date2sql(startSql, "timestamp with time zone");
+        endSql = date2sql(endSql, "timestamp with time zone");
 
         testFilterToSql( ["SOME_DATE", "is", "today"], "SOME_DATE >= " + startSql + " and SOME_DATE <= " + endSql, {
             SOME_DATE: {type: "timestamp with time zone", sql: "SOME_DATE"}
@@ -242,8 +252,8 @@ describe("Filter building sql", () => {
         startSql = new Date(startSql);
         endSql = new Date(endSql);
 
-        startSql = "'" + startSql.toISOString() + "'::timestamp with time zone";
-        endSql = "'" + endSql.toISOString() + "'::timestamp with time zone";
+        startSql = date2sql(startSql, "timestamp with time zone");
+        endSql = date2sql(endSql, "timestamp with time zone");
 
         testFilterToSql( ["SOME_DATE", "is", "tomorrow"], "SOME_DATE >= " + startSql + " and SOME_DATE <= " + endSql, {
             SOME_DATE: {type: "timestamp with time zone", sql: "SOME_DATE"}
@@ -304,12 +314,12 @@ describe("Filter building sql", () => {
         testFilterToSql( ["SOME_DATE", "inRange", []], "false", {
             SOME_DATE: {type: "date", sql: "SOME_DATE"}
         });
-
-        testFilterToSql( ["SOME_DATE", "inRange", [{start: 0, end: 1}]], "SOME_DATE >= '1970-01-01T00:00:00.000Z'::date and SOME_DATE <= '1970-01-01T00:00:00.001Z'::date", {
+        
+        testFilterToSql( ["SOME_DATE", "inRange", [{start: 0, end: 1}]], `SOME_DATE >= ${date2sql("1970-01-01T00:00:00.000Z", "date")} and SOME_DATE <= ${date2sql("1970-01-01T00:00:00.001Z", "date")}`, {
             SOME_DATE: {type: "date", sql: "SOME_DATE"}
         });
-
-        testFilterToSql( ["SOME_DATE", "inRange", [{start: -10, end: 10}]], "SOME_DATE >= '1969-12-31T23:59:59.990Z'::date and SOME_DATE <= '1970-01-01T00:00:00.010Z'::date", {
+        
+        testFilterToSql( ["SOME_DATE", "inRange", [{start: -10, end: 10}]], `SOME_DATE >= ${date2sql("1969-12-31T23:59:59.990Z", "date")} and SOME_DATE <= ${date2sql("1970-01-01T00:00:00.010Z", "date")}`, {
             SOME_DATE: {type: "date", sql: "SOME_DATE"}
         });
     });
