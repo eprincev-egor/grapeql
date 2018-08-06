@@ -64,9 +64,10 @@ describe("Traffic trigger", () => {
             async onUpdateBeginOrDuration({db, row}) {
                 let 
                     trafficId = row.id,
-                    beginDate = Date.parse( row.expected_begin_date ),
-                    durationMs = row.duration_hours * HOUR,
-                    endDate = beginDate + durationMs;
+                    endDate = this.mathEndDate(
+                        row.expected_begin_date,
+                        row.duration_hours
+                    );
                 
                 await db.query(`
                     update traffic set
@@ -92,28 +93,78 @@ describe("Traffic trigger", () => {
 
             async onUpdateDeliveryDate({db, row}) {
                 let orderId = row.id_order;
-                db.query(`
-                    update orders set
-                        end_date = (
-                            select
-                                max( expected_delivery_date )
+                await this.updateOrderEndDate( db, orderId );
+            }
+
+            async onInsertTraffic({db, row}) {
+                let trafficId = row.id,
+                    beginDate = row.expected_begin_date, 
+                    endDate = row.expected_delivery_date;
+                
+                if ( beginDate && endDate ) {
+                    return;
+                }
+
+                if ( !beginDate ) {
+                    if ( row.id_prev_traffic ) {
+                        let prevRow = await db.query(`
+                            select row
+                                expected_delivery_date
                             from traffic
-                            where
-                                id_order = orders.id
-                        )
-                    where
-                        id = $order_id::integer
+                            where id = $prev_id::integer
+                        `, {
+                                $prev_id: row.id_prev_traffic
+                            });
+                        
+                        beginDate = prevRow.expected_delivery_date;
+                    } else {
+                        let orderRow = await db.query(`
+                            select row
+                                start_date
+                            from orders
+                            where id = $order_id::integer
+                        `, {
+                                $order_id: row.id_order
+                            });
+                        beginDate = orderRow.start_date;
+                    }
+                }
+
+                // no endData is value from original insert
+                // just update beginDate
+                if ( endDate ) {
+                    await db.query(`
+                        update traffic set
+                            expected_begin_date = $date::timestamp without time zone
+                        where id = $id::integer
+                    `, {
+                            $id: trafficId,
+                            $date: beginDate
+                        });
+                    return;
+                }
+
+                await db.query(`
+                    update traffic set
+                        expected_begin_date = $begin_date::timestamp without time zone,
+                        expected_delivery_date = $end_date::timestamp without time zone
+                    where id = $id::integer
                 `, {
-                        $order_id: orderId
+                        $id: trafficId,
+                        $begin_date: beginDate,
+                        $end_date: endDate
                     });
             }
 
-            async onInsertTraffic() {
-                
+            mathEndDate(beginDate, durationHours) {
+                beginDate = Date.parse( beginDate );
+                let durationMs = durationHours * HOUR;
+
+                return beginDate + durationMs;
             }
 
-            async onDeleteTraffic() {
-                
+            async onDeleteTraffic({db, row}) {
+                await this.updateOrderEndDate(db, row.id_order);
             }
 
             async onUpdateOrder({db, row, changes}) {
@@ -134,6 +185,23 @@ describe("Traffic trigger", () => {
                         $start_date: changes.start_date
                     });
             }
+            
+            async updateOrderEndDate(db, orderId) {
+                await db.query(`
+                    update orders set
+                        end_date = (
+                            select
+                                max( expected_delivery_date )
+                            from traffic
+                            where
+                                id_order = orders.id
+                        )
+                    where
+                        id = $order_id::integer
+                `, {
+                        $order_id: orderId
+                    });
+            }
         }
 
         await server.triggers.create(Traffic);
@@ -149,6 +217,106 @@ describe("Traffic trigger", () => {
         let diff = end_date - start_date;
         
         assert.equal(diff / HOUR, 144);
+
+        
+        let traffic, row;
+
+        row = await server.query(`
+            insert row into traffic 
+                (id_order, duration_hours, to_point)
+            values
+                (1, 168, 'Tokyo')
+        `);
+
+        traffic = await server.query(`
+            select row *
+            from traffic
+            where id = $id::integer
+        `, {
+                $id: row.id
+            });
+        
+        assert.deepEqual(traffic, {
+            id: 4,
+            id_order: 1,
+            id_prev_traffic: null,
+            duration_hours: 168,
+            to_point: "Tokyo",
+            expected_begin_date: new Date(2018, 0, 1),
+            expected_delivery_date: new Date(2018, 0, 8),
+            actual_delivery_date: null
+        });
+
+        order = await server.query(`
+            select row *
+            from orders
+            where id = 1
+        `);
+
+        assert.deepEqual(order, {
+            id: 1,
+            start_date: new Date(2018, 0, 1),
+            end_date: new Date(2018, 0, 8)
+        });
+
+
+
+        await server.query("delete from traffic where id = $id::integer", {
+            $id: traffic.id
+        });
+
+        order = await server.query(`
+            select row *
+            from orders
+            where id = 1
+        `);
+
+        assert.deepEqual(order, {
+            id: 1,
+            start_date: new Date(2018, 0, 1),
+            end_date: new Date(2018, 0, 7)
+        });
+
+
+        
+        //
+        row = await server.query(`
+            insert row into traffic 
+                (id_order, id_prev_traffic, duration_hours, to_point)
+            values
+                (1, 3, 48, 'Tokyo')
+        `);
+
+        traffic = await server.query(`
+            select row *
+            from traffic
+            where id = $id::integer
+        `, {
+                $id: row.id
+            });
+        
+        assert.deepEqual(traffic, {
+            id: 5,
+            id_order: 1,
+            id_prev_traffic: 3,
+            duration_hours: 48,
+            to_point: "Tokyo",
+            expected_begin_date: new Date(2018, 0, 7),
+            expected_delivery_date: new Date(2018, 0, 9),
+            actual_delivery_date: null
+        });
+
+        order = await server.query(`
+            select row *
+            from orders
+            where id = 1
+        `);
+
+        assert.deepEqual(order, {
+            id: 1,
+            start_date: new Date(2018, 0, 1),
+            end_date: new Date(2018, 0, 9)
+        });
     });
 
 });

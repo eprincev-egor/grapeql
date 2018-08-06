@@ -28,16 +28,9 @@ describe("Parallel transaction", () => {
     });
 
     afterEach(async() => {
-        if ( !server ) {
-            return;
-        }
-
-        await server.stop();
-        server = null;
-
         if ( transaction1 ) {
             try {
-                await transaction1.end();
+                await transaction1.release();
             } catch(err) {
                 console.log(err);
             }
@@ -47,11 +40,16 @@ describe("Parallel transaction", () => {
         
         if ( transaction2 ) {
             try {
-                await transaction2.end();
+                await transaction2.release();
             } catch(err) {
                 console.log(err);
             }
             transaction2 = null;
+        }
+
+        if ( server ) {
+            await server.stop();
+            server = null;
         }
     });
 

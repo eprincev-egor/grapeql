@@ -82,7 +82,7 @@ describe("RollbackLastOnError trigger", () => {
             }
         ]);
 
-        await transaction.end();
+        await transaction.release();
     });
 
 });

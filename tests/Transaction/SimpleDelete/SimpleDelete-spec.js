@@ -25,19 +25,19 @@ describe("SimpleDelete transaction", () => {
     });
 
     afterEach(async() => {
-        if ( !server ) {
-            return;
+        if ( transaction ) {
+            try {
+                await transaction.release();
+            } catch(err) {
+                console.log(err);
+            }
+            transaction = null;    
         }
 
-        await server.stop();
-        server = null;
-
-        if ( !transaction ) {
-            return;
+        if ( server ) {
+            await server.stop();
+            server = null;
         }
-
-        await transaction.end();
-        transaction = null;
     });
 
 

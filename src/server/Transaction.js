@@ -79,8 +79,8 @@ class Transaction {
         }
     }
     
-    async end() {
-        await this.db.end();
+    async release() {
+        await this.db.release();
     }
 }
 

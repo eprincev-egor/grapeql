@@ -137,7 +137,8 @@ class GrapeQL {
     }
     
     async stop() {
-        await this.db.end();
+        await this.db.release();
+        await this.pool.end();
     }
     
     async transaction() {
@@ -174,10 +175,10 @@ class GrapeQL {
         try {
             result = await transaction.query(sql, vars);
             await transaction.commit();
-            transaction.end();
+            transaction.release();
         } catch(err) {
             await transaction.rollback();
-            transaction.end();
+            transaction.release();
             throw err;
         }
         

@@ -79,7 +79,9 @@
     + transaction
 	- jsql
     + show correct call stack on error
-
+    
+    + select row
+    - select value
 # Cache Island:
     (
         select count()
