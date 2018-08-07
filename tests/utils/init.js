@@ -6,6 +6,7 @@ const testRemoveUnnecessaryJoins = require("./testRemoveUnnecessaryJoins");
 const testRemoveUnnecessaryWithes = require("./testRemoveUnnecessaryWithes");
 const testGetDbColumn = require("./testGetDbColumn");
 const testReplaceLinks = require("./testReplaceLinks");
+const testFindDeps = require("./testFindDeps");
 
 const testRequest = require("./testRequest");
 const testRequestCount = require("./testRequestCount");
@@ -40,7 +41,8 @@ function init(__dirname) {
         testInsert: testInsert.bind(null, getServer),
         testUpdate: testUpdate.bind(null, getServer),
         testDelete: testDelete.bind(null, getServer),
-        testGetDbColumn: testGetDbColumn.bind(null, getServer)
+        testGetDbColumn: testGetDbColumn.bind(null, getServer),
+        testFindDeps: testFindDeps.bind(null, getServer)
     };
 }
 

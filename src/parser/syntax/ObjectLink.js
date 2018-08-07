@@ -69,6 +69,16 @@ class ObjectLink extends Syntax {
         }).join(".");
     }
 
+    toLowerString() {
+        return this.link.map(elem => {
+            if ( elem == "*" ) {
+                return "*";
+            }
+
+            return elem.toLowerCase();
+        }).join(".");
+    }
+
     getType(params) {
         let Select = this.Coach.Select;
         let select = this.findParentInstance(Select);

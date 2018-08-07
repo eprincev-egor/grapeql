@@ -1,8 +1,9 @@
 "use strict";
 
-const testFindDeps = require("../utils/testFindDeps");
+const {testFindDeps} = require("../utils/init")(__dirname);
 
 describe("FindDeps", () => {
+
     testFindDeps({
         query: `
             select id
@@ -218,11 +219,16 @@ describe("FindDeps", () => {
                 {
                     schema: "public",
                     name: "companies",
-                    columns: "*"
+                    columns: [
+                        "id",
+                        "inn",
+                        "name"
+                    ]
                 }
             ]
         }
     });
+
 
     testFindDeps({
         query: `
@@ -234,7 +240,11 @@ describe("FindDeps", () => {
                 {
                     schema: "public",
                     name: "companies",
-                    columns: "*"
+                    columns: [
+                        "id",
+                        "inn",
+                        "name"
+                    ]
                 }
             ]
         }
@@ -250,7 +260,11 @@ describe("FindDeps", () => {
                 {
                     schema: "public",
                     name: "companies",
-                    columns: "*"
+                    columns: [
+                        "id",
+                        "inn",
+                        "name"
+                    ]
                 }
             ]
         }
@@ -288,7 +302,11 @@ describe("FindDeps", () => {
                 {
                     schema: "public",
                     name: "companies",
-                    columns: "*"
+                    columns: [
+                        "id",
+                        "inn",
+                        "name"
+                    ]
                 }
             ]
         }
@@ -427,4 +445,378 @@ describe("FindDeps", () => {
             ]
         }
     });
+
+
+    testFindDeps({
+        query: `
+            with
+                x as (
+                    select 
+                        id as col
+                    from companies
+                )
+            select col
+            from x
+        `,
+        result: {
+            tables: [
+                {
+                    schema: "public",
+                    name: "companies",
+                    columns: [
+                        "id"
+                    ]
+                }
+            ]
+        }
+    });
+
+
+    testFindDeps({
+        query: `
+            with
+                x as (
+                    select 
+                        1 as id,
+                        name
+                    from companies
+                )
+            select 
+                id,
+                name
+            from x
+        `,
+        result: {
+            tables: [
+                {
+                    schema: "public",
+                    name: "companies",
+                    columns: [
+                        "name"
+                    ]
+                }
+            ]
+        }
+    });
+
+    testFindDeps({
+        query: `
+            with
+                x as (
+                    select 
+                        1 as id,
+                        inn
+                    from companies
+                )
+            select *
+            from x
+        `,
+        result: {
+            tables: [
+                {
+                    schema: "public",
+                    name: "companies",
+                    columns: [
+                        "inn"
+                    ]
+                }
+            ]
+        }
+    });
+
+    testFindDeps({
+        query: `
+            with
+                x as (
+                    select *
+                    from companies
+                )
+            select *
+            from x
+        `,
+        result: {
+            tables: [
+                {
+                    schema: "public",
+                    name: "companies",
+                    columns: [
+                        "id",
+                        "inn",
+                        "name"
+                    ]
+                }
+            ]
+        }
+    });
+
+    testFindDeps({
+        query: `
+            with
+                x as (
+                    select *
+                    from companies
+                )
+            select
+                x.id::text || x.name
+            from x
+        `,
+        result: {
+            tables: [
+                {
+                    schema: "public",
+                    name: "companies",
+                    columns: [
+                        "id",
+                        "name"
+                    ]
+                }
+            ]
+        }
+    });
+
+    testFindDeps({
+        query: `
+            with
+                x as (
+                    select inn
+                    from companies
+                    where
+                        id > 100
+                )
+            select inn
+            from x
+        `,
+        result: {
+            tables: [
+                {
+                    schema: "public",
+                    name: "companies",
+                    columns: [
+                        "id",
+                        "inn"
+                    ]
+                }
+            ]
+        }
+    });
+
+    testFindDeps({
+        query: `
+            with
+                x as (
+                    select inn as nice
+                    from companies
+                    where
+                        id > 100
+                )
+            select nice
+            from x
+        `,
+        result: {
+            tables: [
+                {
+                    schema: "public",
+                    name: "companies",
+                    columns: [
+                        "id",
+                        "inn"
+                    ]
+                }
+            ]
+        }
+    });
+
+    testFindDeps({
+        query: `
+            with
+                x as (
+                    select 1 as id
+                    from companies
+                    where
+                        id > 100
+                )
+            select *
+            from x
+        `,
+        result: {
+            tables: [
+                {
+                    schema: "public",
+                    name: "companies",
+                    columns: [
+                        "id"
+                    ]
+                }
+            ]
+        }
+    });
+
+    testFindDeps({
+        query: `
+            with
+                x as (
+                    select inn as id
+                    from companies
+                    where
+                        id > 100
+                )
+            select *
+            from x
+        `,
+        result: {
+            tables: [
+                {
+                    schema: "public",
+                    name: "companies",
+                    columns: [
+                        "id",
+                        "inn"
+                    ]
+                }
+            ]
+        }
+    });
+
+    testFindDeps({
+        query: `
+            with
+                x as (
+                    select
+                        id, inn
+                    from companies
+                    where
+                        name is not null
+                )
+            select inn
+            from x
+        `,
+        result: {
+            tables: [
+                {
+                    schema: "public",
+                    name: "companies",
+                    columns: [
+                        "inn",
+                        "name"
+                    ]
+                }
+            ]
+        }
+    });
+
+    testFindDeps({
+        query: `
+            with
+                x as (
+                    with
+                        y as (
+                            select inn as id
+                            from companies
+                        )
+                    select *
+                    from y
+                )
+            select id
+            from x
+        `,
+        result: {
+            tables: [
+                {
+                    schema: "public",
+                    name: "companies",
+                    columns: [
+                        "inn"
+                    ]
+                }
+            ]
+        }
+    });
+
+    testFindDeps({
+        query: `
+            with
+                x as (
+                    with
+                        y as (
+                            select inn as test
+                            from companies
+                        )
+                    select test as id
+                    from y
+                )
+            select id
+            from x
+        `,
+        result: {
+            tables: [
+                {
+                    schema: "public",
+                    name: "companies",
+                    columns: [
+                        "inn"
+                    ]
+                }
+            ]
+        }
+    });
+
+    testFindDeps({
+        query: `
+            with
+                y as (
+                    select inn as test
+                    from companies
+                ),
+                x as (
+                    select test as id
+                    from y
+                )
+            select id
+            from x
+        `,
+        result: {
+            tables: [
+                {
+                    schema: "public",
+                    name: "companies",
+                    columns: [
+                        "inn"
+                    ]
+                }
+            ]
+        }
+    });
+
+    testFindDeps({
+        query: `
+            with
+                y as (
+                    select inn as test
+                    from companies
+                ),
+                x as (
+                    with
+                        y as (
+                            select name as test
+                            from companies
+                        )
+                    select test as id
+                    from y
+                )
+            select id
+            from x
+        `,
+        result: {
+            tables: [
+                {
+                    schema: "public",
+                    name: "companies",
+                    columns: [
+                        "name"
+                    ]
+                }
+            ]
+        }
+    });
+    
 });

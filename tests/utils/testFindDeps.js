@@ -4,7 +4,7 @@ const GrapeQLCoach = require("../../src/parser/GrapeQLCoach");
 const Deps = require("../../src/parser/Deps");
 const assert = require("assert");
 
-function testFindDeps(test) {
+function testFindDeps(getServer, test) {
     it(`query:
 
         ${ test.query }
@@ -13,11 +13,14 @@ result:
 
 ${ JSON.stringify(test.result, null, 4) }
     `, () => {
+        let server = getServer();
+
         let coach = new GrapeQLCoach(test.query.trim());
         let select = coach.parseSelect();
         
         let deps = new Deps({
-            syntax: select
+            select,
+            server
         });
         deps = transform( deps );
         
