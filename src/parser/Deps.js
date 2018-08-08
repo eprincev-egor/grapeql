@@ -12,8 +12,7 @@ class Deps {
         server, 
         // with (...) select withColumns
         withColumns,
-        withAllColumns,
-        withQueries
+        withAllColumns
     }) {
         this.select = select;
         this.server = server;
@@ -21,23 +20,11 @@ class Deps {
         this.tables = [];
         this._tables = {};
         
-
-        // parent withQueries
-        this.parentWithQueries = withQueries || [];
-        this.withQueries = this.parentWithQueries;
-
-        // current withQueries
-        if ( this.select.with ) {
-            // current withQueries must be before parent
-            this.withQueries = this.select.with.queriesArr.concat(
-                this.withQueries
-            );
-        }
-
-
-
         // separation children on groups
         this.prepare();
+
+        // right join (and similar) will change select
+        this.parseFromItems();
 
         // usual select
         if ( withColumns == null ) {
@@ -57,25 +44,7 @@ class Deps {
                 this.parseColumns( this.linksFromOther );
 
                 withColumns.forEach(columnName => {
-                    let column = this.select.columns.find(column => {
-                        if ( column.isStar() ) {
-                            return;
-                        }
-
-                        let alias;
-
-                        if ( column.as ) {
-                            alias = column.as.toLowerCase();
-                        }
-                        else if ( column.expression.isLink() ) {
-                            let link = column.expression.getLink();
-                            alias = link.getLast();
-
-                            alias = alias.toLowerCase();
-                        }
-
-                        return alias == columnName;
-                    });
+                    let column = this.select.getColumnByName(columnName);
                     
                     // with x as ( select 1 as id ) select id from x
                     if ( column ) {
@@ -151,6 +120,12 @@ class Deps {
         this.linksFromSelectColumns = linksFromSelectColumns;
         this.linksFromOther = linksFromOther;
     }
+    
+    parseFromItems() {
+        this.fromItems.forEach(fromItem => {
+            this.addTableByFromItem(fromItem);
+        });
+    }
 
     parseStars() {
         this.starLinks.forEach(starLink => {
@@ -158,14 +133,7 @@ class Deps {
 
             fromItems.forEach(fromItem => {
                 let table = this.addTableByFromItem(fromItem);
-                
-                let withQuery = this.getWithQueryByFromItem( fromItem );
-                if ( withQuery ) {
-                    return;
-                }
-
-                let path = `${ table.schema }.${ table.name }`;
-                let dbTable = this.server.database.findTable( path );
+                let dbTable = fromItem.getDbTable( this.server );
 
                 if ( !dbTable ) {
                     return;
@@ -197,22 +165,11 @@ class Deps {
         this.addColumn(table, columnName);
     }
 
-    getWithQueryByFromItem(fromItem) {
-        let tableLink = fromItem.table;
-            
-        if ( tableLink.link.length != 1 ) {
-            return;
-        }
-
-        let name = tableLink.first();
-        return this.withQueries.find(withQuery => withQuery.name.equal(name));
-    }
-
     parseWith() {
         let withQueries = [];
 
-        this.fromItems.map(fromItem => {
-            let withQuery = this.getWithQueryByFromItem( fromItem );
+        this.fromItems.forEach(fromItem => {
+            let withQuery = fromItem.getWithQuery();
             
             if ( !withQuery ) {
                 return;
@@ -246,9 +203,7 @@ class Deps {
                 select: withQuery.select,
                 server: this.server,
                 withColumns: table.columns,
-                withAllColumns: this.hasStar( table ),
-                // prevWithQueries must be before parentWithQueries
-                withQueries: prevWithQueries.concat(this.parentWithQueries)
+                withAllColumns: this.hasStar( table )
             });
 
             this.removeTable( table );
@@ -288,12 +243,51 @@ class Deps {
         });
     }
 
-    getFromItemsByStar() {
-        return this.fromItems;
+    getFromItemsByStar(starLink) {
+        if ( starLink.link.length == 1 ) {
+            return this.fromItems;
+        }
+
+        let starName = starLink.first();
+
+        return this.fromItems.filter(fromItem => {
+            let alias;
+
+            if ( fromItem.as ) {
+                alias = fromItem.as;
+            } 
+            else if ( fromItem.table ) {
+                alias = fromItem.table.getLast();
+            }
+
+            return alias && alias.equal( starName );
+        });
     }
 
-    getFromItemByColumn() {
-        return this.fromItems[0];
+    getFromItemByColumn(columnLink) {
+        if ( columnLink.link.length == 1 ) {
+            let columnName = columnLink.first().toLowerCase();
+
+            return this.fromItems.find(fromItem => 
+                existsColumn({
+                    fromItem,
+                    server: this.server,
+                    columnName
+                })
+            );
+        }
+
+        return this.fromItems.find(fromItem => {
+            let alias = fromItem.as || fromItem.table.getLast();
+
+            if ( columnLink.link.length == 2 ) {
+                return alias.equal(
+                    columnLink.first()
+                );
+            }
+
+            return true;
+        });
     }
 
     addTableByFromItem(fromItem) {
@@ -384,7 +378,7 @@ class Deps {
         let tableName = tableLink.first();
         let schemaName = "public";
 
-        if ( tableLink.length > 1 ) {
+        if ( tableLink.link.length > 1 ) {
             let schema = tableName;
             schema = schema.toLowerCase();
 
@@ -400,6 +394,39 @@ class Deps {
             tableName
         };
     }
+}
+
+function existsColumn({fromItem, server, columnName}) {
+    let withQuery = fromItem.getWithQuery();
+
+    if ( withQuery ) {
+        if ( withQuery.select ) {
+            let fromItems = [];
+            
+            let column = withQuery.select.getColumnByName( columnName );
+            if ( column ) {
+                return true;
+            }
+
+            withQuery.select.eachFromItem(fromItem => fromItems.push(fromItem));
+    
+            return fromItems.some(fromItem => 
+                existsColumn({
+                    fromItem,
+                    server,
+                    columnName
+                })
+            );
+        }
+        return;
+    }
+
+    let dbTable = fromItem.getDbTable(server);
+    if ( !dbTable ) {
+        return;
+    }
+
+    return columnName in dbTable.columns;
 }
 
 module.exports = Deps;

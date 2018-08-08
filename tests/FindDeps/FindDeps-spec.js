@@ -221,6 +221,7 @@ describe("FindDeps", () => {
                     name: "companies",
                     columns: [
                         "id",
+                        "id_country",
                         "inn",
                         "name"
                     ]
@@ -242,6 +243,7 @@ describe("FindDeps", () => {
                     name: "companies",
                     columns: [
                         "id",
+                        "id_country",
                         "inn",
                         "name"
                     ]
@@ -262,6 +264,7 @@ describe("FindDeps", () => {
                     name: "companies",
                     columns: [
                         "id",
+                        "id_country",
                         "inn",
                         "name"
                     ]
@@ -304,6 +307,7 @@ describe("FindDeps", () => {
                     name: "companies",
                     columns: [
                         "id",
+                        "id_country",
                         "inn",
                         "name"
                     ]
@@ -541,6 +545,7 @@ describe("FindDeps", () => {
                     name: "companies",
                     columns: [
                         "id",
+                        "id_country",
                         "inn",
                         "name"
                     ]
@@ -818,5 +823,148 @@ describe("FindDeps", () => {
             ]
         }
     });
-    
+
+    testFindDeps({
+        query: `
+            select 1
+            from companies
+        `,
+        result: {
+            tables: [
+                {
+                    schema: "public",
+                    name: "companies",
+                    columns: []
+                }
+            ]
+        }
+    });
+
+    testFindDeps({
+        query: `
+            select count( * )
+            from companies
+        `,
+        result: {
+            tables: [
+                {
+                    schema: "public",
+                    name: "companies",
+                    columns: []
+                }
+            ]
+        }
+    });
+
+    testFindDeps({
+        query: `
+            select 1
+            from companies
+            right join countries on true
+        `,
+        result: {
+            tables: [
+                {
+                    schema: "public",
+                    name: "companies",
+                    columns: []
+                },
+                {
+                    schema: "public",
+                    name: "countries",
+                    columns: []
+                }
+            ]
+        }
+    });
+
+    testFindDeps({
+        query: `
+            select 1
+            from companies
+
+            right join countries on
+                countries.id = companies.id_country
+        `,
+        result: {
+            tables: [
+                {
+                    schema: "public",
+                    name: "companies",
+                    columns: [
+                        "id_country"
+                    ]
+                },
+                {
+                    schema: "public",
+                    name: "countries",
+                    columns: [
+                        "id"
+                    ]
+                }
+            ]
+        }
+    });
+
+    testFindDeps({
+        query: `
+            select
+                code,
+                countries.name,
+                companies.name
+            from public.companies
+            
+            left join countries on
+                countries.id = companies.id_country
+        `,
+        result: {
+            tables: [
+                {
+                    schema: "public",
+                    name: "companies",
+                    columns: [
+                        "id_country",
+                        "name"
+                    ]
+                },
+                {
+                    schema: "public",
+                    name: "countries",
+                    columns: [
+                        "code",
+                        "id",
+                        "name"
+                    ]
+                }
+            ]
+        }
+    });
+
+    testFindDeps({
+        query: `
+            with 
+                x as (
+                    select 1 as id
+                    from companies
+                )
+            select x.*
+            from x
+            right join countries on true
+        `,
+        result: {
+            tables: [
+                {
+                    schema: "public",
+                    name: "countries",
+                    columns: []
+                },
+                {
+                    schema: "public",
+                    name: "companies",
+                    columns: []
+                }
+            ]
+        }
+    });
+
 });

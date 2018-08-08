@@ -749,6 +749,27 @@ class Select extends Syntax {
         // });
     }
 
+    getColumnByName(columnName) {
+        return this.columns.find(column => {
+            if ( column.isStar() ) {
+                return;
+            }
+            let alias;
+
+            if ( column.as ) {
+                alias = column.as.toLowerCase();
+            }
+            else if ( column.expression.isLink() ) {
+                let link = column.expression.getLink();
+                alias = link.getLast();
+
+                alias = alias.toLowerCase();
+            }
+
+            return alias == columnName;
+        });
+    }
+
 
     getExpressionType({expression, node, server}) {
         expression = new this.Coach.Expression(expression);

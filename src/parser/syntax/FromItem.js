@@ -294,6 +294,10 @@ class FromItem extends Syntax {
     }
 
     getDbTable(server) {
+        if ( this.getWithQuery() ) {
+            return;
+        }
+
         let tableLink = this.table.link;
         let tableName;
 
@@ -310,7 +314,7 @@ class FromItem extends Syntax {
 
             tableName = tableLink[1];
         } else {
-            dbSchema = server.getSchema("public");
+            dbSchema = server.database.getSchema("public");
             tableName = tableLink[0];
         }
 
@@ -459,6 +463,36 @@ class FromItem extends Syntax {
         } else {
             this.joins.unshift( join );
         }
+    }
+
+    // returned with query if from item reference to with query
+    getWithQuery() {
+        if ( !this.table ) {
+            return;
+        }
+
+        let tableLink = this.table;
+        if ( tableLink.link.length != 1 ) {
+            return;
+        }
+
+        let name = tableLink.first().toLowerCase();
+
+        let select = this.findParentInstance( this.Coach.Select );
+        let withQuery;
+
+        while (select) {
+            if ( select.with ) {
+                withQuery = select.with.queries[ name ];
+
+                if ( withQuery ) {
+                    break;
+                }
+            }
+            select = select.findParentInstance( this.Coach.Select );
+        }
+
+        return withQuery;
     }
 }
 
