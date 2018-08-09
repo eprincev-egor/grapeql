@@ -1,7 +1,7 @@
 "use strict";
 
 const GrapeQLCoach = require("../../src/parser/GrapeQLCoach");
-const Deps = require("../../src/parser/Deps");
+const Deps = require("../../src/parser/deps/Deps");
 const assert = require("assert");
 
 function testFindDeps(getServer, test) {
@@ -37,12 +37,20 @@ function transform(deps) {
         let outTable = {
             schema: table.schema,
             name: table.name,
-            columns: table.columns == "*" ? "*" : table.columns.sort()
+            columns: table.columns.sort()
         };
 
         out.tables.push(
             outTable
         );
+    });
+
+    out.tables.sort((tableA, tableB) => {
+        if ( tableA.schema == tableB.schema ) {
+            return tableA.name > tableB.name ? 1 : -1;
+        } else {
+            return tableA.schema > tableB.schema ? 1 : -1;
+        }
     });
 
     return out;

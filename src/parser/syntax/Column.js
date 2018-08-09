@@ -37,6 +37,14 @@ class Column extends Syntax {
         }
     }
 
+    isLink() {
+        return this.expression.isLink();
+    }
+
+    getLink() {
+        return this.expression.getLink();
+    }
+
     clone() {
         let clone = new Column();
         clone.expression = this.expression.clone();

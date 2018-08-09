@@ -105,7 +105,9 @@ class ObjectLink extends Syntax {
             this.link = [];
         }
 
-        this.addChild(name);
+        if ( name != "*" ) {
+            this.addChild(name);
+        }
         this.link.push(name);
     }
 
@@ -245,6 +247,23 @@ class ObjectLink extends Syntax {
         } else {
             return this.link.map(name => name.toLowerCase()).join(".");
         }
+    }
+
+    getParentFunctionCall() {
+        let functionCall;
+
+        this.findParent(parent => {
+            if ( parent instanceof this.Coach.Select ) {
+                return true;
+            }
+
+            if ( parent instanceof this.Coach.FunctionCall ) {
+                functionCall = parent;
+                return true;
+            }
+        });
+
+        return functionCall;
     }
 }
 

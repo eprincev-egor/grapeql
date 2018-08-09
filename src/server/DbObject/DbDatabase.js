@@ -31,6 +31,8 @@ class DbDatabase {
             where
                 pg_columns.table_schema != 'pg_catalog' and
                 pg_columns.table_schema != 'information_schema'
+            
+            order by pg_columns.ordinal_position
         `);
 
         this.schemas = {};

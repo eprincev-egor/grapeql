@@ -5,6 +5,7 @@ class DbTable {
         this.name = params.name;
         this.schema = params.schema;
         this.columns = {};
+        this.columnsArr = [];
         this.constraints = {};
     }
 
@@ -21,6 +22,7 @@ class DbTable {
 
     addColumn(column) {
         this.columns[ column.name ] = column;
+        this.columnsArr.push( column );
     }
 
     addConstraint(constraint) {
