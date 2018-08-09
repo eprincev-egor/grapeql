@@ -1461,6 +1461,36 @@ describe("FindDeps", () => {
 
     testFindDeps({
         query: `
+            with 
+                x ("bomb") as (
+                    select *
+                    from (
+                        select *
+                        from companies
+                    ) as u
+                )
+            select bomb
+            from (
+                
+                select *
+                from x
+            ) as cmp
+        `,
+        result: {
+            tables: [
+                {
+                    schema: "public",
+                    name: "companies",
+                    columns: [
+                        "id"
+                    ]
+                }
+            ]
+        }
+    });
+
+    testFindDeps({
+        query: `
             select id
             from unnest( array[1, 2]::integer[] ) as id
         `,
@@ -1493,4 +1523,337 @@ describe("FindDeps", () => {
             ]
         }
     });
+
+    testFindDeps({
+        query: `
+            select (select 1) as one
+            from unnest( array[1, 2]::integer[] ) as id
+        `,
+        result: {
+            tables: []
+        }
+    });
+
+    testFindDeps({
+        query: `
+            select 
+                (
+                    select 
+                        code || ' ' || companies.inn
+                    from countries
+                    where
+                        countries.id = companies.id_country
+                ) as country_inn
+            from companies
+        `,
+        result: {
+            tables: [
+                {
+                    schema: "public",
+                    name: "companies",
+                    columns: [
+                        "id_country",
+                        "inn"
+                    ]
+                },
+                {
+                    schema: "public",
+                    name: "countries",
+                    columns: [
+                        "code",
+                        "id"
+                    ]
+                }
+            ]
+        }
+    });
+
+    testFindDeps({
+        query: `
+            select 
+                (
+                    select 
+                        (
+                            select 
+                                code || ' ' || companies.inn
+                        )
+                    from countries
+                    where
+                        countries.id = companies.id_country
+                ) as country_inn
+            from companies
+        `,
+        result: {
+            tables: [
+                {
+                    schema: "public",
+                    name: "companies",
+                    columns: [
+                        "id_country",
+                        "inn"
+                    ]
+                },
+                {
+                    schema: "public",
+                    name: "countries",
+                    columns: [
+                        "code",
+                        "id"
+                    ]
+                }
+            ]
+        }
+    });
+
+    testFindDeps({
+        query: `
+            select x
+            from countries
+            
+            left join lateral (
+                select 
+                    string_agg( distinct companies.name, ', ' ) as x
+                from companies
+                where
+                    countries.id = companies.id_country
+            ) as tmp on true
+        `,
+        result: {
+            tables: [
+                {
+                    schema: "public",
+                    name: "companies",
+                    columns: [
+                        "id_country",
+                        "name"
+                    ]
+                },
+                {
+                    schema: "public",
+                    name: "countries",
+                    columns: [
+                        "id"
+                    ]
+                }
+            ]
+        }
+    });
+
+    testFindDeps({
+        query: `
+            select x, y
+            from countries
+            
+            left join lateral (
+                select 
+                    string_agg( distinct companies.name, ', ' ) as x
+                from companies
+                where
+                    countries.id = companies.id_country
+            ) as tmp1 on true
+
+            left join lateral (
+                select
+                    code,
+                    countries.id as y,
+                    countries.name as z
+                from countries
+            ) as tmp2 on tmp2.code = 'eng'
+        `,
+        result: {
+            tables: [
+                {
+                    schema: "public",
+                    name: "companies",
+                    columns: [
+                        "id_country",
+                        "name"
+                    ]
+                },
+                {
+                    schema: "public",
+                    name: "countries",
+                    columns: [
+                        "code",
+                        "id"
+                    ]
+                }
+            ]
+        }
+    });
+
+
+    testFindDeps({
+        query: `
+            with
+                codes as (
+                    values
+                        (1, 'ru'),
+                        (2, 'en')
+                )
+            select
+            from lateral (
+                select *
+                from countries
+            ) as tmp
+        `,
+        result: {
+            tables: [
+                {
+                    schema: "public",
+                    name: "countries",
+                    columns: [
+                    ]
+                }
+            ]
+        }
+    });
+
+    testFindDeps({
+        query: `
+            with
+                codes (id, code) as (
+                    values
+                        (1, 'ru'),
+                        (2, 'en')
+                )
+            select
+            from lateral (
+                select *
+                from countries
+
+                left join codes on
+                    codes.code = countries.code
+            ) as tmp
+        `,
+        result: {
+            tables: [
+                {
+                    schema: "public",
+                    name: "countries",
+                    columns: [
+                        "code"
+                    ]
+                }
+            ]
+        }
+    });
+
+    testFindDeps({
+        query: `
+            with
+                codes (id, code, test) as (
+                    values
+                        (1, 'ru', null),
+                        (2, 'en', null)
+                )
+            select
+                test
+            from lateral (
+                select *
+                from countries
+
+                left join codes on
+                    codes.code = countries.code
+            ) as tmp
+        `,
+        result: {
+            tables: [
+                {
+                    schema: "public",
+                    name: "countries",
+                    columns: [
+                        "code"
+                    ]
+                }
+            ]
+        }
+    });
+
+    testFindDeps({
+        query: `
+            with
+                codes as (
+                    values
+                        (1, (select code from countries where id = 1)),
+                        (2, 'en')
+                )
+            select *
+            from codes
+        `,
+        result: {
+            tables: [
+                {
+                    schema: "public",
+                    name: "countries",
+                    columns: [
+                        "code",
+                        "id"
+                    ]
+                }
+            ]
+        }
+    });
+
+    testFindDeps({
+        query: `
+            with
+                codes as (
+                    values
+                        (1, 'ru'),
+                        (2, (select code from countries where id = 2))
+                )
+            select *
+            from codes
+        `,
+        result: {
+            tables: [
+                {
+                    schema: "public",
+                    name: "countries",
+                    columns: [
+                        "code",
+                        "id"
+                    ]
+                }
+            ]
+        }
+    });
+
+    testFindDeps({
+        query: `
+            select
+                x
+            from (
+                select
+                    (
+                        select code as y
+                        from countries
+                        where
+                            countries.id = 1
+                    ) as x,
+                    (
+                        select name as x
+                        from countries
+                        where
+                            countries.id = 2
+                    ) as y
+            ) as tmp
+        `,
+        result: {
+            tables: [
+                {
+                    schema: "public",
+                    name: "countries",
+                    columns: [
+                        "code",
+                        "id"
+                    ]
+                }
+            ]
+        }
+    });
+
+    
+
 });

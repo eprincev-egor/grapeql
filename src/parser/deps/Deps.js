@@ -17,16 +17,16 @@ class Deps {
     }
 
     parsePlan(plan) {
+        // links from where part and from select part
+        let allLinks = plan.necessaryLinks;
+        allLinks = allLinks.concat(
+            plan.selectedLinks 
+        );
+
         // select 1 from companies
         plan.fromItems.forEach(fromItem => {
-            // links from where part and from select part
-            let parentLinks = plan.necessaryLinks;
-            parentLinks = parentLinks.concat(
-                plan.selectedLinks 
-            );
-
             // links only from this fromItem
-            parentLinks = parentLinks.filter(link => 
+            let parentLinks = allLinks.filter(link => 
                 fromItem.links.includes(link)
             );
 
@@ -38,11 +38,20 @@ class Deps {
             column.links.forEach(link => {
                 this.addLink(link);
             });
+
+            column.subPlans.forEach(subPlan => {
+                this.parsePlan(subPlan);
+            });
         });
 
         // select ... where id > 100
         plan.necessaryLinks.forEach(link => {
             this.addLink(link);
+        });
+
+        // select  ... where (select ...)
+        plan.necessarySubPlans.forEach(subPlan => {
+            this.parsePlan(subPlan);
         });
     }
 
@@ -66,6 +75,7 @@ class Deps {
 
         parentLinks.forEach(parentLink => {
             let column;
+
             if ( parentLink.subColumn ) {
                 column = parentLink.subColumn;
             } else {
@@ -76,6 +86,10 @@ class Deps {
             column.links.forEach(link => {
                 this.addLink( link );
                 childLinks.push( link );
+            });
+
+            column.subPlans.forEach(subPlan => {
+                this.parsePlan(subPlan);
             });
         });
 
@@ -92,6 +106,10 @@ class Deps {
             this.addFromItem(fromItem, parentLinks);
         });
 
+        // select ... where (select ...)
+        subPlan.necessarySubPlans.forEach(subPlan => {
+            this.parsePlan(subPlan);
+        });
     }
 
     addLink(link) {

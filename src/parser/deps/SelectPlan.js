@@ -5,15 +5,21 @@ const ColumnLink = require("../syntax/ColumnLink");
 const Select = require("../syntax/Select/Select");
 const With = require("../syntax/With");
 const Column = require("../syntax/Column");
+const FromItem = require("../syntax/FromItem");
 
 const Plan = require("./Plan");
 const ValuesPlan = require("./ValuesPlan");
 
 class SelectPlan extends Plan {
     build() {
+        // from ...
         this.buildFrom();
+        // select ...
         this.buildColumns();
+        // where, order by, group by, etc
         this.buildNecessaryLinks();
+        // select (select ...) from ...
+        this.buildSubSelects();
     }
 
     buildFrom() {
@@ -27,7 +33,9 @@ class SelectPlan extends Plan {
             if ( fromItem.select ) {
                 from.plan = new SelectPlan({
                     select: fromItem.select,
-                    server: this.server
+                    server: this.server,
+                    // keyword lateral gives access to parent fromItems
+                    parentPlan: fromItem.lateral ? this : false
                 });
                 from.plan.build();
             } else {
@@ -86,7 +94,8 @@ class SelectPlan extends Plan {
             }
 
             let column = {
-                links: []
+                links: [],
+                subPlans: []
             };
 
             // select 1 as id
@@ -103,6 +112,14 @@ class SelectPlan extends Plan {
             let columnLinks = [];
             columnSyntax.expression.walk((child, walker) => {
                 if ( child instanceof Select ) {
+                    let subPlan = new SelectPlan({
+                        select: child,
+                        server: this.server,
+                        parentPlan: this
+                    });
+                    subPlan.build();
+
+                    column.subPlans.push(subPlan);
                     return walker.skip();
                 }
 
@@ -161,6 +178,42 @@ class SelectPlan extends Plan {
         this.parseColumnLinks(columnLinks, this.necessaryLinks);
     }
 
+    buildSubSelects() {
+        let subSelects = [];
+
+        this.select.walk((child, walker) => {
+            if ( child instanceof With ) {
+                return walker.skip();
+            }
+            if ( child instanceof FromItem ) {
+                return walker.skip();
+            }
+
+            if ( child instanceof Select ) {
+                subSelects.push( child );
+                walker.skip();
+            }
+        });
+
+        subSelects.forEach(subSelect => {
+            let parentColumn = subSelect.findParentInstance(Column);
+            let isSelectColumns = parentColumn && this.select.columns.includes( parentColumn );
+            if ( isSelectColumns ) {
+                return;
+            }
+
+            
+            let subPlan = new SelectPlan({
+                select: subSelect,
+                server: this.server,
+                parentPlan: this
+            });
+            subPlan.build();
+
+            this.necessarySubPlans.push(subPlan);
+        });
+    }
+
     parseColumnLinks(columnLinks, storeLinks) {
         // select from companies where companies is not null
         // select from companies where companies.* is not null
@@ -204,14 +257,18 @@ class SelectPlan extends Plan {
                     links: [{
                         name: dbColumn.name,
                         fromItem
-                    }]
+                    }],
+                    subPlans: []
                 });
             });
         }
         else if ( fromItem.plan ) {
             fromItem.plan.columns.forEach(subColumn => {
                 let link = {subColumn, fromItem};
-                let column = {links: [link]};
+                let column = {
+                    links: [link],
+                    subPlans: []
+                };
 
                 if ( subColumn.name ) {
                     column.name = subColumn.name;
@@ -226,6 +283,11 @@ class SelectPlan extends Plan {
     }
 
     getFromItemByLink(columnLink) {
+        let fromItems = this.fromItems;
+        fromItems = fromItems.concat(
+            this.getParentFromItems()
+        );
+
         // all cases:
         // select id from companies, orders
         // select row_to_json( companies ) from companies
@@ -248,7 +310,7 @@ class SelectPlan extends Plan {
         // cases:
         // select row_to_json( cmp ) from companies as cmp
         // select cmp.id from companies as cmp
-        let fromItemByAlias = this.fromItems.find(fromItem => 
+        let fromItemByAlias = fromItems.find(fromItem => 
             fromItem.as && fromItem.as.equal( columnLink.first() )
         );
         if ( fromItemByAlias ) {
@@ -292,7 +354,7 @@ class SelectPlan extends Plan {
         if ( columnLink.link.length == 1 ) {
             let columnName = columnLink.first().toLowerCase();
 
-            return this.fromItems.find(fromItem => {
+            return fromItems.find(fromItem => {
                 if ( fromItem.dbTable ) {
                     return columnName in fromItem.dbTable.columns;
                 }
@@ -325,8 +387,13 @@ class SelectPlan extends Plan {
     getFromItemByTableLink(tableLink, useAliases = true) {
         let fromItemsWithoutAlias = [];
         let fromItemsWithAlias = [];
+        let fromItems = this.fromItems;
 
-        this.fromItems.forEach(fromItem => {
+        // for sub query
+        let parentFromItems = this.getParentFromItems();
+        fromItems = fromItems.concat( parentFromItems );
+
+        fromItems.forEach(fromItem => {
             if ( fromItem.as ) {
                 fromItemsWithAlias.push( fromItem );
             } else {
@@ -355,7 +422,7 @@ class SelectPlan extends Plan {
 
         // first, we filter fromItems by table name
         let tableName = tableLink.getLast();
-        let fromItems = fromItemsWithoutAlias.filter(fromItem =>
+        fromItems = fromItemsWithoutAlias.filter(fromItem =>
             fromItem.link.getLast().equal( tableName )
         );
 
@@ -396,6 +463,21 @@ class SelectPlan extends Plan {
             this.getFromItemByLink( starLink )
         ];
     }
+
+    getParentFromItems() {
+        let out = [];
+        let parentPlan = this.parentPlan;
+
+        while (parentPlan) {
+            out = out.concat( parentPlan.fromItems );
+
+            parentPlan = parentPlan.parentPlan;
+        }
+
+        return out;
+    }
 }
+
+Plan.SelectPlan = SelectPlan;
 
 module.exports = SelectPlan;

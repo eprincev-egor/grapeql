@@ -2,12 +2,21 @@
 
 const Plan = require("./Plan");
 
+const Select = require("../syntax/Select/Select");
+
 class ValuesPlan extends Plan {
     build() {
+        this.buildColumns();
+    }
+
+    buildColumns() {
         let valueRow = this.values[0];
 
         valueRow.items.forEach((valueItem, index) => {
-            let column = {links: []};
+            let column = {
+                links: [],
+                subPlans: []
+            };
 
             // with x (id, name) as (...)
             // with x (id, name) as (...)
@@ -20,10 +29,28 @@ class ValuesPlan extends Plan {
                 }
             }
 
+            this.values.forEach(valueRow => {
+                let valueItem = valueRow.items[ index ];
+
+                valueItem.walk((child, walker) => {
+                    if ( child instanceof Select ) {
+
+                        let subPlan = new Plan.SelectPlan({
+                            select: child,
+                            server: this.server,
+                            parentPlan: this
+                        });
+                        subPlan.build();
+
+                        column.subPlans.push( subPlan );
+
+                        walker.skip();
+                    }
+                }); 
+            });
+
             this.columns.push( column );
         });
-        
-        console.log( this.columns );
     }
 }
 
