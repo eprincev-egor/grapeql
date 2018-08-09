@@ -24,31 +24,39 @@ class SelectPlan extends Plan {
                 links: []
             };
 
-            let withQuery = fromItem.getWithQuery();
-            let dbTable = fromItem.getDbTable( this.server );
-
-            if ( withQuery ) {
-                from.withQuery = withQuery;
-
-                if ( withQuery.select ) {
-                    from.plan = new SelectPlan({
-                        withQuery,
-                        select: withQuery.select,
-                        server: this.server
-                    });
-                    from.plan.build();
+            if ( fromItem.select ) {
+                from.plan = new SelectPlan({
+                    select: fromItem.select,
+                    server: this.server
+                });
+                from.plan.build();
+            } else {
+                let withQuery = fromItem.getWithQuery();
+                let dbTable = fromItem.getDbTable( this.server );
+    
+                if ( withQuery ) {
+                    from.withQuery = withQuery;
+    
+                    if ( withQuery.select ) {
+                        from.plan = new SelectPlan({
+                            withQuery,
+                            select: withQuery.select,
+                            server: this.server
+                        });
+                        from.plan.build();
+                    }
+                    else if ( withQuery.values ) {
+                        from.plan = new ValuesPlan({
+                            withQuery,
+                            values: withQuery.values,
+                            server: this.server
+                        });
+                        from.plan.build();
+                    }
                 }
-                else if ( withQuery.values ) {
-                    from.plan = new ValuesPlan({
-                        withQuery,
-                        values: withQuery.values,
-                        server: this.server
-                    });
-                    from.plan.build();
+                else if ( dbTable ) {
+                    from.dbTable = dbTable;
                 }
-            }
-            else if ( dbTable ) {
-                from.dbTable = dbTable;
             }
 
             this.fromItems.push( from );

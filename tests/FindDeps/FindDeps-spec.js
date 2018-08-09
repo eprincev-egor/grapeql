@@ -1336,4 +1336,161 @@ describe("FindDeps", () => {
         }
     });
 
+    testFindDeps({
+        query: `
+            select cmp.*
+            from (
+                select *
+                from companies
+            ) as cmp
+        `,
+        result: {
+            tables: [
+                {
+                    schema: "public",
+                    name: "companies",
+                    columns: [
+                        "id",
+                        "id_country",
+                        "inn",
+                        "name"
+                    ]
+                }
+            ]
+        }
+    });
+
+    testFindDeps({
+        query: `
+            select 
+                id_1
+            from 
+                (
+                    select *
+                    from countries
+                ) as x1,
+                (
+                    select id + 1 as id_1
+                    from companies
+                ) as x2
+        `,
+        result: {
+            tables: [
+                {
+                    schema: "public",
+                    name: "companies",
+                    columns: [
+                        "id"
+                    ]
+                },
+                {
+                    schema: "public",
+                    name: "countries",
+                    columns: []
+                }
+            ]
+        }
+    });
+
+    testFindDeps({
+        query: `
+            select 
+                id_1
+            from 
+                (
+                    select *
+                    from countries
+                    where
+                        countries is not null
+                ) as x1,
+                (
+                    select id + 1 as id_1
+                    from companies
+                ) as x2
+        `,
+        result: {
+            tables: [
+                {
+                    schema: "public",
+                    name: "companies",
+                    columns: [
+                        "id"
+                    ]
+                },
+                {
+                    schema: "public",
+                    name: "countries",
+                    columns: [
+                        "code",
+                        "id",
+                        "name"
+                    ]
+                }
+            ]
+        }
+    });
+
+    testFindDeps({
+        query: `
+            select bomb
+            from (
+                with 
+                    x ("bomb") as (
+                        select *
+                        from (
+                            select *
+                            from companies
+                        ) as u
+                    )
+                select *
+                from x
+            ) as cmp
+        `,
+        result: {
+            tables: [
+                {
+                    schema: "public",
+                    name: "companies",
+                    columns: [
+                        "id"
+                    ]
+                }
+            ]
+        }
+    });
+
+    testFindDeps({
+        query: `
+            select id
+            from unnest( array[1, 2]::integer[] ) as id
+        `,
+        result: {
+            tables: []
+        }
+    });
+
+    testFindDeps({
+        query: `
+            select *
+            from (
+                select _id
+                from 
+                    unnest( array[1, 2]::integer[] ) as _id
+                
+                right join companies on
+                    companies.id = _id
+            ) as tmp
+        `,
+        result: {
+            tables: [
+                {
+                    schema: "public",
+                    name: "companies",
+                    columns: [
+                        "id"
+                    ]
+                }
+            ]
+        }
+    });
 });

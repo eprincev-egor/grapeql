@@ -298,6 +298,11 @@ class FromItem extends Syntax {
             return;
         }
 
+        if ( !this.table ) {
+            // from unnest(...)
+            return;
+        }
+
         let tableLink = this.table.link;
         let tableName;
 
