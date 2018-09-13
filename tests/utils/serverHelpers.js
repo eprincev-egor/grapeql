@@ -42,11 +42,16 @@ async function clearDatabase(db, dirname) {
     `);
 
     let clearDbSql = "";
-    result.rows.forEach(row => {
-        clearDbSql += `
-            drop schema ${ row.schema_name } cascade;
-        `;
-    });
+    result.rows
+        .filter(row => 
+            // filter system schemas
+            !/(^pg_toast|^pg_temp|pg_catalog|information_schema)/i.test(row.schema_name)
+        )
+        .forEach(row => {
+            clearDbSql += `
+                drop schema ${ row.schema_name } cascade;
+            `;
+        });
     clearDbSql += `
         drop schema if exists public cascade;
         create schema public;

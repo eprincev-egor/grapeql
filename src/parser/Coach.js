@@ -13,7 +13,7 @@ class Coach {
         throw new Error(
             "\n SyntaxError at line " + (position.line + 1) +
                 ", position " + (position.column + 1) +
-                ", at near `" + this.str.slice(Math.max(position.index, 0), position.index + 10) + "`" +
+                ", at near `" + this.str.slice(Math.max(position.index, 0), position.index + 30) + "`" +
                 "\n Message: " + message
         );
     }

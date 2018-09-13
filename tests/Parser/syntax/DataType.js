@@ -2,6 +2,10 @@
 
 module.exports = [
     {
+        str: "Timestamp",
+        result: {type: "timestamp"}
+    },
+    {
         str: "numeric  ( 10 )",
         result: {type: "numeric(10)"}
     },

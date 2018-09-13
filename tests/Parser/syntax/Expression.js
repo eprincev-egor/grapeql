@@ -642,5 +642,27 @@ module.exports = [
                 {dataType: {type: "numeric(10,2)[]"}}
             ]
         }
+    },
+    {
+        str: "exists(select)",
+        result: {
+            elements: [{
+                select: {
+                    columns: []
+                }
+            }]
+        }
+    },
+    {
+        str: "extract( century from Timestamp '2000-12-16 12:21:14' )",
+        result: {
+            elements: [{
+                field: "century",
+                type: {type: "timestamp"},
+                source: {elements: [
+                    {content: "2000-12-16 12:21:14"}
+                ]}
+            }]
+        }
     }
 ];

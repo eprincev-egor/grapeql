@@ -141,6 +141,14 @@ class Expression extends Syntax {
             elem = coach.parseIn();
         }
 
+        else if ( coach.isExists() ) {
+            elem = coach.parseExists();
+        }
+        
+        else if ( coach.isExtract() ) {
+            elem = coach.parseExtract();
+        }
+
         else if ( coach.isBetween() ) {
             elem = coach.parseBetween();
         }
