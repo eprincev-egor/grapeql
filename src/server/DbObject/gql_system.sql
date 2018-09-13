@@ -1,4 +1,4 @@
-drop schema if exists gql_system;
+drop schema if exists gql_system cascade;
 create schema gql_system;
 
 create table gql_system.log_changes (
