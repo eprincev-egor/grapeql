@@ -124,6 +124,7 @@ class DataType extends Syntax {
                 this.type = this.type.replace(/\s*\(\s*/g, "(");
                 this.type = this.type.replace(/\s*\)\s*/g, ")");
                 this.type = this.type.replace(/\s*,\s*/g, ",");
+                this.type = this.type.toLowerCase();
                 break;
             }
         }
