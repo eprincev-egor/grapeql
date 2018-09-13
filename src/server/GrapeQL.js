@@ -6,6 +6,7 @@ const Transaction = require("./Transaction");
 const DbDatabase = require("./DbObject/DbDatabase");
 const QueryBuilder = require("./QueryBuilder/QueryBuilder");
 const TriggerManager = require("./TriggerManager");
+const CacheManager = require("./Cache/CacheManager");
 
 const express = require("express");
 const bodyParser = require("body-parser");
@@ -108,6 +109,7 @@ class GrapeQL {
         await this.loadDatabaseInfo();
         this.initExpress();
         this.initTriggerManager();
+        this.initCacheManager();
         
         await this.initQueryBuilder();
 
@@ -153,6 +155,10 @@ class GrapeQL {
 
     initTriggerManager() {
         this.triggers = new TriggerManager(this);
+    }
+
+    initCacheManager() {
+        this.cache = new CacheManager({server: this});
     }
 
     initExpress() {

@@ -16,6 +16,8 @@ class DbDatabase {
     }
     
     async load(db) {
+        this.db = db;
+
         let res;
 
         res = await db.query(`
@@ -222,6 +224,56 @@ class DbDatabase {
                     iteration( constraint, table, schema );
                 }
             }
+        }
+    }
+
+    // table: {
+    //     schema: "public",
+    //     name: "test",
+    //     columns: [
+    //         {
+    //             name: "id",
+    //             type: "serial",
+    //             nulls: false,
+    //             default: 1
+    //         }
+    //     ]
+    // }
+    async createTable(table) {
+        let {db} = this;
+        let {schema, name, columns} = table;
+        let dbSchema = this.schemas[ schema ];
+        
+        if ( !dbSchema ) {
+            await db.query(`
+                create schema ${ schema }
+            `);
+
+            dbSchema = new DbSchema({name: schema});
+            this.schemas[ schema ] = dbSchema;
+        }
+        
+        let dbTable = dbSchema.getTable(name);
+        if ( !dbTable ) {
+            let columnsSql = columns.map(column => {
+                let sql = column.name + " " + column.type;
+                
+                if ( column.default ) {
+                    sql += " default " + column.default;
+                }
+
+                if ( column.nulls === false ) {
+                    sql += " not null";
+                }
+
+                return sql;
+            }).join(",");
+
+            await db.query(`
+                create table ${ schema }.${ name.toString() } (
+                    ${ columnsSql }
+                )
+            `);
         }
     }
 }

@@ -1,8 +1,8 @@
 "use strict";
 
 class DbSchema {
-    constructor(params) {
-        this.name = params.name;
+    constructor({name}) {
+        this.name = name;
         this.tables = {};
         this.functions = {};
     }

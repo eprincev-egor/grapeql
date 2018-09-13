@@ -36,7 +36,9 @@ async function clearDatabase(db, dirname) {
     let result = await db.query(`
         select schema_name
         from information_schema.schemata
-        where schema_owner <> 'postgres'
+        where 
+            schema_name <> 'information_schema' and
+            schema_name not ilike 'pg_%'
     `);
 
     let clearDbSql = "";
@@ -54,8 +56,13 @@ async function clearDatabase(db, dirname) {
 
     // creating needed tables
     let sql = fs.readFileSync( dirname + "/up.sql" );
-    await db.query( sql.toString() );
-
+    
+    try {
+        await db.query( sql.toString() );
+    } catch(err) {
+        // redefine callstack
+        throw new Error(err.message);
+    }
 }
 
 function stopServer(getServer) {
