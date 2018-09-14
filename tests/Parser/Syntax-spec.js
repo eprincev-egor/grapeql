@@ -52,6 +52,7 @@ tests.QueryNode = require("./syntax/QueryNode");
 tests.PgArray = require("./syntax/PgArray");
 tests.Exists = require("./syntax/Exists");
 tests.Extract = require("./syntax/Extract");
+tests.SquareBrackets = require("./syntax/SquareBrackets");
 
 for (let className in tests) {
     describe(className, () => {

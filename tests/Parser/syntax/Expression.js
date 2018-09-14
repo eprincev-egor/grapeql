@@ -664,5 +664,64 @@ module.exports = [
                 ]}
             }]
         }
+    },
+    {
+        str: "my_table.my_column_arr[1]",
+        result: {
+            elements: [
+                {link: [
+                    {word: "my_table"},
+                    {word: "my_column_arr"}
+                ]},
+                {content: {elements: [
+                    {number: "1"}
+                ]}}
+            ]
+        }
+    },
+    {
+        str: "(array[100, 200])[1]",
+        result: {
+            elements: [
+                {elements: [
+                    {items: [
+                        {elements: [
+                            {number: "100"}
+                        ]},
+                        {elements: [
+                            {number: "200"}
+                        ]}
+                    ]}
+                ]},
+                {
+                    content: {elements: [
+                        {number: "1"}
+                    ]}
+                }
+            ]
+        }
+    },
+    {
+        str: "(array[100, 200]::bigint[])[1]",
+        result: {
+            elements: [
+                {elements: [
+                    {items: [
+                        {elements: [
+                            {number: "100"}
+                        ]},
+                        {elements: [
+                            {number: "200"}
+                        ]}
+                    ]},
+                    {dataType: {type: "bigint[]"}}
+                ]},
+                {
+                    content: {elements: [
+                        {number: "1"}
+                    ]}
+                }
+            ]
+        }
     }
 ];
