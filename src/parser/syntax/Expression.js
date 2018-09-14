@@ -56,6 +56,12 @@ class Expression extends Syntax {
             this.elements.push(elem);
         }
 
+        if ( coach.isSquareBrackets() ) {
+            let brackets = coach.parseSquareBrackets();
+            this.elements.push(brackets);
+            this.addChild(elem);
+        }
+
         // ::text::text::text
         this.parseToTypes(coach);
 
