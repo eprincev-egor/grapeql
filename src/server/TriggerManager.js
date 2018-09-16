@@ -25,6 +25,9 @@ class TriggerManager {
         //      }
         //  }
         this._triggers = {};
+
+        // begin/beforeCommit  etc
+        this._systemTriggers = {};
     }
 
     async create(TriggerClass) {
@@ -39,6 +42,19 @@ class TriggerManager {
         for (let key in events) {
             let value = events[ key ];
 
+            let handle = trigger[ value ] || value;
+            if ( !_.isFunction(handle) ) {
+                throw new Error(`handle must be are function, or method name: ${value}`);
+            }
+
+            if ( key == "begin" || key == "beforeCommit" ) {
+                this._createSystemTrigger(key, handle);
+                continue;
+            }
+
+
+            // listen table changes
+            
             if ( !/^(insert|update|delete):(\w+\.)?\w+$/.test(key) ) {
                 throw new Error(`invalid event name: ${key}`);
             }
@@ -50,11 +66,6 @@ class TriggerManager {
             let dbTable = this.server.database.findTable(tableName);
             if ( !dbTable ) {
                 throw new Error(`table name not found: ${tableName}`);
-            }
-
-            let handle = trigger[ value ] || value;
-            if ( !_.isFunction(handle) ) {
-                throw new Error(`handle must be are function, or method name: ${value}`);
             }
 
             let lowerPath = dbTable.getLowerPath();
@@ -119,6 +130,8 @@ class TriggerManager {
             if ( type == "update" ) {
                 await trigger.handle({
                     type,
+                    table,
+                    transaction,
                     db: transaction,
                     row: row,
                     changes,
@@ -127,6 +140,8 @@ class TriggerManager {
             } else {
                 await trigger.handle({
                     type,
+                    table,
+                    transaction,
                     db: transaction,
                     row
                 });
@@ -154,6 +169,49 @@ class TriggerManager {
                 row,
                 prev,
                 changes
+            });
+        }
+    }
+
+    _createSystemTrigger(event, handle) {
+        let handlers = this._systemTriggers[ event ];
+
+        if ( !handlers )  {
+            handlers = [];
+            this._systemTriggers[ event ] = handlers;
+        }
+
+        handlers.push( handle );
+    }
+
+    async callBeginTransaction({ transaction }) {
+        let handlers = this._systemTriggers[ "begin" ];
+        if ( !handlers ) {
+            return;
+        }
+
+        for (let i = 0, n = handlers.length; i < n; i++) {
+            let handler = handlers[i];
+
+            await handler({ 
+                db: transaction,
+                transaction
+            });
+        }
+    }
+
+    async callBeforeCommitTransaction({ transaction }) {
+        let handlers = this._systemTriggers[ "beforeCommit" ];
+        if ( !handlers ) {
+            return;
+        }
+
+        for (let i = 0, n = handlers.length; i < n; i++) {
+            let handler = handlers[i];
+
+            await handler({ 
+                db: transaction,
+                transaction
             });
         }
     }

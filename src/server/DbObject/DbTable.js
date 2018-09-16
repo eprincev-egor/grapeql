@@ -1,9 +1,9 @@
 "use strict";
 
 class DbTable {
-    constructor(params) {
-        this.name = params.name;
-        this.schema = params.schema;
+    constructor({name, schema}) {
+        this.name = name;
+        this.schema = schema;
         this.columns = {};
         this.columnsArr = [];
         this.constraints = {};

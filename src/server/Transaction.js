@@ -10,9 +10,16 @@ class Transaction {
     async begin() {
         this.db = await this.server.pool.connect();
         await this.db.query("begin");
+
+        await this.server.triggers.callBeginTransaction({
+            transaction: this
+        });
     }
 
     async commit() {
+        await this.server.triggers.callBeforeCommitTransaction({
+            transaction: this
+        });
         await this.db.query("commit");
     }
     

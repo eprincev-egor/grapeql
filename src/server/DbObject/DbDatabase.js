@@ -274,7 +274,30 @@ class DbDatabase {
                     ${ columnsSql }
                 )
             `);
+
+            dbTable = new DbTable({
+                name,
+                schema
+            });
+
+            columns.forEach(data => {
+                let column = new DbColumn({
+                    name: data.name,
+                    default: data.default,
+                    type: data.type,
+                    nulls: data.nulls,
+                    // for tests
+                    table: table,
+                    schema: schema
+                });
+    
+                dbTable.addColumn( column );
+            });
+
+            dbSchema.addTable( table );
         }
+
+        return dbTable;
     }
 }
 

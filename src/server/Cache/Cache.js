@@ -1,6 +1,7 @@
 "use strict";
 
 const Deps = require("../../parser/deps/Deps");
+const buildUpdateCache = require("../QueryBuilder/buildUpdateCache");
 
 class Cache {
     constructor({
@@ -76,9 +77,10 @@ class Cache {
 
     async createCacheTable() {
         let table = {
-            schema: "sql_cache",
+            schema: "gql_cache",
             name: this.syntax.name,
-            columns: []
+            columns: [],
+            constraints: {}
         };
 
         this.syntax.select.columns.map(syntaxColumn => {
@@ -90,30 +92,76 @@ class Cache {
             table.columns.push({name, type});
         });
 
-        await this.server.database.createTable(table);
+        this.dbTable = await this.server.database.createTable(table);
     }
 
     async createTriggers() {
+        let cache = this;
+
+        let events = {
+            begin: "onBegin",
+            beforeCommit: "onBeforeCommit"
+        };
+
+        let map = new WeakMap();
+
+        class CacheTrigger {
+            getEvents() {
+                return events;
+            }
+        
+            onBegin({ transaction }) {
+                map.set(transaction, []);
+            }
+        
+            onEvent({
+                transaction, type, table,
+                row, prev, changes
+            }) {
+                let changesArr = map.get(transaction);
+
+                if ( type == "update" ) {
+                    changesArr.push({
+                        table, type,
+                        row, prev, changes
+                    });
+                } else {
+                    changesArr.push({
+                        table, type,
+                        row
+                    });
+                }
+            }
+        
+            async onBeforeCommit({ db, transaction }) {
+                // find in map changes for it transaction
+                let changesArr = map.get(transaction);
+                // clear memory
+                map.delete(transaction);
+
+                // build sql and run him
+                await cache.updateCache({db, changesArr});
+            }
+        }
+
         this.deps.tables.forEach(table => {
             let path = table.schema + "." + table.name;
-            let events = {};
             
             events[ "delete:" + path ] = "onEvent";
             events[ "update:" + path ] = "onEvent";
             events[ "insert:" + path ] = "onEvent";
-            
-            class CacheTrigger {
-                getEvents() {
-                    return events;
-                }
-
-                onEvent({type, row, prev, changes}) {
-
-                }
-            }
-
-            this.server.triggers.create(CacheTrigger);
         });
+
+        this.server.triggers.create(CacheTrigger);
+    }
+
+    async updateCache({db, changesArr}) {
+        let sql = buildUpdateCache({
+            changesArr, 
+            cache: this
+        });
+
+        await db.query(sql);
     }
 }
 

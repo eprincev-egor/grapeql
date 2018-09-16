@@ -1,6 +1,8 @@
 "use strict";
 
 const Cache = require("./Cache");
+const _ = require("lodash");
+const GrapeQLCoach = require("../../parser/GrapeQLCoach");
 
 class CacheManager {
     constructor({server}) {
@@ -9,6 +11,14 @@ class CacheManager {
     }
 
     async create(cacheForSyntax) {
+        if ( _.isString(cacheForSyntax) ) {
+            let coach = new GrapeQLCoach(cacheForSyntax);
+            coach.replaceComments();
+            coach.skipSpace();
+
+            cacheForSyntax = coach.parseCacheFor();
+        }
+
         let name = cacheForSyntax.name.toLowerCase();
         if ( name in this._cache ) {
             throw new Error(`cache ${name} already exists`);
