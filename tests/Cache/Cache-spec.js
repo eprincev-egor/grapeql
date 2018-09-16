@@ -31,10 +31,10 @@ describe("Cache", () => {
     });
 
     it("company orders count", async() => {
-        server.cache.create(`
-            cache orders_count for public.company (
+        await server.cache.create(`
+            cache orders for public.company (
                 select
-                    count(*)
+                    count(*) as count
                 from public.orders
                 where
                     public.orders.id_client = public.company.id

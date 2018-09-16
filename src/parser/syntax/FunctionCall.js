@@ -236,19 +236,18 @@ class FunctionCall extends Syntax {
             name = schema;
             schema = null;
         }
-        name = name.word || name.content;
+        name = name.toLowerCase();
 
         if ( name == "coalesce" && !schema ) {
             return argumentsTypes[0];
         }
 
         if ( schema ) {
-            schema = schema.word || schema.content;
-        } else {
-            schema = "public";
+            schema = schema.toLowerCase();
         }
 
-        let dbFunction = params.server.getSchema( schema ).getFunction( name, argumentsTypes );
+        let dbFunction = params.server.database.getFunction({ schema, name, argumentsTypes });
+        
         if ( !dbFunction ) {
             throw new Error(`function ${ this.function }() does not exist`);
         }

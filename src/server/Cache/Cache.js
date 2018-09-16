@@ -2,6 +2,7 @@
 
 const Deps = require("../../parser/deps/Deps");
 const buildUpdateCache = require("../QueryBuilder/buildUpdateCache");
+const GrapeQLCoach = require("../../parser/GrapeQLCoach");
 
 class Cache {
     constructor({
@@ -40,27 +41,30 @@ class Cache {
     }
 
     parseDeps() {
+        let depsSelect = `
+            select * 
+            from ${ this.syntax.table }
+            left join lateral (${ this.syntax.select.toString() }) as tmp on true
+        `.trim();
+        depsSelect = GrapeQLCoach.parseSelect(depsSelect);
+
         let deps = new Deps({
             server: this.server,
-            select: this.syntax.select
+            select: depsSelect
         });
 
         // validate reverse query
         deps.tables.forEach(table => {
-            let reverseQuery = this.syntax.select.reverse.find(reverseQuery => {
-                let schemaName = "public",
-                    tableName = reverseQuery.table.first().toLowerCase();
-                
-                if ( reverseQuery.table.link.length > 1 ) {
-                    schemaName = tableName;
-                    tableName = reverseQuery.table.getLast().toLowerCase();
-                }
+            let tablePath = `${ table.schema }.${ table.name }`;
 
-                return (
-                    table.schema == schemaName &&
-                    table.table == tableName
-                );
-            });
+            // reverseQuery for main table not needed
+            if ( tablePath == this.syntax.table.getDbTableLowerPath() ) {
+                return;
+            }
+
+            let reverseQuery = this.syntax.reverse.find(reverseQuery => 
+                reverseQuery.table.getDbTableLowerPath() == tablePath
+            );
 
             if ( !reverseQuery ) {
                 throw new Error(`reverse query for table ${ table.schema }.${ table.name } does not exists`);
@@ -160,6 +164,10 @@ class Cache {
             changesArr, 
             cache: this
         });
+
+        if ( !sql ) {
+            return;
+        }
 
         await db.query(sql);
     }

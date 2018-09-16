@@ -299,6 +299,23 @@ class DbDatabase {
 
         return dbTable;
     }
+
+    getFunction({ schema, name, argumentsTypes }) {
+        if ( schema ) {
+            let schema = this.getSchema( schema );
+            return schema.getFunction( name, argumentsTypes );
+        }
+
+        let publicSchema = this.getSchema("public");
+        let publicFunc = publicSchema.getFunction( name, argumentsTypes );
+        if ( publicFunc ) {
+            return publicFunc;
+        }
+    
+        // count(), array_agg(), ....
+        let pgCatalogSchema = this.getSchema("pg_catalog");
+        return pgCatalogSchema.getFunction( name, argumentsTypes );
+    }
 }
 
 module.exports = DbDatabase;

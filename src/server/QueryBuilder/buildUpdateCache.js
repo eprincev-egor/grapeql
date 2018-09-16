@@ -5,9 +5,15 @@ function buildUpdateCache({
     changesArr,
     cache
 }) {
+    changesArr = changesArr.filter(changes =>
+        changes.table != cache.syntax.table.getDbTableLowerPath()
+    );
+
     if ( !changesArr.length ) {
         return;
     }
+
+
 
     let tables = [];
     let rowsByTable = {};
@@ -68,9 +74,9 @@ function buildUpdateCache({
     
     // updating table
     let cacheTable = cache.dbTable.schema + "." + cache.dbTable.name;
-    
+
     // updating columns
-    let columns;
+    let columns = [];
     cache.dbTable.columnsArr.forEach(dbColumn => {
         columns.push( dbColumn.name );
     });
