@@ -10,7 +10,7 @@ function buildColumns({select, originalSelect, columns}) {
         if ( definedColumn ) {
             if ( definedColumn.expression.isLink() ) {
                 let link = definedColumn.expression.getLink();
-                let last = link.getLast();
+                let last = link.last();
 
                 if ( last.strictEqualString(key) ) {
                     select.addColumn(`${ definedColumn.expression }`);

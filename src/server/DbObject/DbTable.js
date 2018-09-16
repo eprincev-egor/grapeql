@@ -29,6 +29,16 @@ class DbTable {
         this.constraints[ constraint.name ] = constraint;
     }
 
+    getPrimaryKey() {
+        for (let key in this.constraints ) {
+            let constraint = this.constraints[ key ];
+
+            if ( constraint.type == "primary key" ) {
+                return constraint;
+            }
+        }
+    }
+
     getLowerPath() {
         return (
             (this.schema || "public").toLowerCase() + "." + 

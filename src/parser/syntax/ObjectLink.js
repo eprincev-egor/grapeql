@@ -37,7 +37,7 @@ class ObjectLink extends Syntax {
         return this.link.some(elem => elem == "*");
     }
 
-    getLast() {
+    last() {
         return this.link[ this.link.length - 1 ];
     }
 
@@ -193,7 +193,7 @@ class ObjectLink extends Syntax {
     }
 
     lastEqual(objectName) {
-        let lastElem = this.getLast();
+        let lastElem = this.last();
         return lastElem.equal( objectName );
     }
 

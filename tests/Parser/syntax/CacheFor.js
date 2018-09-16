@@ -2,11 +2,10 @@
 
 module.exports = [
     {
-        str: `cache totals for public.order as orders (
+        str: `cache for public.order as orders (
             select 1
         )`,
         result: {
-            name: {word: "totals"},
             table: {link: [
                 {word: "public"},
                 {word: "order"}
@@ -22,7 +21,7 @@ module.exports = [
         }
     },
     {
-        str: `cache order_totals for company (
+        str: `cache for company (
             select
                 count(orders.id) as quantity
             from orders
@@ -33,7 +32,6 @@ module.exports = [
         after change orders set where
             orders.id_client = company.id`,
         result: {
-            name: {word: "order_totals"},
             table: {link: [
                 {word: "company"}
             ]},
@@ -101,7 +99,7 @@ module.exports = [
     },
 
     {
-        str: `cache totals for company (
+        str: `cache for company (
             select
                 count(orders.id) as quantity,
                 string_agg(partner.name, ', ') as partners_names
@@ -126,7 +124,6 @@ module.exports = [
             )
         `,
         result: {
-            name: {word: "totals"},
             table: {link: [
                 {word: "company"}
             ]},

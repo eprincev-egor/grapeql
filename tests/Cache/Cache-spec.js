@@ -32,15 +32,15 @@ describe("Cache", () => {
 
     it("company orders count", async() => {
         await server.cache.create(`
-            cache orders for public.company (
+            cache for company (
                 select
                     count(*) as count
-                from public.orders
+                from orders
                 where
-                    public.orders.id_client = public.company.id
+                    orders.id_client = company.id
             )
-            after change public.orders set where
-                public.orders.id_client = public.company.id
+            after change orders set where
+                orders.id_client = company.id
         `);
 
         let company = await server.query(`

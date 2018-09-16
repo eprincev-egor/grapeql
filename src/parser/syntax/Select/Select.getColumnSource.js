@@ -29,7 +29,7 @@ module.exports = {
 
                 if ( column.expression.isLink() ) {
                     let columnLink = column.expression.getLink();
-                    let columnName = columnLink.getLast();
+                    let columnName = columnLink.last();
 
                     if ( columnName != "*" ) {
                         return columnName.equal( objectLink.link[0] );
@@ -98,11 +98,11 @@ module.exports = {
             }
 
             if ( throwError !== false ) {
-                throw new Error(`column "${ objectLink.getLast() }" does not exist`);
+                throw new Error(`column "${ objectLink.last() }" does not exist`);
             }
         }
         if ( sources.length > 1 ) {
-            throw new Error(`column reference "${ objectLink.getLast() }" is ambiguous`);
+            throw new Error(`column reference "${ objectLink.last() }" is ambiguous`);
         }
 
         return sources[0];

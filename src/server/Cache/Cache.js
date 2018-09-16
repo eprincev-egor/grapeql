@@ -12,8 +12,37 @@ class Cache {
         this.syntax = cacheForSyntax;
         this.server = server;
 
+        this.findForDbTable();
         this.parseDeps();
         this.validateCacheSyntax();
+    }
+
+    findForDbTable() {
+        
+        let schemaName = this.syntax.table.first();
+        let tableName = this.syntax.table.last();
+        if ( this.syntax.table.link.length == 1 ) {
+            tableName = schemaName;
+            schemaName = "public";
+        }
+        tableName = tableName.toLowerCase();
+        schemaName = schemaName.toLowerCase();
+
+        let dbSchema = this.server.database.getSchema( schemaName );
+        let dbTable = dbSchema && dbSchema.getTable( tableName );
+
+        if ( !dbTable ) {
+            throw new Error(`table ${ tableName } not found`);
+        }
+
+        let primaryKey = dbTable.getPrimaryKey();
+
+        if ( !primaryKey ) {
+            throw new Error(`table ${ tableName } should have primary key`);
+        }
+
+        this.forDbTable = dbTable;
+        this.forPrimaryKey = primaryKey;
     }
 
     validateCacheSyntax() {
@@ -82,10 +111,25 @@ class Cache {
     async createCacheTable() {
         let table = {
             schema: "gql_cache",
-            name: this.syntax.name,
             columns: [],
             constraints: {}
         };
+
+        this.forPrimaryKey.columns.forEach(key => {
+            let dbColumn = this.forDbTable.getColumn(key);
+            let {type, name} = dbColumn;
+
+            table.columns.push({ type, name });
+        });
+
+        let schemaName = this.forDbTable.schema;
+        let tableName = this.forDbTable.name;
+
+        if ( schemaName == "public" ) {
+            table.name = tableName;
+        } else {
+            table.name = `${schemaName}.${tableName}`;
+        }
 
         this.syntax.select.columns.map(syntaxColumn => {
             let name = syntaxColumn.as.toLowerCase();

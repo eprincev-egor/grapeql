@@ -76,7 +76,7 @@ class Column extends Syntax {
 
         if ( this.expression.isLink() ) {
             let link = this.expression.getLink();
-            let name = link.getLast();
+            let name = link.last();
             return name.toLowerCase();
         }
 

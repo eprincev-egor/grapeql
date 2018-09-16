@@ -105,7 +105,7 @@ class SelectPlan extends Plan {
             // select companies.id
             else if ( columnSyntax.isLink() ) {
                 let link = columnSyntax.getLink();
-                column.name = link.getLast().toLowerCase();
+                column.name = link.last().toLowerCase();
             }
 
             // select id::text || name
@@ -235,7 +235,7 @@ class SelectPlan extends Plan {
                 });
             } else {
                 let link = {
-                    name: columnLink.getLast().toLowerCase(),
+                    name: columnLink.last().toLowerCase(),
                     fromItem
                 };
 
@@ -421,9 +421,9 @@ class SelectPlan extends Plan {
         // select test.companies from companies, test.companies
 
         // first, we filter fromItems by table name
-        let tableName = tableLink.getLast();
+        let tableName = tableLink.last();
         fromItems = fromItemsWithoutAlias.filter(fromItem =>
-            fromItem.link.getLast().equal( tableName )
+            fromItem.link.last().equal( tableName )
         );
 
         // only one fromItem has the right tableName

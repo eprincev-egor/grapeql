@@ -54,19 +54,35 @@ function buildUpdateCache({
         let firstRow = rows[0];
         let columns = Object.keys(firstRow);
         
+        // changed rows
         let values = rows.map(row => {
             let values = Object.values(row);
             return `(${values})`;
         });
         values = values.join(",\n");
 
+        // withQuery name
+        let alias;
+
+        let reverseQuery = reverseQueryByTable[ table ];
+        if ( reverseQuery.as ) {
+            alias = reverseQuery.as.toString();
+        }
+        else if ( reverseQuery.table.link.length == 1 ) {
+            alias = reverseQuery.table.toString();
+        }
+        else {
+            alias = `"${ reverseQuery.table.toString() }"`;
+        }
+
+
         withQueries.push(`
-            "${ table }" (${ columns }) as (
+            ${ alias } (${ columns }) as (
                 values
                     ${values}
             )
         `);
-        from.push(`"${ table }"`);
+        from.push(`${ table }`);
     }
     withQueries = withQueries.join(",\n");
     from = from.join(",");
@@ -77,8 +93,8 @@ function buildUpdateCache({
 
     // updating columns
     let columns = [];
-    cache.dbTable.columnsArr.forEach(dbColumn => {
-        columns.push( dbColumn.name );
+    cache.syntax.select.columns.forEach(column => {
+        columns.push( column.as.toLowerCase() );
     });
     columns = columns.join(",\n");
 

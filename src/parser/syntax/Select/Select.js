@@ -690,7 +690,7 @@ class Select extends Syntax {
             } else {
                 if ( column.expression.isLink() ) {
                     let link = column.expression.getLink();
-                    let elem = link.getLast();
+                    let elem = link.last();
 
                     if ( typeof elem != "string" ) {
                         if ( elem.equalString(alias) ) {
@@ -736,7 +736,7 @@ class Select extends Syntax {
         //         }
         //     }
         //     else if ( fromItem.table ) {
-        //         let elem = fromItem.table.getLast();
+        //         let elem = fromItem.table.last();
         //         if ( elem.equalString(alias) ) {
         //             return true;
         //         }
@@ -761,7 +761,7 @@ class Select extends Syntax {
             }
             else if ( column.expression.isLink() ) {
                 let link = column.expression.getLink();
-                alias = link.getLast();
+                alias = link.last();
 
                 alias = alias.toLowerCase();
             }

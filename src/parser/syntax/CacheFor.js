@@ -20,9 +20,6 @@ class CacheFor extends Syntax {
         coach.expectWord("cache");
         coach.skipSpace();
 
-        this.name = coach.parseObjectName();
-        coach.skipSpace();
-
         coach.expectWord("for");
         coach.skipSpace();
 
@@ -59,9 +56,6 @@ class CacheFor extends Syntax {
     clone() {
         let clone = new CacheFor();
 
-        clone.name = this.name.clone();
-        clone.addChild(clone.name);
-
         clone.table = this.table.clone();
         clone.addChild(clone.table);
 
@@ -82,10 +76,7 @@ class CacheFor extends Syntax {
     toString() {
         let out = "";
 
-        out += "cache ";
-        out += this.name.toString();
-
-        out += " for ";
+        out += "cache for ";
         out += this.table.toString();
 
         if ( this.as ) {
