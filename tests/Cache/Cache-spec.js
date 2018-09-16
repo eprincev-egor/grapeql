@@ -55,9 +55,7 @@ describe("Cache", () => {
                 (id_client)
             values
                 ($client_id::integer)
-        `, {
-                $client_id: company.id
-            });
+        `, { $client_id: company.id });
 
         assert.deepEqual(company, {
             id: 1,
