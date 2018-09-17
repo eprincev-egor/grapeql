@@ -1,7 +1,7 @@
 "use strict";
 
 const Deps = require("../../parser/deps/Deps");
-const buildUpdateCache = require("../QueryBuilder/buildUpdateCache");
+const {buildUpdateCache, buildInsertCache} = require("../QueryBuilder/buildUpdateCache");
 const GrapeQLCoach = require("../../parser/GrapeQLCoach");
 
 class Cache {
@@ -131,6 +131,28 @@ class Cache {
             table.name = `${schemaName}.${tableName}`;
         }
 
+        // primary key
+        let constraint;
+        constraint = {
+            name: table.name + "_pkey",
+            type: "primary key",
+            columns: this.forPrimaryKey.columns.slice()
+        };
+        table.constraints[ constraint.name ] = constraint;
+
+        // main foreign key
+        constraint = {
+            name: table.name + "_fkey",
+            type: "foreign key",
+            columns: this.forPrimaryKey.columns.slice(),
+            onUpdate: "cascade",
+            onDelete: "cascade",
+            referenceTable: this.forDbTable.getLowerPath(),
+            referenceColumns: this.forPrimaryKey.columns.slice()
+        };
+        table.constraints[ constraint.name ] = constraint;
+
+
         this.syntax.select.columns.map(syntaxColumn => {
             let name = syntaxColumn.as.toLowerCase();
             let type = syntaxColumn.expression.getType({
@@ -150,6 +172,7 @@ class Cache {
             begin: "onBegin",
             beforeCommit: "onBeforeCommit"
         };
+        events[ "insert:" + this.forDbTable.getLowerPath() ] = "onInsertForTable";
 
         let map = new WeakMap();
 
@@ -160,6 +183,10 @@ class Cache {
         
             onBegin({ transaction }) {
                 map.set(transaction, []);
+            }
+
+            async onInsertForTable({db, row}) {
+                await cache.onInsertForTable({db, row});
             }
         
             onEvent({
@@ -194,6 +221,10 @@ class Cache {
 
         this.deps.tables.forEach(table => {
             let path = table.schema + "." + table.name;
+
+            if ( path == this.forDbTable.getLowerPath() ) {
+                return;
+            }
             
             events[ "delete:" + path ] = "onEvent";
             events[ "update:" + path ] = "onEvent";
@@ -201,6 +232,19 @@ class Cache {
         });
 
         this.server.triggers.create(CacheTrigger);
+    }
+
+    async onInsertForTable({db, row}) {
+        let sql = buildInsertCache({
+            row,
+            cache: this
+        });
+        
+        if ( !sql ) {
+            return;
+        }
+
+        await db.query(sql);
     }
 
     async updateCache({db, changesArr}) {

@@ -1,5 +1,7 @@
 "use strict";
 
+const {value2sql} = require("../../helpers");
+
 function buildUpdateCache({
     // array of changes (insert/update/delete)
     changesArr,
@@ -126,4 +128,70 @@ function buildUpdateCache({
     `;
 }
 
-module.exports = buildUpdateCache;
+function buildInsertCache({
+    row,
+    cache
+}) {
+    let forTableAlias;
+    if ( cache.syntax.as ) {
+        forTableAlias = cache.syntax.as.toLowerCase();
+    }
+    else if ( cache.syntax.table.link.length == 1 ) {
+        forTableAlias = cache.syntax.table.first().toLowerCase();
+    }
+    else {
+        forTableAlias = `"${ cache.syntax.table.getDbTableLowerPath() }"`;
+    }
+    
+    let select = cache.syntax.select.clone();
+    select.replaceLink(
+        (cache.syntax.as ||
+        cache.syntax.table).toString(),
+
+        forTableAlias
+    );
+
+    let insertColumns = select.columns.map(column => 
+        column.as.toLowerCase()
+    );
+    let insertSelectColumns = insertColumns.map(key => `tmp.${ key }`);
+
+    cache.forPrimaryKey.columns.forEach(key => {
+        insertColumns.push(key);
+        insertSelectColumns.push(`${forTableAlias}.${key}`);
+    });
+
+
+
+    let rowSql = [];
+    for (let key in row) {
+        let value = row[ key ];
+        let dbColumn = cache.forDbTable.getColumn( key );
+        let type = dbColumn.type;
+
+        let sqlValue = value2sql( type, value );
+        rowSql.push(`${sqlValue} as ${key}`);
+    }
+    rowSql = rowSql.join(",\n");
+
+
+    return `
+        insert into ${ cache.dbTable.getLowerPath() }
+            (${ insertColumns })
+        select
+            ${ insertSelectColumns }
+        from (
+            select
+                ${ rowSql }
+        ) as ${ forTableAlias }
+        
+        left join lateral (
+            ${ select.toString() }
+        ) as tmp on true
+    `;
+}
+
+module.exports = {
+    buildUpdateCache,
+    buildInsertCache
+};

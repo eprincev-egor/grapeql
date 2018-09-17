@@ -31,10 +31,12 @@ describe("Cache", () => {
     });
 
     it("company orders count", async() => {
+        let cacheRow;
+
         await server.cache.create(`
             cache for company (
                 select
-                    count(*) as count
+                    count(*) as orders_count
                 from orders
                 where
                     orders.id_client = company.id
@@ -50,6 +52,27 @@ describe("Cache", () => {
                 ('Test', '123')
         `);
 
+        assert.deepEqual(company, {
+            id: 1,
+            name: "Test",
+            inn: "123"
+        });
+
+
+
+        cacheRow = await server.query(`
+            select row *
+            from gql_cache.company
+            where id = 1
+        `);
+
+        assert.deepEqual(cacheRow, {
+            id: 1,
+            orders_count: 0
+        });
+
+
+
         let order = await server.query(`
             insert row into orders
                 (id_client)
@@ -57,15 +80,22 @@ describe("Cache", () => {
                 ($client_id::integer)
         `, { $client_id: company.id });
 
-        assert.deepEqual(company, {
-            id: 1,
-            name: "Test",
-            inn: "123"
-        });
-
         assert.deepEqual(order, {
             id: 1,
             id_client: 1
         });
+
+        
+        cacheRow = await server.query(`
+            select row *
+            from gql_cache.company
+            where id = 1
+        `);
+
+        assert.deepEqual(cacheRow, {
+            id: 1,
+            orders_count: 1
+        });
+
     });
 });

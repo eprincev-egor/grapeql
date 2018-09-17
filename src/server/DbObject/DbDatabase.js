@@ -241,7 +241,7 @@ class DbDatabase {
     // }
     async createTable(table) {
         let {db} = this;
-        let {schema, name, columns} = table;
+        let {schema, name, columns, constraints} = table;
         let dbSchema = this.schemas[ schema ];
         
         if ( !dbSchema ) {
@@ -295,6 +295,47 @@ class DbDatabase {
             });
 
             dbSchema.addTable( table );
+            
+            
+            for (let key in constraints) {
+                let {
+                    type, name, columns,
+                    referenceTable, referenceColumns,
+                    onUpdate, onDelete
+                } = constraints[ key ];
+                
+                if ( type == "primary key" ) {
+                    await db.query(`           
+                        ALTER TABLE ${ dbTable.getLowerPath() }
+                        ADD CONSTRAINT ${name} PRIMARY KEY (${ columns });
+
+                    `);
+                }
+                else if ( type == "foreign key" ) {
+                    onUpdate = onUpdate || "no action";
+                    onDelete = onDelete || "no action";
+
+                    await db.query(`           
+                        ALTER TABLE ${ dbTable.getLowerPath() }
+                        ADD CONSTRAINT ${name} FOREIGN KEY (${ columns })
+                            REFERENCES ${ referenceTable } (${ referenceColumns }) MATCH SIMPLE
+                            ON UPDATE ${ onUpdate } ON DELETE ${ onDelete }
+                    `);
+                }
+
+                let dbConstraint = new DbConstraint({
+                    name, 
+                    type, 
+                    columns,
+                    // fk info
+                    onUpdate,
+                    onDelete,
+                    referenceTable,
+                    referenceColumns
+                });
+
+                dbTable.addConstraint( dbConstraint );
+            }
         }
 
         return dbTable;
