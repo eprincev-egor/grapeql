@@ -51,6 +51,33 @@ module.exports = [
         }
     },
     {
+        str: "orders ( id, name ) as (select * from company)",
+        result: {
+            name: {word: "orders"},
+            columns: [
+                {word: "id"},
+                {word: "name"}
+            ],
+            select: {
+                columns: [
+                    {
+                        as: null,
+                        expression: {elements: [
+                            {link: [
+                                "*"
+                            ]}
+                        ]}
+                    }
+                ],
+                from: [{
+                    table: {link: [
+                        {word: "company"}
+                    ]}
+                }]
+            }
+        }
+    },
+    {
         str: "x as (values (1), (2, 3))",
         // VALUES lists must all be the same length
         error: Error

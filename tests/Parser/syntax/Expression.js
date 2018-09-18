@@ -723,5 +723,23 @@ module.exports = [
                 }
             ]
         }
+    },
+    {
+        str: "substring('123456' from 2 for 3)",
+        result: {
+            elements: [
+                {
+                    str: {elements: [{
+                        content: "123456"
+                    }]},
+                    from: {elements: [{
+                        number: "2"
+                    }]},
+                    for: {elements: [{
+                        number: "3"
+                    }]}
+                }
+            ]
+        }
     }
 ];
