@@ -17,6 +17,7 @@ class WithQuery extends Syntax {
             this.columns = coach.parseComma("ObjectName");
             this.columns.map(objectName => this.addChild(objectName));
 
+            coach.skipSpace();
             coach.expect(")");
             coach.skipSpace();
         }
