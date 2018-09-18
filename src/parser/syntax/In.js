@@ -37,6 +37,7 @@ class In extends Syntax {
             });
         } else {
             clone.in = this.in.clone();
+            clone.addChild(clone.in);
         }
         
         return clone;

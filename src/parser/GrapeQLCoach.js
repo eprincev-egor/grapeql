@@ -84,6 +84,7 @@ GrapeQLCoach.addSyntax("Exists", require("./syntax/Exists"));
 GrapeQLCoach.addSyntax("Extract", require("./syntax/Extract"));
 GrapeQLCoach.addSyntax("SquareBrackets", require("./syntax/SquareBrackets"));
 GrapeQLCoach.addSyntax("Substring", require("./syntax/Substring"));
+GrapeQLCoach.addSyntax("Any", require("./syntax/Any"));
 
 GrapeQLCoach.parseEntity = function(str) {
     let coach = new GrapeQLCoach(str);

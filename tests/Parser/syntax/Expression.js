@@ -741,5 +741,20 @@ module.exports = [
                 }
             ]
         }
+    },
+    {
+        str: "any(array[1])",
+        result: {
+            elements: [{
+                type: "any",
+                array: {elements: [
+                    {items: [
+                        {elements: [
+                            {number: "1"}
+                        ]}
+                    ]}
+                ]}
+            }]
+        }
     }
 ];

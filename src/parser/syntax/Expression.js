@@ -159,6 +159,10 @@ class Expression extends Syntax {
             elem = coach.parseSubstring();
         }
 
+        else if ( coach.isAny() ) {
+            elem = coach.parseAny();
+        }
+
         else if ( coach.isBetween() ) {
             elem = coach.parseBetween();
         }

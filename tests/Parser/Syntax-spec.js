@@ -54,6 +54,7 @@ tests.Exists = require("./syntax/Exists");
 tests.Extract = require("./syntax/Extract");
 tests.SquareBrackets = require("./syntax/SquareBrackets");
 tests.Substring = require("./syntax/Substring");
+tests.Any = require("./syntax/Any");
 
 for (let className in tests) {
     describe(className, () => {
