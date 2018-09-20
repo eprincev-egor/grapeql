@@ -34,11 +34,24 @@ class Any extends Syntax {
     }
     
     is(coach) {
-        return (
+        let isKeyword = (
             coach.isWord("any") ||
             coach.isWord("all") ||
             coach.isWord("some")
         );
+            
+        if ( !isKeyword ) {
+            return false;
+        }
+
+        let i = coach.i;
+        coach.readWord();
+        coach.skipSpace();
+
+        let isBracket = coach.is("(");
+        coach.i = i;
+        
+        return isKeyword && isBracket;
     }
     
     clone() {
