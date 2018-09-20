@@ -5,6 +5,7 @@ const buildVars = require("./buildVars");
 const buildWhere = require("./buildWhere");
 const buildFromFiles = require("./buildFromFiles");
 const buildColumns = require("./buildColumns");
+const buildCache = require("./buildCache");
 
 function buildSelect({
     queryBuilder,
@@ -56,6 +57,8 @@ function buildSelect({
     }
 
     buildFromFiles({ queryBuilder, queryNode, select });
+
+    buildCache({ queryBuilder, select });
 
     if ( limit != null && limit != "all" ) {
         select.setLimit(limit);

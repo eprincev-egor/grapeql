@@ -10,7 +10,7 @@ function testRequest(getServer, test) {
         testName = JSON.stringify(test, null, 4);
     }
 
-    it(testName, () => {
+    it(testName, async() => {
         let server = getServer();
         server.queryBuilder.clear();
         
@@ -18,6 +18,13 @@ function testRequest(getServer, test) {
             for (let name in test.nodes) {
                 let node = test.nodes[ name ];
                 server.queryBuilder.addFile(name, node);
+            }
+        }
+
+        if ( test.cache ) {
+            for (let i = 0, n = test.cache; i < n; i++) {
+                let cacheGql = test.cache[i];
+                await server.cache.create(cacheGql);
             }
         }
 
