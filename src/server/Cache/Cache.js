@@ -14,6 +14,8 @@ class Cache {
 
         this.findForDbTable();
         this.parseDeps();
+
+        this.columns = [];
         this.validateCacheSyntax();
     }
 
@@ -50,7 +52,6 @@ class Cache {
             throw new Error("cache should have columns");
         }
 
-        let aliasMap = {};
         this.syntax.select.columns.forEach(column => {
             if ( column.isStar() ) {
                 throw new Error("star link is not allowed here: " + column.toString());
@@ -61,11 +62,11 @@ class Cache {
             }
 
             let alias = column.as.toLowerCase();
-            if ( alias in aliasMap ) {
+            if ( this.columns.includes(alias) ) {
                 throw new Error("column alias should be unique: " + column.toString());
             }
 
-            aliasMap[ alias ] = true;
+            this.columns.push( alias );
         });
     }
 

@@ -27,7 +27,8 @@ class SelectPlan extends Plan {
             let from = {
                 link: fromItem.toTableLink(),
                 as: fromItem.as,
-                links: []
+                links: [],
+                syntax: fromItem
             };
 
             if ( fromItem.select ) {
@@ -261,6 +262,23 @@ class SelectPlan extends Plan {
                     subPlans: []
                 });
             });
+
+
+            let cacheColumns = this.server.cache.getCacheColumns(fromItem.dbTable);
+
+            if ( cacheColumns ) {
+                cacheColumns.forEach(key => {
+                    allColumns.push({
+                        cache: true,
+                        name: key,
+                        links: [{
+                            name: key,
+                            fromItem
+                        }],
+                        subPlans: []
+                    });
+                });
+            }
         }
         else if ( fromItem.plan ) {
             fromItem.plan.columns.forEach(subColumn => {
@@ -356,7 +374,16 @@ class SelectPlan extends Plan {
 
             return fromItems.find(fromItem => {
                 if ( fromItem.dbTable ) {
-                    return columnName in fromItem.dbTable.columns;
+                    let isNativeColumn = columnName in fromItem.dbTable.columns;
+                    
+                    if ( isNativeColumn ) {
+                        return true;
+                    }
+
+                    let cacheColumns = this.server.cache.getCacheColumns( fromItem.dbTable );
+                    if ( cacheColumns ) {
+                        return cacheColumns.includes( columnName );
+                    }
                 }
                 else if ( fromItem.plan ) {
                     return fromItem.plan.columns.some(column =>

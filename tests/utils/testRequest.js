@@ -22,7 +22,7 @@ function testRequest(getServer, test) {
         }
 
         if ( test.cache ) {
-            for (let i = 0, n = test.cache; i < n; i++) {
+            for (let i = 0, n = test.cache.length; i < n; i++) {
                 let cacheGql = test.cache[i];
                 await server.cache.create(cacheGql);
             }

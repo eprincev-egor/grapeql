@@ -4,6 +4,8 @@ const SelectPlan = require("./SelectPlan");
 
 class Deps {
     constructor({select, server}) {
+        this.server = server;
+
         this.tables = [];
         this._tables = {};
 
@@ -113,10 +115,10 @@ class Deps {
     }
 
     addLink(link) {
-        let {name, fromItem} = link;
+        let {fromItem} = link;
 
         if ( fromItem.dbTable ) {
-            this.addColumn( fromItem.dbTable, name );
+            this.addColumn( link );
         }
     }
 
@@ -131,7 +133,11 @@ class Deps {
         table = {
             schema: dbTable.schema,
             name: dbTable.name,
-            columns: []
+            columns: [],
+            cacheColumns: [],
+            cacheFromItems: [],
+
+            _allCacheColumns: this.server.cache.getCacheColumns(dbTable) || []
         };
 
         this.tables.push( table );
@@ -140,10 +146,25 @@ class Deps {
         return table;
     }
 
-    addColumn(dbTable, columnName) {
+    addColumn(link) {
+        let columnName = link.name;
+        let fromItem = link.fromItem;
+        let dbTable = fromItem.dbTable;
         let table = this.addTable(dbTable);
-        if ( !table.columns.includes(columnName) ) {
-            table.columns.push(columnName);
+
+
+        if ( table._allCacheColumns.includes(columnName) ) {
+            if ( !table.cacheColumns.includes(columnName) ) {
+                table.cacheColumns.push(columnName);
+            }
+
+            if ( !table.cacheFromItems.includes( fromItem.syntax ) ) {
+                table.cacheFromItems.push( fromItem.syntax );
+            }
+        } else {
+            if ( !table.columns.includes(columnName) ) {
+                table.columns.push(columnName);
+            }
         }
     }
 }

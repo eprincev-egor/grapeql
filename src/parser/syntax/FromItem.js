@@ -470,6 +470,10 @@ class FromItem extends Syntax {
         }
     }
 
+    unshiftJoin(join) {
+        this.addJoinAfter(join, null);
+    }
+
     // returned with query if from item reference to with query
     getWithQuery() {
         if ( !this.table ) {
