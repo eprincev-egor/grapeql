@@ -49,9 +49,7 @@ describe("SimpleUpdate trigger", () => {
                             units_count = units_count - 1
                         where
                             id = $order_id::integer
-                    `, {
-                            $order_id: prev.id_order
-                        });
+                    `, { $order_id: prev.id_order });
                 }
                 
                 if ( changes.id_order ) {
@@ -60,9 +58,7 @@ describe("SimpleUpdate trigger", () => {
                             units_count = units_count + 1
                         where
                             id = $order_id::integer
-                    `, {
-                            $order_id: changes.id_order
-                        });
+                    `, { $order_id: changes.id_order });
                 }
             }
         }
@@ -125,9 +121,7 @@ describe("SimpleUpdate trigger", () => {
                 (id_order)
             values
                 ($order_id::integer)
-        `, {
-                order_id: order.id
-            });
+        `, { order_id: order.id });
         
         let unit = await server.query(`
             update row units as old_values set 

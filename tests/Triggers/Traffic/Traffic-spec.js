@@ -31,6 +31,7 @@ describe("Traffic trigger", () => {
     });
 
     it("tree dates", async() => {
+        let vars;
         const HOUR = 60 * 60 * 1000;
 
         class Traffic {
@@ -69,26 +70,28 @@ describe("Traffic trigger", () => {
                         row.duration_hours
                     );
                 
+                vars = {
+                    $id: trafficId,
+                    $date: endDate
+                };
                 await db.query(`
                     update traffic set
                         expected_delivery_date = $date::timestamp without time zone
                     where
                         id = $id::integer
-                `, {
-                        $id: trafficId,
-                        $date: endDate
-                    });
+                `, vars);
                 
                 // update next traffic
+                vars = {
+                    $id: trafficId,
+                    $date: endDate
+                };
                 await db.query(`
                     update traffic set
                         expected_begin_date = $date::timestamp without time zone
                     where
                         id_prev_traffic = $id::integer
-                `, {
-                        $id: trafficId,
-                        $date: endDate
-                    });
+                `, vars);
             }
 
             async onUpdateDeliveryDate({db, row}) {
@@ -112,9 +115,7 @@ describe("Traffic trigger", () => {
                                 expected_delivery_date
                             from traffic
                             where id = $prev_id::integer
-                        `, {
-                                $prev_id: row.id_prev_traffic
-                            });
+                        `, { $prev_id: row.id_prev_traffic });
                         
                         beginDate = prevRow.expected_delivery_date;
                     } else {
@@ -123,9 +124,7 @@ describe("Traffic trigger", () => {
                                 start_date
                             from orders
                             where id = $order_id::integer
-                        `, {
-                                $order_id: row.id_order
-                            });
+                        `, { $order_id: row.id_order });
                         beginDate = orderRow.start_date;
                     }
                 }
@@ -133,27 +132,30 @@ describe("Traffic trigger", () => {
                 // no endData is value from original insert
                 // just update beginDate
                 if ( endDate ) {
+                    vars = {
+                        $id: trafficId,
+                        $date: beginDate
+                    };
                     await db.query(`
                         update traffic set
                             expected_begin_date = $date::timestamp without time zone
                         where id = $id::integer
-                    `, {
-                            $id: trafficId,
-                            $date: beginDate
-                        });
+                    `, vars);
                     return;
                 }
+
+                vars = {
+                    $id: trafficId,
+                    $begin_date: beginDate,
+                    $end_date: endDate
+                };
 
                 await db.query(`
                     update traffic set
                         expected_begin_date = $begin_date::timestamp without time zone,
                         expected_delivery_date = $end_date::timestamp without time zone
                     where id = $id::integer
-                `, {
-                        $id: trafficId,
-                        $begin_date: beginDate,
-                        $end_date: endDate
-                    });
+                `, vars);
             }
 
             mathEndDate(beginDate, durationHours) {
@@ -174,16 +176,17 @@ describe("Traffic trigger", () => {
 
                 let orderId = row.id;
 
+                vars = {
+                    $order_id: orderId,
+                    $start_date: changes.start_date
+                };
                 await db.query(`
                     update traffic set
                         expected_begin_date = $start_date::timestamp without time zone
                     where
                         id_order = $order_id::integer and
                         id_prev_traffic is null
-                `, {
-                        $order_id: orderId,
-                        $start_date: changes.start_date
-                    });
+                `, vars);
             }
             
             async updateOrderEndDate(db, orderId) {
@@ -198,9 +201,7 @@ describe("Traffic trigger", () => {
                         )
                     where
                         id = $order_id::integer
-                `, {
-                        $order_id: orderId
-                    });
+                `, { $order_id: orderId });
             }
         }
 
@@ -232,9 +233,7 @@ describe("Traffic trigger", () => {
             select row *
             from traffic
             where id = $id::integer
-        `, {
-                $id: row.id
-            });
+        `, { $id: row.id });
         
         assert.deepEqual(traffic, {
             id: 4,
@@ -291,9 +290,7 @@ describe("Traffic trigger", () => {
             select row *
             from traffic
             where id = $id::integer
-        `, {
-                $id: row.id
-            });
+        `, { $id: row.id });
         
         assert.deepEqual(traffic, {
             id: 5,

@@ -50,9 +50,7 @@ describe("WithUpdate trigger", () => {
                     on conflict (id_order)
                     do update set
                         counts = (select counts + 1 from counter where id_order = excluded.id_order)
-                `, {
-                        $order_id: row.id
-                    });
+                `, { $order_id: row.id });
             }
         }
 
@@ -73,9 +71,7 @@ describe("WithUpdate trigger", () => {
                 count( * ) as updated_count,
                 array_agg( id ) as updated_ids
             from updated_orders
-        `, {
-                $name: "Hello"
-            });
+        `, { $name: "Hello" });
 
         assert.equal(row.updated_count, 1);
         assert.ok(row.updated_ids instanceof Array);

@@ -31,6 +31,8 @@ describe("WithInsert trigger", () => {
     });
 
     it("with (insert..) select", async() => {
+        let vars;
+
         class TestWithInsert {
             getEvents() {
                 return {
@@ -51,9 +53,7 @@ describe("WithInsert trigger", () => {
                         ) 
                     where 
                         id = $order_id::integer
-                `, {
-                        $order_id: orderId
-                    });
+                `, { $order_id: orderId });
             }
         }
 
@@ -63,6 +63,11 @@ describe("WithInsert trigger", () => {
         assert.equal(orderRow.id, 1);
         assert.ok(orderRow.units_names === null);
 
+        vars = {
+            $order_id: orderRow.id,
+            $name_1: "Hello",
+            $name_2: "World"
+        };
         let row = await server.query(`
             with
                 inserted_units as (
@@ -79,11 +84,7 @@ describe("WithInsert trigger", () => {
                 count( * ) as inserted_count,
                 array_agg( id ) as inserted_ids
             from inserted_units
-        `, {
-                $order_id: orderRow.id,
-                $name_1: "Hello",
-                $name_2: "World"
-            });
+        `, vars);
 
         assert.equal(row.inserted_count, 2);
         assert.ok(row.inserted_ids instanceof Array);
@@ -94,9 +95,7 @@ describe("WithInsert trigger", () => {
                 units_names 
             from orders 
             where id = $order_id::integer
-        `, {
-                $order_id: orderRow.id
-            });
+        `, { $order_id: orderRow.id });
 
         assert.equal(orderRow.units_names, "Hello;World");
     });

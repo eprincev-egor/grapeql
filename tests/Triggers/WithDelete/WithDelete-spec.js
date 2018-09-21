@@ -46,9 +46,7 @@ describe("WithDelete trigger", () => {
                         units_count = units_count - 1
                     where 
                         id = $order_id::integer
-                `, {
-                        $order_id: orderId
-                    });
+                `, { $order_id: orderId });
             }
         }
 
@@ -73,9 +71,7 @@ describe("WithDelete trigger", () => {
                 count( * ) as deleted_count,
                 array_agg( id ) as deleted_ids
             from deleted_units
-        `, {
-                $order_id: orderRow.id
-            });
+        `, { $order_id: orderRow.id });
 
         assert.equal(row.deleted_count, 1);
         assert.ok(row.deleted_ids instanceof Array);
@@ -86,9 +82,7 @@ describe("WithDelete trigger", () => {
                 units_count
             from orders 
             where id = $order_id::integer
-        `, {
-                $order_id: orderRow.id
-            });
+        `, { $order_id: orderRow.id });
 
         assert.equal(orderRow.units_count, "0");
     });

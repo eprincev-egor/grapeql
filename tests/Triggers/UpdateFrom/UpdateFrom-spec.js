@@ -187,9 +187,7 @@ describe("UpdateFrom trigger", () => {
             where
                 contracts.id_company_contractor = company_a  and 
                 contracts.id_company_payer      = company_b
-        `, {
-                $companies: [1, 2, 3]
-            });
+        `, { $companies: [1, 2, 3] });
         
         assert.deepEqual(triggersCalls, [
             // 1
