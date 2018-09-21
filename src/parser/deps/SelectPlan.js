@@ -470,7 +470,7 @@ class SelectPlan extends Plan {
 
             let findSchema;
             if ( tableLink.link.length > 1 ) {
-                findSchema = tableLink.link.first();
+                findSchema = tableLink.first();
             } else {
                 findSchema = new ObjectName("public");
             }
