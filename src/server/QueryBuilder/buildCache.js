@@ -2,7 +2,7 @@
 
 const Deps = require("../../parser/deps/Deps");
 const Join = require("../../parser/syntax/Join");
-const Select = require("../../parser/syntax/Select/Select");
+const Expression = require("../../parser/syntax/Expression");
 
 function buildCache({
     select,
@@ -15,7 +15,7 @@ function buildCache({
     });
 
     deps.tables.forEach(table => {
-        if ( !table.cacheFromItems.length ) {
+        if ( !table.cacheFrom.length ) {
             return;
         }
 
@@ -32,11 +32,15 @@ function buildCache({
             }
         });
 
-        table.cacheFromItems.forEach(fromItem => {
+        table.cacheFrom.forEach(from => {
+            let fromItem = from.syntax;
+
             cacheTables.forEach(dbTable => {
                 let fromItemAs = fromItem.getAliasSql();
                 let cacheTableAs = dbTable.schema + "." + dbTable.name;
 
+
+                // add join cache table
                 let on = [];
                 let primaryKey = dbTable.getPrimaryKey();
                 primaryKey.columns.forEach(key => {
@@ -49,15 +53,28 @@ function buildCache({
                 let join = new Join(`left join ${ cacheTableAs } on ${ on }`);
                 fromItem.unshiftJoin( join );
 
-                let select = fromItem.findParentInstance(Select);
-                if ( select ) {
-                    table.cacheColumns.forEach(key => {
-                        select.replaceLink(
-                            fromItemAs + "." + key,
-                            cacheTableAs + "." + key
-                        );
-                    });
-                }
+
+                // replace column links
+                let cacheColumns = dbTable.columnsArr.filter(dbColumn =>
+                    !primaryKey.columns.includes(dbColumn.name)
+                );
+                cacheColumns = cacheColumns.map(dbColumn => dbColumn.name);
+
+                from.links.forEach(link => {
+                    if ( !cacheColumns.includes(link.name) ) {
+                        return;
+                    }
+
+                    // select *
+                    if ( !link.syntax ) {
+                        return;
+                    }
+
+                    let objectLink = link.syntax;
+                    let expression = objectLink.findParentInstance( Expression );
+
+                    expression.replaceElement( objectLink, cacheTableAs + "." + link.name );
+                });
             });
         });
     });

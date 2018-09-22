@@ -135,7 +135,7 @@ class Deps {
             name: dbTable.name,
             columns: [],
             cacheColumns: [],
-            cacheFromItems: [],
+            cacheFrom: [],
 
             _allCacheColumns: this.server.cache.getCacheColumns(dbTable) || []
         };
@@ -158,8 +158,8 @@ class Deps {
                 table.cacheColumns.push(columnName);
             }
 
-            if ( !table.cacheFromItems.includes( fromItem.syntax ) ) {
-                table.cacheFromItems.push( fromItem.syntax );
+            if ( !table.cacheFrom.includes( fromItem ) ) {
+                table.cacheFrom.push( fromItem );
             }
         } else {
             if ( !table.columns.includes(columnName) ) {

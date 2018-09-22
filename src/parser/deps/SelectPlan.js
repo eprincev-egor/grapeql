@@ -236,6 +236,7 @@ class SelectPlan extends Plan {
                 });
             } else {
                 let link = {
+                    syntax: columnLink,
                     name: columnLink.last().toLowerCase(),
                     fromItem
                 };
