@@ -1,7 +1,8 @@
 create table company (
     id serial primary key,
     name text not null unique,
-    inn text not null unique
+    inn text not null unique,
+    manager_name text
 );
 
 create table orders (
