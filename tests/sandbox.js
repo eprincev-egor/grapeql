@@ -11,8 +11,7 @@ const testUpdate = require("./utils/testUpdate");
 const testInsert = require("./utils/testInsert");
 
 const testGetDbColumn = require("./utils/testGetDbColumn");
-const testRemoveUnnecessaryWithes = require("./utils/testRemoveUnnecessaryWithes");
-const testRemoveUnnecessaryJoins = require("./utils/testRemoveUnnecessaryJoins");
+const testRemoveUnnecessary = require("./utils/testRemoveUnnecessary");
 const testReplaceLinks = require("./utils/testReplaceLinks");
 const testSyntax = require("./utils/testSyntax");
 const testFilterToSql = require("./utils/testFilterToSql");
@@ -35,13 +34,12 @@ let server;
     global.testRequest = testRequest.bind(null, getServer);
     global.testRequestCount = testRequestCount.bind(null, getServer);
     global.testRequestIndexOf = testRequestIndexOf.bind(null, getServer);
-    global.testRemoveUnnecessaryWithes = testRemoveUnnecessaryWithes.bind(null, getServer);
     global.testUpdate = testUpdate.bind(null, getServer);
     global.testInsert = testInsert.bind(null, server);
 
     global.testReplaceLinks = testReplaceLinks;
     global.testGetDbColumn = testGetDbColumn;
-    global.testRemoveUnnecessaryJoins = testRemoveUnnecessaryJoins.bind(null, getServer);
+    global.testRemoveUnnecessary = testRemoveUnnecessary.bind(null, getServer);
 
     global.weakDeepEqual = weakDeepEqual;
     global.GrapeQL = GrapeQL;

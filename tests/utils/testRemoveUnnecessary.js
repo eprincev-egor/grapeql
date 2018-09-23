@@ -2,10 +2,10 @@
 
 const assert = require("assert");
 const GrapeQLCoach = require("../../src/parser/GrapeQLCoach");
-const weakDeepEqual = require("../utils/weakDeepEqual");
+const weakDeepEqual = require("./weakDeepEqual");
 const {removeUnnecessary} = require("../../src/server/QueryBuilder/removeUnnecessary");
 
-function testRemoveUnnecessaryJoins(getServer, fromSelect, toSelect) {
+function testRemoveUnnecessary(getServer, fromSelect, toSelect) {
     if ( !toSelect ) {
         toSelect = fromSelect;
     }
@@ -41,4 +41,4 @@ function testRemoveUnnecessaryJoins(getServer, fromSelect, toSelect) {
     });
 }
 
-module.exports = testRemoveUnnecessaryJoins;
+module.exports = testRemoveUnnecessary;
