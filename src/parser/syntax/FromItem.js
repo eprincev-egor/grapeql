@@ -362,7 +362,7 @@ class FromItem extends Syntax {
             }
         }
     }
-
+    
     isDefinedFromLink(fromLink) {
         let link = this.toTableLink();
         if ( link.equalLink( fromLink ) ) {
@@ -373,85 +373,6 @@ class FromItem extends Syntax {
             return this.joins.some(join => (
                 join.from.isDefinedFromLink(fromLink)
             ));
-        }
-    }
-
-    removeUnnecessaryJoins({
-        server, select,
-        checkRemovable = true
-    }) {
-        for (let i = this.joins.length - 1; i >= 0; i--) {
-            let join = this.joins[ i ];
-
-            if ( checkRemovable && !join.isRemovable({ server }) ) {
-                continue;
-            }
-
-            let fromLink = join.from.toTableLink();
-            let isUsedJoin = (
-                select.isHelpfulJoin(join, {checkJoins: false}) ||
-                this._isUsedFromLinkAfter({select, fromLink, i}) ||
-                join.from._isUsedChildJoins({
-                    select, fromLink,
-                    rootFrom: this, i
-                })
-            );
-
-            join.from.removeUnnecessaryJoins({
-                server, select,
-                checkRemovable: isUsedJoin ? true : false
-            });
-
-            if ( join.from.joins.length ) {
-                continue;
-            }
-
-            if ( isUsedJoin ) {
-                continue;
-            }
-
-            this.joins.splice(i, 1);
-            this.removeChild(join);
-        }
-    }
-
-    _isUsedFromLinkAfter({select, fromLink, i}) {
-        i++;
-        for (let n = this.joins.length; i < n; i++) {
-            let nextJoin = this.joins[ i ];
-
-            if ( select.isUsedFromLink(fromLink, {startChild: nextJoin}) ) {
-                return true;
-            }
-
-            if ( nextJoin.from._isUsedFromLinkAfter({
-                select,
-                fromLink,
-                i: -1
-            }) ) {
-                return true;
-            }
-        }
-    }
-
-    _isUsedChildJoins({select, fromLink, rootFrom, i}) {
-        for (let j = 0, n = this.joins.length; j < n; j++) {
-            let join = this.joins[ j ];
-
-            if ( select.isHelpfulJoin(join, {checkJoins: false}) ) {
-                return true;
-            }
-
-            if ( rootFrom._isUsedFromLinkAfter({select, fromLink, i}) ) {
-                return true;
-            }
-
-            if ( join.from._isUsedChildJoins({
-                select, fromLink,
-                rootFrom, i
-            }) ) {
-                return true;
-            }
         }
     }
 

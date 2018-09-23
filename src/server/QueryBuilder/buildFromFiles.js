@@ -7,13 +7,16 @@ const ObjectName = require("../../parser/syntax/ObjectName");
 const ObjectLink = require("../../parser/syntax/ObjectLink");
 const ColumnLink = require("../../parser/syntax/ColumnLink");
 const With = require("../../parser/syntax/With");
+const {removeUnnecessary} = require("./removeUnnecessary");
 
 function buildFromFiles({ 
     queryBuilder, 
     select 
 }) {
-    select.removeUnnecessaryJoins({ server: queryBuilder.server });
-    select.removeUnnecessaryWithes({ server: queryBuilder.server });
+    removeUnnecessary({
+        select,
+        server: queryBuilder.server
+    });
 
     let fileItems = [];
     select.walk(child => {

@@ -3,8 +3,6 @@
 const Syntax = require("../Syntax");
 
 let methods = [
-    require("./Select.removeUnnecessaryJoins"),
-    require("./Select.removeUnnecessaryWithes"),
     require("./Select.getColumnSource")
 ];
 

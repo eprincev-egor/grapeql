@@ -3,6 +3,7 @@
 const assert = require("assert");
 const GrapeQLCoach = require("../../src/parser/GrapeQLCoach");
 const weakDeepEqual = require("../utils/weakDeepEqual");
+const {removeUnnecessary} = require("../../src/server/QueryBuilder/removeUnnecessary");
 
 function testRemoveUnnecessaryWithes(getServer, fromSelect, toSelect) {
     if ( !toSelect ) {
@@ -25,7 +26,10 @@ function testRemoveUnnecessaryWithes(getServer, fromSelect, toSelect) {
         coach.skipSpace();
         let parsedToSelect = coach.parseSelect();
 
-        parsedFromSelect.removeUnnecessaryWithes({server});
+        removeUnnecessary({
+            select: parsedFromSelect,
+            server
+        });
 
         let isEqual = !!weakDeepEqual(parsedFromSelect, parsedToSelect);
 
