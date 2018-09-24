@@ -7,21 +7,26 @@ const FromItem = require("../../parser/syntax/FromItem");
 const Join = require("../../parser/syntax/Join");
 const WithQuery = require("../../parser/syntax/WithQuery");
 const Select = require("../../parser/syntax/Select/Select");
+const SelectPlan = require("../../parser/deps/SelectPlan");
 
 function removeUnnecessary({server, select}) {
-    removeUnnecessaryJoins({server, select});
-    removeUnnecessaryWithes({server, select});
-}
-
-function removeUnnecessaryJoins({server, select}) {
+    let plan = new SelectPlan({
+        select,
+        server
+    });
+    plan.build();
+    
     for (let i = 0, n = select.from.length; i < n; i++) {
         let fromItem = select.from[i];
 
-        removeUnnecessaryJoins_byFromItem({
+        removeUnnecessaryJoins({
+            plan,
             fromItem,
             server, select
         });
     }
+
+    removeUnnecessaryWithes({server, select});
 }
 
 function isHelpfulJoin(select, join, options) {
@@ -180,8 +185,8 @@ function hasWith(select, name) {
 }
 
 
-function removeUnnecessaryJoins_byFromItem({
-    fromItem,
+function removeUnnecessaryJoins({
+    fromItem, plan,
     server, select,
     checkRemovable = true
 }) {
@@ -192,86 +197,69 @@ function removeUnnecessaryJoins_byFromItem({
             continue;
         }
 
-        let fromLink = join.from.toTableLink();
-        let isUsedJoin = (
-            isHelpfulJoin(select, join, {checkJoins: false}) ||
-            isUsedFromLinkAfter({
-                fromItem, 
-                select, 
-                fromLink, i
-            }) ||
-            isUsedChildJoins({
-                fromItem: join.from,
-                select, fromLink,
-                rootFrom: fromItem, 
-                i
-            })
-        );
+        let isUsed = isUsedJoin({
+            join,
+            plan
+        });
 
-        removeUnnecessaryJoins_byFromItem({
+        removeUnnecessaryJoins({
+            plan,
             fromItem: join.from,
             server, select,
-            checkRemovable: isUsedJoin ? true : false
+            checkRemovable: isUsed ? true : false
         });
 
         if ( join.from.joins.length ) {
             continue;
         }
 
-        if ( isUsedJoin ) {
+        if ( isUsed ) {
             continue;
         }
 
         fromItem.joins.splice(i, 1);
         fromItem.removeChild(join);
+
+        // need rebuild plan after remove join
+        plan.build();
     }
 }
 
-function isUsedFromLinkAfter({fromItem, select, fromLink, i}) {
-    i++;
-    for (let n = fromItem.joins.length; i < n; i++) {
-        let nextJoin = fromItem.joins[ i ];
+function isUsedJoin({join, plan, rootJoin}) {
+    if ( !rootJoin ) {
+        rootJoin = join;
+    }
 
-        if ( isUsedFromLink(select, fromLink, {startChild: nextJoin}) ) {
+    let links = plan.getFromItemLinks( join.from );
+
+    links = links.filter(link => {
+        // select *
+        if ( !link.syntax ) {
             return true;
         }
+        
+        // join.on
+        // child join.on, etc
+        if ( link.syntax.hasParent(rootJoin) ) {
+            return false;
+        }
 
-        if ( isUsedFromLinkAfter({
-            fromItem: nextJoin.from,
-            select,
-            fromLink,
-            i: -1
-        }) ) {
+        return true;
+    });
+
+    if ( links.length ) {
+        return true;
+    }
+
+    for (let j = 0, n = join.from.joins.length; j < n; j++) {
+        let childJoin = join.from.joins[ j ];
+
+        if ( isUsedJoin({join: childJoin, plan, rootJoin: join}) ) {
             return true;
         }
     }
-}
 
-function isUsedChildJoins({fromItem, select, fromLink, rootFrom, i}) {
-    for (let j = 0, n = fromItem.joins.length; j < n; j++) {
-        let join = fromItem.joins[ j ];
-
-        if ( isHelpfulJoin(select, join, {checkJoins: false}) ) {
-            return true;
-        }
-
-        if ( 
-            isUsedFromLinkAfter({
-                fromItem: rootFrom,
-                select, fromLink, i
-            }) 
-        ) {
-            return true;
-        }
-
-        if ( isUsedChildJoins({
-            fromItem: join.from,
-            select, fromLink,
-            rootFrom, i
-        }) ) {
-            return true;
-        }
-    }
+    return false;
 }
 
 

@@ -36,6 +36,10 @@ function testRemoveUnnecessary(getServer, fromSelect, toSelect) {
         });
 
         let isEqual = !!weakDeepEqual(parsedFromSelect, parsedToSelect);
+        
+        if ( !isEqual ) {
+            console.log(parsedFromSelect.toString());
+        }
 
         assert.ok(isEqual);
     });

@@ -2,7 +2,7 @@
 
 describe("RemoveJoins", () => {
     const {testRemoveUnnecessary} = require("../../utils/init")(__dirname);
-    
+
     testRemoveUnnecessary(`
             select from company
 
@@ -357,7 +357,7 @@ describe("RemoveJoins", () => {
         left join company on
             company.id = comp_id.id
 
-        left join (
+        left join lateral (
             select company.id
         ) as some_table on true
 
@@ -807,6 +807,10 @@ describe("RemoveJoins", () => {
         from company
     `);
 
+
+
+
+
     testRemoveUnnecessary(`
         select company.inn
         from company
@@ -982,4 +986,5 @@ describe("RemoveJoins", () => {
             limit 1
         ) as test_with_values on true
     `);
+
 });

@@ -12,6 +12,9 @@ const ValuesPlan = require("./ValuesPlan");
 
 class SelectPlan extends Plan {
     build() {
+        // for rebuild case
+        this.clear();
+
         // from ...
         this.buildFrom();
         // select ...
@@ -36,7 +39,24 @@ class SelectPlan extends Plan {
                     select: fromItem.select,
                     server: this.server,
                     // keyword lateral gives access to parent fromItems
-                    parentPlan: fromItem.lateral ? this : false
+                    parentPlan: (
+                        fromItem.lateral ? 
+                            this : 
+                            // else we can use parent.parent, example:
+                            //  
+                            // select *
+                            // from company
+
+                            // left join lateral (
+                            //     select * from (
+                            //         select * from (
+                            //             select
+                            //                 company.id
+                            //         ) as lvl2
+                            //     ) as lvl1
+                            // )
+                            this.parentPlan
+                    )
                 });
                 from.plan.build();
             } else {
@@ -50,7 +70,9 @@ class SelectPlan extends Plan {
                         from.plan = new SelectPlan({
                             withQuery,
                             select: withQuery.select,
-                            server: this.server
+                            server: this.server,
+                            // left join lateral ( with ...  )
+                            parentPlan: this.parentPlan
                         });
                         from.plan.build();
                     }
@@ -58,7 +80,9 @@ class SelectPlan extends Plan {
                         from.plan = new ValuesPlan({
                             withQuery,
                             values: withQuery.values,
-                            server: this.server
+                            server: this.server,
+                            // left join lateral ( with ...  )
+                            parentPlan: this.parentPlan
                         });
                         from.plan.build();
                     }
@@ -186,11 +210,14 @@ class SelectPlan extends Plan {
             if ( child instanceof With ) {
                 return walker.skip();
             }
-            if ( child instanceof FromItem ) {
-                return walker.skip();
-            }
 
             if ( child instanceof Select ) {
+                // left join (select)
+                // from (select)
+                if ( child.parent instanceof FromItem ) {
+                    return walker.skip();
+                }
+
                 subSelects.push( child );
                 walker.skip();
             }
@@ -503,6 +530,18 @@ class SelectPlan extends Plan {
         }
 
         return out;
+    }
+
+    getFromItemLinks(fromItemSyntax) {
+        let from = this.fromItems.find(from =>
+            fromItemSyntax == from.syntax
+        );
+
+        if ( !from ) {
+            return [];
+        }
+
+        return from.links;
     }
 }
 

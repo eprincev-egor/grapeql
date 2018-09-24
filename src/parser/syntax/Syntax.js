@@ -58,6 +58,10 @@ class Syntax {
         return this.findParent(parent => parent instanceof SyntaxClass);
     }
 
+    hasParent(checkParent) {
+        return !!this.findParent(parent => parent == checkParent);
+    }
+
     walk(iteration) {
         if ( !this.children ) {
             return;

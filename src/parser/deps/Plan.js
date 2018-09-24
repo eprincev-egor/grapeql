@@ -13,6 +13,10 @@ class Plan {
         this.server = server;
         this.withQuery = withQuery;
 
+        this.clear();
+    }
+
+    clear() {
         this.columns = [];
         this.columnByName = {};
         this.fromItems = [];
@@ -24,6 +28,7 @@ class Plan {
     }
 
     build() {
+        // redefine me
     }
 }
 
