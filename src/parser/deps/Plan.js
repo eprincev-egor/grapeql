@@ -4,8 +4,11 @@ class Plan {
     constructor({
         select, values, 
         server, withQuery,
-        parentPlan
+        parentPlan,
+        ignoreMissingTable = false
     }) {
+        this.ignoreMissingTable = ignoreMissingTable;
+        
         this.parentPlan = parentPlan;
         
         this.select = select;

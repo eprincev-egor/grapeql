@@ -2,7 +2,7 @@
 
 describe("RemoveWiths", () => {
     const {testRemoveUnnecessary} = require("../../utils/init")(__dirname);
-    
+
     testRemoveUnnecessary(`
         with
             x1 as (
@@ -211,22 +211,22 @@ describe("RemoveWiths", () => {
 
     testRemoveUnnecessary(`
         with x as (select 1 as id)
-        select company.id in ((select id from x), (select id + 1 from x))
+        select 1 in ((select id from x), (select id + 1 from x))
     `);
 
     testRemoveUnnecessary(`
         with x as (select 1 as id)
-        select company.id in (select id from x)
+        select 1 in (select id from x)
     `);
 
     testRemoveUnnecessary(`
         with x as (select 1 as id)
-        select company.id between 1 and (select id + 100 from x)
+        select 1 between 1 and (select id + 100 from x)
     `);
 
     testRemoveUnnecessary(`
         with x as (select 1 as id)
-        select company.id between (select id from x) and 500
+        select 1 between (select id from x) and 500
     `);
 
     testRemoveUnnecessary(`
@@ -410,4 +410,5 @@ describe("RemoveWiths", () => {
         select *
         from x2
     `);
+
 });

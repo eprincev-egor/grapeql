@@ -15,7 +15,8 @@ function buildFromFiles({
 }) {
     removeUnnecessary({
         select,
-        server: queryBuilder.server
+        server: queryBuilder.server,
+        ignoreMissingTable: true
     });
 
     let fileItems = [];

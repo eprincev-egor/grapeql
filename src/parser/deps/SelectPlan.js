@@ -251,6 +251,14 @@ class SelectPlan extends Plan {
             let fromItem = this.getFromItemByLink(columnLink);
             let isStar = columnLink.isStar();
 
+            if ( !fromItem ) {
+                if ( this.ignoreMissingTable ) {
+                    return;
+                }
+                
+                throw new Error(`missing FROM-clause entry for column link "${ columnLink.toString() }"`);
+            }
+
             // select row_to_json( companies )
             if ( isTableLink || isStar ) {
                 let subColumns = this.getAllColumnsFrom( fromItem );
@@ -423,6 +431,25 @@ class SelectPlan extends Plan {
                     
                     if ( withQuery.columns ) {
                         return withQuery.columns.some(name => name.toLowerCase() == columnName);
+                    }
+                }
+                else if ( fromItem.syntax.file ) {
+                    let queryNode = this.server.queryBuilder.getQueryNodeByFile(fromItem.syntax.file);
+
+                    if ( !queryNode ) {
+                        throw new Error(`file ${ fromItem.syntax.file } no found`);
+                    }
+
+                    let filePlan = new SelectPlan({
+                        select: queryNode.select,
+                        server: this.server
+                    });
+                    filePlan.build();
+
+                    let fromItemFromFile = filePlan.getFromItemByLink( columnLink );
+                    
+                    if ( fromItemFromFile ) {
+                        return true;
                     }
                 }
             });

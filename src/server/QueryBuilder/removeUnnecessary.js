@@ -1,18 +1,15 @@
 "use strict";
 
-const Column = require("../../parser/syntax/Column");
-const ColumnLink = require("../../parser/syntax/ColumnLink");
 const TableLink = require("../../parser/syntax/TableLink");
-const FromItem = require("../../parser/syntax/FromItem");
-const Join = require("../../parser/syntax/Join");
 const WithQuery = require("../../parser/syntax/WithQuery");
 const Select = require("../../parser/syntax/Select/Select");
 const SelectPlan = require("../../parser/deps/SelectPlan");
 
-function removeUnnecessary({server, select}) {
+function removeUnnecessary({server, select, ignoreMissingTable = false}) {
     let plan = new SelectPlan({
         select,
-        server
+        server,
+        ignoreMissingTable
     });
     plan.build();
     
@@ -26,65 +23,10 @@ function removeUnnecessary({server, select}) {
         });
     }
 
-    removeUnnecessaryWithes({server, select});
-}
-
-function isHelpfulJoin(select, join, options) {
-    let fromLink = join.from.toTableLink();
-    return isUsedFromLink(select, fromLink, options);
-}
-
-function isUsedFromLink(select, fromLink, options) {
-    options = options || {
-        star: true,
-        checkJoins: true,
-        startChild: false
-    };
-
-    let isUsed = false;
-
-    let child = options.startChild || select;
-
-    child.walk((child, walker) => {
-        if ( child instanceof Column ) {
-            // select *
-            if ( child.parent == select && child.isStar() ) {
-                let columnLink = child.expression.getLink();
-                if ( columnLink.link.length == 1 ) {
-                    isUsed = true;
-                    walker.stop();
-                }
-            }
-        }
-
-        else if ( child instanceof ColumnLink ) {
-            if ( child.containLink( fromLink ) ) {
-                isUsed = true;
-                walker.stop();
-            }
-        }
-
-        else if ( child instanceof Select ) {
-            if ( child.isDefinedFromLink(fromLink) ) {
-                walker.skip();
-            }
-        }
-
-        else if ( child instanceof FromItem ) {
-            if ( !child.lateral && child.parent instanceof Join ) {
-                walker.skip();
-            }
-
-            else if ( options.checkJoins === false ) {
-                let childSelect = child.findParentInstance(Select);
-                if ( select == childSelect ) {
-                    walker.skip();
-                }
-            }
-        }
+    removeUnnecessaryWithes({
+        server, 
+        select, plan
     });
-
-    return isUsed;
 }
 
 function removeUnnecessaryWithes({ select }) {
@@ -264,6 +206,5 @@ function isUsedJoin({join, plan, rootJoin}) {
 
 
 module.exports = {
-    removeUnnecessary, 
-    isHelpfulJoin
+    removeUnnecessary
 };
