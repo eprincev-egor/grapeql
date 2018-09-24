@@ -18,7 +18,8 @@ describe("FindDeps", () => {
                         "id"
                     ]
                 }
-            ]
+            ],
+            files: []
         }
     });
 
@@ -40,7 +41,8 @@ describe("FindDeps", () => {
                         "name"
                     ]
                 }
-            ]
+            ],
+            files: []
         }
     });
 
@@ -61,7 +63,8 @@ describe("FindDeps", () => {
                         "name"
                     ]
                 }
-            ]
+            ],
+            files: []
         }
     });
 
@@ -82,7 +85,8 @@ describe("FindDeps", () => {
                         "name"
                     ]
                 }
-            ]
+            ],
+            files: []
         }
     });
 
@@ -100,7 +104,8 @@ describe("FindDeps", () => {
                         "id"
                     ]
                 }
-            ]
+            ],
+            files: []
         }
     });
 
@@ -118,7 +123,8 @@ describe("FindDeps", () => {
                         "id"
                     ]
                 }
-            ]
+            ],
+            files: []
         }
     });
 
@@ -136,7 +142,8 @@ describe("FindDeps", () => {
                         "id"
                     ]
                 }
-            ]
+            ],
+            files: []
         }
     });
 
@@ -156,7 +163,8 @@ describe("FindDeps", () => {
                         "id"
                     ]
                 }
-            ]
+            ],
+            files: []
         }
     });
     testFindDeps({
@@ -173,7 +181,8 @@ describe("FindDeps", () => {
                         "id"
                     ]
                 }
-            ]
+            ],
+            files: []
         }
     });
                   
@@ -192,7 +201,8 @@ describe("FindDeps", () => {
                         "id"
                     ]
                 }
-            ]
+            ],
+            files: []
         }
     });
 
@@ -210,7 +220,8 @@ describe("FindDeps", () => {
                         "id"
                     ]
                 }
-            ]
+            ],
+            files: []
         }
     });
 
@@ -228,7 +239,8 @@ describe("FindDeps", () => {
                         "id"
                     ]
                 }
-            ]
+            ],
+            files: []
         }
     });
 
@@ -246,7 +258,8 @@ describe("FindDeps", () => {
                         "id"
                     ]
                 }
-            ]
+            ],
+            files: []
         }
     });
 
@@ -264,7 +277,8 @@ describe("FindDeps", () => {
                         "id"
                     ]
                 }
-            ]
+            ],
+            files: []
         }
     });
 
@@ -285,7 +299,8 @@ describe("FindDeps", () => {
                         "name"
                     ]
                 }
-            ]
+            ],
+            files: []
         }
     });
 
@@ -306,7 +321,8 @@ describe("FindDeps", () => {
                         "name"
                     ]
                 }
-            ]
+            ],
+            files: []
         }
     });
 
@@ -327,7 +343,8 @@ describe("FindDeps", () => {
                         "name"
                     ]
                 }
-            ]
+            ],
+            files: []
         }
     });
 
@@ -348,7 +365,8 @@ describe("FindDeps", () => {
                         "name"
                     ]
                 }
-            ]
+            ],
+            files: []
         }
     });
 
@@ -370,7 +388,8 @@ describe("FindDeps", () => {
                         "name"
                     ]
                 }
-            ]
+            ],
+            files: []
         }
     });
 
@@ -391,7 +410,8 @@ describe("FindDeps", () => {
                         "id"
                     ]
                 }
-            ]
+            ],
+            files: []
         }
     });
 
@@ -414,7 +434,8 @@ describe("FindDeps", () => {
                         "name"
                     ]
                 }
-            ]
+            ],
+            files: []
         }
     });
 
@@ -437,7 +458,8 @@ describe("FindDeps", () => {
                         "name"
                     ]
                 }
-            ]
+            ],
+            files: []
         }
     });
 
@@ -461,7 +483,8 @@ describe("FindDeps", () => {
                         "name"
                     ]
                 }
-            ]
+            ],
+            files: []
         }
     });
 
@@ -481,7 +504,8 @@ describe("FindDeps", () => {
                         "name"
                     ]
                 }
-            ]
+            ],
+            files: []
         }
     });
 
@@ -502,7 +526,8 @@ describe("FindDeps", () => {
                         "name"
                     ]
                 }
-            ]
+            ],
+            files: []
         }
     });
 
@@ -522,7 +547,8 @@ describe("FindDeps", () => {
                         "name"
                     ]
                 }
-            ]
+            ],
+            files: []
         }
     });
 
@@ -548,7 +574,8 @@ describe("FindDeps", () => {
                         "inn"
                     ]
                 }
-            ]
+            ],
+            files: []
         }
     });
 
@@ -564,7 +591,8 @@ describe("FindDeps", () => {
                     name: "companies",
                     columns: []
                 }
-            ]
+            ],
+            files: []
         }
     });
 
@@ -580,7 +608,8 @@ describe("FindDeps", () => {
                     name: "companies",
                     columns: []
                 }
-            ]
+            ],
+            files: []
         }
     });
     
@@ -606,7 +635,8 @@ describe("FindDeps", () => {
                         "id"
                     ]
                 }
-            ]
+            ],
+            files: []
         }
     });
 
@@ -634,7 +664,8 @@ describe("FindDeps", () => {
                         "name"
                     ]
                 }
-            ]
+            ],
+            files: []
         }
     });
 
@@ -659,7 +690,8 @@ describe("FindDeps", () => {
                         "inn"
                     ]
                 }
-            ]
+            ],
+            files: []
         }
     });
 
@@ -685,7 +717,8 @@ describe("FindDeps", () => {
                         "name"
                     ]
                 }
-            ]
+            ],
+            files: []
         }
     });
 
@@ -710,7 +743,8 @@ describe("FindDeps", () => {
                         "name"
                     ]
                 }
-            ]
+            ],
+            files: []
         }
     });
 
@@ -736,7 +770,8 @@ describe("FindDeps", () => {
                         "inn"
                     ]
                 }
-            ]
+            ],
+            files: []
         }
     });
 
@@ -762,7 +797,8 @@ describe("FindDeps", () => {
                         "inn"
                     ]
                 }
-            ]
+            ],
+            files: []
         }
     });
 
@@ -787,7 +823,8 @@ describe("FindDeps", () => {
                         "id"
                     ]
                 }
-            ]
+            ],
+            files: []
         }
     });
 
@@ -813,7 +850,8 @@ describe("FindDeps", () => {
                         "inn"
                     ]
                 }
-            ]
+            ],
+            files: []
         }
     });
 
@@ -840,7 +878,8 @@ describe("FindDeps", () => {
                         "name"
                     ]
                 }
-            ]
+            ],
+            files: []
         }
     });
 
@@ -868,7 +907,8 @@ describe("FindDeps", () => {
                         "inn"
                     ]
                 }
-            ]
+            ],
+            files: []
         }
     });
 
@@ -896,7 +936,8 @@ describe("FindDeps", () => {
                         "inn"
                     ]
                 }
-            ]
+            ],
+            files: []
         }
     });
 
@@ -923,7 +964,8 @@ describe("FindDeps", () => {
                         "inn"
                     ]
                 }
-            ]
+            ],
+            files: []
         }
     });
 
@@ -955,7 +997,8 @@ describe("FindDeps", () => {
                         "name"
                     ]
                 }
-            ]
+            ],
+            files: []
         }
     });
 
@@ -979,7 +1022,8 @@ describe("FindDeps", () => {
                     name: "countries",
                     columns: []
                 }
-            ]
+            ],
+            files: []
         }
     });
 
@@ -1007,7 +1051,8 @@ describe("FindDeps", () => {
                         "id"
                     ]
                 }
-            ]
+            ],
+            files: []
         }
     });
 
@@ -1041,7 +1086,8 @@ describe("FindDeps", () => {
                         "name"
                     ]
                 }
-            ]
+            ],
+            files: []
         }
     });
 
@@ -1068,7 +1114,8 @@ describe("FindDeps", () => {
                     name: "countries",
                     columns: []
                 }
-            ]
+            ],
+            files: []
         }
     });
 
@@ -1085,7 +1132,8 @@ describe("FindDeps", () => {
         `,
         result: {
             tables: [
-            ]
+            ],
+            files: []
         }
     });
 
@@ -1101,7 +1149,8 @@ describe("FindDeps", () => {
             from x
         `,
         result: {
-            tables: []
+            tables: [],
+            files: []
         }
     });
 
@@ -1122,7 +1171,8 @@ describe("FindDeps", () => {
             from y
         `,
         result: {
-            tables: []
+            tables: [],
+            files: []
         }
     });
 
@@ -1144,7 +1194,8 @@ describe("FindDeps", () => {
             from y
         `,
         result: {
-            tables: []
+            tables: [],
+            files: []
         }
     });
 
@@ -1172,7 +1223,8 @@ describe("FindDeps", () => {
                         "id"
                     ]
                 }
-            ]
+            ],
+            files: []
         }
     });
 
@@ -1200,7 +1252,8 @@ describe("FindDeps", () => {
                         "id"
                     ]
                 }
-            ]
+            ],
+            files: []
         }
     });
 
@@ -1221,7 +1274,8 @@ describe("FindDeps", () => {
                         "name"
                     ]
                 }
-            ]
+            ],
+            files: []
         }
     });
 
@@ -1249,7 +1303,8 @@ describe("FindDeps", () => {
                         "name"
                     ]
                 }
-            ]
+            ],
+            files: []
         }
     });
 
@@ -1279,7 +1334,8 @@ describe("FindDeps", () => {
                         "name"
                     ]
                 }
-            ]
+            ],
+            files: []
         }
     });
 
@@ -1302,7 +1358,8 @@ describe("FindDeps", () => {
                         "id"
                     ]
                 }
-            ]
+            ],
+            files: []
         }
     });
 
@@ -1332,7 +1389,8 @@ describe("FindDeps", () => {
                         "name"
                     ]
                 }
-            ]
+            ],
+            files: []
         }
     });
 
@@ -1356,7 +1414,8 @@ describe("FindDeps", () => {
                         "name"
                     ]
                 }
-            ]
+            ],
+            files: []
         }
     });
 
@@ -1388,7 +1447,8 @@ describe("FindDeps", () => {
                     name: "countries",
                     columns: []
                 }
-            ]
+            ],
+            files: []
         }
     });
 
@@ -1426,7 +1486,8 @@ describe("FindDeps", () => {
                         "name"
                     ]
                 }
-            ]
+            ],
+            files: []
         }
     });
 
@@ -1455,7 +1516,8 @@ describe("FindDeps", () => {
                         "id"
                     ]
                 }
-            ]
+            ],
+            files: []
         }
     });
 
@@ -1485,7 +1547,8 @@ describe("FindDeps", () => {
                         "id"
                     ]
                 }
-            ]
+            ],
+            files: []
         }
     });
 
@@ -1495,7 +1558,8 @@ describe("FindDeps", () => {
             from unnest( array[1, 2]::integer[] ) as id
         `,
         result: {
-            tables: []
+            tables: [],
+            files: []
         }
     });
 
@@ -1520,7 +1584,8 @@ describe("FindDeps", () => {
                         "id"
                     ]
                 }
-            ]
+            ],
+            files: []
         }
     });
 
@@ -1530,7 +1595,8 @@ describe("FindDeps", () => {
             from unnest( array[1, 2]::integer[] ) as id
         `,
         result: {
-            tables: []
+            tables: [],
+            files: []
         }
     });
 
@@ -1564,7 +1630,8 @@ describe("FindDeps", () => {
                         "id"
                     ]
                 }
-            ]
+            ],
+            files: []
         }
     });
 
@@ -1601,7 +1668,8 @@ describe("FindDeps", () => {
                         "id"
                     ]
                 }
-            ]
+            ],
+            files: []
         }
     });
 
@@ -1635,7 +1703,8 @@ describe("FindDeps", () => {
                         "id"
                     ]
                 }
-            ]
+            ],
+            files: []
         }
     });
 
@@ -1678,7 +1747,8 @@ describe("FindDeps", () => {
                         "id"
                     ]
                 }
-            ]
+            ],
+            files: []
         }
     });
 
@@ -1705,7 +1775,8 @@ describe("FindDeps", () => {
                     columns: [
                     ]
                 }
-            ]
+            ],
+            files: []
         }
     });
 
@@ -1735,7 +1806,8 @@ describe("FindDeps", () => {
                         "code"
                     ]
                 }
-            ]
+            ],
+            files: []
         }
     });
 
@@ -1766,7 +1838,8 @@ describe("FindDeps", () => {
                         "code"
                     ]
                 }
-            ]
+            ],
+            files: []
         }
     });
 
@@ -1791,7 +1864,8 @@ describe("FindDeps", () => {
                         "id"
                     ]
                 }
-            ]
+            ],
+            files: []
         }
     });
 
@@ -1816,7 +1890,8 @@ describe("FindDeps", () => {
                         "id"
                     ]
                 }
-            ]
+            ],
+            files: []
         }
     });
 
@@ -1850,10 +1925,96 @@ describe("FindDeps", () => {
                         "id"
                     ]
                 }
+            ],
+            files: []
+        }
+    });
+
+    testFindDeps({
+        query: `
+            select 
+                companies.id,
+                countries.id
+            from companies
+            
+            left join ./countries on
+                countries.id = companies.id_country
+        `,
+        result: {
+            tables: [
+                {
+                    schema: "public",
+                    name: "companies",
+                    columns: [
+                        "id",
+                        "id_country"
+                    ]
+                }
+            ],
+            files: [
+                {
+                    file: "./countries",
+                    columns: [
+                        "id"
+                    ]
+                }
             ]
         }
     });
 
-    
+    testFindDeps({
+        query: `
+            select companies.id
+            from ./companies
+        `,
+        result: {
+            tables: [],
+            files: [
+                {
+                    file: "./companies",
+                    columns: [
+                        "id"
+                    ]
+                }
+            ]
+        }
+    });
+
+    testFindDeps({
+        query: `
+            select
+                companies.id,
+                Country1.code,
+                Country2.code
+            from companies
+            
+            left join ./countries as Country1 on
+                Country1.id = companies.id_country + 1
+            
+            left join ./countries as Country2 on
+                Country2.id = companies.id_country + 2
+        `,
+        result: {
+            tables: [
+                {
+                    schema: "public",
+                    name: "companies",
+                    columns: [
+                        "id",
+                        "id_country"
+                    ]
+                }
+            ],
+            files: [
+                {
+                    file: "./countries",
+                    columns: [
+                        "code",
+                        "id"
+                    ]
+                }
+            ]
+        }
+    });
 
 });

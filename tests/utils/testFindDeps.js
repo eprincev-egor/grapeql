@@ -30,8 +30,10 @@ ${ JSON.stringify(test.result, null, 4) }
 }
 
 function transform(deps) {
-    let out = {};
-    out.tables = [];
+    let out = {
+        tables: [],
+        files: []
+    };
     
     deps.tables.forEach(table => {
         let outTable = {
@@ -51,6 +53,22 @@ function transform(deps) {
         } else {
             return tableA.schema > tableB.schema ? 1 : -1;
         }
+    });
+
+
+    deps.files.forEach(fileItem => {
+        let outFile = {
+            file: fileItem.file,
+            columns: fileItem.columns.sort()
+        };
+
+        out.files.push(
+            outFile
+        );
+    });
+
+    out.files.sort((fileA, fileB) => {
+        return fileA.file > fileB.file ? 1 : -1;
     });
 
     return out;

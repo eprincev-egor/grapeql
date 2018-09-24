@@ -9,6 +9,9 @@ class Deps {
         this.tables = [];
         this._tables = {};
 
+        this.files = [];
+        this._files = {};
+        
         this.plan = new SelectPlan({
             select,
             server
@@ -64,6 +67,9 @@ class Deps {
         else if ( fromItem.plan ) {
             this.parseSubPlan( fromItem.plan, parentLinks );
         }
+        else if ( fromItem.file ) {
+            this.addFile( fromItem.file );
+        }
     }
 
     parseSubPlan(subPlan, parentLinks) {
@@ -117,7 +123,7 @@ class Deps {
     addLink(link) {
         let {fromItem} = link;
 
-        if ( fromItem.dbTable ) {
+        if ( fromItem.dbTable || fromItem.file ) {
             this.addColumn( link );
         }
     }
@@ -146,24 +152,49 @@ class Deps {
         return table;
     }
 
+    addFile(file) {
+        let fromFile = this._files[ file ];
+
+        if ( fromFile ) {
+            return fromFile;
+        }
+
+        fromFile = {
+            file,
+            columns: []
+        };
+
+        this.files.push( fromFile );
+        this._files[ file ] = fromFile;
+    }
+
     addColumn(link) {
         let columnName = link.name;
         let fromItem = link.fromItem;
-        let dbTable = fromItem.dbTable;
-        let table = this.addTable(dbTable);
 
+        if ( fromItem.dbTable ) {
+            let table = this.addTable( fromItem.dbTable );
 
-        if ( table._allCacheColumns.includes(columnName) ) {
-            if ( !table.cacheColumns.includes(columnName) ) {
-                table.cacheColumns.push(columnName);
+            if ( table._allCacheColumns.includes(columnName) ) {
+                if ( !table.cacheColumns.includes(columnName) ) {
+                    table.cacheColumns.push(columnName);
+                }
+    
+                if ( !table.cacheFrom.includes( fromItem ) ) {
+                    table.cacheFrom.push( fromItem );
+                }
+            } else {
+                if ( !table.columns.includes(columnName) ) {
+                    table.columns.push(columnName);
+                }
             }
+        }
 
-            if ( !table.cacheFrom.includes( fromItem ) ) {
-                table.cacheFrom.push( fromItem );
-            }
-        } else {
-            if ( !table.columns.includes(columnName) ) {
-                table.columns.push(columnName);
+        if ( fromItem.file ) {
+            let file = this.addFile( fromItem.file );
+
+            if ( !file.columns.includes(columnName) ) {
+                file.columns.push(columnName);
             }
         }
     }

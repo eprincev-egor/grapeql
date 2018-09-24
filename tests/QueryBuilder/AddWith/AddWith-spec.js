@@ -2,7 +2,7 @@
 
 describe("AddWith", () => {
     const {testRequest} = require("../../utils/init")(__dirname);
-/*
+
     testRequest({
         nodes: {
             Company: `
@@ -191,7 +191,7 @@ describe("AddWith", () => {
             from company
         `
     });
-*/
+
     testRequest({
         nodes: {
             Company: `
@@ -235,7 +235,7 @@ describe("AddWith", () => {
             on Country.id = company.id_country
         `
     });
-/*
+
     testRequest({
         nodes: {
             Company: `
@@ -309,5 +309,5 @@ describe("AddWith", () => {
                 country.code = $tag1$ru$tag1$
         `
     });
-*/
+
 });

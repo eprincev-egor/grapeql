@@ -59,7 +59,11 @@ class SelectPlan extends Plan {
                     )
                 });
                 from.plan.build();
-            } else {
+            } 
+            else if ( fromItem.file ) {
+                from.file = fromItem.file.toString();
+            }
+            else {
                 let withQuery = fromItem.getWithQuery();
                 let dbTable = fromItem.getDbTable( this.server );
     
@@ -359,6 +363,7 @@ class SelectPlan extends Plan {
         // select row_to_json( test.companies ) from companies, test.companies
         // select test.companies.id from companies, test.companies
         // select test.companies.* from companies, test.companies
+        // select Order.Client.Country.Code from ./Order
        
         // find by alias
         // cases:
@@ -369,6 +374,25 @@ class SelectPlan extends Plan {
         );
         if ( fromItemByAlias ) {
             return fromItemByAlias;
+        }
+
+        // find by file name
+        // cases:
+        // select Order.Client.Country.Code from ./Order
+        let fromItemByFile = fromItems.find(fromItem => {
+            if ( fromItem.as ) {
+                return;
+            }
+
+            if ( !fromItem.file ) {
+                return;
+            }
+
+            let fileName = fromItem.syntax.file.toObjectName();
+            return fileName.equal( columnLink.first() );
+        });
+        if ( fromItemByFile ) {
+            return fromItemByFile;
         }
 
         // transform stars to nothing
