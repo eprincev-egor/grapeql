@@ -5,31 +5,83 @@ const WithQuery = require("../../parser/syntax/WithQuery");
 const Select = require("../../parser/syntax/Select/Select");
 const SelectPlan = require("../../parser/deps/SelectPlan");
 
-function removeUnnecessary({server, select, ignoreMissingTable = false}) {
-    let plan = new SelectPlan({
-        select,
-        server,
-        ignoreMissingTable
-    });
-    plan.build();
+function removeUnnecessary({
+    server, select, 
+    plan,
+    // TODO: remove it
+    ignoreMissingTable = false
+}) {
+    if ( !plan ) {
+        plan = new SelectPlan({
+            select,
+            server,
+            ignoreMissingTable
+        });
+        plan.build();
+    }
     
-    for (let i = 0, n = select.from.length; i < n; i++) {
-        let fromItem = select.from[i];
-
+    select.from.forEach(fromItem => {
         removeUnnecessaryJoins({
             plan,
             fromItem,
             server, select
         });
-    }
+    });
 
     removeUnnecessaryWithes({
         server, 
         select, plan
     });
+
+    plan.fromItems.forEach(from => {
+        let subPlan = from.plan;
+        if ( !subPlan ) {
+            return;
+        }
+
+
+        let subSelect = from.withQuery && from.withQuery.select;
+        if ( !subSelect ) {
+            return;
+        }
+
+        removeUnnecessaryColumns({
+            server,
+            select: subSelect,
+            plan: subPlan,
+            parentLinks: from.links
+        });
+
+        removeUnnecessary({
+            server,
+            ignoreMissingTable,
+            select: subSelect,
+            plan: subPlan
+        });
+    });
 }
 
-function removeUnnecessaryWithes({ select }) {
+function removeUnnecessaryColumns({select, plan, parentLinks}) {
+    let toRemove = [];
+    plan.columns.forEach(column => {
+        let isUsedColumn = parentLinks.some(parentLink => 
+            parentLink.name == column.name
+        );
+
+        if ( !isUsedColumn ) {
+            toRemove.push( column.syntax );
+        }
+    });
+
+    if ( toRemove.length ) {
+        toRemove.forEach(columnSyntax => {
+            select.removeColumn( columnSyntax );
+        });
+        plan.build();
+    }
+}
+
+function removeUnnecessaryWithes({ select, plan }) {
     if ( !select.with ) {
         return;
     }
@@ -74,6 +126,7 @@ function removeUnnecessaryWithes({ select }) {
         select.with.queriesArr.splice(i, 1);
         delete select.with.queries[ withQuery.name.toLowerCase() ];
         n--;
+        plan.build();
     }
 
     if ( select.with.isEmpty() ) {

@@ -124,7 +124,8 @@ class SelectPlan extends Plan {
 
             let column = {
                 links: [],
-                subPlans: []
+                subPlans: [],
+                syntax: columnSyntax
             };
 
             // select 1 as id

@@ -656,7 +656,7 @@ describe("Cache", () => {
             from x
         `
     });
-/*
+    
     testRequest({
         nodes: {
             Company: `
@@ -688,5 +688,5 @@ describe("Cache", () => {
             from x
         `
     });
-*/
+
 });
