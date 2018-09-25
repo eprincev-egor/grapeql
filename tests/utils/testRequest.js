@@ -13,6 +13,7 @@ function testRequest(getServer, test) {
     it(testName, async() => {
         let server = getServer();
         server.queryBuilder.clear();
+        server.cache.clear();
         
         if ( test.nodes ) {
             for (let name in test.nodes) {

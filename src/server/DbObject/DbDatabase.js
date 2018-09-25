@@ -294,7 +294,7 @@ class DbDatabase {
                 dbTable.addColumn( column );
             });
 
-            dbSchema.addTable( table );
+            dbSchema.addTable( dbTable );
             
             
             for (let key in constraints) {

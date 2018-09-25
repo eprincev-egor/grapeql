@@ -10,6 +10,10 @@ class CacheManager {
         this._cache = [];
     }
 
+    clear() {
+        this._cache = [];
+    }
+
     async create(cacheForSyntax) {
         if ( _.isString(cacheForSyntax) ) {
             let coach = new GrapeQLCoach(cacheForSyntax);

@@ -109,7 +109,7 @@ class SelectPlan extends Plan {
                 let fromItems = this.getFromItemsByStarLink(starLink);
 
                 fromItems.forEach(fromItem => {
-                    let columns = this.getAllColumnsFrom(fromItem);
+                    let columns = this.getAllColumnsFrom(fromItem, columnSyntax);
                     this.columns = this.columns.concat( columns );
 
                     columns.forEach(column => {
@@ -287,7 +287,7 @@ class SelectPlan extends Plan {
         });
     }
 
-    getAllColumnsFrom(fromItem) {
+    getAllColumnsFrom(fromItem, starColumnSyntax) {
         let allColumns = [];
 
         if ( fromItem.dbTable ) {
@@ -296,6 +296,7 @@ class SelectPlan extends Plan {
             dbTable.columnsArr.forEach(dbColumn => {
                 allColumns.push({
                     name: dbColumn.name,
+                    starColumnSyntax,
                     links: [{
                         name: dbColumn.name,
                         fromItem
@@ -312,6 +313,7 @@ class SelectPlan extends Plan {
                     allColumns.push({
                         cache: true,
                         name: key,
+                        starColumnSyntax,
                         links: [{
                             name: key,
                             fromItem
@@ -323,8 +325,13 @@ class SelectPlan extends Plan {
         }
         else if ( fromItem.plan ) {
             fromItem.plan.columns.forEach(subColumn => {
-                let link = {subColumn, fromItem};
+                let link = {
+                    subColumn, 
+                    fromItem
+                };
+                
                 let column = {
+                    starColumnSyntax,
                     links: [link],
                     subPlans: []
                 };

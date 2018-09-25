@@ -45,6 +45,12 @@ function removeUnnecessary({
             return;
         }
 
+        expandStarLinks({
+            select: subSelect,
+            plan: subPlan
+        });
+        subPlan.build();
+
         removeUnnecessaryColumns({
             server,
             select: subSelect,
@@ -58,6 +64,26 @@ function removeUnnecessary({
             select: subSelect,
             plan: subPlan
         });
+    });
+}
+
+function expandStarLinks({ select, plan }) {
+    let starColumns = [];
+
+    plan.columns.forEach(column => {
+        let columnSyntax = column.starColumnSyntax;
+        
+        if ( columnSyntax && column.name ) {
+            select.addColumn(column.name, columnSyntax);
+
+            if ( !starColumns.includes(columnSyntax) ) {
+                starColumns.push(columnSyntax);
+            }
+        }
+    });
+
+    starColumns.forEach(columnSyntax => {
+        select.removeColumn( columnSyntax );
     });
 }
 

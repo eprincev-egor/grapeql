@@ -646,13 +646,24 @@ class Select extends Syntax {
         this.columns = [];
     }
 
-    addColumn(sql) {
+    addColumn(sql, afterColumn) {
         let coach = new this.Coach(sql);
         coach.skipSpace();
 
         let column = coach.parseColumn(sql);
         this.addChild(column);
-        this.columns.push(column);
+
+        if ( !afterColumn ) {
+            this.columns.push(column);
+        } else {
+            let index = this.columns.indexOf( afterColumn );
+            
+            if ( index == -1 ) {
+                throw new Error(`afterColumn: ${afterColumn} not found`);
+            }
+
+            this.columns.splice(index, 0, column);
+        }
 
         return column;
     }
