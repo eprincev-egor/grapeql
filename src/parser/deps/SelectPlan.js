@@ -492,6 +492,11 @@ class SelectPlan extends Plan {
     }
 
     getFromItemByTableLink(tableLink, useAliases = true) {
+        // if   schema.table.column
+        if ( tableLink.link.length > 2 ) {
+            return;
+        }
+
         let fromItemsWithoutAlias = [];
         let fromItemsWithAlias = [];
         let fromItems = this.fromItems;
@@ -533,26 +538,23 @@ class SelectPlan extends Plan {
             fromItem.link.last().equal( tableName )
         );
 
-        // only one fromItem has the right tableName
-        if ( fromItems.length == 1 ) {
-            return fromItems[0];
+
+        let findSchema;
+        if ( tableLink.link.length > 1 ) {
+            findSchema = tableLink.first();
+        } else {
+            findSchema = new ObjectName("public");
         }
 
         // check schema
         return fromItems.find(fromItem => {
+            let fromTableLink = fromItem.link;
+
             let fromSchema;
-            if ( fromItem.link.length > 1 ) {
-                fromSchema = fromItem.link.first();
+            if ( fromTableLink.link.length > 1 ) {
+                fromSchema = fromTableLink.first();
             } else {
                 fromSchema = new ObjectName("public");
-            }
-
-
-            let findSchema;
-            if ( tableLink.link.length > 1 ) {
-                findSchema = tableLink.first();
-            } else {
-                findSchema = new ObjectName("public");
             }
 
             return findSchema.equal( fromSchema );

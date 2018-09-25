@@ -2017,4 +2017,129 @@ describe("FindDeps", () => {
         }
     });
 
+    testFindDeps({
+        query: `
+            select 
+                a.b,
+                b.a 
+            from a, b
+        `,
+        result: {
+            tables: [
+                {
+                    schema: "public",
+                    name: "a",
+                    columns: [
+                        "b"
+                    ]
+                },
+                {
+                    schema: "public",
+                    name: "b",
+                    columns: [
+                        "a"
+                    ]
+                }
+            ],
+            files: []
+        }
+    });
+
+    testFindDeps({
+        query: `
+            select 
+                a.a,
+                b.b 
+            from a, b
+        `,
+        result: {
+            tables: [
+                {
+                    schema: "public",
+                    name: "a",
+                    columns: [
+                        "a"
+                    ]
+                },
+                {
+                    schema: "public",
+                    name: "b",
+                    columns: [
+                        "b"
+                    ]
+                }
+            ],
+            files: []
+        }
+    });
+
+    testFindDeps({
+        query: `
+            select 
+                public.a.b,
+                b.a
+            from a, public.b
+        `,
+        result: {
+            tables: [
+                {
+                    schema: "public",
+                    name: "a",
+                    columns: [
+                        "b"
+                    ]
+                },
+                {
+                    schema: "public",
+                    name: "b",
+                    columns: [
+                        "a"
+                    ]
+                }
+            ],
+            files: []
+        }
+    });
+
+    testFindDeps({
+        query: `
+            select 
+                test.test.test
+            from test.test
+        `,
+        result: {
+            tables: [
+                {
+                    schema: "test",
+                    name: "test",
+                    columns: [
+                        "test"
+                    ]
+                }
+            ],
+            files: []
+        }
+    });
+
+    testFindDeps({
+        query: `
+            select 
+                test.test
+            from test.test
+        `,
+        result: {
+            tables: [
+                {
+                    schema: "test",
+                    name: "test",
+                    columns: [
+                        "id",
+                        "test"
+                    ]
+                }
+            ],
+            files: []
+        }
+    });
+
 });

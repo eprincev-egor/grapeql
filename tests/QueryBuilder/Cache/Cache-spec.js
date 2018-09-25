@@ -710,7 +710,7 @@ describe("Cache", () => {
             with 
                 x as (
                     select
-                        gql_cache.company.id as x
+                        gql_cache.company.orders_count as x
                     from company
 
                     left join gql_cache.company on
