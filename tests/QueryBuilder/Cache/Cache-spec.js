@@ -14,8 +14,6 @@ describe("Cache", () => {
             orders.id_client = company.id
     `;
     
-
-
     testRequest({
         nodes: {
             Company: `
@@ -656,7 +654,7 @@ describe("Cache", () => {
             from x
         `
     });
-    
+
     testRequest({
         nodes: {
             Company: `
@@ -685,6 +683,41 @@ describe("Cache", () => {
                 )
             select
                 x.id
+            from x
+        `
+    });
+
+    testRequest({
+        nodes: {
+            Company: `
+                with 
+                    x as (
+                        select
+                            id,
+                            orders_count as x
+                        from company
+                    )
+                select x.x
+                from x
+            `
+        },
+        cache: [orders_count_cache],
+        node: "Company",
+        request: {
+            columns: ["x"]
+        },
+        result: `
+            with 
+                x as (
+                    select
+                        gql_cache.company.id as x
+                    from company
+
+                    left join gql_cache.company on
+                        gql_cache.company.id = company.id
+                )
+            select
+                x.x
             from x
         `
     });
