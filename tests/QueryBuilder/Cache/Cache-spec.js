@@ -13,7 +13,7 @@ describe("Cache", () => {
         after change orders set where
             orders.id_client = company.id
     `;
-    
+
     testRequest({
         nodes: {
             Company: `
@@ -28,11 +28,11 @@ describe("Cache", () => {
         result: `
             select 
                 company.id,
-                gql_cache.company.orders_count
+                gql_cache_company.orders_count
             from company
 
-            left join gql_cache.company on
-                gql_cache.company.id = company.id
+            left join gql_cache.company as gql_cache_company on
+                gql_cache_company.id = company.id
         `
     });
 
@@ -51,11 +51,11 @@ describe("Cache", () => {
         result: `
             select 
                 company.id,
-                gql_cache.company.orders_count
+                gql_cache_company.orders_count
             from company
 
-            left join gql_cache.company on
-                gql_cache.company.id = company.id
+            left join gql_cache.company as gql_cache_company on
+                gql_cache_company.id = company.id
         `
     });
 
@@ -76,11 +76,11 @@ describe("Cache", () => {
         result: `
             select 
                 company.id,
-                gql_cache.company.orders_count
+                gql_cache_company.orders_count
             from company
 
-            left join gql_cache.company on
-                gql_cache.company.id = company.id
+            left join gql_cache.company as gql_cache_company on
+                gql_cache_company.id = company.id
         `
     });
 
@@ -100,12 +100,12 @@ describe("Cache", () => {
         },
         result: `
             select 
-                gql_cache.company.orders_count as "id",
+                gql_cache_company.orders_count as "id",
                 company.id as "orders_count"
             from company
 
-            left join gql_cache.company on
-                gql_cache.company.id = company.id
+            left join gql_cache.company as gql_cache_company on
+                gql_cache_company.id = company.id
         `
     });
 
@@ -126,11 +126,11 @@ describe("Cache", () => {
         result: `
             select 
                 cmp.id,
-                gql_cache.company.orders_count
+                gql_cache_company.orders_count
             from company as cmp
 
-            left join gql_cache.company on
-                gql_cache.company.id = cmp.id
+            left join gql_cache.company as gql_cache_company on
+                gql_cache_company.id = cmp.id
         `
     });
 
@@ -150,12 +150,12 @@ describe("Cache", () => {
         },
         result: `
             select 
-                id,
-                gql_cache.company.orders_count
+                cmp.id,
+                gql_cache_company.orders_count
             from company as cmp
 
-            left join gql_cache.company on
-                gql_cache.company.id = cmp.id
+            left join gql_cache.company as gql_cache_company on
+                gql_cache_company.id = cmp.id
         `
     });
 
@@ -171,16 +171,16 @@ describe("Cache", () => {
         cache: [orders_count_cache],
         node: "Company",
         request: {
-            columns: ["id", "orders_count"]
+            columns: ["orders_count", "id"]
         },
         result: `
             select 
-                id,
-                gql_cache.company.orders_count
+                gql_cache_company.orders_count,
+                cmp.id
             from company as cmp
 
-            left join gql_cache.company on
-                gql_cache.company.id = cmp.id
+            left join gql_cache.company as gql_cache_company on
+                gql_cache_company.id = cmp.id
         `
     });
 
@@ -200,12 +200,12 @@ describe("Cache", () => {
         },
         result: `
             select 
-                ID as "id",
-                gql_cache.company.orders_count as "orders_count"
+                cmp.ID as "id",
+                gql_cache_company.orders_count as "orders_count"
             from company as cmp
 
-            left join gql_cache.company on
-                gql_cache.company.id = cmp.id
+            left join gql_cache.company as gql_cache_company on
+                gql_cache_company.id = cmp.id
         `
     });
 
@@ -225,12 +225,12 @@ describe("Cache", () => {
         },
         result: `
             select 
-                "id",
-                gql_cache.company.orders_count
+                cmp."id",
+                gql_cache_company.orders_count
             from company as cmp
 
-            left join gql_cache.company on
-                gql_cache.company.id = cmp.id
+            left join gql_cache.company as gql_cache_company on
+                gql_cache_company.id = cmp.id
         `
     });
 
@@ -251,11 +251,11 @@ describe("Cache", () => {
         result: `
             select 
                 cOmpaNy.Id as "id",
-                gql_cache.company.orders_count as "orders_count"
+                gql_cache_company.orders_count as "orders_count"
             from company
 
-            left join gql_cache.company on
-                gql_cache.company.id = company.id
+            left join gql_cache.company as gql_cache_company on
+                gql_cache_company.id = company.id
         `
     });
 
@@ -276,11 +276,11 @@ describe("Cache", () => {
         result: `
             select 
                 public.company.id,
-                gql_cache.company.orders_count
+                gql_cache_company.orders_count
             from company
 
-            left join gql_cache.company on
-                gql_cache.company.id = company.id
+            left join gql_cache.company as gql_cache_company on
+                gql_cache_company.id = company.id
         `
     });
 
@@ -301,11 +301,11 @@ describe("Cache", () => {
         result: `
             select 
                 company.id,
-                gql_cache.company.orders_count
+                gql_cache_company.orders_count
             from public.company
 
-            left join gql_cache.company on
-                gql_cache.company.id = public.company.id
+            left join gql_cache.company as gql_cache_company on
+                gql_cache_company.id = public.company.id
         `
     });
 
@@ -326,11 +326,11 @@ describe("Cache", () => {
         result: `
             select 
                 public.company.id,
-                gql_cache.company.orders_count
+                gql_cache_company.orders_count
             from public.company
 
-            left join gql_cache.company on
-                gql_cache.company.id = public.company.id
+            left join gql_cache.company as gql_cache_company on
+                gql_cache_company.id = public.company.id
         `
     });
 
@@ -349,11 +349,11 @@ describe("Cache", () => {
         },
         result: `
             select 
-                gql_cache.company.orders_count + 1 as "test"
+                gql_cache_company.orders_count + 1 as "test"
             from company
 
-            left join gql_cache.company on
-                gql_cache.company.id = company.id
+            left join gql_cache.company as gql_cache_company on
+                gql_cache_company.id = company.id
         `
     });
 
@@ -396,11 +396,11 @@ describe("Cache", () => {
                 company.id
             from company
             
-            left join gql_cache.company on
-                gql_cache.company.id = company.id
+            left join gql_cache.company as gql_cache_company on
+                gql_cache_company.id = company.id
 
             where
-                gql_cache.company.orders_count > 100
+                gql_cache_company.orders_count > 100
         `
     });
 
@@ -421,11 +421,11 @@ describe("Cache", () => {
         result: `
             select 
                 company.id,
-                coalesce( gql_cache.company.orders_count, 0 ) as "orders_count"
+                coalesce( gql_cache_company.orders_count, 0 ) as "orders_count"
             from company
             
-            left join gql_cache.company on
-                gql_cache.company.id = company.id
+            left join gql_cache.company as gql_cache_company on
+                gql_cache_company.id = company.id
         `
     });
 
@@ -468,10 +468,10 @@ describe("Cache", () => {
                 company.id
             from company
             
-            left join gql_cache.company on
-                gql_cache.company.id = company.id
+            left join gql_cache.company as gql_cache_company on
+                gql_cache_company.id = company.id
 
-            order by gql_cache.company.orders_count desc
+            order by gql_cache_company.orders_count desc
         `
     });
 
@@ -493,10 +493,10 @@ describe("Cache", () => {
                 company.id
             from company
             
-            left join gql_cache.company on
-                gql_cache.company.id = company.id
+            left join gql_cache.company as gql_cache_company on
+                gql_cache_company.id = company.id
 
-            order by gql_cache.company.orders_count desc
+            order by gql_cache_company.orders_count desc
         `
     });
 
@@ -518,12 +518,12 @@ describe("Cache", () => {
                 company.id
             from company
             
-            left join gql_cache.company on
-                gql_cache.company.id = company.id
+            left join gql_cache.company as gql_cache_company on
+                gql_cache_company.id = company.id
 
             order by 
-                gql_cache.company.orders_count,
-                gql_cache.company.orders_count + 1 desc
+                gql_cache_company.orders_count,
+                gql_cache_company.orders_count + 1 desc
         `
     });
 
@@ -543,11 +543,11 @@ describe("Cache", () => {
         },
         result: `
             select 
-                sum( gql_cache.company.orders_count ) as "orders_count"
+                sum( gql_cache_company.orders_count ) as "orders_count"
             from company
             
-            left join gql_cache.company on
-                gql_cache.company.id = company.id
+            left join gql_cache.company as gql_cache_company on
+                gql_cache_company.id = company.id
 
             group by manager_name
         `
@@ -572,10 +572,10 @@ describe("Cache", () => {
                 string_agg( distinct manager_name, ', ' ) as "test"
             from company
             
-            left join gql_cache.company on
-                gql_cache.company.id = company.id
+            left join gql_cache.company as gql_cache_company on
+                gql_cache_company.id = company.id
 
-            group by gql_cache.company.orders_count
+            group by gql_cache_company.orders_count
         `
     });
 
@@ -605,14 +605,14 @@ describe("Cache", () => {
                 string_agg( distinct manager_name, ', ' ) as "test"
             from company
             
-            left join gql_cache.company on
-                gql_cache.company.id = company.id
+            left join gql_cache.company as gql_cache_company on
+                gql_cache_company.id = company.id
 
             group by 
                 grouping sets (
                     (),
                     rollup (
-                        gql_cache.company.orders_count
+                        gql_cache_company.orders_count
                     )
                 )
         `
@@ -641,12 +641,12 @@ describe("Cache", () => {
             with 
                 x as (
                     select
-                        id,
-                        gql_cache.company.orders_count as x
+                        company.id,
+                        gql_cache_company.orders_count as x
                     from company
 
-                    left join gql_cache.company on
-                        gql_cache.company.id = company.id
+                    left join gql_cache.company as gql_cache_company on
+                        gql_cache_company.id = company.id
                 )
             select
                 x.id,
@@ -710,11 +710,11 @@ describe("Cache", () => {
             with 
                 x as (
                     select
-                        gql_cache.company.orders_count as x
+                        gql_cache_company.orders_count as x
                     from company
 
-                    left join gql_cache.company on
-                        gql_cache.company.id = company.id
+                    left join gql_cache.company as gql_cache_company on
+                        gql_cache_company.id = company.id
                 )
             select
                 x.x
@@ -743,13 +743,166 @@ describe("Cache", () => {
             with 
                 x as (
                     select
-                        gql_cache.company.orders_count
+                        gql_cache_company.orders_count
                     from company
 
-                    left join gql_cache.company on
-                        gql_cache.company.id = company.id
+                    left join gql_cache.company as gql_cache_company on
+                        gql_cache_company.id = company.id
                 )
             select 
+                x.orders_count
+            from x
+        `
+    });
+
+    testRequest({
+        nodes: {
+            Company: `
+                with 
+                    x as (
+                        select *
+                        from company
+                    )
+                select 
+                    x.id::text || x.orders_count::text as tmp
+                from x
+            `
+        },
+        cache: [orders_count_cache],
+        node: "Company",
+        request: {
+            columns: ["tmp"]
+        },
+        result: `
+            with 
+                x as (
+                    select
+                    company.id,
+                        gql_cache_company.orders_count
+                    from company
+
+                    left join gql_cache.company as gql_cache_company on
+                        gql_cache_company.id = company.id
+                )
+            select 
+                x.id::text || x.orders_count::text as "tmp"
+            from x
+        `
+    });
+
+    testRequest({
+        nodes: {
+            Company: `
+                with 
+                    x as (
+                        select *
+                        from company
+                        where
+                            company.orders_count > 100
+                    )
+                select *
+                from x
+            `
+        },
+        cache: [orders_count_cache],
+        node: "Company",
+        request: {
+            columns: ["id"]
+        },
+        result: `
+            with 
+                x as (
+                    select
+                        company.id
+                    from company
+
+                    left join gql_cache.company as gql_cache_company on
+                        gql_cache_company.id = company.id
+                    
+                    where
+                        gql_cache_company.orders_count > 100
+                )
+            select 
+                x.id
+            from x
+        `
+    });
+
+    testRequest({
+        nodes: {
+            Company: `
+                with 
+                    x as (
+                        select *
+                        from company
+                        where
+                            orders_count > 100
+                    )
+                select *
+                from x
+            `
+        },
+        cache: [orders_count_cache],
+        node: "Company",
+        request: {
+            columns: ["id"]
+        },
+        result: `
+            with 
+                x as (
+                    select
+                        company.id
+                    from company
+
+                    left join gql_cache.company as gql_cache_company on
+                        gql_cache_company.id = company.id
+                    
+                    where
+                        gql_cache_company.orders_count > 100
+                )
+            select 
+                x.id
+            from x
+        `
+    });
+
+    testRequest({
+        nodes: {
+            Company: `
+                with 
+                    x as (
+                        select 
+                            inn as id,
+                            orders_count
+                        from company
+                        where
+                            id > 100
+                    )
+                select *
+                from x
+            `
+        },
+        cache: [orders_count_cache],
+        node: "Company",
+        request: {
+            columns: ["id", "orders_count"]
+        },
+        result: `
+            with 
+                x as (
+                    select
+                        inn as id,
+                        gql_cache_company.orders_count
+                    from company
+
+                    left join gql_cache.company as gql_cache_company on
+                        gql_cache_company.id = company.id
+                    
+                    where
+                        company.id > 100
+                )
+            select 
+                x.id,
                 x.orders_count
             from x
         `

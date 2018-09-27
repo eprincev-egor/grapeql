@@ -37,7 +37,8 @@ function buildCache({
 
             cacheTables.forEach(dbTable => {
                 let fromItemAs = fromItem.getAliasSql();
-                let cacheTableAs = dbTable.schema + "." + dbTable.name;
+                let cacheTableName = dbTable.schema + "." + dbTable.name;
+                let cacheTableAs = dbTable.schema + "_" + dbTable.name;
 
 
                 // add join cache table
@@ -50,7 +51,7 @@ function buildCache({
                 });
                 on = on.join(" and ");
 
-                let join = new Join(`left join ${ cacheTableAs } on ${ on }`);
+                let join = new Join(`left join ${ cacheTableName } as ${ cacheTableAs } on ${ on }`);
                 fromItem.unshiftJoin( join );
 
 
@@ -61,10 +62,6 @@ function buildCache({
                 cacheColumns = cacheColumns.map(dbColumn => dbColumn.name);
 
                 from.links.forEach(link => {
-                    if ( !cacheColumns.includes(link.name) ) {
-                        return;
-                    }
-
                     // select *
                     if ( !link.syntax ) {
                         return;
@@ -73,7 +70,21 @@ function buildCache({
                     let objectLink = link.syntax;
                     let expression = objectLink.findParentInstance( Expression );
 
-                    expression.replaceElement( objectLink, cacheTableAs + "." + link.name );
+                    if ( cacheColumns.includes(link.name) ) {
+                        expression.replaceElement( objectLink, cacheTableAs + "." + link.name );
+                    } 
+
+                    // select from company where id > 100
+                    //
+                    // for fix error: column reference "id" is ambiguous
+                    // need replace single column link
+                    else if ( 
+                        objectLink.link.length == 1 &&
+                        primaryKey.columns.includes( objectLink.last().toLowerCase() )
+                    ) {
+                        // objectLink.toString() for save string case
+                        expression.replaceElement( objectLink, fromItemAs + "." + objectLink.toString() );
+                    }
                 });
             });
         });
