@@ -908,4 +908,390 @@ describe("Cache", () => {
         `
     });
 
+    testRequest({
+        nodes: {
+            Company: `
+                with 
+                    x as (
+                        select
+                            id, inn,
+                            orders_count
+                        from company
+                        where
+                            name is not null
+                    )
+                select *
+                from x
+            `
+        },
+        cache: [orders_count_cache],
+        node: "Company",
+        request: {
+            columns: ["id", "orders_count"]
+        },
+        result: `
+            with 
+                x as (
+                    select
+                        company.id,
+                        gql_cache_company.orders_count
+                    from company
+
+                    left join gql_cache.company as gql_cache_company on
+                        gql_cache_company.id = company.id
+                    
+                    where
+                        name is not null
+                )
+            select 
+                x.id,
+                x.orders_count
+            from x
+        `
+    });
+
+    testRequest({
+        nodes: {
+            Company: `
+                with
+                    x as (
+                        with
+                            y as (
+                                select orders_count as id
+                                from company
+                            )
+                        select *
+                        from y
+                    )
+                select id
+                from x
+            `
+        },
+        cache: [orders_count_cache],
+        node: "Company",
+        request: {
+            columns: ["id"]
+        },
+        result: `
+            with
+                x as (
+                    with
+                        y as (
+                            select 
+                                gql_cache_company.orders_count as id
+                            from company
+
+                            left join gql_cache.company as gql_cache_company on
+                                gql_cache_company.id = company.id
+                        )
+                    select id
+                    from y
+                )
+            select id
+            from x
+        `
+    });
+
+    testRequest({
+        nodes: {
+            Company: `
+                with
+                    x as (
+                        with
+                            y as (
+                                select orders_count as test
+                                from company
+                            )
+                        select test as id
+                        from y
+                    )
+                select id
+                from x
+            `
+        },
+        cache: [orders_count_cache],
+        node: "Company",
+        request: {
+            columns: ["id"]
+        },
+        result: `
+            with
+                x as (
+                    with
+                        y as (
+                            select 
+                                gql_cache_company.orders_count as test
+                            from company
+
+                            left join gql_cache.company as gql_cache_company on
+                                gql_cache_company.id = company.id
+                        )
+                    select test as id
+                    from y
+                )
+            select id
+            from x
+        `
+    });
+
+    testRequest({
+        nodes: {
+            Company: `
+                with
+                    y as (
+                        select orders_count as test
+                        from company
+                    ),
+                    x as (      
+                        select test as id
+                        from y
+                    )
+                select id
+                from x
+            `
+        },
+        cache: [orders_count_cache],
+        node: "Company",
+        request: {
+            columns: ["id"]
+        },
+        result: `
+            with
+                y as (
+                    select 
+                        gql_cache_company.orders_count as test
+                    from company
+
+                    left join gql_cache.company as gql_cache_company on
+                        gql_cache_company.id = company.id
+                ),
+                x as (      
+                    select test as id
+                    from y
+                )
+            select id
+            from x
+        `
+    });
+
+    testRequest({
+        nodes: {
+            Company: `
+                with
+                    y as (
+                        select inn as test
+                        from company
+                    ),
+                    x as (
+                        with
+                            y as (
+                                select orders_count as test
+                                from company
+                            )
+                        select test as id
+                        from y
+                    )
+                select id
+                from x
+            `
+        },
+        cache: [orders_count_cache],
+        node: "Company",
+        request: {
+            columns: ["id"]
+        },
+        result: `
+            with
+                x as (
+                    with
+                        y as (
+                            select 
+                                gql_cache_company.orders_count as test
+                            from company
+
+                            left join gql_cache.company as gql_cache_company on
+                                gql_cache_company.id = company.id
+                        )
+                    select test as id
+                    from y
+                )
+            select id
+            from x
+        `
+    });
+
+    testRequest({
+        nodes: {
+            Company: `
+                select 1 as test
+                from company
+                right join country on true
+            `
+        },
+        cache: [orders_count_cache],
+        node: "Company",
+        request: {
+            columns: ["test"]
+        },
+        result: `
+            select 1 as "test"
+            from company
+            right join country on true
+        `
+    });
+
+    testRequest({
+        nodes: {
+            Company: `
+                select 
+                    1 as test
+                from company
+
+                right join country on
+                    country.id = company.id + company.orders_count
+            `
+        },
+        cache: [orders_count_cache],
+        node: "Company",
+        request: {
+            columns: ["test"]
+        },
+        result: `
+            select 
+                1 as "test"
+            from company
+
+            left join gql_cache.company as gql_cache_company on
+                gql_cache_company.id = company.id
+
+            right join country on
+                country.id = company.id + gql_cache_company.orders_count
+        `
+    });
+
+    testRequest({
+        nodes: {
+            Company: `
+                select 
+                    1 as test
+                from company
+
+                right join country on
+                    country.id = company.id + orders_count
+            `
+        },
+        cache: [orders_count_cache],
+        node: "Company",
+        request: {
+            columns: ["test"]
+        },
+        result: `
+            select 
+                1 as "test"
+            from company
+
+            left join gql_cache.company as gql_cache_company on
+                gql_cache_company.id = company.id
+
+            right join country on
+                country.id = company.id + gql_cache_company.orders_count
+        `
+    });
+
+    testRequest({
+        nodes: {
+            Company: `
+                select
+                    code,
+                    country.name,
+                    company.name as company_name
+                from public.company
+                
+                left join country on
+                    country.id = company.id_country
+            `
+        },
+        cache: [orders_count_cache],
+        node: "Company",
+        request: {
+            columns: ["company_name", "code"]
+        },
+        result: `
+            select
+                company.name as "company_name",
+                code
+            from public.company
+            
+            left join country on
+                country.id = company.id_country
+        `
+    });
+
+    testRequest({
+        nodes: {
+            Company: `
+                with 
+                    x as (
+                        select 1 as id
+                        from company
+                    )
+                select x.*
+                from x
+                right join countries on true
+            `
+        },
+        cache: [orders_count_cache],
+        node: "Company",
+        request: {
+            columns: ["id"]
+        },
+        result: `
+            with 
+                x as (
+                    select 1 as id
+                    from company
+                )
+            select 
+                x.id
+            from x
+            right join countries on true
+        `
+    });
+
+    testRequest({
+        nodes: {
+            Company: `
+                with 
+                    x as (
+                        select 
+                            orders_count + 1 as id
+                        from company
+                    )
+                select x.*
+                from x
+                right join countries on true
+            `
+        },
+        cache: [orders_count_cache],
+        node: "Company",
+        request: {
+            columns: ["id"]
+        },
+        result: `
+            with 
+                x as (
+                    select 
+                        gql_cache_company.orders_count + 1 as id
+                    from company
+
+                    left join gql_cache.company as gql_cache_company on
+                        gql_cache_company.id = company.id
+                )
+            select 
+                x.id
+            from x
+            right join countries on true
+        `
+    });
+
 });
