@@ -89,6 +89,10 @@ class Deps {
             } else {
                 let name = parentLink.name;
                 column = subPlan.columnByName[ name ];
+
+                if ( !column ) {
+                    throw new Error(`column ${ name } in sub plan, does not exist`);
+                }
             }
             
             column.links.forEach(link => {

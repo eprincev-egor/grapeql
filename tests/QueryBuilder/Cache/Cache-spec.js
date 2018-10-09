@@ -1294,4 +1294,95 @@ describe("Cache", () => {
         `
     });
 
+    testRequest({
+        nodes: {
+            Company: `
+                with 
+                    x (id, name) as (
+                        values
+                            (1, 'Red'),
+                            (2, 'Green'),
+                            (3, 'orders_count: ' || (
+                                select orders_count::text
+                                from company
+                                where id = 1
+                            ))
+                    )
+                select x.*
+                from x
+            `
+        },
+        cache: [orders_count_cache],
+        node: "Company",
+        request: {
+            columns: ["name"]
+        },
+        result: `
+                with 
+                    x (id, name) as (
+                        values
+                            (1, 'Red'),
+                            (2, 'Green'),
+                            (3, 'orders_count: ' || (
+                                select gql_cache_company.orders_count::text
+                                from company
+
+                                left join gql_cache.company as gql_cache_company on
+                                    gql_cache_company.id = company.id
+
+                                where company.id = 1
+                            ))
+                    )
+                select 
+                    x.name
+                from x
+        `
+    });
+
+    /*
+    testRequest({
+        nodes: {
+            Company: `
+                with 
+                    x (id, name) as (
+                        values
+                            (1, 'Red'),
+                            (2, 'Green'),
+                            (3, 'orders_count: ' || (
+                                select orders_count::text
+                                from company
+                                where id = 1
+                            ))
+                    )
+                select x.*
+                from x
+            `
+        },
+        cache: [orders_count_cache],
+        node: "Company",
+        request: {
+            columns: ["name"]
+        },
+        result: `
+                with 
+                    x (id, name) as (
+                        values
+                            (1, 'Red'),
+                            (2, 'Green'),
+                            (3, 'orders_count: ' || (
+                                select gql_cache_company.orders_count::text
+                                from company
+
+                                left join gql_cache.company as gql_cache_company on
+                                    gql_cache_company.id = company.id
+
+                                where company.id = 1
+                            ))
+                    )
+                select 
+                    x.id
+                from x
+        `
+    });
+    */
 });
