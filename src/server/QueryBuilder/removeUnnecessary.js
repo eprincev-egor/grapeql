@@ -304,7 +304,13 @@ function isUsedJoin({join, plan, rootJoin}) {
 function removeUnnecessaryWithColumns({plan}) {
     plan.fromItems.forEach(fromItem => {
         let withQuery = fromItem.withQuery;
-        if ( !withQuery || !withQuery.values ) {
+        let isValuesQuery = (
+            withQuery &&
+            withQuery.values &&
+            withQuery.columns
+        );
+
+        if ( !isValuesQuery ) {
             return;
         }
 
