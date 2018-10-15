@@ -1421,5 +1421,55 @@ describe("Cache", () => {
                 from x
         `
     });
+
+    testRequest({
+        nodes: {
+            Company: `
+                select
+                    x
+                from (
+                    select
+                        (
+                            select orders_count as y
+                            from company
+                            where
+                                company.id = 1
+                        ) as x,
+                        (
+                            select orders_count as x
+                            from orders
+                            
+                            left join company on
+                                company.id = orders.id_client
+
+                            where
+                                orders.id = 2
+                        ) as y
+                ) as tmp
+            `
+        },
+        cache: [orders_count_cache],
+        node: "Company",
+        request: {
+            columns: ["x"]
+        },
+        result: `
+                select
+                    x
+                from (
+                    select
+                        (
+                            select gql_cache_company.orders_count as y
+                            from company
+
+                            left join gql_cache.company as gql_cache_company on
+                                gql_cache_company.id = company.id
+                            
+                            where
+                                company.id = 1
+                        ) as x
+                ) as tmp
+        `
+    });
     
 });

@@ -40,7 +40,7 @@ function removeUnnecessary({
         }
 
 
-        let subSelect = from.withQuery && from.withQuery.select;
+        let subSelect = subPlan.select;
         if ( !subSelect ) {
             return;
         }

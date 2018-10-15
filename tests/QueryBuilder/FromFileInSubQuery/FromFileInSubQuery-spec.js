@@ -102,7 +102,7 @@ describe("FromFileInSubQuery", () => {
                 country.id as "country.id"
             from company
 
-            left join (select * from country as Country) as country on
+            left join (select id from country as Country) as country on
                 country.id = 1
         `
     });
@@ -130,7 +130,7 @@ describe("FromFileInSubQuery", () => {
                 country.id as "country.id"
             from company
 
-            left join lateral (select * from country as Country) as country on
+            left join lateral (select id from country as Country) as country on
                 country.id = 1
         `
     });

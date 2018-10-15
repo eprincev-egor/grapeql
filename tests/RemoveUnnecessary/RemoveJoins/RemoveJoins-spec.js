@@ -195,12 +195,24 @@ describe("RemoveJoins", () => {
             left join (select * from country limit 1) as country on true
 
             order by country.id
+    `, `
+            select from company
+
+            left join (select id from country limit 1) as country on true
+
+            order by country.id
     `);
 
     testRemoveUnnecessary(`
             select from company
 
             left join (select * from country limit 1) as country on true
+
+            group by country.id
+    `, `
+            select from company
+
+            left join (select id from country limit 1) as country on true
 
             group by country.id
     `);
@@ -211,12 +223,24 @@ describe("RemoveJoins", () => {
             left join (select * from country limit 1) as country on true
 
             group by cube (company.id, (country.id, 1))
+    `, `
+            select from company
+
+            left join (select id from country limit 1) as country on true
+
+            group by cube (company.id, (country.id, 1))
     `);
 
     testRemoveUnnecessary(`
             select from company
 
             left join (select * from country limit 1) as country on true
+
+            group by rollup (company.id, (country.id, 1))
+    `, `
+            select from company
+
+            left join (select id from country limit 1) as country on true
 
             group by rollup (company.id, (country.id, 1))
     `);
@@ -227,6 +251,12 @@ describe("RemoveJoins", () => {
             left join (select * from country limit 1) as country on true
 
             group by GROUPING SETS (company.id, country.code)
+    `, `
+            select from company
+
+            left join (select code from country limit 1) as country on true
+
+            group by GROUPING SETS (company.id, country.code)
     `);
 
     testRemoveUnnecessary(`
@@ -235,6 +265,12 @@ describe("RemoveJoins", () => {
             from company
 
             left join (select * from country limit 1) as country on true
+    `, `
+            select
+                cast( country.id as bigint )
+            from company
+
+            left join (select id from country limit 1) as country on true
     `);
 
     testRemoveUnnecessary(`
@@ -243,6 +279,12 @@ describe("RemoveJoins", () => {
             from company
 
             left join (select * from country limit 1) as country on true
+    `, `
+            select
+                company.id in (country.id)
+            from company
+
+            left join (select id from country limit 1) as country on true
     `);
 
     testRemoveUnnecessary(`
@@ -251,6 +293,12 @@ describe("RemoveJoins", () => {
             from company
 
             left join (select * from country limit 1) as country on true
+    `, `
+            select
+                company.id between country.id and 2
+            from company
+
+            left join (select id from country limit 1) as country on true
     `);
 
     testRemoveUnnecessary(`
@@ -259,6 +307,12 @@ describe("RemoveJoins", () => {
             from company
 
             left join (select * from country limit 1) as country on true
+    `, `
+            select
+                company.id between 1 and country.id
+            from company
+
+            left join (select id from country limit 1) as country on true
     `);
 
     testRemoveUnnecessary(`
@@ -270,6 +324,15 @@ describe("RemoveJoins", () => {
             from company
 
             left join (select * from country limit 1) as country on true
+    `, `
+            select
+                (case
+                    when country.id is not null
+                    then 1
+                end) as some
+            from company
+
+            left join (select id from country limit 1) as country on true
     `);
 
     testRemoveUnnecessary(`
@@ -282,6 +345,16 @@ describe("RemoveJoins", () => {
             from company
 
             left join (select * from country limit 1) as country on true
+    `, `
+            select
+                (case
+                    when true
+                    then 1
+                    else country.id
+                end) as some
+            from company
+
+            left join (select id from country limit 1) as country on true
     `);
 
     testRemoveUnnecessary(`
@@ -293,6 +366,15 @@ describe("RemoveJoins", () => {
             from company
 
             left join (select * from country limit 1) as country on true
+    `, `
+            select
+                (case
+                    when true
+                    then country.id
+                end) as some
+            from company
+
+            left join (select id from country limit 1) as country on true
     `);
 
     testRemoveUnnecessary(`
@@ -301,6 +383,12 @@ describe("RemoveJoins", () => {
             from company
 
             left join (select * from country limit 1) as country on true
+    `, `
+            select
+                coalesce(1, country.id)
+            from company
+
+            left join (select id from country limit 1) as country on true
     `);
 
     testRemoveUnnecessary(`
@@ -309,6 +397,12 @@ describe("RemoveJoins", () => {
             from company
 
             left join (select * from country limit 1) as country on true
+    `, `
+            select
+                lower(country.code)
+            from company
+
+            left join (select code from country limit 1) as country on true
     `);
 
     testRemoveUnnecessary(`
@@ -337,9 +431,9 @@ describe("RemoveJoins", () => {
         from (select 1 as id) as comp_id
 
         left join lateral (
-            select * from (
+            select 
+            from (
                 select
-                    russia_country.id as id_country
                 from country as russia_country
 
                 where
@@ -376,9 +470,9 @@ describe("RemoveJoins", () => {
             company.id = comp_id.id
 
         left join lateral (
-            select * from (
+            select 
+            from (
                 select
-                    russia_country.id as id_country
                 from country as russia_country
 
                 where
@@ -441,6 +535,25 @@ describe("RemoveJoins", () => {
                             company.name
                     )
                 select * from test
+            ) as some_table
+        ) as some_table on true
+
+    `, `
+        select
+            comp_id.id
+        from (select 1 as id) as comp_id
+
+        left join company on
+            company.id = comp_id.id
+
+        left join lateral (
+            select 
+            from (
+                with
+                    test as (
+                        select
+                    )
+                select from test
             ) as some_table
         ) as some_table on true
 
@@ -562,7 +675,7 @@ describe("RemoveJoins", () => {
         from company
 
         left join lateral (
-            select *
+            select id
             from country
         ) as CountryEnd on
             CountryEnd.id = 1

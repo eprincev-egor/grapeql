@@ -111,6 +111,13 @@ describe("RemoveWiths", () => {
             select *
             from x
         ) as y on true
+    `, `
+        with x as (select)
+        select from company
+        left join lateral (
+            select
+            from x
+        ) as y on true
     `);
 
     testRemoveUnnecessary(`
@@ -120,12 +127,25 @@ describe("RemoveWiths", () => {
             select *
             from x
         ) as y on true
+    `, `
+        with x as (select )
+        select from company
+        left join (
+            select 
+            from x
+        ) as y on true
     `);
 
     testRemoveUnnecessary(`
         with x as (select 1 as id)
         select from (
             select *
+            from x
+        ) as y
+    `, `
+        with x as (select)
+        select from (
+            select
             from x
         ) as y
     `);
