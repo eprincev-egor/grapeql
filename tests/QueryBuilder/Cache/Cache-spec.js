@@ -1315,7 +1315,7 @@ describe("Cache", () => {
         cache: [orders_count_cache],
         node: "Company",
         request: {
-            columns: ["name"]
+            columns: ["id", "name"]
         },
         result: `
                 with 
@@ -1334,12 +1334,49 @@ describe("Cache", () => {
                             ))
                     )
                 select 
+                    x.id,
                     x.name
                 from x
         `
     });
 
-    /*
+    testRequest({
+        nodes: {
+            Company: `
+                with 
+                    x (id, name) as (
+                        values
+                            (1, 'Red'),
+                            (2, 'Green'),
+                            (3, 'orders_count: ' || (
+                                select orders_count::text
+                                from company
+                                where id = 1
+                            ))
+                    )
+                select x.*
+                from x
+            `
+        },
+        cache: [orders_count_cache],
+        node: "Company",
+        request: {
+            columns: ["id"]
+        },
+        result: `
+                with 
+                    x (id) as (
+                        values
+                            (1),
+                            (2),
+                            (3)
+                    )
+                select 
+                    x.id
+                from x
+        `
+    });
+
     testRequest({
         nodes: {
             Company: `
@@ -1365,11 +1402,11 @@ describe("Cache", () => {
         },
         result: `
                 with 
-                    x (id, name) as (
+                    x (name) as (
                         values
-                            (1, 'Red'),
-                            (2, 'Green'),
-                            (3, 'orders_count: ' || (
+                            ('Red'),
+                            ('Green'),
+                            ('orders_count: ' || (
                                 select gql_cache_company.orders_count::text
                                 from company
 
@@ -1380,9 +1417,9 @@ describe("Cache", () => {
                             ))
                     )
                 select 
-                    x.id
+                    x.name
                 from x
         `
     });
-    */
+    
 });

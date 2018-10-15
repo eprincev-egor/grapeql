@@ -143,6 +143,21 @@ class WithQuery extends Syntax {
 
         return out;
     }
+
+    removeValuesColumn(columnNameToRemove) {
+        let index = this.columns.findIndex(columnName =>
+            columnName.equal( columnNameToRemove )
+        );
+
+        if ( index == -1 ) {
+            return;
+        }
+
+        this.columns.splice( index, 1 );
+        this.values.forEach(valueRow => {
+            valueRow.items.splice(index, 1);
+        });
+    }
 }
 
 module.exports = WithQuery;

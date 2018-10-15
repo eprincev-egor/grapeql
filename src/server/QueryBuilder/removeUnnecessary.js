@@ -65,6 +65,24 @@ function removeUnnecessary({
             plan: subPlan
         });
     });
+
+    /* 
+    with x (id, name) as (
+        values (1, 'Nice')
+    )
+    select name from x
+
+    ==>
+
+    with x (name) as (
+        values ('Nice')
+    )
+    select name from x
+    */
+    removeUnnecessaryWithColumns({
+        select,
+        plan
+    });
 }
 
 function expandStarLinks({ select, plan }) {
@@ -281,6 +299,32 @@ function isUsedJoin({join, plan, rootJoin}) {
     }
 
     return false;
+}
+
+function removeUnnecessaryWithColumns({plan}) {
+    plan.fromItems.forEach(fromItem => {
+        let withQuery = fromItem.withQuery;
+        if ( !withQuery || !withQuery.values ) {
+            return;
+        }
+
+        let unnecessaryColumns = [];
+        withQuery.columns.forEach(columnName => {
+            let isUsed = fromItem.links.some(link =>
+                columnName.equalString( link.name )
+            );
+
+            if ( !isUsed ) {
+                unnecessaryColumns.push(
+                    columnName
+                );
+            }
+        });
+
+        unnecessaryColumns.forEach(columnName =>
+            withQuery.removeValuesColumn( columnName )
+        );
+    });
 }
 
 
