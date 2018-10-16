@@ -16,6 +16,7 @@ describe("SimpleDelete transaction", () => {
         let db = new pg.Client(config.db);
         await db.connect();
         await clearDatabase(db, __dirname);
+        await db.end();
 
         // run server
         config.http = false;
