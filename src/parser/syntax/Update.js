@@ -204,7 +204,7 @@ class Update extends ChangeCommand {
             out += this.where.toString();
         }
 
-        out += this.toStringReturning();
+        out += this.toStringReturning(options);
 
         return out;
     }

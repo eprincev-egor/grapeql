@@ -93,16 +93,19 @@ class ChangeCommand extends Syntax {
         }
     }
 
-    toStringReturning() {
+    toStringReturning(options) {
+        options = options || {pg: false};
         let out = "";
         
         if ( this.returning ) {
             out += " returning ";
-            if ( this._returningRow ) {
-                out += " row ";
-            }
-            if ( this._returningValue ) {
-                out += " value ";
+            if ( !options.pg ) {
+                if ( this._returningRow ) {
+                    out += " row ";
+                }
+                if ( this._returningValue ) {
+                    out += " value ";
+                }
             }
             out += this.returning.map(column => column.toString()).join(", ");
         }

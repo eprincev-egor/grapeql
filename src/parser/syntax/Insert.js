@@ -243,7 +243,7 @@ class Insert extends ChangeCommand {
             out += this.onConflict.toString();
         }
 
-        out += this.toStringReturning();
+        out += this.toStringReturning(options);
 
         return out;
     }
