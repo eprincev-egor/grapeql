@@ -85,7 +85,7 @@ describe("UpdateFrom trigger", () => {
 
         let row;
         let sql = `
-            update row orders set
+            update orders set
                 sale_sum = totals.sale_sum,
                 buy_sum = totals.buy_sum,
                 profit = totals.profit
@@ -120,7 +120,7 @@ describe("UpdateFrom trigger", () => {
                     orders.buy_sum is distinct from totals.buy_sum
                 )
             
-            returning totals.*
+            returning row totals.*
         `;
         row = await server.query(sql);
 

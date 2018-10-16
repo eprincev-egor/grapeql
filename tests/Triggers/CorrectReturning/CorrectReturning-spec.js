@@ -57,7 +57,7 @@ describe("CorrectReturning", () => {
         });
 
         triggersCalls = [];
-        row = await server.query("insert row into units default values returning 100 as x");
+        row = await server.query("insert into units default values returning row 100 as x");
         assert.deepEqual(row, {
             x: 100
         });
@@ -66,7 +66,7 @@ describe("CorrectReturning", () => {
         });
         
         triggersCalls = [];
-        row = await server.query("insert row into units default values returning *, units.id as x");
+        row = await server.query("insert into units default values returning row *, units.id as x");
         assert.deepEqual(row, {
             id: 3,
             x: 3

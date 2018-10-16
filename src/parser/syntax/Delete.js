@@ -19,7 +19,9 @@ class Delete extends ChangeCommand {
     }
 
     parse(coach, options) {
-        options = options || {allowReturningObject: false};
+        options = options || {allowCustomReturning: false};
+        // need for method parseReturning
+        this.options = options;
 
         if ( coach.isWith() ) {
             this.with = coach.parseWith();
@@ -30,12 +32,18 @@ class Delete extends ChangeCommand {
         coach.expectWord("delete");
         coach.skipSpace();
 
-        if ( options.allowReturningObject ) {
+        if ( options.allowCustomReturning ) {
             if ( coach.isWord("row") ) {
                 coach.expectWord("row");
                 coach.skipSpace();
                  
                 this.returningObject = true;
+            }
+            else if ( coach.isWord("value") ) {
+                coach.expectWord("value");
+                coach.skipSpace();
+                 
+                this.returningValue = true;
             }
         }
 
@@ -123,6 +131,9 @@ class Delete extends ChangeCommand {
 
         if ( this.returningObject ) {
             clone.returningObject = true;
+        }
+        if ( this.returningValue ) {
+            clone.returningValue = true;
         }
 
         if ( this.only ) {

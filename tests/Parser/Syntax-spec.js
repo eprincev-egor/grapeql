@@ -232,14 +232,14 @@ describe("allow row", () => {
         let coach, select;
         
         coach = new GrapeQLCoach("select row * from orders");
-        select = coach.parseSelect({allowReturningObject: true});
+        select = coach.parseSelect({allowCustomReturning: true});
         
         assert.ok(select.returningObject === true);
         
         let pgSql = select.toString({ pg: true });
         coach = new GrapeQLCoach(pgSql);
         
-        select = coach.parseSelect({allowReturningObject: true});
+        select = coach.parseSelect({allowCustomReturning: true});
         
         assert.ok(select.returningObject == null);
     });
@@ -248,14 +248,14 @@ describe("allow row", () => {
         let coach, insert;
         
         coach = new GrapeQLCoach("insert row into orders default values");
-        insert = coach.parseInsert({allowReturningObject: true});
+        insert = coach.parseInsert({allowCustomReturning: true});
         
         assert.ok(insert.returningObject === true);
         
         let pgSql = insert.toString({ pg: true });
         coach = new GrapeQLCoach(pgSql);
         
-        insert = coach.parseInsert({allowReturningObject: true});
+        insert = coach.parseInsert({allowCustomReturning: true});
         
         assert.ok(insert.returningObject == null);
     });

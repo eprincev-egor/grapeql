@@ -151,6 +151,10 @@ class Coach {
         }
     }
 
+    isEnd() {
+        return this.i >= this.str.length;
+    }
+
     // parsing over "," and returning array of syntax objects
     // first argument SyntaxName is string: "Expression" or "ObjectLink" or any SyntaxName,
     // first symbol must be in upper case

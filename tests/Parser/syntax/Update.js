@@ -710,7 +710,7 @@ module.exports = [
     {
         str: "update row companies set name = 'nice'",
         options: {
-            allowReturningObject: true
+            allowCustomReturning: true
         },
         result: {
             returningObject: true,
@@ -728,9 +728,29 @@ module.exports = [
         }
     },
     {
+        str: "update companies set name = 'nice' returning value id",
+        options: {
+            allowCustomReturning: true
+        },
+        result: {
+            returningValue: true,
+            table: {link: [
+                {word: "companies"}
+            ]},
+            set: [
+                {
+                    column: {word: "name"},
+                    value: {expression: {elements: [
+                        {content: "nice"}
+                    ]}}
+                }
+            ]
+        }
+    },
+    {
         str: "update companies set name = 'nice'",
         options: {
-            allowReturningObject: true
+            allowCustomReturning: true
         },
         result: {
             table: {link: [

@@ -72,24 +72,50 @@ class Select extends Syntax {
     }
 
     parse(coach, options) {
-        options = options || {allowReturningObject: false};
+        options = options || {allowCustomReturning: false};
         this.parseWith(coach);
 
         coach.expectWord("select");
         coach.skipSpace();
         
-        if ( options.allowReturningObject ) {
+        let customReturningStart = coach.i;
+        
+        if ( options.allowCustomReturning ) {
             if ( coach.isWord("row") ) {
                 coach.expectWord("row");
                 coach.skipSpace();
                 
                 this.returningObject = true;
             }
+            else if ( coach.isWord("value") ) {
+                coach.expectWord("value");
+                coach.skipSpace();
+                
+                this.returningValue = true;
+            }
         }
 
         this.columns = coach.parseComma("Column");
         this.columns.map(column => this.addChild(column));
         coach.skipSpace();
+
+        if ( this.returningValue ) {
+            if( !this.columns.length ) {
+                coach.i = customReturningStart;
+                coach.throwError("select value should have one column");
+            }
+            
+            if ( this.columns.length > 1 ) {
+                coach.i = customReturningStart;
+                coach.throwError("select value should contain only one column");
+            }
+
+            let firstColumn = this.columns[0];
+            if ( firstColumn.isStar() ) {
+                coach.i = customReturningStart;
+                coach.throwError("select value can't use with star");
+            }
+        }
 
         this.parseFrom(coach);
         this.parseWhere(coach);
@@ -434,6 +460,9 @@ class Select extends Syntax {
         if ( this.returningObject ) {
             clone.returningObject = true;
         }
+        else if ( this.returningValue ) {
+            clone.returningValue = true;
+        }
 
         clone.columns = this.columns.map(item => item.clone());
         clone.columns.map(item => clone.addChild(item));
@@ -530,8 +559,13 @@ class Select extends Syntax {
         }
 
         out += "select ";
-        if ( !options.pg && this.returningObject ) {
-            out += " row ";
+        if ( !options.pg ) {
+            if ( this.returningObject ) {
+                out += " row ";
+            }
+            else if ( this.returningValue ) {
+                out += " value ";
+            }
         }
         
         out += this.columns.map(item => item.toString()).join(", ");

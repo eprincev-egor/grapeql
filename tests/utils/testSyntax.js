@@ -35,6 +35,7 @@ function testSyntax(className, test) {
             let isEqual = !!weakDeepEqual(test.result, result);
             if ( !isEqual ) {
                 console.log("break here");
+                console.log(result);
             }
 
             assert.ok(isEqual);
@@ -53,6 +54,10 @@ function testSyntax(className, test) {
             }
 
             isEqual = !!weakDeepEqual(test.result, cloneResult);
+            if ( !isEqual ) {
+                console.log("clone, break here");
+                console.log(cloneResult);
+            }
             assert.ok(isEqual);
         }
         else {

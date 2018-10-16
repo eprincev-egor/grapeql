@@ -1219,7 +1219,7 @@ module.exports = [
     },
     {
         str: "select row * from company",
-        options: {allowReturningObject: true},
+        options: {allowCustomReturning: true},
         result: {
             returningObject: true,
             columns: [
@@ -1240,8 +1240,30 @@ module.exports = [
         }
     },
     {
+        str: "select value id from company",
+        options: {allowCustomReturning: true},
+        result: {
+            returningValue: true,
+            columns: [
+                {
+                    as: null,
+                    expression: {elements: [
+                        {link: [
+                            {word: "id"}
+                        ]}
+                    ]}
+                }
+            ],
+            from: [{
+                table: {link: [
+                    {word: "company"}
+                ]}
+            }]
+        }
+    },
+    {
         str: "select * from company",
-        options: {allowReturningObject: true},
+        options: {allowCustomReturning: true},
         result: {
             columns: [
                 {

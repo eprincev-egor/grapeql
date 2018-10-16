@@ -11,8 +11,10 @@ class Update extends ChangeCommand {
     }
 
     parse(coach, options) {
-        options = options || {allowReturningObject: false};
-
+        options = options || {allowCustomReturning: false};
+        // need for method parseReturning
+        this.options = options;
+        
         if ( coach.isWith() ) {
             this.with = coach.parseWith();
             this.addChild(this.with);
@@ -22,7 +24,7 @@ class Update extends ChangeCommand {
         coach.expectWord("update");
         coach.skipSpace();
 
-        if ( options.allowReturningObject ) {
+        if ( options.allowCustomReturning ) {
             if ( coach.isWord("row") ) {
                 coach.expectWord("row");
                 coach.skipSpace();
@@ -120,6 +122,9 @@ class Update extends ChangeCommand {
 
         if ( this.returningObject ) {
             clone.returningObject = true;
+        }
+        if ( this.returningValue ) {
+            clone.returningValue = true;
         }
 
         if ( this.only ) {

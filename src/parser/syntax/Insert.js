@@ -33,7 +33,10 @@ class Insert extends ChangeCommand {
     }
 
     parse(coach, options) {
-        options = options || {allowReturningObject: false};
+        options = options || {allowCustomReturning: false};
+        // need for method parseReturning
+        this.options = options;
+
         if ( coach.isWith() ) {
             this.with = coach.parseWith();
             this.addChild(this.with);
@@ -43,7 +46,7 @@ class Insert extends ChangeCommand {
         coach.expectWord("insert");
         coach.skipSpace();
         
-        if ( options.allowReturningObject ) {
+        if ( options.allowCustomReturning ) {
             if ( coach.isWord("row") ) {
                 coach.expectWord("row");
                 coach.skipSpace();
@@ -155,6 +158,10 @@ class Insert extends ChangeCommand {
         
         if ( this.returningObject ) {
             clone.returningObject = true;
+        }
+        
+        if ( this.returningValue ) {
+            clone.returningValue = true;
         }
 
         clone.table = this.table.clone();

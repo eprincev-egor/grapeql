@@ -89,8 +89,8 @@ describe("SimpleInsert transaction", () => {
         let row;
         
         row = await transaction.query(`
-            insert row into country default values
-            returning id
+            insert into country default values
+            returning row id
         `);
         
         assert.ok(row.id == 1);

@@ -49,9 +49,9 @@ describe("SimpleDelete transaction", () => {
         `);
         
         row = await transaction.query(`
-            delete row from country
+            delete from country
             where id = 1
-            returning id, code
+            returning row id, code
         `);
 
         assert.ok(row.id == 1);

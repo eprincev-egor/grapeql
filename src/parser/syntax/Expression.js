@@ -20,7 +20,7 @@ class Expression extends Syntax {
 
     is(coach) {
         // for stopping parseComma
-        return !coach.is(/[\s),]/);
+        return !coach.isEnd() && !coach.is(/[\s),]/);
     }
 
     parseElements(coach, options) {

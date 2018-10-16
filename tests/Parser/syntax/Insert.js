@@ -627,7 +627,7 @@ module.exports = [
     {
         str: "insert row into orders default values",
         options: {
-            allowReturningObject: true
+            allowCustomReturning: true
         },
         result: {
             returningObject: true,
@@ -640,7 +640,7 @@ module.exports = [
     {
         str: "insert into orders default values",
         options: {
-            allowReturningObject: true
+            allowCustomReturning: true
         },
         result: {
             table: {link: [
@@ -675,6 +675,19 @@ module.exports = [
                     ]}}
                 ]}
             ]
+        }
+    },
+    {
+        str: "insert into orders default values returning value id",
+        options: {
+            allowCustomReturning: true
+        },
+        result: {
+            returningValue: true,
+            table: {link: [
+                {word: "orders"}
+            ]},
+            defaultValues: true
         }
     }
 ];

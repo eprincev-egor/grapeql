@@ -124,9 +124,9 @@ describe("SimpleUpdate trigger", () => {
         `, { order_id: order.id });
         
         let unit = await server.query(`
-            update row units as old_values set 
+            update units as old_values set 
                 doc_number = 'nice'
-            returning 
+            returning row
                 old_values.doc_number, 
                 id
         `);
