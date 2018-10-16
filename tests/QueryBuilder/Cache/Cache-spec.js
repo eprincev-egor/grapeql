@@ -1425,8 +1425,7 @@ describe("Cache", () => {
     testRequest({
         nodes: {
             Company: `
-                select
-                    x
+                select *
                 from (
                     select
                         (
@@ -1455,7 +1454,7 @@ describe("Cache", () => {
         },
         result: `
                 select
-                    x
+                    tmp.x
                 from (
                     select
                         (
@@ -1468,6 +1467,59 @@ describe("Cache", () => {
                             where
                                 company.id = 1
                         ) as x
+                ) as tmp
+        `
+    });
+
+    testRequest({
+        nodes: {
+            Company: `
+                select *
+                from (
+                    select
+                        (
+                            select orders_count as y
+                            from company
+                            where
+                                company.id = 1
+                        ) as x,
+                        (
+                            select orders_count as x
+                            from orders
+                            
+                            left join company on
+                                company.id = orders.id_client
+
+                            where
+                                orders.id = 2
+                        ) as y
+                ) as tmp
+            `
+        },
+        cache: [orders_count_cache],
+        node: "Company",
+        request: {
+            columns: ["y"]
+        },
+        result: `
+                select
+                    tmp.y
+                from (
+                    select
+                        (
+                            select gql_cache_company.orders_count as x
+                            from orders
+
+                            left join company 
+                            
+                                left join gql_cache.company as gql_cache_company on
+                                    gql_cache_company.id = company.id
+                                
+                            on company.id = orders.id_client
+
+                            where
+                                orders.id = 2
+                        ) as y
                 ) as tmp
         `
     });
