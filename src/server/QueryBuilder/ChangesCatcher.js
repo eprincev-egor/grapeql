@@ -31,51 +31,9 @@ class ChangesCatcher {
     }
 
     prepareResult(pgResult) {
-        let {query} = this;
         let result = pgResult[0];
         let changesResult = pgResult[1];
 
-        // next syntax must return an object:
-        // select row
-        // insert ... returning row
-        // update ... returning row
-        // delete ... returning row
-        if ( query.returningObject ) {
-            if ( !result.rows || !result.rows.length ) {
-                result = null;
-            }
-    
-            else if ( result.rows.length === 1 ) {
-                result = result.rows[0];
-            }
-
-            else {
-                let commandType = query.commandType || "select";
-                throw new Error(`${commandType} row should return only one row`);
-            }
-        } 
-        // next syntax must return an value:
-        // select value
-        // insert ... returning value
-        // update ... returning value
-        // delete ... returning value
-        else if ( query.returningValue ) {
-            if ( !result.rows || !result.rows.length ) {
-                result = null;
-            }
-
-            else if ( result.rows.length === 1 ) {
-                let row = result.rows[0];
-                let values = Object.values(row);
-
-                result = values[0];
-            }
-        }
-
-        else {
-            result = result.rows || [];
-        }
-        
         let changesStack = [];
         changesResult.rows.forEach(row => {
             let type;
@@ -128,7 +86,7 @@ class ChangesCatcher {
         
 
         return {
-            result: result,
+            result,
             changesStack
         };
     }

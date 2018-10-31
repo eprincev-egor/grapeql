@@ -341,6 +341,38 @@ class DbDatabase {
         return dbTable;
     }
 
+    async createColumns(dbTable, createColumns) {
+        let {db} = this;
+        let sql = [];
+        let tableName = dbTable.getLowerPath();
+
+        createColumns.forEach(({name, type}) => {
+
+            let column = dbTable.getColumn(name);
+            if ( column ) {
+                if ( column.type == type ) {
+                    return;
+                }
+
+                throw new Error(`column "${name}" of relation "${tableName}" already exists with another type ${ column.type }`);
+            }
+            
+            
+            column = new DbColumn({
+                name,
+                type
+            });
+            dbTable.addColumn( column );
+
+
+            sql.push(`alter table ${tableName} add column ${name} ${type};`);
+        });
+
+        sql = sql.join(";\n");
+
+        await db.query(sql);
+    }
+
     getFunction({ schema, name, argumentsTypes }) {
         if ( schema ) {
             let schema = this.getSchema( schema );

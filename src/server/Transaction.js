@@ -48,6 +48,12 @@ class Transaction {
                 transaction: this,
                 changesStack
             });
+
+            // returning row, value, ...
+            result = this.server.queryBuilder.customReturning(
+                query,
+                result
+            );
         } catch(err) {
             // rollback last changes
             await this.db.query(`rollback to savepoint ${ savePointName }`);

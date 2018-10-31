@@ -12,6 +12,7 @@ const buildCount = require("./buildCount");
 const buildIndexOf = require("./buildIndexOf");
 const buildQueryVars = require("./buildQueryVars");
 const ChangesCatcher = require("./ChangesCatcher");
+const customReturning = require("./customReturning");
 
 class QueryBuilder {
     constructor({ server }) {
@@ -156,8 +157,8 @@ class QueryBuilder {
     }
 
     buildQuery(sql, vars) {
-        let query = GrapeQLCoach.parseCommand(sql);
-        
+        let query = GrapeQLCoach.parseCommand(sql);     
+
         // $order_id::bigint => 1
         buildQueryVars(query, vars);
 
@@ -197,6 +198,10 @@ class QueryBuilder {
         if ( query instanceof GrapeQLCoach.Update ) {
             return "update";
         }
+    }
+
+    customReturning(query, pgResult) {
+        return customReturning(query, pgResult);
     }
 }
 

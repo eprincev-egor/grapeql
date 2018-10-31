@@ -56,14 +56,15 @@ describe("Cache/Refresh/OnInsert", () => {
         assert.deepEqual(company, {
             id: 1,
             name: "Test",
-            inn: "123"
+            inn: "123",
+            orders_count: null
         });
 
 
 
         cacheRow = await server.query(`
-            select row *
-            from gql_cache.company
+            select row id, orders_count
+            from company
             where id = 1
         `);
 
@@ -88,8 +89,8 @@ describe("Cache/Refresh/OnInsert", () => {
 
         
         cacheRow = await server.query(`
-            select row *
-            from gql_cache.company
+            select row id, orders_count
+            from company
             where id = 1
         `);
 

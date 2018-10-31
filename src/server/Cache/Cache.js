@@ -105,65 +105,25 @@ class Cache {
     }
 
     async build() {
-        await this.createCacheTable();
+        await this.createCacheColumns();
         await this.createTriggers();
     }
 
-    async createCacheTable() {
-        let table = {
-            schema: "gql_cache",
-            columns: [],
-            constraints: {}
-        };
-
-        this.forPrimaryKey.columns.forEach(key => {
-            let dbColumn = this.forDbTable.getColumn(key);
-            let {type, name} = dbColumn;
-
-            table.columns.push({ type, name });
-        });
-
-        let schemaName = this.forDbTable.schema;
-        let tableName = this.forDbTable.name;
-
-        if ( schemaName == "public" ) {
-            table.name = tableName;
-        } else {
-            table.name = `${schemaName}.${tableName}`;
-        }
-
-        // primary key
-        let constraint;
-        constraint = {
-            name: table.name + "_pkey",
-            type: "primary key",
-            columns: this.forPrimaryKey.columns.slice()
-        };
-        table.constraints[ constraint.name ] = constraint;
-
-        // main foreign key
-        constraint = {
-            name: table.name + "_fkey",
-            type: "foreign key",
-            columns: this.forPrimaryKey.columns.slice(),
-            onUpdate: "cascade",
-            onDelete: "cascade",
-            referenceTable: this.forDbTable.getLowerPath(),
-            referenceColumns: this.forPrimaryKey.columns.slice()
-        };
-        table.constraints[ constraint.name ] = constraint;
-
-
+    async createCacheColumns() {
+        let cacheColumns = [];
         this.syntax.select.columns.map(syntaxColumn => {
             let name = syntaxColumn.as.toLowerCase();
             let type = syntaxColumn.expression.getType({
                 server: this.server
             });
 
-            table.columns.push({name, type});
+            cacheColumns.push({name, type});
         });
 
-        this.dbTable = await this.server.database.createTable(table);
+        await this.server.database.createColumns(
+            this.forDbTable, 
+            cacheColumns
+        );
     }
 
     async createTriggers() {

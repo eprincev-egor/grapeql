@@ -47,7 +47,6 @@ function buildUpdateCache({
     });
 
 
-    let withQueries = [];
     let from = [];
 
     for (let table in rowsByTable) {
@@ -77,21 +76,20 @@ function buildUpdateCache({
             alias = `"${ reverseQuery.table.toString() }"`;
         }
 
-
-        withQueries.push(`
-            ${ alias } (${ columns }) as (
-                values
-                    ${values}
-            )
-        `);
-        from.push(`${ table }`);
+        from.push(`(
+            with
+                ${ alias } (${ columns }) as (
+                    values
+                        ${values}
+                )
+            select * from ${ alias }
+        ) as ${ alias }`);
     }
-    withQueries = withQueries.join(",\n");
     from = from.join(",");
 
     
     // updating table
-    let cacheTable = cache.dbTable.schema + "." + cache.dbTable.name;
+    let cacheTable = cache.forDbTable.getLowerPath();
 
     // updating columns
     let columns = [];
@@ -114,8 +112,6 @@ function buildUpdateCache({
     where = where.join("\n or \n");
 
     return `
-        with
-            ${withQueries}
         update ${ cacheTable } set 
             (
                 ${ columns }
@@ -151,15 +147,22 @@ function buildInsertCache({
         forTableAlias
     );
 
-    let insertColumns = select.columns.map(column => 
+    let updateColumns = select.columns.map(column => 
         column.as.toLowerCase()
     );
-    let insertSelectColumns = insertColumns.map(key => `tmp.${ key }`);
 
+    let where = [];
     cache.forPrimaryKey.columns.forEach(key => {
-        insertColumns.push(key);
-        insertSelectColumns.push(`${forTableAlias}.${key}`);
+        let value = row[ key ];
+        let dbColumn = cache.forDbTable.getColumn( key );
+        let type = dbColumn.type;
+
+        let sqlValue = value2sql( type, value );
+
+        where.push(`${forTableAlias}.${key} = ${ sqlValue }`);
     });
+
+    where = where.join(" \nand\n ");
 
 
 
@@ -176,18 +179,16 @@ function buildInsertCache({
 
 
     return `
-        insert into ${ cache.dbTable.getLowerPath() }
-            (${ insertColumns })
-        select
-            ${ insertSelectColumns }
-        from (
-            select
-                ${ rowSql }
-        ) as ${ forTableAlias }
+        update ${ cache.forDbTable.getLowerPath() } as ${ forTableAlias } set
+            (
+                ${ updateColumns.join(",\n") }
+            ) = (
+                ${ select.toString() }
+            )
+        where
+            ${ where }
         
-        left join lateral (
-            ${ select.toString() }
-        ) as tmp on true
+        returning *
     `;
 }
 
